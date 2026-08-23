@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title">
+    <title>افهمها وفهمني ولي الأمر</title>
+    <rect width="512" height="512" rx="96" fill="#0f766e"/>
+    <path d="M116 148h280v216H116z" fill="#fff" opacity=".94"/>
+    <path d="M150 188h212v32H150zm0 70h154v28H150zm0 60h108v28H150z" fill="#14213d"/>
+    <circle cx="344" cy="320" r="44" fill="#f59e0b"/>
+    <text x="256" y="104" fill="#ffffff" font-family="Tahoma, Arial, sans-serif" font-size="54" font-weight="700" text-anchor="middle">أف</text>
+</svg>

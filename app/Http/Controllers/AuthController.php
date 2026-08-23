@@ -22,7 +22,13 @@ class AuthController
         } $request->session()->regenerate();
         $request->user()->update(['last_login_at' => now()]);
 
-        return redirect()->intended(route('admin.dashboard'));
+        $fallback = match (true) {
+            $request->user()->isParent() => route('parent.dashboard'),
+            $request->user()->isStudent() => route('student.dashboard'),
+            default => route('admin.dashboard'),
+        };
+
+        return redirect()->intended($fallback);
     }
 
     public function destroy(Request $request): RedirectResponse

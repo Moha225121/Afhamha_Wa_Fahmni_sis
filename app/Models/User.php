@@ -25,6 +25,16 @@ class User extends Authenticatable
         return $this->role === 'admin' && $this->status === 'active';
     }
 
+    public function isParent(): bool
+    {
+        return $this->role === 'parent' && $this->status === 'active';
+    }
+
+    public function isStudent(): bool
+    {
+        return $this->role === 'student' && $this->status === 'active';
+    }
+
     public function hasPermission(string $permission): bool
     {
         if (! $this->isAdmin()) {
