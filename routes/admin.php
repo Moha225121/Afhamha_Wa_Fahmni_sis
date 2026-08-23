@@ -1,0 +1,53 @@
+<?php
+
+use App\Http\Controllers\Admin\AnnouncementController;
+use App\Http\Controllers\Admin\ClassroomController;
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\GuardianController;
+use App\Http\Controllers\Admin\ModuleController;
+use App\Http\Controllers\Admin\OperationsController;
+use App\Http\Controllers\Admin\ProfileController;
+use App\Http\Controllers\Admin\StudentController;
+use App\Http\Controllers\Admin\SubjectController;
+use App\Http\Controllers\Admin\TeacherController;
+use Illuminate\Support\Facades\Route;
+
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function (): void {
+    Route::get('/', fn () => redirect()->route('admin.dashboard'));
+    Route::get('/dashboard', DashboardController::class)->name('dashboard');
+    Route::get('/dashboard/index', fn () => redirect()->route('admin.dashboard'))->name('dashboard.index');
+    Route::resource('students', StudentController::class)->except('destroy');
+    Route::resource('teachers', TeacherController::class)->except('destroy');
+    Route::resource('parents', GuardianController::class)->except('destroy');
+    Route::resource('classes', ClassroomController::class)->except('destroy');
+    Route::resource('subjects', SubjectController::class)->except('destroy');
+    Route::resource('announcements', AnnouncementController::class)->except('destroy');
+    Route::get('schedules', [OperationsController::class, 'schedules'])->name('schedules.index');
+    Route::get('schedules/create', [OperationsController::class, 'scheduleCreate'])->name('schedules.create');
+    Route::post('schedules', [OperationsController::class, 'scheduleStore'])->name('schedules.store');
+    Route::delete('schedules/{id}', [OperationsController::class, 'scheduleDestroy'])->name('schedules.destroy');
+    Route::get('attendance', [OperationsController::class, 'attendance'])->name('attendance.index');
+    Route::post('attendance', [OperationsController::class, 'attendanceStore'])->name('attendance.store');
+    Route::get('exams', [OperationsController::class, 'exams'])->name('exams.index');
+    Route::get('exams/create', [OperationsController::class, 'examCreate'])->name('exams.create');
+    Route::post('exams', [OperationsController::class, 'examStore'])->name('exams.store');
+    Route::patch('exams/{id}/status', [OperationsController::class, 'examStatus'])->name('exams.status');
+    Route::get('grades', [OperationsController::class, 'grades'])->name('grades.index');
+    Route::post('grades', [OperationsController::class, 'gradesStore'])->name('grades.store');
+    Route::get('library', [OperationsController::class, 'library'])->name('library.index');
+    Route::post('library', [OperationsController::class, 'libraryStore'])->name('library.store');
+    Route::delete('library/{id}', [OperationsController::class, 'libraryDestroy'])->name('library.destroy');
+    Route::get('users', [OperationsController::class, 'users'])->name('users.index');
+    Route::patch('users/{user}', [OperationsController::class, 'userUpdate'])->name('users.update');
+    Route::get('reports', [OperationsController::class, 'reports'])->name('reports.index');
+    Route::get('settings', [OperationsController::class, 'settings'])->name('settings.index');
+    Route::put('settings', [OperationsController::class, 'settingsUpdate'])->name('settings.update');
+    Route::get('roles', [OperationsController::class, 'roles'])->name('roles.index');
+    Route::get('audit-logs', [OperationsController::class, 'auditLogs'])->name('audit-logs.index');
+    Route::get('notifications', [OperationsController::class, 'notifications'])->name('notifications.index');
+    Route::patch('notifications/read', [OperationsController::class, 'notificationsRead'])->name('notifications.read');
+    Route::get('/{module}', [ModuleController::class, 'index'])->whereIn('module', ['schedules', 'attendance', 'exams', 'grades', 'library', 'reports', 'users', 'roles', 'audit-logs', 'settings', 'notifications'])->name('module.index');
+    Route::patch('/{module}/{id}/toggle', [ModuleController::class, 'toggle'])->whereIn('module', ['students', 'teachers', 'parents', 'subjects', 'users', 'library'])->name('module.toggle');
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+});

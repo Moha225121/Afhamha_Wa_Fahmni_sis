@@ -1,0 +1,1 @@
+@extends('admin.layout') @section('title','ملف ولي الأمر') @section('actions')<a class="btn primary" href="{{ route('admin.parents.edit',$parent) }}">تعديل</a>@endsection @section('content')<div class="panel"><h2>{{ $parent->user->name }}</h2><p>{{ $parent->user->phone }}</p><p>الأبناء: {{ $parent->students->pluck('user.name')->join('، ') ?: 'غير مرتبط' }}</p></div>@endsection

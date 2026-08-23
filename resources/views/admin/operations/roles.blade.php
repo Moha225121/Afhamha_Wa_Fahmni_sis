@@ -1,0 +1,1 @@
+@extends('admin.layout') @section('title','الأدوار والصلاحيات') @section('content')<div class="cards">@foreach($roles as $name=>$permissions)<article class="card"><h2>{{ $name }}</h2>@forelse($permissions as $p)<span class="badge">{{ $p }}</span>@empty<p class="muted">لا توجد صلاحيات إدارية.</p>@endforelse</article>@endforeach</div>@endsection
