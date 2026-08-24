@@ -5,6 +5,7 @@ namespace App\Http\Controllers\StudentPortal;
 use App\Http\Controllers\Controller;
 use App\Models\Announcement;
 use App\Models\Student;
+use App\Models\Subject;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -21,6 +22,8 @@ class PortalController extends Controller
             'student' => $student,
             'summary' => $this->summaryFor($student),
             'recentGrades' => $this->recentGradesFor($student, 3),
+            'subjects' => $this->subjectsFor($student),
+            'todaysSchedule' => $this->todaysScheduleFor($student),
             'announcements' => $this->announcementsFor($student, 4),
         ]);
     }
@@ -154,6 +157,43 @@ class PortalController extends Controller
             ->select(['exam_attempts.id', 'exam_attempts.score', 'exam_attempts.maximum_score', 'exam_attempts.percentage', 'exam_attempts.status', 'exam_attempts.submitted_at', 'exams.title', 'subjects.name as subject'])
             ->latest('exam_attempts.submitted_at')
             ->limit($limit)
+            ->get();
+    }
+
+    private function subjectsFor(Student $student): Collection
+    {
+        if (! $student->classroom_id) {
+            return collect();
+        }
+
+        return Subject::query()
+            ->where('status', 'active')
+            ->whereHas('classrooms', fn ($query) => $query->whereKey($student->classroom_id))
+            ->orderBy('name')
+            ->get();
+    }
+
+    private function todaysScheduleFor(Student $student): Collection
+    {
+        if (! $student->classroom_id) {
+            return collect();
+        }
+
+        return DB::table('schedules')
+            ->join('subjects', 'schedules.subject_id', '=', 'subjects.id')
+            ->join('teachers', 'schedules.teacher_id', '=', 'teachers.id')
+            ->join('users', 'teachers.user_id', '=', 'users.id')
+            ->where('schedules.classroom_id', $student->classroom_id)
+            ->where('schedules.day_of_week', now()->dayOfWeek)
+            ->where('subjects.status', 'active')
+            ->select([
+                'schedules.starts_at',
+                'schedules.ends_at',
+                'schedules.room',
+                'subjects.name as subject',
+                'users.name as teacher',
+            ])
+            ->orderBy('schedules.starts_at')
             ->get();
     }
 

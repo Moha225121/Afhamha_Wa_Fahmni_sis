@@ -140,8 +140,10 @@ class OperationsController extends Controller
 
     public function libraryStore(LibraryResourceRequest $r): RedirectResponse
     {
-        $path = $r->file('file')->store('library', 'public');
-        DB::table('library_resources')->insert($r->safe()->except(['file', 'is_public']) + ['file_path' => $path, 'is_public' => $r->boolean('is_public'), 'status' => 'active', 'created_by' => $r->user()->id, 'created_at' => now(), 'updated_at' => now()]);
+        $isPublic = $r->boolean('is_public');
+        $disk = $isPublic ? 'public' : 'local';
+        $path = $r->file('file')->store('library', $disk);
+        DB::table('library_resources')->insert($r->safe()->except(['file', 'is_public']) + ['file_path' => $path, 'disk' => $disk, 'is_public' => $isPublic, 'status' => 'active', 'created_by' => $r->user()->id, 'created_at' => now(), 'updated_at' => now()]);
         AuditService::record('created', 'library');
 
         return back()->with('success', 'تم رفع المورد.');
@@ -151,7 +153,10 @@ class OperationsController extends Controller
     {
         $row = DB::table('library_resources')->find($id);
         abort_unless($row, 404);
-        Storage::disk('public')->delete($row->file_path);
+        $disk = in_array($row->disk ?? null, ['local', 'public'], true)
+            ? $row->disk
+            : ($row->is_public ? 'public' : 'local');
+        Storage::disk($disk)->delete($row->file_path);
         DB::table('library_resources')->where('id', $id)->delete();
         AuditService::record('deleted', 'library');
 

@@ -59,7 +59,42 @@
 
     <section class="list-section">
         <div class="section-title">
-            <h2>الرسائل</h2>
+            <h2>مواد صفي</h2>
+            <a href="{{ route('student.subjects.index') }}">الكل</a>
+        </div>
+        @forelse($subjects as $subject)
+            <a class="list-row" href="{{ route('student.subjects.show', $subject) }}">
+                <div>
+                    <strong>{{ $subject->name }}</strong>
+                    <span>{{ $subject->code }}{{ $subject->description ? ' · '.$subject->description : '' }}</span>
+                </div>
+                <b>‹</b>
+            </a>
+        @empty
+            <p class="muted-line">لا توجد مواد نشطة مرتبطة بصفك حاليًا.</p>
+        @endforelse
+    </section>
+
+    <section class="list-section">
+        <div class="section-title">
+            <h2>جدول اليوم</h2>
+        </div>
+        @forelse($todaysSchedule as $session)
+            <div class="list-row">
+                <div>
+                    <strong>{{ $session->subject }}</strong>
+                    <span>{{ $session->teacher }}{{ $session->room ? ' · '.$session->room : '' }}</span>
+                </div>
+                <b>{{ substr($session->starts_at, 0, 5) }} – {{ substr($session->ends_at, 0, 5) }}</b>
+            </div>
+        @empty
+            <p class="muted-line">لا توجد حصص مسجلة لهذا اليوم.</p>
+        @endforelse
+    </section>
+
+    <section class="list-section">
+        <div class="section-title">
+            <h2>التنبيهات</h2>
             <a href="{{ route('student.messages') }}">الكل</a>
         </div>
         @forelse($announcements as $announcement)
