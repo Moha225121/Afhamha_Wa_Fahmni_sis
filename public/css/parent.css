@@ -34,9 +34,18 @@ a {
 
 button,
 input,
-select {
+select,
+textarea {
     font: inherit;
 }
+
+.profile-form textarea, .profile-form input[type=file] { width:100%; border:1px solid var(--line); border-radius:8px; padding:11px; background:#fff; }
+.choice { display:flex !important; align-items:center; gap:8px; color:var(--ink) !important; }
+.choice input { width:auto; }
+.action-link, .list-row button, .final-submit { border:0; border-radius:8px; background:var(--primary); color:#fff; padding:9px 12px; font-weight:700; }
+.final-submit { display:block; width:100%; min-height:48px; margin-top:14px; background:var(--accent); }
+.section-space { margin-top:14px; }
+.message-card form { margin-top:12px; }
 
 .app-shell {
     min-height: 100dvh;

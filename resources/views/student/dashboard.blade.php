@@ -9,6 +9,15 @@
         <span>{{ $student->classroom?->name ?? 'بدون صف' }}</span>
     </section>
 
+    <section class="list-section">
+        <div class="section-title"><h2>الخدمات الأكاديمية</h2></div>
+        <a class="message-row" href="{{ route('student.assignments.index') }}"><strong>الواجبات والتسليم</strong><span>عرض</span></a>
+        <a class="message-row" href="{{ route('student.exams.index') }}"><strong>الاختبارات الإلكترونية</strong><span>عرض</span></a>
+        <a class="message-row" href="{{ route('student.attendance') }}"><strong>سجل الحضور</strong><span>عرض</span></a>
+        <a class="message-row" href="{{ route('student.schedule') }}"><strong>الجدول الدراسي</strong><span>عرض</span></a>
+        <a class="message-row" href="{{ route('student.notifications') }}"><strong>الإشعارات</strong><span>عرض</span></a>
+    </section>
+
     <section class="metrics-grid">
         <article class="metric">
             <span>حضور مسجل</span>
