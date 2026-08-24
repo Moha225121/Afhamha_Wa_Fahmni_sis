@@ -34,8 +34,29 @@ a {
 
 button,
 input,
-select {
+select,
+textarea {
     font: inherit;
+}
+
+:focus-visible {
+    outline: 3px solid #2563eb;
+    outline-offset: 3px;
+}
+
+.skip-link {
+    position: fixed;
+    top: 8px;
+    right: 8px;
+    z-index: 100;
+    transform: translateY(-160%);
+    border-radius: 8px;
+    background: #fff;
+    padding: 10px 14px;
+}
+
+.skip-link:focus {
+    transform: translateY(0);
 }
 
 .app-shell {
@@ -552,6 +573,316 @@ select {
     line-height: 1.8;
 }
 
+.breadcrumbs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin: 2px 2px 16px;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.breadcrumbs a {
+    color: var(--primary);
+    font-weight: 700;
+}
+
+.page-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 14px;
+}
+
+.primary-link,
+.secondary-link,
+.filter-form button,
+.filter-form > a,
+.resource-card a,
+.tutor-intro button,
+.conversation-sidebar button,
+.chat-composer button {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.primary-link,
+.filter-form button,
+.resource-card a,
+.tutor-intro button,
+.conversation-sidebar button,
+.chat-composer button {
+    background: var(--primary);
+    color: #fff;
+}
+
+.secondary-link,
+.filter-form > a {
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--primary);
+}
+
+.lesson-content,
+.filter-form,
+.resource-card,
+.tutor-intro,
+.conversation-sidebar,
+.chat-panel {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface);
+    box-shadow: var(--shadow);
+}
+
+.lesson-content,
+.tutor-intro {
+    padding: 18px;
+}
+
+.content-copy,
+.chat-message p {
+    margin: 0;
+    line-height: 1.9;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.filter-form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    padding: 14px;
+}
+
+.filter-form label {
+    display: grid;
+    gap: 7px;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.filter-form .wide {
+    grid-column: 1 / -1;
+}
+
+.filter-form input,
+.filter-form select,
+.chat-composer textarea {
+    width: 100%;
+    min-width: 0;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--ink);
+    padding: 11px 12px;
+}
+
+.resource-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr));
+    gap: 12px;
+    margin-top: 14px;
+}
+
+.resource-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 9px;
+    padding: 16px;
+}
+
+.resource-card > span {
+    color: var(--primary);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.resource-card h2,
+.resource-card p,
+.tutor-intro h2,
+.tutor-intro p,
+.chat-panel header h1,
+.chat-panel header p {
+    margin: 0;
+}
+
+.resource-card h2 {
+    font-size: 18px;
+}
+
+.resource-card p,
+.tutor-intro p {
+    color: var(--muted);
+    line-height: 1.7;
+}
+
+.resource-card a {
+    margin-top: auto;
+}
+
+.tutor-intro {
+    display: grid;
+    gap: 12px;
+}
+
+.tutor-layout {
+    display: grid;
+    gap: 14px;
+}
+
+.conversation-sidebar {
+    display: grid;
+    align-content: start;
+    gap: 8px;
+    max-height: 220px;
+    padding: 12px;
+    overflow-y: auto;
+}
+
+.conversation-sidebar a {
+    border-radius: 8px;
+    padding: 10px;
+    color: var(--muted);
+    overflow-wrap: anywhere;
+}
+
+.conversation-sidebar a.active {
+    background: var(--surface-soft);
+    color: var(--primary);
+    font-weight: 700;
+}
+
+.chat-panel {
+    min-width: 0;
+    overflow: hidden;
+}
+
+.chat-panel > header {
+    border-bottom: 1px solid var(--line);
+    padding: 16px;
+}
+
+.chat-panel > header p {
+    color: var(--primary);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.chat-panel > header h1 {
+    margin-top: 4px;
+    font-size: 20px;
+}
+
+.chat-panel .notice {
+    margin: 14px 14px 0;
+}
+
+.chat-history {
+    display: grid;
+    gap: 12px;
+    min-height: 260px;
+    max-height: 58vh;
+    margin: 0;
+    padding: 16px;
+    overflow-y: auto;
+    list-style: none;
+}
+
+.chat-message {
+    width: min(88%, 620px);
+    border-radius: 8px;
+    padding: 12px 14px;
+}
+
+.chat-message strong {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 12px;
+}
+
+.message-status {
+    display: block;
+    margin-top: 8px;
+    font-size: 12px;
+    opacity: .85;
+}
+
+.retry-message-button {
+    min-height: 40px;
+    margin-top: 8px;
+    border: 1px solid currentColor;
+    border-radius: 8px;
+    background: #fff;
+    color: var(--primary);
+    padding: 7px 10px;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.chat-message.from-student {
+    justify-self: start;
+    background: var(--primary);
+    color: #fff;
+}
+
+.chat-message.from-tutor {
+    justify-self: end;
+    background: var(--surface-soft);
+}
+
+.chat-composer {
+    position: sticky;
+    bottom: 70px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 8px;
+    border-top: 1px solid var(--line);
+    background: var(--surface);
+    padding: 12px;
+}
+
+.chat-composer label,
+.chat-composer textarea,
+.chat-composer .sending-status {
+    grid-column: 1 / -1;
+}
+
+.chat-composer label {
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.chat-composer .sending-status {
+    min-height: 18px;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.chat-composer button:disabled {
+    cursor: wait;
+    opacity: .7;
+}
+
+.chat-pagination {
+    margin: 0;
+    border-top: 1px solid var(--line);
+    padding: 12px;
+}
+
+.student-portal .bottom-nav a {
+    min-height: 48px;
+}
+
 .bottom-nav {
     position: fixed;
     left: 50%;
@@ -610,4 +941,61 @@ select {
     .metric.wide {
         grid-column: span 1;
     }
+}
+
+@media (min-width: 860px) {
+    .student-portal .app-shell {
+        max-width: 1120px;
+    }
+
+    .student-portal .bottom-nav {
+        width: min(100%, 1120px);
+    }
+
+    .student-portal .metrics-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .student-portal .tutor-layout {
+        grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
+    }
+
+    .student-portal .conversation-sidebar {
+        max-height: none;
+        overflow-y: visible;
+    }
+
+    .student-portal .chat-composer {
+        bottom: 0;
+    }
+}
+
+.student-pagination {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 18px;
+}
+
+.student-pagination a,
+.student-pagination span {
+    min-width: 84px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface);
+    padding: 8px 12px;
+}
+
+.student-pagination a {
+    color: var(--primary);
+    font-weight: 700;
+}
+
+.student-pagination span[aria-disabled="true"] {
+    color: var(--muted);
+    opacity: .65;
 }
