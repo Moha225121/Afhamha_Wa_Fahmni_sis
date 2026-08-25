@@ -5,6 +5,6 @@ $php = 'C:\php-8.4.12\php.exe'
     -d extension=zip `
     -d extension=pdo_sqlite `
     -d extension=sqlite3 `
-    -S 127.0.0.1:8000 `
+    -S 127.0.0.1:5500 `
     -t public `
     start-local-router.php

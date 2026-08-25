@@ -1,14 +1,19 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap');
+
 :root {
-    --bg: #f7f8f5;
+    --bg: #f7f9f6;
     --surface: #ffffff;
     --surface-soft: #eef6f4;
     --ink: #14213d;
     --muted: #687182;
-    --line: #dde5e1;
+    --line: #dce5e1;
+    --line-strong: #c7d5ce;
     --primary: #0f766e;
+    --primary-deep: #0b5f59;
     --accent: #f59e0b;
     --rose: #e85d75;
     --shadow: 0 12px 30px rgba(20, 33, 61, .08);
+    --focus: 0 0 0 4px rgba(15, 118, 110, .16);
 }
 
 * {
@@ -17,13 +22,14 @@
 
 html {
     background: #dfe7e4;
+    color-scheme: light;
 }
 
 body {
     margin: 0;
     background: var(--bg);
     color: var(--ink);
-    font-family: Tahoma, Arial, sans-serif;
+    font-family: Cairo, Tahoma, Arial, sans-serif;
     letter-spacing: 0;
 }
 
@@ -39,12 +45,16 @@ textarea {
     font: inherit;
 }
 
+button {
+    cursor: pointer;
+}
+
 .app-shell {
+    position: relative;
     min-height: 100dvh;
     max-width: 520px;
     margin: 0 auto;
     background: var(--bg);
-    position: relative;
     box-shadow: 0 0 0 1px rgba(20, 33, 61, .06);
 }
 
@@ -56,9 +66,10 @@ textarea {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 12px;
     padding: 14px 16px;
-    background: rgba(247, 248, 245, .94);
     border-bottom: 1px solid var(--line);
+    background: rgba(247, 249, 246, .94);
     backdrop-filter: blur(12px);
 }
 
@@ -66,6 +77,7 @@ textarea {
     display: flex;
     align-items: center;
     gap: 10px;
+    min-width: 0;
 }
 
 .brand-mark,
@@ -73,7 +85,7 @@ textarea {
 .large-avatar {
     display: grid;
     place-items: center;
-    background: var(--primary);
+    background: linear-gradient(135deg, var(--primary), #17a398);
     color: #fff;
     font-weight: 800;
 }
@@ -82,11 +94,21 @@ textarea {
     width: 42px;
     height: 42px;
     border-radius: 8px;
+    direction: ltr;
+    flex: 0 0 auto;
+    font-size: 13px;
+}
+
+.brand-copy {
+    min-width: 0;
 }
 
 .brand-copy b,
 .brand-copy small {
     display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .brand-copy b {
@@ -101,9 +123,9 @@ textarea {
 
 .logout-form button {
     border: 1px solid var(--line);
+    border-radius: 8px;
     background: var(--surface);
     color: var(--ink);
-    border-radius: 8px;
     padding: 8px 11px;
 }
 
@@ -117,11 +139,13 @@ textarea {
     flex-direction: column;
     justify-content: flex-end;
     gap: 8px;
-    padding: 20px;
     border-radius: 8px;
-    background: var(--primary);
+    background:
+        linear-gradient(135deg, rgba(15, 118, 110, .96), rgba(20, 33, 61, .92)),
+        var(--primary);
     color: #fff;
     box-shadow: var(--shadow);
+    padding: 20px;
 }
 
 .hero p,
@@ -155,7 +179,7 @@ textarea {
 .page-title p {
     margin: 0 0 5px;
     color: var(--primary);
-    font-weight: 700;
+    font-weight: 800;
     font-size: 13px;
 }
 
@@ -189,15 +213,15 @@ textarea {
 .more-list,
 .message-card,
 .empty-state {
-    background: var(--surface);
     border: 1px solid var(--line);
     border-radius: 8px;
+    background: var(--surface);
     box-shadow: var(--shadow);
 }
 
 .child-switch {
     display: grid;
-    grid-template-columns: auto 1fr;
+    grid-template-columns: auto minmax(0, 1fr);
     align-items: center;
     gap: 10px;
     margin-top: 14px;
@@ -207,19 +231,172 @@ textarea {
 .child-switch label {
     color: var(--muted);
     font-size: 13px;
+    font-weight: 700;
 }
 
-.child-switch select,
-.profile-form input,
-.profile-form select,
-.profile-form textarea {
+input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),
+select,
+textarea {
+    width: 100%;
+    min-height: 46px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background-color: #fff;
+    color: var(--ink);
+    padding: 11px 12px;
+    outline: 0;
+    transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
+}
+
+input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):hover,
+select:hover,
+textarea:hover {
+    border-color: var(--line-strong);
+}
+
+input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):focus,
+select:focus,
+textarea:focus {
+    border-color: var(--primary);
+    box-shadow: var(--focus);
+}
+
+select:not([multiple]) {
+    appearance: none;
+    -webkit-appearance: none;
+    padding-inline-start: 42px;
+    padding-inline-end: 12px;
+    background-image:
+        linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+        linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+    background-position:
+        left 18px center,
+        left 12px center;
+    background-repeat: no-repeat;
+    background-size: 7px 7px;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    accent-color: var(--primary);
+}
+
+select.native-select-hidden {
+    position: absolute !important;
+    inline-size: 1px !important;
+    block-size: 1px !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+.select-ui {
+    position: relative;
+    display: inline-block;
     width: 100%;
     min-width: 0;
+    vertical-align: middle;
+}
+
+.select-ui__button {
+    position: relative;
+    width: 100%;
+    min-height: 46px;
     border: 1px solid var(--line);
     border-radius: 8px;
     background: #fff;
     color: var(--ink);
-    padding: 11px 12px;
+    padding: 10px 12px 10px 42px;
+    text-align: right;
+    transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
+}
+
+.select-ui__button::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 17px;
+    width: 8px;
+    height: 8px;
+    border-inline-end: 2px solid var(--muted);
+    border-bottom: 2px solid var(--muted);
+    transform: translateY(-65%) rotate(45deg);
+    transition: transform .18s ease, border-color .18s ease;
+}
+
+.select-ui__button:hover,
+.select-ui--open .select-ui__button {
+    border-color: var(--line-strong);
+}
+
+.select-ui__button.is-placeholder {
+    color: #8a948f;
+}
+
+.select-ui__button:focus-visible,
+.select-ui--open .select-ui__button {
+    border-color: var(--primary);
+    box-shadow: var(--focus);
+    outline: 0;
+}
+
+.select-ui--open .select-ui__button::after {
+    border-color: var(--primary);
+    transform: translateY(-35%) rotate(225deg);
+}
+
+.select-ui__menu {
+    position: fixed;
+    z-index: 1000;
+    display: none;
+    max-height: 260px;
+    overflow: auto;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 18px 45px rgba(20, 33, 61, .16);
+    padding: 6px;
+    direction: rtl;
+}
+
+.select-ui__menu.open {
+    display: grid;
+    gap: 3px;
+}
+
+.select-ui__option {
+    width: 100%;
+    min-height: 38px;
+    border: 0;
+    border-radius: 7px;
+    background: transparent;
+    color: var(--ink);
+    padding: 8px 10px;
+    text-align: right;
+}
+
+.select-ui__option:hover,
+.select-ui__option:focus-visible {
+    background: #eef6f4;
+    outline: 0;
+}
+
+.select-ui__option.is-selected {
+    background: linear-gradient(135deg, rgba(15, 118, 110, .16), rgba(245, 158, 11, .14));
+    color: var(--ink);
+    font-weight: 800;
+}
+
+.select-ui__option:disabled {
+    color: #9aa4b2;
+    cursor: not-allowed;
 }
 
 .student-focus {
@@ -254,7 +431,7 @@ textarea {
     border-radius: 8px;
     background: var(--accent);
     color: #fff;
-    font-weight: 700;
+    font-weight: 800;
 }
 
 .section-gap {
@@ -393,8 +570,8 @@ textarea {
 }
 
 .student-focus a {
-    padding: 9px 12px;
     flex: 0 0 auto;
+    padding: 9px 12px;
 }
 
 .metrics-grid {
@@ -409,10 +586,10 @@ textarea {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    padding: 14px;
     border: 1px solid var(--line);
     border-radius: 8px;
     background: var(--surface);
+    padding: 14px;
 }
 
 .metric.wide {
@@ -509,14 +686,14 @@ textarea {
 
 .child-card {
     display: grid;
-    grid-template-columns: 48px 1fr auto;
+    grid-template-columns: 48px minmax(0, 1fr) auto;
     align-items: center;
     gap: 12px;
-    padding: 14px;
-    background: var(--surface);
     border: 1px solid var(--line);
     border-radius: 8px;
+    background: var(--surface);
     box-shadow: var(--shadow);
+    padding: 14px;
 }
 
 .avatar {
@@ -543,8 +720,8 @@ textarea {
 }
 
 .student-profile {
-    text-align: center;
     padding: 14px 0 18px;
+    text-align: center;
 }
 
 .large-avatar {
@@ -599,7 +776,7 @@ textarea {
 .message-card span {
     color: var(--primary);
     font-size: 12px;
-    font-weight: 700;
+    font-weight: 800;
 }
 
 .message-card h2 {
@@ -625,6 +802,7 @@ textarea {
     gap: 7px;
     color: var(--muted);
     font-size: 13px;
+    font-weight: 700;
 }
 
 .profile-form input:disabled {
@@ -632,9 +810,9 @@ textarea {
 }
 
 .profile-form button {
-    border: 0;
     min-height: 46px;
     margin-top: 4px;
+    border: 0;
 }
 
 .more-list {
@@ -643,11 +821,11 @@ textarea {
 
 .more-list a,
 .more-list button {
+    width: 100%;
     min-height: 54px;
     display: flex;
     align-items: center;
     gap: 12px;
-    width: 100%;
     border: 0;
     border-top: 1px solid var(--line);
     background: transparent;
@@ -670,7 +848,7 @@ textarea {
     margin: 20px 0 0;
     color: var(--muted);
     text-align: center;
-    font-weight: 700;
+    font-weight: 800;
 }
 
 .empty-state {
@@ -697,10 +875,10 @@ textarea {
     z-index: 10;
     width: min(100%, 520px);
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     transform: translateX(-50%);
-    background: rgba(255, 255, 255, .96);
     border-top: 1px solid var(--line);
+    background: rgba(255, 255, 255, .96);
     padding: 8px max(8px, env(safe-area-inset-left)) calc(8px + env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-right));
     backdrop-filter: blur(14px);
 }
@@ -712,7 +890,7 @@ textarea {
     gap: 3px;
     color: var(--muted);
     font-size: 11px;
-    font-weight: 700;
+    font-weight: 800;
 }
 
 .bottom-nav span {

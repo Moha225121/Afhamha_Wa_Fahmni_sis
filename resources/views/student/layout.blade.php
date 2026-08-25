@@ -7,13 +7,14 @@
     <title>@yield('title', 'بوابة الطالب') | افهمها وفهمني</title>
     <link rel="stylesheet" href="{{ asset('css/parent.css') }}">
     <script src="{{ asset('js/student-tutor.js') }}" defer></script>
+    <script src="{{ asset('js/enhanced-selects.js') }}" defer></script>
 </head>
 <body class="student-portal">
 <a class="skip-link" href="#student-main">تجاوز إلى المحتوى</a>
 <div class="app-shell">
     <header class="app-header">
         <a class="brand" href="{{ route('student.dashboard') }}" aria-label="بوابة الطالب">
-            <span class="brand-mark">أف</span>
+            <span class="brand-mark">AWF</span>
             <span class="brand-copy">
                 <b>افهمها وفهمني</b>
                 <small>بوابة الطالب</small>

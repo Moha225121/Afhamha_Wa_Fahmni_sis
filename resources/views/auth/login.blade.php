@@ -8,7 +8,7 @@
 </head>
 <body class="login-page">
 <main class="login-card">
-    <div class="brand-mark">أف</div>
+    <div class="brand-mark">AWF</div>
     <p class="eyebrow">منصة افهمها وفهمني</p>
     <h1>دخول المنصة</h1>
 

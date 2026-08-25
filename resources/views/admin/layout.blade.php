@@ -1,7 +1,7 @@
 <!doctype html>
-<html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>@yield('title') | افهمها وفهمني</title><link rel="stylesheet" href="{{ asset('css/admin.css') }}"></head>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>@yield('title') | افهمها وفهمني</title><link rel="stylesheet" href="{{ asset('css/admin.css') }}"><script src="{{ asset('js/enhanced-selects.js') }}" defer></script></head>
 <body><button class="menu-toggle" id="menu" aria-label="فتح القائمة">☰</button>
-<aside class="sidebar" id="sidebar"><a class="logo" href="{{ route('admin.dashboard') }}"><span class="brand-mark">أف</span><span><b>افهمها وفهمني</b><small>إدارة المدرسة</small></span></a>
+<aside class="sidebar" id="sidebar"><a class="logo" href="{{ route('admin.dashboard') }}"><span class="brand-mark">AWF</span><span><b>افهمها وفهمني</b><small>إدارة المدرسة</small></span></a>
 <nav>@php($nav=['dashboard'=>'لوحة التحكم','students'=>'الطلاب','teachers'=>'المعلمون','parents'=>'أولياء الأمور','classes'=>'الصفوف','subjects'=>'المواد','schedules'=>'الجداول','attendance'=>'الحضور','exams'=>'الاختبارات','grades'=>'الدرجات','library'=>'المكتبة','announcements'=>'الإعلانات','reports'=>'التقارير','users'=>'المستخدمون','roles'=>'الصلاحيات','audit-logs'=>'سجل العمليات','settings'=>'الإعدادات'])
 @foreach($nav as $key=>$label)
 @php($url=in_array($key,['dashboard','students','teachers','parents','classes','subjects','announcements'])?route('admin.'.$key.'.index',[],false):route('admin.module.index',$key,false))

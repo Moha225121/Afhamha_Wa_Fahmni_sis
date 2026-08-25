@@ -25,7 +25,7 @@ Use the project script:
 Then open:
 
 ```text
-http://127.0.0.1:8000/login
+http://127.0.0.1:5500/login
 ```
 
 Use `Ctrl + F5` in the browser if the page was previously cached without styling.
@@ -56,7 +56,7 @@ Password: password123
 
 ## Parent Login
 
-1. Open `http://127.0.0.1:8000/login`.
+1. Open `http://127.0.0.1:5500/login`.
 2. Enter:
 
 ```text
@@ -67,7 +67,7 @@ password123
 3. After login, the system redirects the parent to:
 
 ```text
-http://127.0.0.1:8000/parent/dashboard
+http://127.0.0.1:5500/parent/dashboard
 ```
 
 The parent account can only see students linked to its `guardians` record through the existing `guardian_student` relationship. Directly changing a student ID in the URL is blocked for unlinked students.

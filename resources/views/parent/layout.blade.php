@@ -12,12 +12,13 @@
     <link rel="icon" href="{{ asset('icons/parent-icon.svg') }}" type="image/svg+xml">
     <link rel="apple-touch-icon" href="{{ asset('icons/parent-icon-192.png') }}">
     <link rel="stylesheet" href="{{ asset('css/parent.css') }}">
+    <script src="{{ asset('js/enhanced-selects.js') }}" defer></script>
 </head>
 <body>
 <div class="app-shell">
     <header class="app-header">
         <a class="brand" href="{{ route('parent.dashboard') }}" aria-label="بوابة ولي الأمر">
-            <span class="brand-mark">أف</span>
+            <span class="brand-mark">AWF</span>
             <span class="brand-copy">
                 <b>افهمها وفهمني</b>
                 <small>بوابة ولي الأمر</small>
