@@ -21,6 +21,22 @@
             <span>✉</span>
             الرسائل
         </a>
+        <a href="{{ route('parent.attendance') }}">
+            <span>✓</span>
+            الحضور
+        </a>
+        <a href="{{ route('parent.assignments') }}">
+            <span>▤</span>
+            الواجبات
+        </a>
+        <a href="{{ route('parent.exams') }}">
+            <span>◌</span>
+            الاختبارات والنتائج
+        </a>
+        <a href="{{ route('parent.notifications') }}">
+            <span>●</span>
+            الإشعارات
+        </a>
         <form method="post" action="{{ route('logout') }}">
             @csrf
             <button type="submit"><span>↶</span> تسجيل الخروج</button>

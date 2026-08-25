@@ -14,6 +14,7 @@ use App\Models\Subject;
 use App\Models\Teacher;
 use App\Models\User;
 use App\Services\AuditService;
+use App\Services\ParentNotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -65,15 +66,31 @@ class OperationsController extends Controller
         return view('admin.operations.attendance', compact('students', 'records', 'date', 'classroomId') + ['classrooms' => Classroom::all()]);
     }
 
-    public function attendanceStore(Request $r): RedirectResponse
+    public function attendanceStore(Request $r, ParentNotificationService $notifications): RedirectResponse
     {
         $d = $r->validate(['date' => ['required', 'date'], 'records' => ['required', 'array'], 'records.*' => ['required', Rule::in(['present', 'absent', 'late', 'excused'])]]);
-        DB::transaction(function () use ($d, $r) {
+        $alerts = DB::transaction(function () use ($d, $r) {
+            $alerts = [];
             foreach ($d['records'] as $id => $status) {
                 $s = Student::findOrFail($id);
                 DB::table('attendance_records')->updateOrInsert(['student_id' => $s->id, 'date' => $d['date']], ['classroom_id' => $s->classroom_id, 'status' => $status, 'recorded_by' => $r->user()->id, 'updated_at' => now(), 'created_at' => now()]);
+                if ($status !== 'present') {
+                    $alerts[] = [$s, $status];
+                }
             }AuditService::record('recorded', 'attendance');
+
+            return $alerts;
         });
+
+        $labels = ['absent' => 'غياب', 'late' => 'تأخر', 'excused' => 'غياب بعذر'];
+        foreach ($alerts as [$student, $status]) {
+            $notifications->sendToGuardians($student, [
+                'title' => 'تنبيه حضور',
+                'body' => 'تم تسجيل '.$labels[$status].' للطالب '.$student->user->name.' بتاريخ '.$d['date'].'.',
+                'url' => route('parent.attendance', ['student' => $student->id]),
+                'category' => 'attendance',
+            ]);
+        }
 
         return back()->with('success', 'تم حفظ الحضور.');
     }
@@ -117,17 +134,34 @@ class OperationsController extends Controller
         return view('admin.operations.grades', compact('exams', 'exam', 'students', 'grades'));
     }
 
-    public function gradesStore(Request $r): RedirectResponse
+    public function gradesStore(Request $r, ParentNotificationService $notifications): RedirectResponse
     {
         $d = $r->validate(['exam_id' => ['required', 'exists:exams,id'], 'scores' => ['required', 'array'], 'scores.*' => ['nullable', 'numeric', 'min:0']]);
-        $exam = DB::table('exams')->find($d['exam_id']);
-        DB::transaction(function () use ($d, $exam) {
+        $exam = DB::table('exams')
+            ->join('subjects', 'exams.subject_id', '=', 'subjects.id')
+            ->where('exams.id', $d['exam_id'])
+            ->select('exams.*', 'subjects.name as subject')
+            ->first();
+        $publishedStudentIds = DB::transaction(function () use ($d, $exam) {
+            $studentIds = [];
             foreach ($d['scores'] as $id => $score) {
                 if ($score === null) {
                     continue;
                 }abort_if((float) $score > (float) $exam->total_score, 422, 'الدرجة تتجاوز الدرجة الكلية.');
                 DB::table('grades')->updateOrInsert(['exam_id' => $exam->id, 'student_id' => $id], ['score' => $score, 'published_at' => now(), 'created_at' => now(), 'updated_at' => now()]);
+                $studentIds[] = $id;
             }AuditService::record('published', 'grades');
+
+            return $studentIds;
+        });
+
+        Student::with('user')->whereIn('id', $publishedStudentIds)->get()->each(function (Student $student) use ($notifications, $exam): void {
+            $notifications->sendToGuardians($student, [
+                'title' => 'تم نشر نتيجة جديدة',
+                'body' => 'تم نشر نتيجة '.$exam->title.' في مادة '.$exam->subject.' للطالب '.$student->user->name.'.',
+                'url' => route('parent.results', ['student' => $student->id]),
+                'category' => 'grade',
+            ]);
         });
 
         return back()->with('success', 'تم حفظ الدرجات.');

@@ -65,10 +65,17 @@
             @endforelse
         </section>
 
+        <section class="quick-links">
+            <a href="{{ route('parent.attendance', ['student' => $selectedStudent->id]) }}">الحضور</a>
+            <a href="{{ route('parent.assignments', ['student' => $selectedStudent->id]) }}">الواجبات</a>
+            <a href="{{ route('parent.exams', ['student' => $selectedStudent->id]) }}">الاختبارات</a>
+            <a href="{{ route('parent.notifications') }}">الإشعارات</a>
+        </section>
+
         <section class="list-section">
             <div class="section-title">
                 <h2>الرسائل</h2>
-                <a href="{{ route('parent.messages') }}">الكل</a>
+                <a href="{{ route('parent.messages', ['student' => $selectedStudent->id]) }}">الكل</a>
             </div>
             @forelse($announcements as $announcement)
                 <a class="message-row" href="{{ route('parent.messages') }}">
