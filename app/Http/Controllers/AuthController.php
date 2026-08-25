@@ -9,8 +9,19 @@ use Illuminate\View\View;
 
 class AuthController
 {
-    public function create(): View
+    public function create(): View|RedirectResponse
     {
+        if (Auth::check()) {
+            $fallback = match (true) {
+                Auth::user()->isParent() => route('parent.dashboard'),
+                Auth::user()->isStudent() => route('student.dashboard'),
+                Auth::user()->isTeacher() => route('teacher.dashboard'),
+                default => route('admin.dashboard'),
+            };
+
+            return redirect()->to($fallback);
+        }
+
         return view('auth.login');
     }
 
@@ -25,6 +36,7 @@ class AuthController
         $fallback = match (true) {
             $request->user()->isParent() => route('parent.dashboard'),
             $request->user()->isStudent() => route('student.dashboard'),
+            $request->user()->isTeacher() => route('teacher.dashboard'),
             default => route('admin.dashboard'),
         };
 
