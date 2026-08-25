@@ -24,7 +24,7 @@
         @forelse($automaticResults as $result)
             <a class="list-row" href="{{ route('student.exams.result', $result->id) }}">
                 <div><strong>{{ $result->subject }}</strong><span>{{ $result->title }} · {{ $result->submitted_at ? \Illuminate\Support\Carbon::parse($result->submitted_at)->format('Y-m-d') : '-' }}</span></div>
-                <b>{{ $result->status === 'pending_review' ? 'بانتظار المراجعة' : rtrim(rtrim(number_format((float) $result->score, 2, '.', ''), '0'), '.').' / '.rtrim(rtrim(number_format((float) $result->maximum_score, 2, '.', ''), '0'), '.') }}</b>
+                <b @class(['numeric-value' => $result->status !== 'pending_review'])>{{ $result->status === 'pending_review' ? 'بانتظار المراجعة' : rtrim(rtrim(number_format((float) $result->score, 2, '.', ''), '0'), '.').' / '.rtrim(rtrim(number_format((float) $result->maximum_score, 2, '.', ''), '0'), '.') }}</b>
             </a>
         @empty
             <p class="muted-line">لا توجد نتائج اختبارات إلكترونية.</p>
@@ -41,7 +41,7 @@
                     <strong>{{ $grade->subject }}</strong>
                     <span>{{ $grade->title }} · {{ $grade->published_at ? \Illuminate\Support\Carbon::parse($grade->published_at)->format('Y-m-d') : '-' }}</span>
                 </div>
-                <b>{{ $score }} / {{ $total }}</b>
+                <b class="numeric-value">{{ $score }} / {{ $total }}</b>
             </div>
         @empty
             <p class="muted-line">لا توجد نتائج منشورة.</p>
