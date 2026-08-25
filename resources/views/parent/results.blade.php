@@ -4,7 +4,7 @@
 
 @section('content')
     <section class="page-title">
-        <p>ملخص النتائج المنشورة</p>
+        <p>نتائج الاختبارات المنشورة</p>
         <h1>النتائج</h1>
     </section>
 

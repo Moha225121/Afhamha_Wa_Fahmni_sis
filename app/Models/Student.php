@@ -37,4 +37,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
     {
         return $this->hasMany(TutorConversation::class);
     }
+
+    public function assignmentSubmissions(): HasMany
+    {
+        return $this->hasMany(AssignmentSubmission::class);
+    }
 }

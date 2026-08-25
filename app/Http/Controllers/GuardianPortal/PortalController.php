@@ -4,21 +4,24 @@ namespace App\Http\Controllers\GuardianPortal;
 
 use App\Http\Controllers\Controller;
 use App\Models\Announcement;
+use App\Models\Assignment;
 use App\Models\Guardian;
 use App\Models\Student;
+use App\Services\ParentPortalContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class PortalController extends Controller
 {
+    public function __construct(private readonly ParentPortalContext $context) {}
+
     public function dashboard(Request $request): View
     {
-        $guardian = $this->guardian($request);
-        $children = $this->childrenFor($guardian);
-        $selectedStudent = $this->selectedStudent($guardian, $children, $request->query('student'));
+        [$guardian, $children, $selectedStudent] = $this->parentContext($request);
 
         return view('parent.dashboard', [
             'guardian' => $guardian,
@@ -32,19 +35,18 @@ class PortalController extends Controller
 
     public function children(Request $request): View
     {
-        $guardian = $this->guardian($request);
+        $guardian = $this->context->guardian($request);
 
         return view('parent.children.index', [
             'guardian' => $guardian,
-            'children' => $this->childrenFor($guardian),
+            'children' => $this->context->children($guardian),
         ]);
     }
 
     public function child(Request $request, Student $student): View
     {
-        $guardian = $this->guardian($request);
-        abort_unless($guardian->students()->whereKey($student->id)->exists(), 404);
-
+        $guardian = $this->context->guardian($request);
+        $this->context->assertChild($guardian, $student);
         $student->load(['user', 'classroom.academicYear']);
 
         return view('parent.children.show', [
@@ -58,32 +60,97 @@ class PortalController extends Controller
 
     public function results(Request $request): View
     {
-        $guardian = $this->guardian($request);
-        $children = $this->childrenFor($guardian);
-        $selectedStudent = $this->selectedStudent($guardian, $children, $request->query('student'));
+        [, $children, $selectedStudent] = $this->parentContext($request);
 
         return view('parent.results', [
             'children' => $children,
             'selectedStudent' => $selectedStudent,
             'summary' => $this->summaryFor($selectedStudent),
-            'recentGrades' => $this->recentGradesFor($selectedStudent, 8),
+            'recentGrades' => $this->recentGradesFor($selectedStudent, 30),
+        ]);
+    }
+
+    public function attendance(Request $request): View
+    {
+        [, $children, $selectedStudent] = $this->parentContext($request);
+
+        return view('parent.attendance', [
+            'children' => $children,
+            'selectedStudent' => $selectedStudent,
+            'summary' => $this->summaryFor($selectedStudent),
+            'records' => $selectedStudent
+                ? DB::table('attendance_records')->where('student_id', $selectedStudent->id)->latest('date')->get()
+                : collect(),
+        ]);
+    }
+
+    public function assignments(Request $request): View
+    {
+        [, $children, $selectedStudent] = $this->parentContext($request);
+        $assignments = collect();
+
+        if ($selectedStudent?->classroom_id) {
+            $assignments = Assignment::query()
+                ->with([
+                    'subject',
+                    'attachments',
+                    'submissions' => fn ($query) => $query->where('student_id', $selectedStudent->id),
+                ])
+                ->where('classroom_id', $selectedStudent->classroom_id)
+                ->where('status', 'published')
+                ->where(fn ($query) => $query->whereNull('published_at')->orWhere('published_at', '<=', now()))
+                ->orderByRaw('case when due_at is null then 1 else 0 end')
+                ->orderBy('due_at')
+                ->get();
+        }
+
+        return view('parent.assignments', compact('children', 'selectedStudent', 'assignments'));
+    }
+
+    public function exams(Request $request): View
+    {
+        [, $children, $selectedStudent] = $this->parentContext($request);
+        $exams = collect();
+
+        if ($selectedStudent?->classroom_id) {
+            $exams = DB::table('exams')
+                ->join('subjects', 'exams.subject_id', '=', 'subjects.id')
+                ->leftJoin('grades', function ($join) use ($selectedStudent): void {
+                    $join->on('grades.exam_id', '=', 'exams.id')->where('grades.student_id', '=', $selectedStudent->id);
+                })
+                ->where('exams.classroom_id', $selectedStudent->classroom_id)
+                ->where('exams.status', 'published')
+                ->select([
+                    'exams.id', 'exams.title', 'exams.starts_at', 'exams.duration_minutes', 'exams.total_score',
+                    'subjects.name as subject', 'grades.score', 'grades.published_at as grade_published_at',
+                ])
+                ->orderBy('exams.starts_at')
+                ->get();
+        }
+
+        return view('parent.exams', [
+            'children' => $children,
+            'selectedStudent' => $selectedStudent,
+            'upcomingExams' => $exams->filter(fn ($exam) => Carbon::parse($exam->starts_at)->greaterThanOrEqualTo(now())),
+            'previousExams' => $exams->filter(fn ($exam) => Carbon::parse($exam->starts_at)->lessThan(now())),
         ]);
     }
 
     public function messages(Request $request): View
     {
-        $guardian = $this->guardian($request);
-        $children = $this->childrenFor($guardian);
+        [$guardian, $children, $selectedStudent] = $this->parentContext($request);
 
         return view('parent.messages', [
+            'guardian' => $guardian,
             'children' => $children,
-            'announcements' => $this->announcementsFor($children, 20),
+            'selectedStudent' => $selectedStudent,
+            'announcements' => $this->announcementsFor($children, 12),
         ]);
     }
 
     public function profile(Request $request): View
     {
-        return view('parent.profile', ['guardian' => $this->guardian($request)]);
+        return view('parent.profile', ['guardian' => $this->context->guardian($request)]);
     }
 
     public function updateProfile(Request $request): RedirectResponse
@@ -100,36 +167,16 @@ class PortalController extends Controller
 
     public function more(Request $request): View
     {
-        return view('parent.more', ['guardian' => $this->guardian($request)]);
+        return view('parent.more', ['guardian' => $this->context->guardian($request)]);
     }
 
-    private function guardian(Request $request): Guardian
+    /** @return array{0: Guardian, 1: Collection<int, Student>, 2: Student|null} */
+    private function parentContext(Request $request): array
     {
-        return $request->user()->guardian()->with('user')->firstOrFail();
-    }
+        $guardian = $this->context->guardian($request);
+        $children = $this->context->children($guardian);
 
-    private function childrenFor(Guardian $guardian): Collection
-    {
-        return $guardian->students()
-            ->with(['user', 'classroom.academicYear'])
-            ->orderBy('student_number')
-            ->get();
-    }
-
-    private function selectedStudent(Guardian $guardian, Collection $children, mixed $studentId): ?Student
-    {
-        if ($studentId === null || $studentId === '') {
-            return $children->first();
-        }
-
-        $student = $guardian->students()
-            ->with(['user', 'classroom.academicYear'])
-            ->whereKey((int) $studentId)
-            ->first();
-
-        abort_unless($student, 404);
-
-        return $student;
+        return [$guardian, $children, $this->context->selectedStudent($guardian, $children, $request->query('student'))];
     }
 
     private function summaryFor(?Student $student): array
@@ -140,6 +187,8 @@ class PortalController extends Controller
                 'present' => 0,
                 'absent' => 0,
                 'late' => 0,
+                'excused' => 0,
+                'attendance_percent' => null,
                 'published_grades' => 0,
                 'average_percent' => null,
             ];
@@ -151,21 +200,28 @@ class PortalController extends Controller
             ->selectRaw("sum(case when status = 'present' then 1 else 0 end) as present")
             ->selectRaw("sum(case when status = 'absent' then 1 else 0 end) as absent")
             ->selectRaw("sum(case when status = 'late' then 1 else 0 end) as late")
+            ->selectRaw("sum(case when status = 'excused' then 1 else 0 end) as excused")
             ->first();
 
         $grades = DB::table('grades')
             ->join('exams', 'grades.exam_id', '=', 'exams.id')
             ->where('grades.student_id', $student->id)
+            ->where('exams.status', 'published')
             ->whereNotNull('grades.published_at')
             ->selectRaw('count(*) as total')
             ->selectRaw('avg(case when exams.total_score > 0 then grades.score * 100.0 / exams.total_score end) as average_percent')
             ->first();
 
+        $total = (int) ($attendance->total ?? 0);
+        $present = (int) ($attendance->present ?? 0);
+
         return [
-            'attendance_total' => (int) ($attendance->total ?? 0),
-            'present' => (int) ($attendance->present ?? 0),
+            'attendance_total' => $total,
+            'present' => $present,
             'absent' => (int) ($attendance->absent ?? 0),
             'late' => (int) ($attendance->late ?? 0),
+            'excused' => (int) ($attendance->excused ?? 0),
+            'attendance_percent' => $total ? round(($present / $total) * 100, 1) : null,
             'published_grades' => (int) ($grades->total ?? 0),
             'average_percent' => $grades?->average_percent === null ? null : round((float) $grades->average_percent, 1),
         ];
@@ -181,19 +237,17 @@ class PortalController extends Controller
             ->join('exams', 'grades.exam_id', '=', 'exams.id')
             ->join('subjects', 'exams.subject_id', '=', 'subjects.id')
             ->where('grades.student_id', $student->id)
+            ->where('exams.status', 'published')
             ->whereNotNull('grades.published_at')
             ->select([
-                'grades.score',
-                'grades.published_at',
-                'exams.title',
-                'exams.total_score',
-                'subjects.name as subject',
+                'grades.score', 'grades.published_at', 'exams.title', 'exams.total_score', 'subjects.name as subject',
             ])
             ->latest('grades.published_at')
             ->limit($limit)
             ->get();
     }
 
+    /** @param Collection<int, Student> $children */
     private function announcementsFor(Collection $children, int $limit): Collection
     {
         $classroomIds = $children->pluck('classroom_id')->filter()->unique()->values();
