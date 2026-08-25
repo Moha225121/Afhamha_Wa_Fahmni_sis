@@ -22,7 +22,7 @@ Use the project script:
 .\start-local.ps1
 ```
 
-Then open:
+Then open the local login page:
 
 ```text
 http://127.0.0.1:5500/login
