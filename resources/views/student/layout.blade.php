@@ -6,15 +6,12 @@
     <meta name="theme-color" content="#0f766e">
     <title>@yield('title', 'بوابة الطالب') | افهمها وفهمني</title>
     <link rel="stylesheet" href="{{ asset('css/parent.css') }}">
-    <script src="{{ asset('js/student-tutor.js') }}" defer></script>
-    <script src="{{ asset('js/enhanced-selects.js') }}" defer></script>
 </head>
-<body class="student-portal">
-<a class="skip-link" href="#student-main">تجاوز إلى المحتوى</a>
+<body>
 <div class="app-shell">
     <header class="app-header">
         <a class="brand" href="{{ route('student.dashboard') }}" aria-label="بوابة الطالب">
-            <span class="brand-mark">AWF</span>
+            <span class="brand-mark">أف</span>
             <span class="brand-copy">
                 <b>افهمها وفهمني</b>
                 <small>بوابة الطالب</small>
@@ -26,29 +23,25 @@
         </form>
     </header>
 
-    <main class="app-content" id="student-main" tabindex="-1">
+    <main class="app-content">
         @yield('content')
     </main>
 
     <nav class="bottom-nav" aria-label="تنقل الطالب">
-        <a href="{{ route('student.dashboard') }}" class="{{ request()->routeIs('student.dashboard') ? 'active' : '' }}" @if(request()->routeIs('student.dashboard')) aria-current="page" @endif>
-            <span aria-hidden="true">⌂</span>
+        <a href="{{ route('student.dashboard') }}" class="{{ request()->routeIs('student.dashboard') ? 'active' : '' }}">
+            <span>⌂</span>
             الرئيسية
         </a>
-        <a href="{{ route('student.subjects.index') }}" class="{{ request()->routeIs('student.subjects.*', 'student.lessons.*') ? 'active' : '' }}" @if(request()->routeIs('student.subjects.*', 'student.lessons.*')) aria-current="page" @endif>
-            <span aria-hidden="true">▤</span>
-            المواد
+        <a href="{{ route('student.results') }}" class="{{ request()->routeIs('student.results') ? 'active' : '' }}">
+            <span>◌</span>
+            النتائج
         </a>
-        <a href="{{ route('student.library.index') }}" class="{{ request()->routeIs('student.library.*') ? 'active' : '' }}" @if(request()->routeIs('student.library.*')) aria-current="page" @endif>
-            <span aria-hidden="true">▦</span>
-            المكتبة
+        <a href="{{ route('student.messages') }}" class="{{ request()->routeIs('student.messages') ? 'active' : '' }}">
+            <span>✉</span>
+            الرسائل
         </a>
-        <a href="{{ route('student.tutor.index') }}" class="{{ request()->routeIs('student.tutor.*') ? 'active' : '' }}" @if(request()->routeIs('student.tutor.*')) aria-current="page" @endif>
-            <span aria-hidden="true">✦</span>
-            المعلّم
-        </a>
-        <a href="{{ route('student.profile') }}" class="{{ request()->routeIs('student.profile') ? 'active' : '' }}" @if(request()->routeIs('student.profile')) aria-current="page" @endif>
-            <span aria-hidden="true">◉</span>
+        <a href="{{ route('student.profile') }}" class="{{ request()->routeIs('student.profile') ? 'active' : '' }}">
+            <span>◉</span>
             الملف
         </a>
     </nav>

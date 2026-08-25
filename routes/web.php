@@ -1,11 +1,25 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Route;
 
-Route::redirect('/', '/login');
+Route::get('/', function () {
+    if (! Auth::check()) {
+        return redirect()->route('login');
+    }
+
+    $fallback = match (true) {
+        Auth::user()->isParent() => route('parent.dashboard'),
+        Auth::user()->isStudent() => route('student.dashboard'),
+        Auth::user()->isTeacher() => route('teacher.dashboard'),
+        default => route('admin.dashboard'),
+    };
+
+    return redirect()->to($fallback);
+});
 Route::get('/parent-manifest.webmanifest', fn () => Response::make(File::get(public_path('parent-manifest.webmanifest')), 200, ['Content-Type' => 'application/manifest+json']))->name('parent.pwa.manifest');
 Route::get('/parent-sw.js', fn () => Response::make(File::get(public_path('parent-sw.js')), 200, ['Content-Type' => 'application/javascript']))->name('parent.pwa.service-worker');
 Route::view('/parent-offline.html', 'parent.offline')->name('parent.offline');
@@ -16,4 +30,5 @@ Route::middleware('guest')->group(function (): void {
 Route::post('/logout', [AuthController::class, 'destroy'])->middleware('auth')->name('logout');
 require __DIR__.'/student.php';
 require __DIR__.'/parent.php';
+require __DIR__.'/teacher.php';
 require __DIR__.'/admin.php';

@@ -5,8 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -37,9 +35,14 @@ class User extends Authenticatable
         return $this->role === 'student' && $this->status === 'active';
     }
 
+    public function isTeacher(): bool
+    {
+        return $this->role === 'teacher' && $this->status === 'active';
+    }
+
     public function hasPermission(string $permission): bool
     {
-        if (! $this->isAdmin()) {
+        if ($this->status !== 'active') {
             return false;
         } $p = config('permissions.roles.'.$this->role, []);
 
@@ -59,22 +62,5 @@ class User extends Authenticatable
     public function guardian(): HasOne
     {
         return $this->hasOne(Guardian::class);
-    }
-
-    public function conversations(): BelongsToMany
-    {
-        return $this->belongsToMany(Conversation::class, 'conversation_participants')
-            ->withPivot('last_read_at')
-            ->withTimestamps();
-    }
-
-    public function sentMessages(): HasMany
-    {
-        return $this->hasMany(Message::class, 'sender_id');
-    }
-
-    public function pushSubscriptions(): HasMany
-    {
-        return $this->hasMany(PushSubscription::class);
     }
 }

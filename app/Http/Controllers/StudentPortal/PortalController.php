@@ -5,7 +5,6 @@ namespace App\Http\Controllers\StudentPortal;
 use App\Http\Controllers\Controller;
 use App\Models\Announcement;
 use App\Models\Student;
-use App\Models\Subject;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -20,8 +19,8 @@ class PortalController extends Controller
         return view('student.dashboard', [
             'student' => $student,
             'summary' => $this->summaryFor($student),
-            'subjects' => $this->subjectsFor($student),
-            'todaysSchedule' => $this->todaysScheduleFor($student),
+            'recentGrades' => $this->recentGradesFor($student, 3),
+            'upcomingExams' => $this->upcomingExamsFor($student, 4),
             'announcements' => $this->announcementsFor($student, 4),
         ]);
     }
@@ -107,40 +106,21 @@ class PortalController extends Controller
             ->get();
     }
 
-    private function subjectsFor(Student $student): Collection
+    private function upcomingExamsFor(Student $student, int $limit): Collection
     {
-        if (! $student->classroom_id) {
-            return collect();
-        }
-
-        return Subject::query()
-            ->where('status', 'active')
-            ->whereHas('classrooms', fn ($query) => $query->whereKey($student->classroom_id))
-            ->orderBy('name')
-            ->get();
-    }
-
-    private function todaysScheduleFor(Student $student): Collection
-    {
-        if (! $student->classroom_id) {
-            return collect();
-        }
-
-        return DB::table('schedules')
-            ->join('subjects', 'schedules.subject_id', '=', 'subjects.id')
-            ->join('teachers', 'schedules.teacher_id', '=', 'teachers.id')
-            ->join('users', 'teachers.user_id', '=', 'users.id')
-            ->where('schedules.classroom_id', $student->classroom_id)
-            ->where('schedules.day_of_week', now()->dayOfWeek)
-            ->where('subjects.status', 'active')
+        return DB::table('exams')
+            ->join('subjects', 'exams.subject_id', '=', 'subjects.id')
+            ->where('exams.classroom_id', $student->classroom_id)
+            ->whereIn('exams.status', ['scheduled', 'published'])
+            ->where('exams.starts_at', '>=', now())
             ->select([
-                'schedules.starts_at',
-                'schedules.ends_at',
-                'schedules.room',
+                'exams.id',
+                'exams.title',
+                'exams.starts_at',
                 'subjects.name as subject',
-                'users.name as teacher',
             ])
-            ->orderBy('schedules.starts_at')
+            ->orderBy('exams.starts_at')
+            ->limit($limit)
             ->get();
     }
 
@@ -154,11 +134,7 @@ class PortalController extends Controller
                 $query->whereIn('audience', ['all', 'students']);
 
                 if ($student->classroom_id) {
-                    $query->orWhere(function ($classroomQuery) use ($student): void {
-                        $classroomQuery
-                            ->where('audience', 'classroom')
-                            ->where('classroom_id', $student->classroom_id);
-                    });
+                    $query->orWhere('classroom_id', $student->classroom_id);
                 }
             })
             ->latest('published_at')
