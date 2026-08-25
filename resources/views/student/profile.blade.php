@@ -27,4 +27,9 @@
             <strong>{{ $student->classroom?->academicYear?->name ?? '-' }}</strong>
         </div>
     </section>
+
+    <section class="more-list" aria-label="روابط الطالب الأخرى">
+        <a href="{{ route('student.results') }}"><span aria-hidden="true">◌</span>النتائج</a>
+        <a href="{{ route('student.messages') }}"><span aria-hidden="true">✉</span>الإعلانات والرسائل</a>
+    </section>
 @endsection

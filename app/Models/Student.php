@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable(['user_id', 'student_number', 'classroom_id', 'birth_date', 'gender', 'address', 'status'])] class Student extends Model
@@ -30,5 +31,15 @@ use Illuminate\Database\Eloquent\SoftDeletes;
     public function guardians(): BelongsToMany
     {
         return $this->belongsToMany(Guardian::class, 'guardian_student');
+    }
+
+    public function tutorConversations(): HasMany
+    {
+        return $this->hasMany(TutorConversation::class);
+    }
+
+    public function assignmentSubmissions(): HasMany
+    {
+        return $this->hasMany(AssignmentSubmission::class);
     }
 }

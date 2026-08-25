@@ -4,7 +4,6 @@ use App\Http\Middleware\EnsureUserHasPermission;
 use App\Http\Middleware\EnsureUserIsAdmin;
 use App\Http\Middleware\EnsureUserIsParent;
 use App\Http\Middleware\EnsureUserIsStudent;
-use App\Http\Middleware\EnsureUserIsTeacher;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -21,7 +20,6 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin' => EnsureUserIsAdmin::class,
             'parent' => EnsureUserIsParent::class,
             'student' => EnsureUserIsStudent::class,
-            'teacher' => EnsureUserIsTeacher::class,
             'permission' => EnsureUserHasPermission::class,
         ]);
     })
