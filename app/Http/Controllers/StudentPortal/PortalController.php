@@ -70,21 +70,43 @@ class PortalController extends Controller
             ->selectRaw("sum(case when status = 'late' then 1 else 0 end) as late")
             ->first();
 
-        $grades = DB::table('grades')
-            ->join('exams', 'grades.exam_id', '=', 'exams.id')
-            ->where('grades.student_id', $student->id)
-            ->whereNotNull('grades.published_at')
-            ->selectRaw('count(*) as total')
-            ->selectRaw('avg(case when exams.total_score > 0 then grades.score * 100.0 / exams.total_score end) as average_percent')
-            ->first();
+        $savedGradeValues = collect();
+        $gradeSheets = DB::table('grade_sheets')
+            ->whereExists(function ($query): void {
+                $query->selectRaw('1')
+                    ->from('teacher_assignments')
+                    ->whereColumn('teacher_assignments.teacher_id', 'grade_sheets.teacher_id')
+                    ->whereColumn('teacher_assignments.classroom_id', 'grade_sheets.classroom_id');
+            })
+            ->where('grade_sheets.classroom_id', $student->classroom_id)
+            ->select('grade_sheets.scores')
+            ->pluck('scores');
+
+        foreach ($gradeSheets as $scores) {
+            $scores = json_decode($scores ?? '{}', true);
+
+            if (is_array($scores) && array_key_exists((string) $student->id, $scores)) {
+                $studentScore = $scores[(string) $student->id];
+
+                if (is_array($studentScore)) {
+                    $studentScore = collect($studentScore)
+                        ->filter(fn ($value): bool => is_numeric($value))
+                        ->average();
+                }
+
+                if (is_numeric($studentScore)) {
+                    $savedGradeValues->push((float) $studentScore);
+                }
+            }
+        }
 
         return [
             'attendance_total' => (int) ($attendance->total ?? 0),
             'present' => (int) ($attendance->present ?? 0),
             'absent' => (int) ($attendance->absent ?? 0),
             'late' => (int) ($attendance->late ?? 0),
-            'published_grades' => (int) ($grades->total ?? 0),
-            'average_percent' => $grades?->average_percent === null ? null : round((float) $grades->average_percent, 1),
+            'published_grades' => $savedGradeValues->count(),
+            'average_percent' => $savedGradeValues->isEmpty() ? null : round((float) $savedGradeValues->average(), 1),
         ];
     }
 

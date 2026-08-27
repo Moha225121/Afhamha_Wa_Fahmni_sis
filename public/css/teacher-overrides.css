@@ -35,7 +35,8 @@ body {
 .content {
     padding: 22px 18px 42px;
     max-width: 100%;
-    min-width: 980px;
+    min-width: 0;
+    width: 100%;
     margin: 0 auto;
     overflow-x: auto;
 }
@@ -129,7 +130,8 @@ textarea:focus {
 }
 
 .form-card {
-    max-width: 1100px;
+    max-width: none;
+    width: 100%;
 }
 
 .form-hint {
@@ -165,6 +167,72 @@ textarea:focus {
 .form-actions {
     margin-top: 26px;
     gap: 12px;
+}
+
+.rich-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 10px;
+    padding: 8px 10px;
+    border: 1px solid rgba(148, 163, 184, 0.4);
+    border-radius: 12px;
+    background: rgba(248, 250, 252, 0.9);
+}
+
+.rich-toolbar button {
+    border: 1px solid rgba(148, 163, 184, 0.45);
+    background: #fff;
+    color: #1f2937;
+    border-radius: 8px;
+    padding: 6px 9px;
+    min-width: 34px;
+    cursor: pointer;
+    font-weight: 700;
+}
+
+.rich-toolbar button:hover {
+    background: #eef4ff;
+    border-color: rgba(59, 130, 246, 0.5);
+}
+
+.rich-editor,
+.rich-inline-editor {
+    width: 100%;
+    min-height: 110px;
+    padding: 12px 14px;
+    border: 1px solid rgba(148, 163, 184, 0.45);
+    border-radius: 12px;
+    background: #ffffff;
+    color: #0f172a;
+    line-height: 1.8;
+    text-align: right;
+    direction: rtl;
+    overflow: auto;
+}
+
+.rich-editor:empty::before,
+.rich-inline-editor:empty::before {
+    content: attr(data-placeholder);
+    color: #94a3b8;
+}
+
+.rich-inline-editor {
+    min-height: 52px;
+    display: block;
+}
+
+.rich-editor ul,
+.rich-editor ol,
+.rich-inline-editor ul,
+.rich-inline-editor ol {
+    padding-right: 22px;
+    margin: 10px 0;
+}
+
+.rich-editor p,
+.rich-inline-editor p {
+    margin: 0 0 8px;
 }
 
 .btn {

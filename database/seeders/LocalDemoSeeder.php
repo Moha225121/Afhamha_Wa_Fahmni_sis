@@ -66,6 +66,23 @@ class LocalDemoSeeder extends Seeder
             'subject_id' => $subject->id,
         ]);
 
+        DB::table('grade_sheets')->updateOrInsert(
+            ['teacher_id' => $teacher->id, 'classroom_id' => $classroom->id],
+            [
+                'sheet_data' => json_encode([
+                    ['key' => 'monthly', 'title' => 'اختبار شهري', 'weight' => 20],
+                    ['key' => 'midterm', 'title' => 'اختبار نصفي', 'weight' => 20],
+                    ['key' => 'work', 'title' => 'أعمال', 'weight' => 20],
+                    ['key' => 'activity', 'title' => 'نشاط', 'weight' => 20],
+                ]),
+                'scores' => json_encode([
+                    (string) $firstStudent->id => 90,
+                    (string) $secondStudent->id => 80,
+                ]),
+                'updated_at' => now(),
+            ],
+        );
+
         DB::table('attendance_records')->updateOrInsert(
             ['student_id' => $firstStudent->id, 'date' => now()->subDay()->toDateString()],
             ['classroom_id' => $classroom->id, 'status' => 'present', 'recorded_by' => $admin->id, 'created_at' => now(), 'updated_at' => now()],
@@ -105,7 +122,9 @@ class LocalDemoSeeder extends Seeder
                 'subject_id' => $subject->id,
                 'teacher_id' => $teacher->id,
                 'instructions' => 'حل التمارين من صفحة 12 ورفع الحل قبل الموعد.',
+                'description' => 'حل التمارين من صفحة 12 ورفع الحل قبل الموعد.',
                 'due_at' => now()->addDays(2),
+                'due_date' => now()->addDays(2)->toDateString(),
                 'status' => 'published',
                 'published_at' => now()->subHour(),
             ],

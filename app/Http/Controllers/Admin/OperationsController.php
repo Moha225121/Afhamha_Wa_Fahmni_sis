@@ -17,6 +17,7 @@ use App\Services\AuditService;
 use App\Services\ParentNotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
@@ -98,8 +99,26 @@ class OperationsController extends Controller
     public function exams(): View
     {
         $rows = DB::table('exams')->join('subjects', 'exams.subject_id', '=', 'subjects.id')->join('classrooms', 'exams.classroom_id', '=', 'classrooms.id')->select('exams.*', 'subjects.name as subject', 'classrooms.name as classroom')->latest('starts_at')->paginate(20);
+        $rows->getCollection()->transform(function ($exam) {
+            $exam->effective_status = $this->effectiveExamStatus($exam);
+
+            return $exam;
+        });
 
         return view('admin.operations.exams', compact('rows'));
+    }
+
+    private function effectiveExamStatus(object $exam): string
+    {
+        if ($exam->status === 'completed') {
+            return 'completed';
+        }
+
+        if (in_array($exam->status, ['scheduled', 'published'], true) && Carbon::parse($exam->starts_at)->isPast()) {
+            return 'published';
+        }
+
+        return $exam->status;
     }
 
     public function examCreate(): View

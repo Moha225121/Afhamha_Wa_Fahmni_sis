@@ -82,10 +82,13 @@ class AssignmentController extends Controller
             'subject_id' => $data['subject_id'],
             'teacher_id' => $teacher->id,
             'description' => $data['description'] ?? null,
+            'instructions' => $data['description'] ?? null,
             'due_date' => $data['due_date'],
+            'due_at' => $data['due_date'],
             'max_score' => $data['max_score'],
             'attachment_path' => $path,
             'status' => 'active',
+            'published_at' => now(),
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -108,7 +111,9 @@ class AssignmentController extends Controller
             'classroom_id' => $data['classroom_id'],
             'subject_id' => $data['subject_id'],
             'description' => $data['description'] ?? null,
+            'instructions' => $data['description'] ?? null,
             'due_date' => $data['due_date'],
+            'due_at' => $data['due_date'],
             'max_score' => $data['max_score'],
             'updated_at' => now(),
         ];

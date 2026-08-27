@@ -11,7 +11,7 @@
         ];
     })->values();
 @endphp
-<form class="form-card" method="post" action="{{ $exam ? route('teacher.exams.update',$exam->id) : route('teacher.exams.store') }}" id="exam-form" style="max-width:100%">
+<form class="form-card" method="post" action="{{ $exam ? route('teacher.exams.update',$exam->id) : route('teacher.exams.store') }}" id="exam-form" style="max-width:100%; width:min(1400px, 100%); margin:0 auto;">
 @csrf
 @if($exam) @method('put') @endif
 <div class="form-hint">
@@ -66,6 +66,167 @@
 <script id="existing-questions-data" type="application/json">{!! json_encode($existingQuestions) !!}</script>
 
 @section('scripts')
+<style>
+  #questions-container {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    width: 100%;
+  }
+
+  .question-card {
+    width: 100%;
+    max-width: none;
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(248,250,252,0.98));
+    border-radius: 18px;
+    padding: 20px;
+    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.05);
+  }
+
+  .question-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 18px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.25);
+  }
+
+  .question-head h2 {
+    margin: 0;
+    font-size: 1.05rem;
+    color: #0f172a;
+  }
+
+  .choices-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 14px;
+  }
+
+  .choice-row {
+    display: grid;
+    grid-template-columns: 32px 1fr;
+    gap: 10px;
+    align-items: center;
+    background: rgba(255,255,255,0.7);
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    border-radius: 12px;
+    padding: 10px 12px;
+  }
+
+  .choice-row input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #1d4ed8;
+  }
+
+  .choice-row input[type="text"],
+  .question-card textarea,
+  .question-card input[type="number"],
+  .question-card select {
+    border: 1px solid rgba(148, 163, 184, 0.5);
+    border-radius: 10px;
+    padding: 10px 12px;
+    background: rgba(255,255,255,0.8);
+    color: #0f172a;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .question-card textarea {
+    min-height: 110px;
+    resize: vertical;
+  }
+
+  .question-card textarea:focus,
+  .question-card input:focus,
+  .question-card select:focus {
+    border-color: rgba(59, 130, 246, 0.7);
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
+    outline: none;
+  }
+
+  .question-card .form-grid {
+    margin-bottom: 14px;
+  }
+
+  .question-card .add-choice {
+    margin-top: 12px;
+    width: fit-content;
+  }
+
+  .rich-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+    padding: 8px 10px;
+    border: 1px solid rgba(148, 163, 184, 0.4);
+    border-radius: 12px;
+    background: rgba(248, 250, 252, 0.9);
+  }
+
+  .rich-toolbar button {
+    border: 1px solid rgba(148, 163, 184, 0.45);
+    background: #fff;
+    color: #1f2937;
+    border-radius: 8px;
+    padding: 6px 9px;
+    min-width: 34px;
+    cursor: pointer;
+    font-weight: 700;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .rich-toolbar button:hover {
+    background: #eef4ff;
+    border-color: rgba(59, 130, 246, 0.5);
+  }
+
+  .rich-editor {
+    width: 100%;
+    min-height: 110px;
+    padding: 12px 14px;
+    border: 1px solid rgba(148, 163, 184, 0.45);
+    border-radius: 12px;
+    background: #ffffff;
+    color: #0f172a;
+    line-height: 1.8;
+    text-align: right;
+    direction: rtl;
+    overflow: auto;
+  }
+
+  .rich-editor:empty::before {
+    content: attr(data-placeholder);
+    color: #94a3b8;
+  }
+
+  .rich-editor ul,
+  .rich-editor ol {
+    padding-right: 22px;
+    margin: 10px 0;
+  }
+
+  .rich-editor p {
+    margin: 0 0 8px;
+  }
+
+  .remove-question {
+    border: none;
+    background: transparent;
+    color: #dc2626;
+    font-weight: 600;
+    padding: 0;
+  }
+</style>
 <script>
 (function(){
   const container = document.getElementById('questions-container');
@@ -88,11 +249,49 @@
   classroomSelect.addEventListener('change', filterSubjects);
   filterSubjects();
 
+  function buildRichToolbar(prefix, isInline){
+    const items = [
+      { label: 'B', cmd: 'bold', title: 'غامق' },
+      { label: 'I', cmd: 'italic', title: 'مائل' },
+      { label: 'U', cmd: 'underline', title: 'تسطير' },
+      { label: '•', cmd: 'insertUnorderedList', title: 'قائمة نقطية' },
+      { label: '≡', cmd: 'justifyLeft', title: 'محاذاة يسار' },
+      { label: '≣', cmd: 'justifyCenter', title: 'محاذاة وسط' },
+      { label: '⇢', cmd: 'justifyRight', title: 'محاذاة يمين' },
+      { label: '❝', cmd: 'formatBlock', value: 'blockquote', title: 'اقتباس' }
+    ];
+
+    return '<div class="rich-toolbar">' + items.map(item => {
+      return '<button type="button" data-command="' + item.cmd + '" data-value="' + (item.value || '') + '" title="' + item.title + '">' + item.label + '</button>';
+    }).join('') + '</div>';
+  }
+
+  function bindRichEditor(editor, hiddenInput){
+    hiddenInput.value = editor.innerHTML;
+    editor.addEventListener('input', function () {
+      hiddenInput.value = editor.innerHTML;
+    });
+    editor.addEventListener('blur', function () {
+      hiddenInput.value = editor.innerHTML;
+    });
+
+    editor.parentElement.querySelectorAll('.rich-toolbar button').forEach(button => {
+      button.addEventListener('click', function () {
+        const command = button.dataset.command;
+        const value = button.dataset.value || null;
+        editor.focus();
+        document.execCommand(command, false, value);
+        hiddenInput.value = editor.innerHTML;
+      });
+    });
+  }
+
   function choiceRow(qIdx, cIdx, text, checked){
-    text = text || ''; checked = !!checked;
+    text = text || '';
+    const safeText = text.replace(/"/g, '&quot;');
     return `<div class="choice-row">
       <input type="checkbox" class="correct-toggle" data-group="q${qIdx}" name="questions[${qIdx}][choices][${cIdx}][is_correct]" value="1" ${checked?'checked':''} title="إجابة صحيحة">
-      <input type="text" name="questions[${qIdx}][choices][${cIdx}][text]" value="${text.replace(/"/g,'&quot;')}" placeholder="نص الخيار">
+      <input type="text" name="questions[${qIdx}][choices][${cIdx}][text]" value="${safeText}" placeholder="نص الخيار">
     </div>`;
   }
 
@@ -114,12 +313,25 @@
         </select></label>
         <label>الدرجة<input type="number" step="0.25" min="0.25" name="questions[${qIdx}][score]" value="${data.score}"></label>
       </div>
-      <label>نص السؤال<textarea name="questions[${qIdx}][text]" rows="2">${data.text}</textarea></label>
+      <div>
+        ${buildRichToolbar('question-' + qIdx, false)}
+        <div class="rich-editor" contenteditable="true" data-placeholder="اكتب نص السؤال هنا...">${data.text || ''}</div>
+        <textarea hidden name="questions[${qIdx}][text]">${(data.text || '').replace(/"/g, '&quot;')}</textarea>
+      </div>
       <div class="choices-list"></div>
       <button type="button" class="btn secondary small add-choice">إضافة خيار</button>
     `;
 
     const choicesList = wrap.querySelector('.choices-list');
+    const editor = wrap.querySelector('.rich-editor');
+    const hiddenInput = wrap.querySelector('textarea[name="questions[' + qIdx + '][text]"]');
+    bindRichEditor(editor, hiddenInput);
+
+    const typeSelect = wrap.querySelector('.type-select');
+    if (typeSelect && typeSelect.value !== 'mcq' && typeSelect.value !== 'true_false') {
+      choicesList.style.display = 'none';
+      addChoiceBtn.style.display = 'none';
+    }
     const addChoiceBtn = wrap.querySelector('.add-choice');
     let cCount = 0;
 

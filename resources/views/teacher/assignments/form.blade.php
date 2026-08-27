@@ -43,7 +43,17 @@
 </div>
 <label class="wide">
     <span class="label-head">الوصف</span>
-    <textarea name="description" rows="5" placeholder="اكتب تعليمات الواجب، المطلوب، الوقت المحدد، والمصادر أو النقاط المهمة للطلاب...">{{ old('description', $assignment->description ?? '') }}</textarea>
+    <div class="rich-toolbar">
+        <button type="button" data-command="bold" title="غامق"><strong>B</strong></button>
+        <button type="button" data-command="italic" title="مائل"><em>I</em></button>
+        <button type="button" data-command="underline" title="تسطير"><span style="text-decoration:underline;">U</span></button>
+        <button type="button" data-command="insertUnorderedList" title="قائمة نقطية">•</button>
+        <button type="button" data-command="justifyLeft" title="يسار">⇤</button>
+        <button type="button" data-command="justifyCenter" title="وسط">≡</button>
+        <button type="button" data-command="justifyRight" title="يمين">⇥</button>
+    </div>
+    <div class="rich-editor" contenteditable="true" data-placeholder="اكتب وصف الواجب هنا...">{!! old('description', $assignment->description ?? '') !!}</div>
+    <textarea name="description" hidden>{{ old('description', $assignment->description ?? '') }}</textarea>
 </label>
 <label class="wide">
     <span class="label-head">المرفقات</span>
@@ -60,6 +70,9 @@
 (function(){
   const classroomSelect = document.getElementById('a-classroom');
   const subjectSelect = document.getElementById('a-subject');
+  const editor = document.querySelector('#assignment-form .rich-editor');
+  const hiddenField = document.querySelector('#assignment-form textarea[name="description"]');
+
   function filterSubjects(){
     const opt = classroomSelect.options[classroomSelect.selectedIndex];
     const allowed = (opt && opt.dataset.subjects) ? opt.dataset.subjects.split(',').filter(Boolean) : [];
@@ -72,6 +85,25 @@
     });
     if (!hasSelected) subjectSelect.value = '';
   }
+
+  if (editor && hiddenField) {
+    editor.innerHTML = hiddenField.value || '';
+    editor.addEventListener('input', () => {
+      hiddenField.value = editor.innerHTML;
+    });
+    editor.addEventListener('blur', () => {
+      hiddenField.value = editor.innerHTML;
+    });
+    document.querySelectorAll('#assignment-form .rich-toolbar button').forEach(button => {
+      button.addEventListener('click', () => {
+        const command = button.dataset.command;
+        editor.focus();
+        document.execCommand(command, false, null);
+        hiddenField.value = editor.innerHTML;
+      });
+    });
+  }
+
   classroomSelect.addEventListener('change', filterSubjects);
   filterSubjects();
 })();

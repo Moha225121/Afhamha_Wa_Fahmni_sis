@@ -115,9 +115,11 @@ class ExamController extends Controller
 
         $questions = collect($data['questions'] ?? [])->values();
 
-        $normalizedStatus = in_array($data['status'] ?? 'draft', ['published', 'scheduled'], true) ? 'scheduled' : ($data['status'] ?? 'draft');
+        $normalizedStatus = in_array($data['status'] ?? 'draft', ['draft', 'scheduled', 'published'], true)
+            ? ($data['status'] ?? 'draft')
+            : 'draft';
 
-        if ($normalizedStatus === 'scheduled') {
+        if (in_array($normalizedStatus, ['scheduled', 'published'], true)) {
             $this->assertPublishable($questions);
         }
 
