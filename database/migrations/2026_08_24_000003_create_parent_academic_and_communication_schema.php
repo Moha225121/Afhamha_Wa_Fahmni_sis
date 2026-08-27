@@ -8,14 +8,9 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('assignment_attachments', function (Blueprint $table): void {
-            $table->id();
-            $table->foreignId('assignment_id')->constrained()->cascadeOnDelete();
-            $table->string('path');
-            $table->string('original_name');
-            $table->string('mime_type', 120)->nullable();
+        Schema::table('assignment_attachments', function (Blueprint $table): void {
+            $table->string('path')->nullable();
             $table->unsignedBigInteger('size')->nullable();
-            $table->timestamps();
         });
 
         Schema::create('assignment_submission_attachments', function (Blueprint $table): void {
@@ -75,8 +70,8 @@ return new class extends Migration
         Schema::dropIfExists('conversation_participants');
         Schema::dropIfExists('conversations');
         Schema::dropIfExists('assignment_submission_attachments');
-        Schema::dropIfExists('assignment_submissions');
-        Schema::dropIfExists('assignment_attachments');
-        Schema::dropIfExists('assignments');
+        Schema::table('assignment_attachments', function (Blueprint $table): void {
+            $table->dropColumn(['path', 'size']);
+        });
     }
 };

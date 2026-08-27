@@ -50,7 +50,7 @@ class LocalDemoSeeder extends Seeder
         );
 
         $teacherUser = User::updateOrCreate(
-            ['email' => 'teacher@example.test'],
+            ['email' => 'teacher1@example.test'],
             ['name' => 'المعلمة مريم', 'password' => 'password123', 'role' => 'teacher', 'status' => 'active'],
         );
         $teacher = Teacher::updateOrCreate(['user_id' => $teacherUser->id], ['specialization' => 'رياضيات', 'status' => 'active']);

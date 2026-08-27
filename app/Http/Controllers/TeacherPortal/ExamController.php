@@ -152,8 +152,10 @@ class ExamController extends Controller
                 $questionId = DB::table('exam_questions')->insertGetId([
                     'exam_id' => $examId,
                     'type' => $question['type'],
+                    'question_text' => $question['text'],
                     'text' => $question['text'],
                     'score' => $question['score'],
+                    'position' => $index,
                     'order' => $index,
                     'created_at' => now(),
                     'updated_at' => now(),

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Announcement;
 use App\Models\Student;
 use App\Models\Subject;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -20,6 +21,7 @@ class PortalController extends Controller
         return view('student.dashboard', [
             'student' => $student,
             'summary' => $this->summaryFor($student),
+            'recentGrades' => $this->recentGradesFor($student, 3),
             'subjects' => $this->subjectsFor($student),
             'todaysSchedule' => $this->todaysScheduleFor($student),
             'announcements' => $this->announcementsFor($student, 4),
@@ -34,6 +36,7 @@ class PortalController extends Controller
             'student' => $student,
             'summary' => $this->summaryFor($student),
             'recentGrades' => $this->recentGradesFor($student, 10),
+            'automaticResults' => $this->automaticResultsFor($student, 20),
         ]);
     }
 
@@ -50,6 +53,43 @@ class PortalController extends Controller
     public function profile(Request $request): View
     {
         return view('student.profile', ['student' => $this->student($request)]);
+    }
+
+    public function attendance(Request $request): View
+    {
+        $student = $this->student($request);
+        $records = DB::table('attendance_records')->where('student_id', $student->id)->latest('date')->paginate(30);
+
+        return view('student.attendance', compact('student', 'records'));
+    }
+
+    public function schedule(Request $request): View
+    {
+        $student = $this->student($request);
+        $schedule = DB::table('schedules')->join('subjects', 'schedules.subject_id', '=', 'subjects.id')
+            ->join('teachers', 'schedules.teacher_id', '=', 'teachers.id')->join('users', 'teachers.user_id', '=', 'users.id')
+            ->where('schedules.classroom_id', $student->classroom_id)
+            ->select('schedules.*', 'subjects.name as subject', 'users.name as teacher')->orderBy('day_of_week')->orderBy('starts_at')->get();
+
+        return view('student.schedule', compact('student', 'schedule'));
+    }
+
+    public function notifications(Request $request): View
+    {
+        $student = $this->student($request);
+        $notifications = $request->user()->notifications()->latest()->paginate(30);
+        $unreadCount = $request->user()->unreadNotifications()->count();
+        $announcements = $this->announcementsFor($student, 20);
+
+        return view('student.notifications', compact('student', 'notifications', 'unreadCount', 'announcements'));
+    }
+
+    public function markNotificationRead(Request $request, string $notification): RedirectResponse
+    {
+        $record = $request->user()->notifications()->whereKey($notification)->firstOrFail();
+        $record->markAsRead();
+
+        return back()->with('success', 'تم تعليم الإشعار كمقروء.');
     }
 
     private function student(Request $request): Student
@@ -129,6 +169,19 @@ class PortalController extends Controller
             ->get();
     }
 
+    private function automaticResultsFor(Student $student, int $limit): Collection
+    {
+        return DB::table('exam_attempts')
+            ->join('exams', 'exam_attempts.exam_id', '=', 'exams.id')
+            ->join('subjects', 'exams.subject_id', '=', 'subjects.id')
+            ->where('exam_attempts.student_id', $student->id)
+            ->whereIn('exam_attempts.status', ['submitted', 'pending_review'])
+            ->select(['exam_attempts.id', 'exam_attempts.score', 'exam_attempts.maximum_score', 'exam_attempts.percentage', 'exam_attempts.status', 'exam_attempts.submitted_at', 'exams.title', 'subjects.name as subject'])
+            ->latest('exam_attempts.submitted_at')
+            ->limit($limit)
+            ->get();
+    }
+
     private function subjectsFor(Student $student): Collection
     {
         if (! $student->classroom_id) {
@@ -173,15 +226,10 @@ class PortalController extends Controller
             ->where(fn ($query) => $query->whereNull('published_at')->orWhere('published_at', '<=', now()))
             ->where(fn ($query) => $query->whereNull('expires_at')->orWhere('expires_at', '>', now()))
             ->where(function ($query) use ($student): void {
-                $query->whereIn('audience', ['all', 'students']);
-
-                if ($student->classroom_id) {
-                    $query->orWhere(function ($classroomQuery) use ($student): void {
-                        $classroomQuery
-                            ->where('audience', 'classroom')
-                            ->where('classroom_id', $student->classroom_id);
-                    });
-                }
+                $query->whereIn('audience', ['all', 'students'])
+                    ->when($student->classroom_id, fn ($audience) => $audience->orWhere(
+                        fn ($classroom) => $classroom->where('audience', 'classroom')->where('classroom_id', $student->classroom_id),
+                    ));
             })
             ->latest('published_at')
             ->limit($limit)

@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class AssignmentSubmission extends Model
 {
-    protected $fillable = ['assignment_id', 'student_id', 'status', 'notes', 'submitted_at', 'graded_at', 'score'];
+    protected $fillable = ['assignment_id', 'student_id', 'file_path', 'original_name', 'mime_type', 'file_size', 'status', 'notes', 'submitted_at', 'graded_at', 'score'];
 
     protected function casts(): array
     {

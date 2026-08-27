@@ -13,6 +13,7 @@ Route::get('/login', [AuthController::class, 'create'])->name('login');
 Route::post('/login', [AuthController::class, 'store'])->name('login.store');
 Route::post('/logout', [AuthController::class, 'destroy'])->middleware('auth')->name('logout');
 require __DIR__.'/student.php';
+require __DIR__.'/teacher.php';
 require __DIR__.'/parent.php';
 require __DIR__.'/teacher.php';
 require __DIR__.'/admin.php';

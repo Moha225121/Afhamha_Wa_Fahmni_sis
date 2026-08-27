@@ -14,7 +14,7 @@
             @forelse($upcomingExams as $exam)
                 <div class="list-row"><div><strong>{{ $exam->title }}</strong><span>{{ $exam->subject }} · {{ \Illuminate\Support\Carbon::parse($exam->starts_at)->format('Y-m-d H:i') }}</span></div><b>{{ $exam->duration_minutes }} د</b></div>
             @empty
-                <p class="muted-line">لا توجد اختبارات قادمة منشورة.</p>
+                <p class="muted-line">لا توجد اختبارات قادمة.</p>
             @endforelse
         </section>
         <section class="list-section">
@@ -24,7 +24,7 @@
                 @php($total = rtrim(rtrim(number_format((float) $exam->total_score, 2, '.', ''), '0'), '.'))
                 <div class="list-row"><div><strong>{{ $exam->title }}</strong><span>{{ $exam->subject }} · {{ \Illuminate\Support\Carbon::parse($exam->starts_at)->format('Y-m-d') }}</span></div><b>{{ $score === null ? 'النتيجة لم تنشر' : $score.' / '.$total }}</b></div>
             @empty
-                <p class="muted-line">لا توجد اختبارات سابقة منشورة.</p>
+                <p class="muted-line">لا توجد اختبارات سابقة.</p>
             @endforelse
         </section>
     @endif

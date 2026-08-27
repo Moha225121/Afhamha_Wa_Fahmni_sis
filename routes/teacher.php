@@ -32,9 +32,11 @@ Route::prefix('teacher')->name('teacher.')->middleware(['auth', 'teacher'])->gro
     Route::get('/assignments/create', [AssignmentController::class, 'create'])->name('assignments.create');
     Route::post('/assignments', [AssignmentController::class, 'store'])->name('assignments.store');
     Route::get('/assignments/{assignment}/edit', [AssignmentController::class, 'edit'])->name('assignments.edit');
+    Route::get('/assignments/{assignment}', [\App\Http\Controllers\TeacherPortal\AssignmentSubmissionController::class, 'show'])->name('assignments.show');
     Route::put('/assignments/{assignment}', [AssignmentController::class, 'update'])->name('assignments.update');
     Route::get('/assignments/{assignment}/submissions', [AssignmentController::class, 'submissions'])->name('assignments.submissions');
     Route::post('/assignments/{assignment}/submissions', [AssignmentController::class, 'submissionsStore'])->name('assignments.submissions.store');
+    Route::get('/submissions/{submission}/file', [\App\Http\Controllers\TeacherPortal\AssignmentSubmissionController::class, 'download'])->middleware('throttle:60,1')->name('submissions.file');
 
     Route::get('/grades', [GradeController::class, 'index'])->name('grades.index');
     Route::post('/grades', [GradeController::class, 'store'])->name('grades.store');

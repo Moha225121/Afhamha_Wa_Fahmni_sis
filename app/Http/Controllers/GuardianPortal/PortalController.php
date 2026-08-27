@@ -97,7 +97,7 @@ class PortalController extends Controller
                     'submissions' => fn ($query) => $query->where('student_id', $selectedStudent->id),
                 ])
                 ->where('classroom_id', $selectedStudent->classroom_id)
-                ->where('status', 'published')
+                ->whereIn('status', ['published', 'active'])
                 ->where(fn ($query) => $query->whereNull('published_at')->orWhere('published_at', '<=', now()))
                 ->orderByRaw('case when due_at is null then 1 else 0 end')
                 ->orderBy('due_at')
@@ -119,7 +119,7 @@ class PortalController extends Controller
                     $join->on('grades.exam_id', '=', 'exams.id')->where('grades.student_id', '=', $selectedStudent->id);
                 })
                 ->where('exams.classroom_id', $selectedStudent->classroom_id)
-                ->where('exams.status', 'published')
+                ->whereIn('exams.status', ['published', 'scheduled'])
                 ->select([
                     'exams.id', 'exams.title', 'exams.starts_at', 'exams.duration_minutes', 'exams.total_score',
                     'subjects.name as subject', 'grades.score', 'grades.published_at as grade_published_at',
