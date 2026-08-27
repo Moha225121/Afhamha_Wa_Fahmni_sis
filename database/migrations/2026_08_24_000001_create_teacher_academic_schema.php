@@ -34,7 +34,7 @@ return new class extends Migration
             $t->foreignId('classroom_id')->constrained()->cascadeOnDelete();
             $t->foreignId('teacher_id')->constrained()->restrictOnDelete();
             $t->text('description')->nullable();
-            $t->date('due_date')->index();
+            $t->date('due_date')->nullable()->index();
             $t->decimal('max_score', 8, 2)->default(10);
             $t->string('attachment_path')->nullable();
             $t->string('status', 20)->default('active')->index();
@@ -45,7 +45,10 @@ return new class extends Migration
             $t->id();
             $t->foreignId('assignment_id')->constrained()->cascadeOnDelete();
             $t->foreignId('student_id')->constrained()->cascadeOnDelete();
+            $t->string('status', 20)->default('submitted')->index();
+            $t->text('notes')->nullable();
             $t->timestamp('submitted_at')->nullable();
+            $t->timestamp('graded_at')->nullable();
             $t->decimal('score', 8, 2)->nullable();
             $t->text('feedback')->nullable();
             $t->foreignId('graded_by')->nullable()->constrained('users')->nullOnDelete();
