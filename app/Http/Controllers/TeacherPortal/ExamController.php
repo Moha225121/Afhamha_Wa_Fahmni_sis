@@ -205,14 +205,16 @@ class ExamController extends Controller
         $examRow = DB::table('exams')->where('id', $exam)->first();
         abort_unless($examRow && (int) $examRow->teacher_id === $teacher->id, 404);
 
-        $data = $request->validate(['status' => ['required', Rule::in(['draft', 'scheduled', 'completed'])]]);
+        $data = $request->validate(['status' => ['required', Rule::in(['draft', 'scheduled', 'published', 'completed'])]]);
 
-        if ($data['status'] === 'scheduled' && $examRow->status === 'draft') {
+        $normalizedStatus = $data['status'] === 'published' ? 'published' : $data['status'];
+
+        if (($normalizedStatus === 'scheduled' || $normalizedStatus === 'published') && in_array($examRow->status, ['draft', 'scheduled', 'published'], true)) {
             $questions = DB::table('exam_questions')->where('exam_id', $exam)->get();
             abort_if($questions->isEmpty(), 422, 'لا يمكن جدولة اختبار بدون أسئلة.');
         }
 
-        DB::table('exams')->where('id', $exam)->update(['status' => $data['status'], 'updated_at' => now()]);
+        DB::table('exams')->where('id', $exam)->update(['status' => $normalizedStatus, 'updated_at' => now()]);
         AuditService::record('status_changed', 'exams');
 
         return back()->with('success', 'تم تحديث حالة الاختبار.');

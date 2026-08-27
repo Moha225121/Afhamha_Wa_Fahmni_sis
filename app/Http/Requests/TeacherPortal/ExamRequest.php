@@ -20,7 +20,7 @@ class ExamRequest extends FormRequest
             'subject_id' => ['required', 'integer', 'exists:subjects,id'],
             'starts_at' => ['required', 'date'],
             'duration_minutes' => ['required', 'integer', 'between:1,600'],
-            'status' => ['required', Rule::in(['draft', 'scheduled', 'completed'])],
+            'status' => ['required', Rule::in(['draft', 'scheduled', 'published', 'completed'])],
             'questions' => ['nullable', 'array'],
             'questions.*.type' => ['required', Rule::in(['mcq', 'true_false', 'short_answer'])],
             'questions.*.text' => ['required', 'string'],
