@@ -1,12 +1,13 @@
 @extends('teacher.layout') @section('title','إدارة الحضور') @section('subtitle','سجل حضور طلاب صفوفك') @section('content')
-<form class="filters">
+<form class="filters" method="get" action="{{ route('teacher.attendance.index') }}">
 <input type="date" name="date" value="{{ $date }}">
 <select name="classroom_id"><option value="">اختر الصف</option>@foreach($classrooms as $c)<option value="{{ $c->id }}" @selected($classroomId==$c->id)>{{ $c->name }} {{ $c->section }}</option>@endforeach</select>
-<button class="btn secondary">عرض</button>
+<button class="btn secondary" type="submit">عرض</button>
 </form>
 <form method="post" action="{{ route('teacher.attendance.store') }}">
 @csrf
 <input type="hidden" name="date" value="{{ $date }}">
+<input type="hidden" name="classroom_id" value="{{ $classroomId }}">
 <div class="table-wrap">
 <table>
 <thead><tr><th>الطالب</th><th>الرقم</th><th>الحالة</th></tr></thead>

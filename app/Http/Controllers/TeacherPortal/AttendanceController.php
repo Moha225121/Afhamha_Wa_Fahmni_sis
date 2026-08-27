@@ -47,6 +47,7 @@ class AttendanceController extends Controller
 
         $data = $request->validate([
             'date' => ['required', 'date'],
+            'classroom_id' => ['nullable', 'integer'],
             'records' => ['required', 'array'],
             'records.*' => ['required', Rule::in(['present', 'absent', 'late', 'excused'])],
         ]);
@@ -64,6 +65,9 @@ class AttendanceController extends Controller
             AuditService::record('recorded', 'attendance');
         });
 
-        return back()->with('success', 'تم حفظ الحضور.');
+        return redirect()->route('teacher.attendance.index', [
+            'date' => $data['date'],
+            'classroom_id' => $data['classroom_id'] ?? null,
+        ])->with('success', 'تم حفظ الحضور.');
     }
 }
