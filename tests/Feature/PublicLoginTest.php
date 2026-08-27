@@ -36,6 +36,28 @@ class PublicLoginTest extends TestCase
         $this->assertAuthenticatedAs($studentUser);
     }
 
+    public function test_root_and_login_show_login_even_when_a_session_exists(): void
+    {
+        $parentUser = User::factory()->create(['role' => 'parent', 'status' => 'active']);
+        Guardian::create(['user_id' => $parentUser->id, 'status' => 'active']);
+        $studentUser = $this->createStudentAccount();
+        $adminUser = User::factory()->create(['role' => 'admin', 'status' => 'active']);
+
+        $this->get('/')->assertRedirect('/login');
+        $this->actingAs($parentUser)->get('/')->assertRedirect('/login');
+        $this->actingAs($parentUser)->get('/login')->assertOk();
+        $this->actingAs($studentUser)->get('/')->assertRedirect('/login');
+        $this->actingAs($studentUser)->get('/login')->assertOk();
+        $this->actingAs($adminUser)->get('/')->assertRedirect('/login');
+        $this->actingAs($adminUser)->get('/login')->assertOk();
+
+        $this->actingAs($parentUser)->post('/login', [
+            'email' => $studentUser->email,
+            'password' => 'password123',
+        ])->assertRedirect('/student/dashboard');
+        $this->assertAuthenticatedAs($studentUser);
+    }
+
     public function test_student_portal_is_only_for_student_accounts(): void
     {
         $studentUser = $this->createStudentAccount();

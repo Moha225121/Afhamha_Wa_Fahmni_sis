@@ -141,13 +141,25 @@ class ParentPortalTest extends TestCase
     {
         $this->actingAs($this->parentUser)
             ->put('/parent/profile', ['name' => 'Updated Parent', 'phone' => '0911111111'])
-            ->assertRedirect();
+            ->assertRedirect('/parent/dashboard');
 
         $this->assertDatabaseHas('users', [
             'id' => $this->parentUser->id,
             'name' => 'Updated Parent',
             'phone' => '0911111111',
         ]);
+    }
+
+    public function test_parent_more_menu_is_available_without_bottom_more_tab(): void
+    {
+        $this->actingAs($this->parentUser)
+            ->get('/parent/dashboard')
+            ->assertOk()
+            ->assertSee('data-more-toggle', false)
+            ->assertSee('more-menu-panel', false)
+            ->assertSeeText('المزيد')
+            ->assertDontSee('class="logout-form"', false)
+            ->assertDontSee('href="http://localhost/parent/more"', false);
     }
 
     public function test_parent_pwa_assets_are_available_without_sensitive_page_caching(): void
