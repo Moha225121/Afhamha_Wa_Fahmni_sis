@@ -129,6 +129,14 @@ button {
     padding: 8px 11px;
 }
 
+.teacher-portal .action-link {
+    border-radius: 8px;
+    background: var(--primary);
+    color: #fff;
+    padding: 9px 12px;
+    font-weight: 700;
+}
+
 .app-content {
     padding: 16px 14px 104px;
 }

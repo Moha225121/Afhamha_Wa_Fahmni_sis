@@ -113,16 +113,29 @@ class PortalController extends Controller
         $exams = collect();
 
         if ($selectedStudent?->classroom_id) {
+            $latestAttemptIds = DB::table('exam_attempts')
+                ->selectRaw('exam_id, max(id) as attempt_id')
+                ->where('student_id', $selectedStudent->id)
+                ->whereIn('status', ['submitted', 'pending_review'])
+                ->groupBy('exam_id');
             $exams = DB::table('exams')
                 ->join('subjects', 'exams.subject_id', '=', 'subjects.id')
                 ->leftJoin('grades', function ($join) use ($selectedStudent): void {
                     $join->on('grades.exam_id', '=', 'exams.id')->where('grades.student_id', '=', $selectedStudent->id);
                 })
+                ->leftJoinSub($latestAttemptIds, 'latest_attempts', function ($join): void {
+                    $join->on('latest_attempts.exam_id', '=', 'exams.id');
+                })
+                ->leftJoin('exam_attempts as automatic_attempts', 'automatic_attempts.id', '=', 'latest_attempts.attempt_id')
                 ->where('exams.classroom_id', $selectedStudent->classroom_id)
                 ->where('exams.status', 'published')
                 ->select([
                     'exams.id', 'exams.title', 'exams.starts_at', 'exams.duration_minutes', 'exams.total_score',
                     'subjects.name as subject', 'grades.score', 'grades.published_at as grade_published_at',
+                    'automatic_attempts.status as automatic_status',
+                    'automatic_attempts.score as automatic_score',
+                    'automatic_attempts.maximum_score as automatic_maximum_score',
+                    'automatic_attempts.percentage as automatic_percentage',
                 ])
                 ->orderBy('exams.starts_at')
                 ->get();
@@ -203,14 +216,10 @@ class PortalController extends Controller
             ->selectRaw("sum(case when status = 'excused' then 1 else 0 end) as excused")
             ->first();
 
-        $grades = DB::table('grades')
-            ->join('exams', 'grades.exam_id', '=', 'exams.id')
-            ->where('grades.student_id', $student->id)
-            ->where('exams.status', 'published')
-            ->whereNotNull('grades.published_at')
-            ->selectRaw('count(*) as total')
-            ->selectRaw('avg(case when exams.total_score > 0 then grades.score * 100.0 / exams.total_score end) as average_percent')
-            ->first();
+        $results = $this->publishedResultsFor($student);
+        $percentages = $results
+            ->filter(fn ($result) => (float) $result->total_score > 0)
+            ->map(fn ($result) => (float) $result->score * 100 / (float) $result->total_score);
 
         $total = (int) ($attendance->total ?? 0);
         $present = (int) ($attendance->present ?? 0);
@@ -222,29 +231,57 @@ class PortalController extends Controller
             'late' => (int) ($attendance->late ?? 0),
             'excused' => (int) ($attendance->excused ?? 0),
             'attendance_percent' => $total ? round(($present / $total) * 100, 1) : null,
-            'published_grades' => (int) ($grades->total ?? 0),
-            'average_percent' => $grades?->average_percent === null ? null : round((float) $grades->average_percent, 1),
+            'published_grades' => $results->count(),
+            'average_percent' => $percentages->isEmpty() ? null : round((float) $percentages->avg(), 1),
         ];
     }
 
     private function recentGradesFor(?Student $student, int $limit): Collection
     {
+        return $this->publishedResultsFor($student)->take($limit)->values();
+    }
+
+    private function publishedResultsFor(?Student $student): Collection
+    {
         if (! $student) {
             return collect();
         }
 
-        return DB::table('grades')
+        $manual = DB::table('grades')
             ->join('exams', 'grades.exam_id', '=', 'exams.id')
             ->join('subjects', 'exams.subject_id', '=', 'subjects.id')
             ->where('grades.student_id', $student->id)
             ->where('exams.status', 'published')
             ->whereNotNull('grades.published_at')
             ->select([
-                'grades.score', 'grades.published_at', 'exams.title', 'exams.total_score', 'subjects.name as subject',
+                'exams.id as exam_id', 'grades.score', 'grades.published_at', 'exams.title',
+                'exams.total_score', 'subjects.name as subject',
             ])
-            ->latest('grades.published_at')
-            ->limit($limit)
             ->get();
+
+        $automatic = DB::table('exam_attempts')
+            ->join('exams', 'exam_attempts.exam_id', '=', 'exams.id')
+            ->join('subjects', 'exams.subject_id', '=', 'subjects.id')
+            ->where('exam_attempts.student_id', $student->id)
+            ->where('exam_attempts.status', 'submitted')
+            ->whereNotNull('exam_attempts.percentage')
+            ->where('exams.status', 'published')
+            ->when(
+                $manual->isNotEmpty(),
+                fn ($query) => $query->whereNotIn('exam_attempts.exam_id', $manual->pluck('exam_id')),
+            )
+            ->select([
+                'exams.id as exam_id', 'exam_attempts.score', 'exam_attempts.submitted_at as published_at',
+                'exams.title', 'exam_attempts.maximum_score as total_score', 'subjects.name as subject',
+            ])
+            ->orderByDesc('exam_attempts.id')
+            ->get()
+            ->unique('exam_id');
+
+        return $manual
+            ->concat($automatic)
+            ->sortByDesc(fn ($result) => $result->published_at ? Carbon::parse($result->published_at)->getTimestamp() : 0)
+            ->values();
     }
 
     /** @param Collection<int, Student> $children */

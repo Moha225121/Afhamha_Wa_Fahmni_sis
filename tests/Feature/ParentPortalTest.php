@@ -220,6 +220,70 @@ class ParentPortalTest extends TestCase
             ->assertNotFound();
     }
 
+    public function test_parent_sees_automatic_result_only_for_linked_child(): void
+    {
+        $subject = Subject::create(['name' => 'Automatic Results', 'code' => 'AUTO-1', 'stage' => 'Primary', 'status' => 'active']);
+        $teacher = $this->teacherForClassroom($this->classroom, $subject);
+        $linkedExam = DB::table('exams')->insertGetId([
+            'title' => 'Linked Automatic Exam',
+            'subject_id' => $subject->id,
+            'classroom_id' => $this->classroom->id,
+            'teacher_id' => $teacher->id,
+            'starts_at' => now()->subHour(),
+            'duration_minutes' => 30,
+            'total_score' => 10,
+            'status' => 'published',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        $foreignExam = DB::table('exams')->insertGetId([
+            'title' => 'Foreign Automatic Exam',
+            'subject_id' => $subject->id,
+            'classroom_id' => $this->unlinkedStudent->classroom_id,
+            'teacher_id' => $teacher->id,
+            'starts_at' => now()->subHour(),
+            'duration_minutes' => 30,
+            'total_score' => 10,
+            'status' => 'published',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        foreach ([
+            [$linkedExam, $this->linkedStudent->id, 9, 90],
+            [$foreignExam, $this->unlinkedStudent->id, 2, 20],
+        ] as [$examId, $studentId, $score, $percentage]) {
+            DB::table('exam_attempts')->insert([
+                'exam_id' => $examId,
+                'student_id' => $studentId,
+                'attempt_number' => 1,
+                'started_at' => now()->subHour(),
+                'expires_at' => now()->subMinutes(30),
+                'submitted_at' => now()->subMinutes(30),
+                'graded_at' => now()->subMinutes(30),
+                'status' => 'submitted',
+                'score' => $score,
+                'maximum_score' => 10,
+                'percentage' => $percentage,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        $this->actingAs($this->parentUser)
+            ->get('/parent/results?student='.$this->linkedStudent->id)
+            ->assertOk()
+            ->assertSeeText('Linked Automatic Exam')
+            ->assertSeeText('9 / 10')
+            ->assertDontSeeText('Foreign Automatic Exam');
+        $this->get('/parent/exams?student='.$this->linkedStudent->id)
+            ->assertOk()
+            ->assertSeeText('Linked Automatic Exam')
+            ->assertSeeText('9 / 10')
+            ->assertSeeText('Foreign Automatic Exam')
+            ->assertDontSeeText('2 / 10');
+        $this->get('/parent/results?student='.$this->unlinkedStudent->id)->assertNotFound();
+    }
+
     public function test_parent_can_message_only_admin_or_teacher_assigned_to_the_child_classroom(): void
     {
         $subject = Subject::create(['name' => 'Science', 'code' => 'SCI-1', 'stage' => 'Primary', 'status' => 'active']);

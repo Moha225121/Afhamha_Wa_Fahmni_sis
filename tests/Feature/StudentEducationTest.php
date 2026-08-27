@@ -157,6 +157,8 @@ class StudentEducationTest extends TestCase
 
         $this->actingAs($studentA['user'])->get(route('student.dashboard'))
             ->assertOk()
+            ->assertSeeText('الخدمات الأكاديمية')
+            ->assertSeeText('آخر النتائج')
             ->assertSeeText($subjectA->name)
             ->assertDontSeeText($subjectB->name)
             ->assertSeeText('قاعة 1')
