@@ -118,6 +118,45 @@ class PublicLoginTest extends TestCase
         ]);
     }
 
+    public function test_teacher_can_open_assignment_creation_form(): void
+    {
+        $teacherUser = User::factory()->create(['role' => 'teacher', 'status' => 'active', 'password' => 'password123']);
+        $teacher = Teacher::create(['user_id' => $teacherUser->id, 'specialization' => 'رياضيات', 'status' => 'active']);
+
+        $year = AcademicYear::create([
+            'name' => '2026/2027',
+            'starts_at' => '2026-09-01',
+            'ends_at' => '2027-06-30',
+            'is_current' => true,
+        ]);
+
+        $classroom = Classroom::create([
+            'name' => 'Grade 1',
+            'stage' => 'Primary',
+            'section' => 'A',
+            'academic_year_id' => $year->id,
+        ]);
+
+        $subject = Subject::create([
+            'code' => 'MATH-ASSIGN',
+            'name' => 'Mathematics',
+            'stage' => 'Primary',
+            'description' => 'Assignment subject',
+            'status' => 'active',
+        ]);
+
+        DB::table('teacher_assignments')->insert([
+            'teacher_id' => $teacher->id,
+            'classroom_id' => $classroom->id,
+            'subject_id' => $subject->id,
+        ]);
+
+        $this->actingAs($teacherUser)
+            ->get('/teacher/assignments/create')
+            ->assertOk()
+            ->assertSeeText('إنشاء واجب');
+    }
+
     private function createStudentAccount(): User
     {
         $year = AcademicYear::create([
