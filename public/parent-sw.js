@@ -1,8 +1,8 @@
-const CACHE_NAME = 'afhamha-parent-static-v3';
+const CACHE_NAME = 'afhamha-parent-static-v7';
 const OFFLINE_URL = '/parent-offline.html';
 const STATIC_ASSETS = [
     OFFLINE_URL,
-    '/css/parent.css',
+    '/favicon.ico',
     '/icons/parent-icon.svg',
     '/icons/parent-icon-192.png',
     '/icons/parent-icon-512.png',

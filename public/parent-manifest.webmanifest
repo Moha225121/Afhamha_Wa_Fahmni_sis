@@ -2,6 +2,7 @@
     "name": "افهمها وفهمني - ولي الأمر",
     "short_name": "ولي الأمر",
     "description": "بوابة ولي الأمر داخل منصة افهمها وفهمني",
+    "id": "/parent/",
     "start_url": "/parent/dashboard",
     "scope": "/parent/",
     "display": "standalone",
@@ -9,7 +10,8 @@
     "dir": "rtl",
     "lang": "ar",
     "background_color": "#f7f8f5",
-    "theme_color": "#0f766e",
+    "theme_color": "#0e7c86",
+    "categories": ["education", "productivity"],
     "icons": [
         {
             "src": "/icons/parent-icon-192.png",
@@ -28,6 +30,26 @@
             "sizes": "512x512",
             "type": "image/png",
             "purpose": "maskable"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "الرئيسية",
+            "short_name": "الرئيسية",
+            "url": "/parent/dashboard",
+            "icons": [{ "src": "/icons/parent-icon-192.png", "sizes": "192x192" }]
+        },
+        {
+            "name": "الرسائل",
+            "short_name": "الرسائل",
+            "url": "/parent/messages",
+            "icons": [{ "src": "/icons/parent-icon-192.png", "sizes": "192x192" }]
+        },
+        {
+            "name": "الإشعارات",
+            "short_name": "الإشعارات",
+            "url": "/parent/notifications",
+            "icons": [{ "src": "/icons/parent-icon-192.png", "sizes": "192x192" }]
         }
     ]
 }
