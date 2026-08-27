@@ -8,19 +8,6 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('assignments', function (Blueprint $table): void {
-            $table->id();
-            $table->foreignId('classroom_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('subject_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('teacher_id')->constrained()->restrictOnDelete();
-            $table->string('title');
-            $table->text('instructions')->nullable();
-            $table->dateTime('due_at')->nullable()->index();
-            $table->string('status', 20)->default('draft')->index();
-            $table->timestamp('published_at')->nullable()->index();
-            $table->timestamps();
-        });
-
         Schema::create('assignment_attachments', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('assignment_id')->constrained()->cascadeOnDelete();
@@ -29,19 +16,6 @@ return new class extends Migration
             $table->string('mime_type', 120)->nullable();
             $table->unsignedBigInteger('size')->nullable();
             $table->timestamps();
-        });
-
-        Schema::create('assignment_submissions', function (Blueprint $table): void {
-            $table->id();
-            $table->foreignId('assignment_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('student_id')->constrained()->cascadeOnDelete();
-            $table->string('status', 20)->default('submitted')->index();
-            $table->text('notes')->nullable();
-            $table->timestamp('submitted_at')->nullable()->index();
-            $table->timestamp('graded_at')->nullable();
-            $table->decimal('score', 8, 2)->nullable();
-            $table->timestamps();
-            $table->unique(['assignment_id', 'student_id']);
         });
 
         Schema::create('assignment_submission_attachments', function (Blueprint $table): void {

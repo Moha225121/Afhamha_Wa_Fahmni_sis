@@ -44,6 +44,21 @@ class PublicLoginTest extends TestCase
         $this->actingAs($studentUser)->get('/student/dashboard')->assertOk()->assertSeeText($studentUser->name);
     }
 
+    public function test_teacher_login_redirects_to_teacher_portal(): void
+    {
+        $teacherUser = User::factory()->create([
+            'name' => 'Teacher Account',
+            'role' => 'teacher',
+            'status' => 'active',
+            'password' => 'password123',
+        ]);
+
+        $this->post('/login', ['email' => $teacherUser->email, 'password' => 'password123'])
+            ->assertRedirect('/teacher/dashboard');
+
+        $this->assertAuthenticatedAs($teacherUser);
+    }
+
     private function createStudentAccount(): User
     {
         $year = AcademicYear::create([
