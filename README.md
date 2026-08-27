@@ -46,7 +46,11 @@ Email: parent@example.test
 Password: password123
 
 Teacher
-Email: teacher@example.test
+Email: teacher1@example.test
+Password: password123
+
+Second Teacher
+Email: teacher2@example.test
 Password: password123
 
 Student
