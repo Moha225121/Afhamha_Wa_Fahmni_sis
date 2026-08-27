@@ -8,20 +8,53 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('assignment_attachments', function (Blueprint $table): void {
-            $table->string('path')->nullable();
-            $table->unsignedBigInteger('size')->nullable();
-        });
+        if (! Schema::hasTable('assignments')) {
+            Schema::create('assignments', function (Blueprint $table): void {
+                $table->id();
+                $table->foreignId('classroom_id')->constrained()->cascadeOnDelete();
+                $table->foreignId('subject_id')->constrained()->cascadeOnDelete();
+                $table->foreignId('teacher_id')->constrained()->restrictOnDelete();
+                $table->string('title');
+                $table->text('instructions')->nullable();
+                $table->dateTime('due_at')->nullable()->index();
+                $table->string('status', 20)->default('draft')->index();
+                $table->timestamp('published_at')->nullable()->index();
+                $table->timestamps();
+            });
+        }
 
-        Schema::create('assignment_submission_attachments', function (Blueprint $table): void {
-            $table->id();
-            $table->foreignId('assignment_submission_id')->constrained()->cascadeOnDelete();
-            $table->string('path');
-            $table->string('original_name');
-            $table->string('mime_type', 120)->nullable();
-            $table->unsignedBigInteger('size')->nullable();
-            $table->timestamps();
-        });
+        if (! Schema::hasTable('assignment_attachments')) {
+            Schema::create('assignment_attachments', function (Blueprint $table): void {
+                    $table->id();
+                    $table->foreignId('assignment_id')->constrained()->cascadeOnDelete();
+                    $table->string('path');
+                    $table->string('original_name');
+                    $table->string('mime_type', 120)->nullable();
+                    $table->unsignedBigInteger('size')->nullable();
+                    $table->timestamps();
+            });
+        } else {
+            Schema::table('assignment_attachments', function (Blueprint $table): void {
+                if (! Schema::hasColumn('assignment_attachments', 'path')) {
+                    $table->string('path')->nullable();
+                }
+                if (! Schema::hasColumn('assignment_attachments', 'size')) {
+                    $table->unsignedBigInteger('size')->nullable();
+                }
+            });
+        }
+
+        if (! Schema::hasTable('assignment_submission_attachments')) {
+            Schema::create('assignment_submission_attachments', function (Blueprint $table): void {
+                $table->id();
+                $table->foreignId('assignment_submission_id')->constrained()->cascadeOnDelete();
+                $table->string('path');
+                $table->string('original_name');
+                $table->string('mime_type', 120)->nullable();
+                $table->unsignedBigInteger('size')->nullable();
+                $table->timestamps();
+            });
+        }
 
         Schema::create('conversations', function (Blueprint $table): void {
             $table->id();
@@ -70,8 +103,15 @@ return new class extends Migration
         Schema::dropIfExists('conversation_participants');
         Schema::dropIfExists('conversations');
         Schema::dropIfExists('assignment_submission_attachments');
-        Schema::table('assignment_attachments', function (Blueprint $table): void {
-            $table->dropColumn(['path', 'size']);
-        });
+            if (Schema::hasTable('assignment_attachments')) {
+                Schema::table('assignment_attachments', function (Blueprint $table): void {
+                    if (Schema::hasColumn('assignment_attachments', 'path')) {
+                        $table->dropColumn('path');
+                    }
+                    if (Schema::hasColumn('assignment_attachments', 'size')) {
+                        $table->dropColumn('size');
+                    }
+                });
+            }
     }
 };
