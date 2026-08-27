@@ -60,11 +60,32 @@ class OperationsController extends Controller
     public function attendance(Request $r): View
     {
         $date = $r->date ?: now()->toDateString();
-        $classroomId = $r->classroom_id;
-        $students = Student::with('user')->when($classroomId, fn ($q, $v) => $q->where('classroom_id', $v))->where('status', 'active')->get();
-        $records = DB::table('attendance_records')->whereDate('date', $date)->whereIn('student_id', $students->pluck('id'))->get()->keyBy('student_id');
+        $attendance = DB::table('classrooms')
+            ->leftJoin('students', function ($join): void {
+                $join->on('students.classroom_id', '=', 'classrooms.id')->where('students.status', 'active');
+            })
+            ->leftJoin('attendance_records', function ($join) use ($date): void {
+                $join->on('attendance_records.student_id', '=', 'students.id')->whereDate('attendance_records.date', $date);
+            })
+            ->join('academic_years', 'academic_years.id', '=', 'classrooms.academic_year_id')
+            ->select('classrooms.id', 'classrooms.name as classroom', 'classrooms.section', 'academic_years.name as academic_year')
+            ->selectRaw('count(distinct students.id) as students_total')
+            ->selectRaw("count(case when attendance_records.status = 'present' then 1 end) as present")
+            ->selectRaw("count(case when attendance_records.status = 'absent' then 1 end) as absent")
+            ->selectRaw("count(case when attendance_records.status = 'late' then 1 end) as late")
+            ->selectRaw("count(case when attendance_records.status = 'excused' then 1 end) as excused")
+            ->groupBy('classrooms.id', 'classrooms.name', 'classrooms.section', 'academic_years.name')
+            ->orderBy('academic_years.name')
+            ->orderBy('classrooms.name')
+            ->get()
+            ->map(function ($row) {
+                $recorded = $row->present + $row->absent + $row->late + $row->excused;
+                $row->rate = $recorded ? round($row->present / $recorded * 100, 1) : 0;
 
-        return view('admin.operations.attendance', compact('students', 'records', 'date', 'classroomId') + ['classrooms' => Classroom::all()]);
+                return $row;
+            });
+
+        return view('admin.operations.attendance', compact('attendance', 'date'));
     }
 
     public function attendanceStore(Request $r, ParentNotificationService $notifications): RedirectResponse
@@ -98,7 +119,7 @@ class OperationsController extends Controller
 
     public function exams(): View
     {
-        $rows = DB::table('exams')->join('subjects', 'exams.subject_id', '=', 'subjects.id')->join('classrooms', 'exams.classroom_id', '=', 'classrooms.id')->select('exams.*', 'subjects.name as subject', 'classrooms.name as classroom')->latest('starts_at')->paginate(20);
+        $rows = DB::table('exams')->join('subjects', 'exams.subject_id', '=', 'subjects.id')->join('classrooms', 'exams.classroom_id', '=', 'classrooms.id')->join('teachers', 'exams.teacher_id', '=', 'teachers.id')->join('users', 'teachers.user_id', '=', 'users.id')->select('exams.*', 'subjects.name as subject', 'classrooms.name as classroom', 'users.name as teacher')->latest('starts_at')->paginate(20);
         $rows->getCollection()->transform(function ($exam) {
             $exam->effective_status = $this->effectiveExamStatus($exam);
 
@@ -145,12 +166,34 @@ class OperationsController extends Controller
 
     public function grades(Request $r): View
     {
-        $exams = DB::table('exams')->latest('starts_at')->get();
-        $exam = $r->exam_id ? DB::table('exams')->find($r->exam_id) : null;
-        $students = $exam ? Student::with('user')->where('classroom_id', $exam->classroom_id)->get() : collect();
-        $grades = $exam ? DB::table('grades')->where('exam_id', $exam->id)->get()->keyBy('student_id') : collect();
+        $grades = Classroom::with('academicYear')->get()->map(function (Classroom $classroom) {
+            $studentsTotal = Student::where('classroom_id', $classroom->id)->where('status', 'active')->count();
+            $values = collect();
 
-        return view('admin.operations.grades', compact('exams', 'exam', 'students', 'grades'));
+            DB::table('grade_sheets')->where('classroom_id', $classroom->id)->pluck('scores')->each(function ($scores) use ($values): void {
+                $decoded = json_decode($scores ?? '{}', true);
+                if (is_array($decoded)) {
+                    collect($decoded)->each(function ($score) use ($values): void {
+                        if (is_numeric($score)) {
+                            $values->push((float) $score);
+                        }
+                    });
+                }
+            });
+
+            return (object) [
+                'classroom' => $classroom->name,
+                'section' => $classroom->section,
+                'academic_year' => $classroom->academicYear?->name,
+                'students_total' => $studentsTotal,
+                'graded_students' => $values->count(),
+                'average' => $values->isEmpty() ? null : round((float) $values->average(), 1),
+                'highest' => $values->max(),
+                'lowest' => $values->min(),
+            ];
+        });
+
+        return view('admin.operations.grades', compact('grades'));
     }
 
     public function gradesStore(Request $r, ParentNotificationService $notifications): RedirectResponse
