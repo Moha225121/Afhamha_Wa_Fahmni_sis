@@ -121,6 +121,9 @@ class GradeController extends Controller
         ]);
 
         $classroomStudentIds = Student::where('classroom_id', $data['classroom_id'])->pluck('id');
+        $studentNames = Student::with('user')->whereIn('id', $classroomStudentIds)->get()->mapWithKeys(fn ($student) => [
+            (string) $student->id => $student->user?->name ?? 'الطالب',
+        ]);
 
         $scoresToSave = [];
         $columnScoresToSave = [];
@@ -177,8 +180,12 @@ class GradeController extends Controller
                 abort_unless($classroomStudentIds->contains((int) $studentId), 403, 'الطالب ليس ضمن هذا الصف.');
                 $limit = $columnLimits->get((string) $columnKey, 100);
                 if ((float) $score > $limit) {
+                    $studentName = $studentNames->get((string) $studentId, 'الطالب');
+                    $columnTitle = $columnLimits->has((string) $columnKey)
+                        ? collect($normalizedColumns)->firstWhere('key', (string) $columnKey)['title']
+                        : 'العمود';
                     throw ValidationException::withMessages([
-                        "column_scores.{$columnKey}.{$studentId}" => "درجة الطالب لا يمكن أن تتجاوز {$limit}. زد الحد الأعلى للعمود أولًا.",
+                        "column_scores.{$columnKey}.{$studentId}" => "{$columnTitle} للطالب {$studentName} لا يمكن أن تتجاوز {$limit}.",
                     ]);
                 }
                 $columnScoresToSave[(string) $columnKey][(string) $studentId] = round((float) $score, 2);

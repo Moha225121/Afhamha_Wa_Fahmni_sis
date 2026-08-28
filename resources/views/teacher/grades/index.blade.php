@@ -297,6 +297,17 @@
                 column_scores: {}
             };
 
+            for (const column of state.columns) {
+                for (const student of students) {
+                    const value = column.grades[student.id];
+                    if (value !== '' && value !== null && typeof value !== 'undefined' && Number(value) > Number(column.max_score || 100)) {
+                        saveStatus.textContent = `${column.title} للطالب ${student.name} لا يمكن أن تتجاوز ${column.max_score}.`;
+                        saveStatus.classList.add('show');
+                        return;
+                    }
+                }
+            }
+
             students.forEach(s => {
                 const val = calculateAverageForStudent(s.id);
                 if (val !== null && !isNaN(val)) {
@@ -337,7 +348,12 @@
                 setTimeout(() => saveStatus.classList.remove('show'), 3000);
             }).catch(async (err) => {
                 let msg = 'فشل الحفظ.';
-                try { const json = await err.json(); if (json?.message) msg = json.message; } catch(e) {}
+                try {
+                    const json = await err.json();
+                    const validationMessage = Object.values(json?.errors || {}).flat()[0];
+                    if (validationMessage) msg = validationMessage;
+                    else if (json?.message) msg = json.message;
+                } catch(e) {}
                 saveStatus.textContent = msg;
                 saveStatus.classList.add('show');
                 setTimeout(() => saveStatus.classList.remove('show'), 3000);
