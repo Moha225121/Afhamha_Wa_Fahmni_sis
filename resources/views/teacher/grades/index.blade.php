@@ -14,6 +14,9 @@
 @endphp
 
 <div class="grade-sheet-page">
+    <div class="form-hint grade-instructions">
+        يمكنك تسمية كل عمود حسب نظام الدرجات في المدرسة، وتحديد الدرجة القصوى الخاصة به. أدخل درجات الطلاب ضمن الحد المحدد، واحذف أي عمود غير مطلوب باستخدام زر الحذف.
+    </div>
     <div class="grade-top-row">
         <div class="grade-headline">
             <span class="meta-label">الصف</span>
