@@ -9,6 +9,7 @@ use App\Services\AuditService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class GradeController extends Controller
@@ -40,6 +41,7 @@ class GradeController extends Controller
                 'key' => (string) ($column['key'] ?? 'column_'.uniqid()),
                 'title' => $title,
                 'weight' => max(1, (int) ($column['weight'] ?? 20)),
+                'max_score' => min(100, max(1, (float) ($column['max_score'] ?? 100))),
             ];
         }, $sheetColumns)));
     }
@@ -115,6 +117,7 @@ class GradeController extends Controller
             'sheet_columns' => ['nullable', 'array'],
             'sheet_columns.*.title' => ['nullable', 'string', 'max:255'],
             'sheet_columns.*.weight' => ['nullable', 'integer', 'min:1', 'max:100'],
+            'sheet_columns.*.max_score' => ['nullable', 'numeric', 'gt:0', 'max:100'],
         ]);
 
         $classroomStudentIds = Student::where('classroom_id', $data['classroom_id'])->pluck('id');
@@ -133,17 +136,20 @@ class GradeController extends Controller
                 'key' => (string) ($column['key'] ?? 'column_'.($index + 1)),
                 'title' => $title,
                 'weight' => max(1, (int) ($column['weight'] ?? 20)),
+                'max_score' => min(100, max(1, (float) ($column['max_score'] ?? 100))),
             ];
         }
 
         if (empty($normalizedColumns)) {
             $normalizedColumns = [
-                ['key' => 'monthly', 'title' => 'اختبار شهري', 'weight' => 20],
-                ['key' => 'midterm', 'title' => 'اختبار نصفي', 'weight' => 20],
-                ['key' => 'work', 'title' => 'أعمال', 'weight' => 20],
-                ['key' => 'activity', 'title' => 'نشاط', 'weight' => 20],
+                ['key' => 'monthly', 'title' => 'اختبار شهري', 'weight' => 20, 'max_score' => 100],
+                ['key' => 'midterm', 'title' => 'اختبار نصفي', 'weight' => 20, 'max_score' => 100],
+                ['key' => 'work', 'title' => 'أعمال', 'weight' => 20, 'max_score' => 100],
+                ['key' => 'activity', 'title' => 'نشاط', 'weight' => 20, 'max_score' => 100],
             ];
         }
+
+        $columnLimits = collect($normalizedColumns)->keyBy('key')->map(fn ($column) => (float) $column['max_score']);
 
         foreach ($data['scores'] ?? [] as $studentId => $score) {
             if ($score === null || $score === '') {
@@ -169,6 +175,12 @@ class GradeController extends Controller
                 }
 
                 abort_unless($classroomStudentIds->contains((int) $studentId), 403, 'الطالب ليس ضمن هذا الصف.');
+                $limit = $columnLimits->get((string) $columnKey, 100);
+                if ((float) $score > $limit) {
+                    throw ValidationException::withMessages([
+                        "column_scores.{$columnKey}.{$studentId}" => "درجة الطالب لا يمكن أن تتجاوز {$limit}. زد الحد الأعلى للعمود أولًا.",
+                    ]);
+                }
                 $columnScoresToSave[(string) $columnKey][(string) $studentId] = round((float) $score, 2);
             }
         }

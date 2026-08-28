@@ -66,10 +66,10 @@
         const serverColumnScores = @json($columnScores ?? []);
 
         const defaultColumns = [
-            { key: 'monthly', title: 'اختبار شهري', weight: 20, grades: {} },
-            { key: 'midterm', title: 'اختبار نصفي', weight: 20, grades: {} },
-            { key: 'work', title: 'أعمال', weight: 20, grades: {} },
-            { key: 'activity', title: 'نشاط', weight: 20, grades: {} }
+            { key: 'monthly', title: 'اختبار شهري', weight: 20, max_score: 100, grades: {} },
+            { key: 'midterm', title: 'اختبار نصفي', weight: 20, max_score: 100, grades: {} },
+            { key: 'work', title: 'أعمال', weight: 20, max_score: 100, grades: {} },
+            { key: 'activity', title: 'نشاط', weight: 20, max_score: 100, grades: {} }
         ];
 
         const storageKey = 'teacherGradeSheet_' + classroomId;
@@ -104,6 +104,7 @@
                     key: column.key || 'column_' + index,
                     title: column.title || 'عمود جديد',
                     weight: Number(column.weight) > 0 ? Number(column.weight) : 20,
+                    max_score: Number(column.max_score) > 0 ? Number(column.max_score) : 100,
                     grades: { ...(serverColumnScores[column.key] || {}), ...(column.grades || {}) }
                 }));
             }
@@ -113,6 +114,7 @@
                     key: column.key || 'column_' + index,
                     title: column.title || 'عمود جديد',
                     weight: Number(column.weight) > 0 ? Number(column.weight) : 20,
+                    max_score: Number(column.max_score) > 0 ? Number(column.max_score) : 100,
                     grades: serverColumnScores[column.key] || {}
                 }));
             }
@@ -121,6 +123,7 @@
                 key: column.key + '_' + index,
                 title: column.title,
                 weight: column.weight,
+                max_score: column.max_score,
                 grades: {}
             }));
         }
@@ -172,6 +175,7 @@
                         <input type="text" class="column-title-input" data-column-index="${columnIndex}" value="${escapeHtml(column.title)}" aria-label="اسم العمود">
                         <div class="column-tools">
                             <input type="number" class="column-weight-input" data-column-index="${columnIndex}" min="1" max="100" value="${Number(column.weight || 20)}" aria-label="وزن العمود">
+                            <input type="number" class="column-max-input" data-column-index="${columnIndex}" min="1" max="100" value="${Number(column.max_score || 100)}" aria-label="الحد الأعلى للدرجة">
                             <button type="button" class="delete-column-btn" data-column-index="${columnIndex}" title="حذف العمود">×</button>
                         </div>
                     </div>
@@ -202,7 +206,7 @@
                     const input = document.createElement('input');
                     input.type = 'number';
                     input.min = '0';
-                    input.max = '100';
+                    input.max = String(Number(column.max_score || 100));
                     input.step = '1';
                     input.value = column.grades[student.id] ?? '';
                     input.dataset.columnIndex = String(columnIndex);
@@ -252,6 +256,17 @@
                 });
             });
 
+            document.querySelectorAll('.column-max-input').forEach((input) => {
+                input.addEventListener('input', function () {
+                    const index = Number(this.dataset.columnIndex);
+                    const nextMax = Number(this.value) || 1;
+                    state.columns[index].max_score = Math.min(100, Math.max(1, nextMax));
+                    this.value = state.columns[index].max_score;
+                    const columnInputs = document.querySelectorAll(`.grade-input[data-column-index="${index}"]`);
+                    columnInputs.forEach((gradeInput) => { gradeInput.max = String(state.columns[index].max_score); });
+                });
+            });
+
             document.querySelectorAll('.delete-column-btn').forEach((button) => {
                 button.addEventListener('click', function () {
                     const index = Number(this.dataset.columnIndex);
@@ -281,6 +296,7 @@
                 key: 'custom_' + Date.now(),
                 title: 'عمود جديد',
                 weight: 20,
+                max_score: 100,
                 grades: {}
             });
             saveState(state.columns);
@@ -293,7 +309,7 @@
 
             const payload = {
                 classroom_id: Number(classroomId),
-                sheet_columns: state.columns.map(c => ({ key: c.key, title: c.title, weight: c.weight })),
+                sheet_columns: state.columns.map(c => ({ key: c.key, title: c.title, weight: c.weight, max_score: c.max_score })),
                 scores: {},
                 column_scores: {}
             };
@@ -333,7 +349,9 @@
                     const row = document.querySelector(`#grade-table-body tr[data-student-id="${id}"]`);
                     if (row) row.querySelector('.avg-cell').textContent = formatAverageForDisplay(saved[id]);
                 });
-                // do not show a success flash to the user
+                saveStatus.textContent = 'تم حفظ الدرجات بنجاح.';
+                saveStatus.classList.add('show');
+                setTimeout(() => saveStatus.classList.remove('show'), 3000);
             }).catch(async (err) => {
                 let msg = 'فشل الحفظ.';
                 try { const json = await err.json(); if (json?.message) msg = json.message; } catch(e) {}
