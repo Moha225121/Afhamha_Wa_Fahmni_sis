@@ -146,11 +146,11 @@
 
             state.columns.forEach((column) => {
                 const value = Number(column.grades[studentId]);
-                const weight = Number(column.weight || 0);
+                const maximum = Number(column.max_score || 100);
 
-                if (Number.isFinite(value) && weight > 0) {
-                    totalScore += value;
-                    totalWeight += weight;
+                if (Number.isFinite(value) && maximum > 0) {
+                    totalScore += (value / maximum) * 100;
+                    totalWeight += 1;
                 }
             });
 
@@ -158,7 +158,7 @@
                 return null;
             }
 
-            return Number(((totalScore / totalWeight) * 100).toFixed(1));
+            return Number((totalScore / totalWeight).toFixed(1));
         }
 
         function formatAverageForDisplay(value) {
@@ -174,7 +174,6 @@
                     <div class="column-header">
                         <input type="text" class="column-title-input" data-column-index="${columnIndex}" value="${escapeHtml(column.title)}" aria-label="اسم العمود">
                         <div class="column-tools">
-                            <input type="number" class="column-weight-input" data-column-index="${columnIndex}" min="1" max="100" value="${Number(column.weight || 20)}" aria-label="وزن العمود">
                             <input type="number" class="column-max-input" data-column-index="${columnIndex}" min="1" max="100" value="${Number(column.max_score || 100)}" aria-label="الحد الأعلى للدرجة">
                             <button type="button" class="delete-column-btn" data-column-index="${columnIndex}" title="حذف العمود">×</button>
                         </div>
@@ -240,22 +239,6 @@
                 });
             });
 
-            document.querySelectorAll('.column-weight-input').forEach((input) => {
-                input.addEventListener('input', function () {
-                    const index = Number(this.dataset.columnIndex);
-                    const nextWeight = Number(this.value) || 1;
-                    state.columns[index].weight = Math.min(100, Math.max(1, nextWeight));
-                    this.value = state.columns[index].weight;
-                    Array.from(document.querySelectorAll('#grade-table-body tr')).forEach((row) => {
-                        const studentId = Number(row.dataset.studentId);
-                        const avgCell = row.querySelector('.avg-cell');
-                        if (avgCell) {
-                            avgCell.textContent = formatAverageForDisplay(calculateAverageForStudent(studentId));
-                        }
-                    });
-                });
-            });
-
             document.querySelectorAll('.column-max-input').forEach((input) => {
                 input.addEventListener('input', function () {
                     const index = Number(this.dataset.columnIndex);
@@ -309,7 +292,7 @@
 
             const payload = {
                 classroom_id: Number(classroomId),
-                sheet_columns: state.columns.map(c => ({ key: c.key, title: c.title, weight: c.weight, max_score: c.max_score })),
+                sheet_columns: state.columns.map(c => ({ key: c.key, title: c.title, max_score: c.max_score })),
                 scores: {},
                 column_scores: {}
             };
