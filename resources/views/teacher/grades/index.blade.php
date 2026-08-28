@@ -63,6 +63,7 @@
         const serverColumns = @json($gradeSheetColumns ?? []);
         // Scores saved on server (overall percent), keyed by student id
         const serverScores = @json($grades->mapWithKeys(function ($g) { return [(string)$g->student_id => $g->score]; }) ?? []);
+        const serverColumnScores = @json($columnScores ?? []);
 
         const defaultColumns = [
             { key: 'monthly', title: 'اختبار شهري', weight: 20, grades: {} },
@@ -103,7 +104,7 @@
                     key: column.key || 'column_' + index,
                     title: column.title || 'عمود جديد',
                     weight: Number(column.weight) > 0 ? Number(column.weight) : 20,
-                    grades: column.grades || {}
+                    grades: { ...(serverColumnScores[column.key] || {}), ...(column.grades || {}) }
                 }));
             }
 
@@ -112,7 +113,7 @@
                     key: column.key || 'column_' + index,
                     title: column.title || 'عمود جديد',
                     weight: Number(column.weight) > 0 ? Number(column.weight) : 20,
-                    grades: {}
+                    grades: serverColumnScores[column.key] || {}
                 }));
             }
 
@@ -293,7 +294,8 @@
             const payload = {
                 classroom_id: Number(classroomId),
                 sheet_columns: state.columns.map(c => ({ key: c.key, title: c.title, weight: c.weight })),
-                scores: {}
+                scores: {},
+                column_scores: {}
             };
 
             students.forEach(s => {
@@ -301,6 +303,15 @@
                 if (val !== null && !isNaN(val)) {
                     payload.scores[s.id] = val;
                 }
+            });
+            state.columns.forEach(column => {
+                payload.column_scores[column.key] = {};
+                students.forEach(student => {
+                    const value = column.grades[student.id];
+                    if (value !== '' && value !== null && typeof value !== 'undefined' && Number.isFinite(Number(value))) {
+                        payload.column_scores[column.key][student.id] = Number(value);
+                    }
+                });
             });
 
             const token = '{{ csrf_token() }}';

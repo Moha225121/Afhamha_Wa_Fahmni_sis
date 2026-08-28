@@ -72,6 +72,7 @@ class GradeController extends Controller
 
         $students = collect();
         $grades = collect();
+        $columnScores = [];
         $gradeSheetColumns = [];
 
         if ($classroom) {
@@ -88,11 +89,17 @@ class GradeController extends Controller
                     })->keyBy('student_id');
                 }
             }
+            if ($record && !empty($record->column_scores)) {
+                $decodedColumnScores = json_decode($record->column_scores, true);
+                if (is_array($decodedColumnScores)) {
+                    $columnScores = $decodedColumnScores;
+                }
+            }
 
             $gradeSheetColumns = $this->savedSheetForClassroom($teacher, $classroom->id);
         }
 
-        return view('teacher.grades.index', compact('classrooms', 'classroom', 'students', 'grades', 'gradeSheetColumns'));
+        return view('teacher.grades.index', compact('classrooms', 'classroom', 'students', 'grades', 'columnScores', 'gradeSheetColumns'));
     }
 
     public function store(Request $request)
@@ -102,6 +109,9 @@ class GradeController extends Controller
             'classroom_id' => ['required', 'integer'],
             'scores' => ['nullable', 'array'],
             'scores.*' => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'column_scores' => ['nullable', 'array'],
+            'column_scores.*' => ['nullable', 'array'],
+            'column_scores.*.*' => ['nullable', 'numeric', 'min:0', 'max:100'],
             'sheet_columns' => ['nullable', 'array'],
             'sheet_columns.*.title' => ['nullable', 'string', 'max:255'],
             'sheet_columns.*.weight' => ['nullable', 'integer', 'min:1', 'max:100'],
@@ -110,6 +120,7 @@ class GradeController extends Controller
         $classroomStudentIds = Student::where('classroom_id', $data['classroom_id'])->pluck('id');
 
         $scoresToSave = [];
+        $columnScoresToSave = [];
         $normalizedColumns = [];
 
         foreach ($data['sheet_columns'] ?? [] as $index => $column) {
@@ -151,10 +162,21 @@ class GradeController extends Controller
             $scoresToSave[(int)$studentId] = round($val, 2);
         }
 
-        DB::transaction(function () use ($teacher, $data, $normalizedColumns, $scoresToSave) {
+        foreach ($data['column_scores'] ?? [] as $columnKey => $studentScores) {
+            foreach ($studentScores as $studentId => $score) {
+                if ($score === null || $score === '') {
+                    continue;
+                }
+
+                abort_unless($classroomStudentIds->contains((int) $studentId), 403, 'الطالب ليس ضمن هذا الصف.');
+                $columnScoresToSave[(string) $columnKey][(string) $studentId] = round((float) $score, 2);
+            }
+        }
+
+        DB::transaction(function () use ($teacher, $data, $normalizedColumns, $scoresToSave, $columnScoresToSave) {
             DB::table('grade_sheets')->updateOrInsert(
                 ['teacher_id' => $teacher->id, 'classroom_id' => $data['classroom_id']],
-                ['sheet_data' => json_encode($normalizedColumns), 'scores' => json_encode($scoresToSave), 'updated_at' => now()]
+                ['sheet_data' => json_encode($normalizedColumns), 'scores' => json_encode($scoresToSave), 'column_scores' => json_encode($columnScoresToSave), 'updated_at' => now()]
             );
             AuditService::record('updated', 'grades');
         });
