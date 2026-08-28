@@ -6,7 +6,7 @@
     --nav-soft: #1b2638;
     --orange: #f28c28;
     --orange-deep: #d96f11;
-    --teal: #0f766e;
+    --teal: #0e7c86;
     --bg: #f6f7fb;
     --surface: #ffffff;
     --surface-soft: #f8fafc;
@@ -671,21 +671,44 @@ tbody tr:hover {
 }
 
 .login-page {
+    position: relative;
     min-height: 100vh;
     display: grid;
     place-items: center;
+    overflow: hidden;
+    isolation: isolate;
     background:
-        radial-gradient(circle at 20% 20%, rgba(242, 140, 40, .18), transparent 30%),
-        linear-gradient(135deg, #111827, #203047 58%, #0f766e);
+        linear-gradient(135deg, #eef6f3 0%, #dcefeb 42%, #fff7e7 100%);
+}
+
+.login-page::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+        linear-gradient(120deg, transparent 0 18%, rgba(15, 118, 110, .1) 18% 32%, transparent 32% 100%),
+        linear-gradient(60deg, transparent 0 56%, rgba(242, 140, 40, .16) 56% 68%, transparent 68% 100%);
 }
 
 .login-card {
+    position: relative;
     width: min(430px, 92vw);
-    border: 1px solid rgba(255, 255, 255, .64);
+    border: 1px solid rgba(255, 255, 255, .86);
     border-radius: 8px;
-    background: rgba(255, 255, 255, .94);
-    box-shadow: 0 24px 60px rgba(8, 13, 23, .22);
+    background: rgba(255, 255, 255, .9);
+    box-shadow: 0 24px 60px rgba(15, 45, 55, .18);
+    backdrop-filter: blur(18px) saturate(1.12);
     padding: 35px;
+    overflow: hidden;
+}
+
+.login-card::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto;
+    height: 5px;
+    background: linear-gradient(90deg, #0e7c86, #14b8a6, #f28c28);
 }
 
 .login-card h1 {
@@ -702,6 +725,24 @@ tbody tr:hover {
 
 .login-card .btn {
     width: 100%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .login-card {
+        animation: loginRise .42s cubic-bezier(.2, .8, .2, 1) both;
+    }
+}
+
+@keyframes loginRise {
+    from {
+        opacity: 0;
+        transform: translateY(14px) scale(.985);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
 
 .check {

@@ -24,6 +24,17 @@ return Application::configure(basePath: dirname(__DIR__))
             'teacher' => EnsureUserIsTeacher::class,
             'permission' => EnsureUserHasPermission::class,
         ]);
+
+        $middleware->redirectUsersTo(function (Request $request): string {
+            $user = $request->user();
+
+            return route(match (true) {
+                $user?->isParent() => 'parent.dashboard',
+                $user?->isStudent() => 'student.dashboard',
+                $user?->isTeacher() => 'teacher.assignments.index',
+                default => 'admin.dashboard',
+            });
+        });
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

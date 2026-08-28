@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Afhamha Wa Fahmni SIS</title>
+    <style>
+        :root {
+            color-scheme: light;
+            font-family: Arial, Helvetica, sans-serif;
+            color: #14213d;
+            background: #f7f9fb;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            display: grid;
+            place-items: center;
+        }
+
+        main {
+            width: min(560px, calc(100% - 32px));
+            padding: 28px;
+            border: 1px solid #dde6ee;
+            border-radius: 8px;
+            background: #ffffff;
+            box-shadow: 0 18px 45px rgba(20, 33, 61, 0.08);
+        }
+
+        h1 {
+            margin: 0 0 12px;
+            font-size: 24px;
+        }
+
+        p {
+            margin: 0 0 14px;
+            line-height: 1.6;
+            color: #526173;
+        }
+
+        a {
+            color: #0f766e;
+            font-weight: 700;
+        }
+
+        code {
+            display: inline-block;
+            padding: 3px 6px;
+            border-radius: 4px;
+            background: #eef5f4;
+            color: #0f4f49;
+        }
+
+        .status {
+            margin-top: 18px;
+            padding-top: 18px;
+            border-top: 1px solid #edf1f5;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <h1>Afhamha Wa Fahmni SIS</h1>
+        <p>You are on Live Server port <code>5501</code>. The real Laravel app runs on port <code>5500</code>.</p>
+        <p>Double-click <code>start-local.cmd</code>, then this page will open <a href="http://127.0.0.1:5500/login">http://127.0.0.1:5500/login</a>.</p>
+        <p class="status" id="status">Checking the Laravel server...</p>
+    </main>
+
+    <script>
+        const target = 'http://127.0.0.1:5500/login';
+        const status = document.getElementById('status');
+
+        let checks = 0;
+
+        function checkLaravel() {
+            checks += 1;
+
+            fetch(target, { mode: 'no-cors', cache: 'no-store' })
+                .then(() => {
+                    status.textContent = 'Laravel is running. Opening the login page...';
+                    window.location.replace(target);
+                })
+                .catch(() => {
+                    status.textContent = 'Laravel is not running yet. Start it with start-local.cmd. Checking again...';
+                    setTimeout(checkLaravel, checks < 60 ? 1500 : 5000);
+                });
+        }
+
+        checkLaravel();
+    </script>
+</body>
+</html>

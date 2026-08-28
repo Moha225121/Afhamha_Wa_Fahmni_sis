@@ -19,7 +19,7 @@ The project is configured to work locally with SQLite for now. PostgreSQL will b
 Use the project script:
 
 ```powershell
-.\start-local.ps1
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\start-local.ps1
 ```
 
 Then open the local login page:
@@ -28,7 +28,11 @@ Then open the local login page:
 http://127.0.0.1:5500/login
 ```
 
+The script opens this URL automatically on Windows unless you pass `-NoBrowser`.
+
 Use `Ctrl + F5` in the browser if the page was previously cached without styling.
+
+In VS Code, use the task named `Start Laravel local server`. You can also double-click `start-local.cmd` on Windows. The Live Server extension's `Go Live` button can only open the helper page at the project root; it cannot run Laravel/PHP. The workspace moves Live Server to port `5501` so it does not take Laravel's `5500` port.
 
 Why this script exists: `php artisan serve` may start without the SQLite extensions on this machine. `start-local.ps1` starts PHP directly with `pdo_sqlite` and `sqlite3` enabled and uses `start-local-router.php` so static files such as CSS, icons, and service worker files are served correctly.
 
@@ -113,7 +117,8 @@ Parent routes are protected by authentication and the `parent` middleware:
 Included parent features:
 
 - Mobile-first RTL Blade layout.
-- Bottom navigation for home, children, results, messages, and more.
+- Bottom navigation for home, children, results, and messages.
+- Compact side menu for profile, attendance, assignments, exams, notifications, and logout.
 - Dashboard showing linked children and available academic summaries.
 - Child list and child detail pages.
 - Child switching when more than one student is linked.
@@ -197,9 +202,20 @@ Parent PWA files:
 /icons/parent-icon-192.png
 /icons/parent-icon-512.png
 /icons/parent-maskable-512.png
+/favicon.ico
 ```
 
 Install behavior is available from the browser when opening the parent portal on a supported device/browser.
+
+The manual PWA install and Lighthouse checklist is in `docs/parent-pwa-qa.md`.
+
+Run the local parent PWA audit with the demo parent account:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\audit-pwa.ps1
+```
+
+On Windows you can also double-click `audit-pwa.cmd`.
 
 ## Tests
 
@@ -209,8 +225,16 @@ Run the full test suite with PHP 8.4 and SQLite extensions enabled:
 C:\php-8.4.12\php.exe -d extension=fileinfo -d extension=zip -d extension=pdo_sqlite -d extension=sqlite3 vendor\phpunit\phpunit\phpunit
 ```
 
+Or use the included helper:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\run-tests.ps1
+```
+
+On Windows you can also double-click `run-tests.cmd`.
+
 Recent verification:
 
 ```text
-18 tests, 66 assertions
+68 tests, 526 assertions
 ```

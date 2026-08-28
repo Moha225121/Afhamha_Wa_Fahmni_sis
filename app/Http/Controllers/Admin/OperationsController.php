@@ -177,6 +177,7 @@ class OperationsController extends Controller
         $isPublic = $r->boolean('is_public');
         $disk = $isPublic ? 'public' : 'local';
         $path = $r->file('file')->store('library', $disk);
+
         DB::table('library_resources')->insert($r->safe()->except(['file', 'is_public']) + ['file_path' => $path, 'disk' => $disk, 'is_public' => $isPublic, 'status' => 'active', 'created_by' => $r->user()->id, 'created_at' => now(), 'updated_at' => now()]);
         AuditService::record('created', 'library');
 

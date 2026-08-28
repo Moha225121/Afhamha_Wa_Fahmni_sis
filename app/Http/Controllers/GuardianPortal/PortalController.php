@@ -175,12 +175,12 @@ class PortalController extends Controller
 
         $request->user()->update($validated);
 
-        return back()->with('success', 'تم حفظ الملف الشخصي.');
+        return redirect()->route('parent.dashboard')->with('success', 'تم حفظ الملف الشخصي.');
     }
 
-    public function more(Request $request): View
+    public function more(Request $request): RedirectResponse
     {
-        return view('parent.more', ['guardian' => $this->context->guardian($request)]);
+        return redirect()->route('parent.dashboard');
     }
 
     /** @return array{0: Guardian, 1: Collection<int, Student>, 2: Student|null} */

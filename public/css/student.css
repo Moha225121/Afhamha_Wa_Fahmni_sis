@@ -1358,6 +1358,7 @@ html {
         top: 104px;
         bottom: auto;
         transform: none;
+        animation: none;
         align-self: start;
         flex-direction: column;
         align-items: stretch;

@@ -3,9 +3,11 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <meta name="theme-color" content="#0b6b63">
+    <meta name="theme-color" content="#0e7c86">
     <title>{{ strip_tags($__env->yieldContent('title', 'بوابة الطالب')) }} | افهمها وفهمني</title>
-    <link rel="stylesheet" href="{{ asset('css/parent.css') }}">
+    <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="any">
+    <link rel="apple-touch-icon" href="{{ asset('icons/parent-icon-192.png') }}">
+    <link rel="stylesheet" href="{{ asset('css/parent.css') }}?v=portal-style-1">
     <link rel="stylesheet" href="{{ asset('css/student.css') }}?v=20260825-2">
     <script src="{{ asset('js/student-tutor.js') }}" defer></script>
     <script src="{{ asset('js/enhanced-selects.js') }}" defer></script>
