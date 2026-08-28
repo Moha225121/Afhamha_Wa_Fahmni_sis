@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\TeacherPortal\Concerns\InteractsWithTeacherScope;
 use App\Http\Requests\TeacherPortal\AssignmentRequest;
 use App\Models\Classroom;
+use App\Models\AssignmentAttachment;
 use App\Models\Student;
 use App\Models\Subject;
 use App\Services\AuditService;
@@ -22,11 +23,17 @@ class AssignmentController extends Controller
     public function index(Request $request): View
     {
         $teacher = $this->teacher($request);
+        $filters = $request->validate([
+            'classroom_id' => ['nullable', 'integer', 'exists:classrooms,id'],
+            'due_date' => ['nullable', 'date', 'date_format:Y-m-d'],
+        ]);
 
         $rows = DB::table('assignments')
             ->join('subjects', 'assignments.subject_id', '=', 'subjects.id')
             ->join('classrooms', 'assignments.classroom_id', '=', 'classrooms.id')
             ->where('assignments.teacher_id', $teacher->id)
+            ->when(! empty($filters['classroom_id']), fn ($query) => $query->where('assignments.classroom_id', $filters['classroom_id']))
+            ->when(! empty($filters['due_date']), fn ($query) => $query->whereDate('assignments.due_date', $filters['due_date']))
             ->select('assignments.*', 'subjects.name as subject', 'classrooms.name as classroom')
             ->selectSub(function ($query) {
                 $query->from('students')->selectRaw('count(*)')->whereColumn('students.classroom_id', 'assignments.classroom_id')->where('students.status', 'active');
@@ -35,9 +42,12 @@ class AssignmentController extends Controller
                 $query->from('assignment_submissions')->selectRaw('count(*)')->whereColumn('assignment_submissions.assignment_id', 'assignments.id')->whereNotNull('submitted_at');
             }, 'submissions_count')
             ->latest('assignments.due_date')
-            ->paginate(20);
+            ->paginate(20)
+            ->withQueryString();
 
-        return view('teacher.assignments.index', compact('rows'));
+        $classrooms = Classroom::whereIn('id', $this->assignedClassroomIds($teacher))->orderBy('name')->get();
+
+        return view('teacher.assignments.index', compact('rows', 'classrooms', 'filters'));
     }
 
     public function create(Request $request): View
@@ -74,9 +84,13 @@ class AssignmentController extends Controller
         $data = $request->validated();
         abort_unless($this->ownsPair($teacher, (int) $data['classroom_id'], (int) $data['subject_id']), 403, 'أنت غير مكلف بهذا الصف/المادة.');
 
-        $path = $request->hasFile('attachment') ? $request->file('attachment')->store('assignments', 'public') : null;
+        $path = null;
+        $files = $this->uploadedFiles($request);
+        if ($files !== []) {
+            $path = $files[0]->store('assignments', 'local');
+        }
 
-        DB::table('assignments')->insert([
+        $assignmentId = DB::table('assignments')->insertGetId([
             'title' => $data['title'],
             'classroom_id' => $data['classroom_id'],
             'subject_id' => $data['subject_id'],
@@ -92,6 +106,7 @@ class AssignmentController extends Controller
             'created_at' => now(),
             'updated_at' => now(),
         ]);
+        $this->storeAttachments($files, $assignmentId);
         AuditService::record('created', 'assignments');
 
         return redirect()->route('teacher.assignments.index')->with('success', 'تم إنشاء الواجب.');
@@ -118,17 +133,50 @@ class AssignmentController extends Controller
             'updated_at' => now(),
         ];
 
-        if ($request->hasFile('attachment')) {
+        $files = $this->uploadedFiles($request);
+        if ($files !== []) {
             if ($row->attachment_path) {
-                Storage::disk('public')->delete($row->attachment_path);
+                Storage::disk('local')->delete($row->attachment_path);
             }
-            $attributes['attachment_path'] = $request->file('attachment')->store('assignments', 'public');
+            $attributes['attachment_path'] = $files[0]->store('assignments', 'local');
         }
 
         DB::table('assignments')->where('id', $assignment)->update($attributes);
+        $this->storeAttachments($files, $assignment);
         AuditService::record('updated', 'assignments');
 
         return redirect()->route('teacher.assignments.index')->with('success', 'تم تحديث الواجب.');
+    }
+
+    private function uploadedFiles(Request $request): array
+    {
+        $files = $request->file('attachments', []);
+        if (! is_array($files)) {
+            $files = [$files];
+        }
+        if ($request->hasFile('attachment')) {
+            $files[] = $request->file('attachment');
+        }
+
+        return array_values(array_filter($files));
+    }
+
+    private function storeAttachments(array $files, int $assignmentId): void
+    {
+        foreach ($files as $index => $file) {
+            $path = $file->store("assignment-attachments/{$assignmentId}", 'local');
+            AssignmentAttachment::create([
+                'assignment_id' => $assignmentId,
+                'disk' => 'local',
+                'file_path' => $path,
+                'path' => $path,
+                'original_name' => $file->getClientOriginalName(),
+                'mime_type' => $file->getMimeType(),
+                'size' => $file->getSize(),
+                'file_size' => $file->getSize(),
+                'sort_order' => $index,
+            ]);
+        }
     }
 
     public function submissions(Request $request, int $assignment): View

@@ -4,6 +4,12 @@
         <p>أنشئ اختبارًا جديدًا، أو تابع المسودات الحالية، ثم عدّلها قبل موعد التطبيق لضمان تجهيز الاختبار بشكل جيد.</p>
     </div>
 </div>
+<form class="filters" method="get" action="{{ route('teacher.exams.index') }}">
+    <label><span class="label-head">الصف</span><select name="classroom_id"><option value="">كل الصفوف</option>@foreach($classrooms as $classroom)<option value="{{ $classroom->id }}" @selected(($filters['classroom_id'] ?? '') == $classroom->id)>{{ $classroom->name }} {{ $classroom->section }}</option>@endforeach</select></label>
+    <label><span class="label-head">تاريخ الاختبار</span><input type="date" name="starts_at" value="{{ $filters['starts_at'] ?? '' }}"></label>
+    <button class="btn primary" type="submit">تصفية</button>
+    <a class="btn secondary" href="{{ route('teacher.exams.index') }}">إعادة ضبط</a>
+</form>
 <div class="table-wrap">
 <table class="exam-table">
 <thead><tr><th>الاختبار</th><th>المادة</th><th>الصف</th><th>التاريخ</th><th>الأسئلة</th><th>الحالة</th><th>الإجراءات</th></tr></thead>
@@ -48,10 +54,10 @@
 @else
 <span class="muted-inline">—</span>
 @endif
-<form method="post" action="{{ route('teacher.exams.destroy', $r->id) }}" onsubmit="return confirm('هل أنت متأكد أنك تريد حذف هذا الاختبار؟')">
+<form method="post" action="{{ route('teacher.exams.destroy', $r->id) }}">
     @csrf
     @method('delete')
-    <button type="submit" class="link-danger" data-confirm="هل أنت متأكد أنك تريد حذف هذا الاختبار؟">حذف</button>
+    <button type="submit" class="link-danger teacher-delete-action" data-confirm="هل أنت متأكد أنك تريد حذف هذا الاختبار؟">حذف</button>
 </form>
     </div>
 </td>

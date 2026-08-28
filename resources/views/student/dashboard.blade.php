@@ -80,6 +80,15 @@
 
     <div class="dashboard-panels">
         <section class="list-section">
+            <div class="section-title"><h2>ملاحظات المعلم</h2></div>
+            @forelse($teacherNotes as $note)
+                <div class="list-row"><div><strong>{{ $note->body }}</strong><span>{{ $note->teacher?->user?->name ?? 'المعلم' }} · {{ $note->created_at->format('Y-m-d') }}</span></div></div>
+            @empty
+                <p class="muted-line">لا توجد ملاحظات جديدة.</p>
+            @endforelse
+        </section>
+
+        <section class="list-section">
             <div class="section-title">
                 <div><span class="section-kicker">أداؤك</span><h2>آخر النتائج</h2></div>
                 <a href="{{ route('student.results') }}">الكل</a>

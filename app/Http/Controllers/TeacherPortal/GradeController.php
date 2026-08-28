@@ -193,9 +193,23 @@ class GradeController extends Controller
         }
 
         DB::transaction(function () use ($teacher, $data, $normalizedColumns, $scoresToSave, $columnScoresToSave) {
+            $existing = DB::table('grade_sheets')
+                ->where('teacher_id', $teacher->id)
+                ->where('classroom_id', $data['classroom_id'])
+                ->first();
+            $existingScores = json_decode($existing?->scores ?? '{}', true);
+            $existingColumnScores = json_decode($existing?->column_scores ?? '{}', true);
+            $existingScores = is_array($existingScores) ? $existingScores : [];
+            $existingColumnScores = is_array($existingColumnScores) ? $existingColumnScores : [];
+
             DB::table('grade_sheets')->updateOrInsert(
                 ['teacher_id' => $teacher->id, 'classroom_id' => $data['classroom_id']],
-                ['sheet_data' => json_encode($normalizedColumns), 'scores' => json_encode($scoresToSave), 'column_scores' => json_encode($columnScoresToSave), 'updated_at' => now()]
+                [
+                    'sheet_data' => json_encode($normalizedColumns),
+                    'scores' => json_encode(array_replace($existingScores, $scoresToSave)),
+                    'column_scores' => json_encode(array_replace_recursive($existingColumnScores, $columnScoresToSave)),
+                    'updated_at' => now(),
+                ]
             );
             AuditService::record('updated', 'grades');
         });

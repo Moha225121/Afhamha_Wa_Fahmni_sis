@@ -17,10 +17,12 @@ class AssignmentRequest extends FormRequest
             'title' => ['required', 'string', 'max:255'],
             'classroom_id' => ['required', 'integer', 'exists:classrooms,id'],
             'subject_id' => ['required', 'integer', 'exists:subjects,id'],
-            'due_date' => ['required', 'date'],
+            'due_date' => ['required', 'date', 'date_format:Y-m-d'],
             'max_score' => ['required', 'numeric', 'min:0.5'],
             'description' => ['nullable', 'string'],
             'attachment' => ['nullable', 'file', 'mimes:pdf,doc,docx,ppt,pptx,jpg,jpeg,png', 'max:20480'],
+            'attachments' => ['nullable', 'array', 'max:10'],
+            'attachments.*' => ['file', 'mimes:pdf,doc,docx,ppt,pptx,jpg,jpeg,png', 'max:20480'],
         ];
     }
 }

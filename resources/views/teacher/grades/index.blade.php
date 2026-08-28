@@ -14,12 +14,9 @@
 @endphp
 
 <div class="grade-sheet-page">
-    <div class="form-hint grade-instructions">
-        يمكنك اضافة وتسمية كل عمود حسب نظام الدرجات المعتمد  في المدرسة، وتحديد الدرجة القصوى الخاصة به. أدخل درجات الطلاب ضمن الحد المحدد، وحذف أي عمود غير مطلوب باستخدام زر الحذف.
-    </div>
     <div class="grade-top-row">
         <div class="grade-headline">
-            <span class="meta-label">الصف</span>
+            <div><span class="eyebrow">سجل الأداء الأكاديمي</span><h2>درجات الطلاب</h2></div>
             <form method="get" action="{{ route('teacher.grades.index') }}" class="grade-filter-form">
                 <select name="classroom_id" class="mini-select" onchange="this.form.submit()">
                     <option value="">اختر الصف</option>
@@ -36,6 +33,9 @@
             <button type="button" class="btn secondary" id="add-grade-column">إضافة عمود</button>
             <button type="button" class="btn primary" id="save-grade-sheet">حفظ التغييرات</button>
         </div>
+    </div>
+    <div class="form-hint grade-instructions">
+        يمكنك اضافة وتسمية كل عمود حسب نظام الدرجات المعتمد  في المدرسة، وتحديد الدرجة القصوى الخاصة به. أدخل درجات الطلاب ضمن الحد المحدد، ويمكنك حذف أي عمود غير مطلوب باستخدام زر الحذف.
     </div>
 
     @if($classroom)
@@ -178,7 +178,7 @@
                         <input type="text" class="column-title-input" data-column-index="${columnIndex}" value="${escapeHtml(column.title)}" aria-label="اسم العمود">
                         <div class="column-tools">
                             <input type="number" class="column-max-input" data-column-index="${columnIndex}" min="1" max="100" value="${Number(column.max_score || 100)}" aria-label="الحد الأعلى للدرجة">
-                            <button type="button" class="delete-column-btn" data-column-index="${columnIndex}" title="حذف العمود">×</button>
+                            <button type="button" class="delete-column-btn teacher-delete-action" data-column-index="${columnIndex}" title="حذف العمود">×</button>
                         </div>
                     </div>
                 `;
@@ -373,16 +373,16 @@
 
 <style>
     .grade-sheet-page {
-        padding: 12px 18px 0;
+        padding: 4px 0 0;
     }
 
     .grade-top-row {
         display: flex;
-        align-items: center;
+        align-items: flex-end;
         justify-content: space-between;
         gap: 12px;
         margin-bottom: 18px;
-        padding: 4px 0;
+        padding: 4px 0 10px;
     }
 
     .grade-headline {
@@ -392,6 +392,8 @@
         font-size: 14px;
         color: #334155;
     }
+
+    .grade-headline h2 { margin: 4px 0 0; color: #17223a; font-size: 22px; line-height: 1.3; }
 
     .meta-label {
         color: #64748b;
@@ -425,8 +427,11 @@
     .grade-grid-wrap {
         overflow-x: auto;
         overflow-y: hidden;
-        border-radius: 12px;
-        background: rgba(255,255,255,0.15);
+        border: 1px solid #dfe7f5;
+        border-radius: 16px;
+        background: #fff;
+        box-shadow: 0 12px 28px rgba(18, 42, 77, 0.06);
+        padding: 10px 10px 8px;
         scrollbar-width: thin;
         scrollbar-color: #cfd9ec transparent;
         padding-bottom: 8px;
@@ -446,20 +451,20 @@
         width: 100%;
         min-width: 980px;
         border-collapse: collapse;
-        background: transparent;
+        background: #fff;
     }
 
     .grade-grid th,
     .grade-grid td {
-        border: 1px solid #dfe3eb;
-        padding: 10px 12px;
+        border: 1px solid #e3eaf4;
+        padding: 12px 14px;
         text-align: center;
-        background: rgba(255,255,255,0.08);
+        background: #fff;
         vertical-align: middle;
     }
 
     .grade-grid th {
-        background: #f7f8fa;
+        background: #f5f8fd;
         color: #334155;
         font-weight: 700;
         font-size: 15px;

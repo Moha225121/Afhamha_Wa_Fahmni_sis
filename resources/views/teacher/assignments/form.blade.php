@@ -57,7 +57,7 @@
 </label>
 <label class="wide">
     <span class="label-head">المرفقات</span>
-    <input type="file" name="attachment">
+    <input type="file" name="attachments[]" multiple accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png">
     @if(!empty($assignment->attachment_path))<p class="muted">يوجد مرفق حالي — رفع ملف جديد سيستبدله.</p>@endif
 </label>
 <div class="form-actions">
@@ -73,17 +73,16 @@
   const editor = document.querySelector('#assignment-form .rich-editor');
   const hiddenField = document.querySelector('#assignment-form textarea[name="description"]');
 
-  function filterSubjects(){
-    const opt = classroomSelect.options[classroomSelect.selectedIndex];
-    const allowed = (opt && opt.dataset.subjects) ? opt.dataset.subjects.split(',').filter(Boolean) : [];
-    let hasSelected = false;
-    Array.from(subjectSelect.options).forEach(o => {
+  function filterClassrooms(){
+    const selectedSubject = subjectSelect.value;
+    let selectedAllowed = false;
+    Array.from(classroomSelect.options).forEach(o => {
       if (!o.value) { o.hidden = false; return; }
-      const ok = allowed.includes(o.value);
-      o.hidden = !ok;
-      if (ok && o.selected) hasSelected = true;
+      const allowed = (o.dataset.subjects || '').split(',').filter(Boolean);
+      o.hidden = selectedSubject !== '' && !allowed.includes(selectedSubject);
+      if (!o.hidden && o.selected) selectedAllowed = true;
     });
-    if (!hasSelected) subjectSelect.value = '';
+    if (!selectedAllowed) classroomSelect.value = '';
   }
 
   if (editor && hiddenField) {
@@ -104,8 +103,8 @@
     });
   }
 
-  classroomSelect.addEventListener('change', filterSubjects);
-  filterSubjects();
+  subjectSelect.addEventListener('change', filterClassrooms);
+  filterClassrooms();
 })();
 </script>
 @endsection

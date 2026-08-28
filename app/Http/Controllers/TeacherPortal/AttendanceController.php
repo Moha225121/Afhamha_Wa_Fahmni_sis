@@ -34,10 +34,11 @@ class AttendanceController extends Controller
             ->get();
 
         $records = DB::table('attendance_records')->whereDate('date', $date)->whereIn('student_id', $students->pluck('id'))->get()->keyBy('student_id');
+        $attendanceSummary = collect(['present' => 0, 'absent' => 0, 'late' => 0, 'excused' => 0])->merge($records->countBy('status'));
 
         $classrooms = Classroom::whereIn('id', $classroomIds)->get();
 
-        return view('teacher.attendance.index', compact('students', 'records', 'date', 'classroomId', 'classrooms'));
+        return view('teacher.attendance.index', compact('students', 'records', 'date', 'classroomId', 'classrooms', 'attendanceSummary'));
     }
 
     public function store(Request $request): RedirectResponse

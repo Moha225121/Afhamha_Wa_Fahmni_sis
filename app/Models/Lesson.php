@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['subject_id', 'unit_id', 'title', 'content', 'status', 'published_at', 'position'])]
+#[Fillable(['teacher_id', 'classroom_id', 'subject_id', 'unit_id', 'title', 'content', 'status', 'published_at', 'position'])]
 class Lesson extends Model
 {
     protected function casts(): array
@@ -27,6 +27,16 @@ class Lesson extends Model
     public function subject(): BelongsTo
     {
         return $this->belongsTo(Subject::class);
+    }
+
+    public function classroom(): BelongsTo
+    {
+        return $this->belongsTo(Classroom::class);
+    }
+
+    public function teacher(): BelongsTo
+    {
+        return $this->belongsTo(Teacher::class);
     }
 
     public function unit(): BelongsTo

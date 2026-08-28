@@ -22,19 +22,28 @@ class ExamController extends Controller
     public function index(Request $request): View
     {
         $teacher = $this->teacher($request);
+        $filters = $request->validate([
+            'classroom_id' => ['nullable', 'integer', 'exists:classrooms,id'],
+            'starts_at' => ['nullable', 'date', 'date_format:Y-m-d'],
+        ]);
 
         $rows = DB::table('exams')
             ->join('subjects', 'exams.subject_id', '=', 'subjects.id')
             ->join('classrooms', 'exams.classroom_id', '=', 'classrooms.id')
             ->where('exams.teacher_id', $teacher->id)
+            ->when(! empty($filters['classroom_id']), fn ($query) => $query->where('exams.classroom_id', $filters['classroom_id']))
+            ->when(! empty($filters['starts_at']), fn ($query) => $query->whereDate('exams.starts_at', $filters['starts_at']))
             ->select('exams.*', 'subjects.name as subject', 'classrooms.name as classroom')
             ->selectSub(function ($query) {
                 $query->from('exam_questions')->selectRaw('count(*)')->whereColumn('exam_questions.exam_id', 'exams.id');
             }, 'questions_count')
             ->latest('exams.starts_at')
-            ->paginate(20);
+            ->paginate(20)
+            ->withQueryString();
 
-        return view('teacher.exams.index', compact('rows'));
+        $classrooms = Classroom::whereIn('id', $this->assignedClassroomIds($teacher))->orderBy('name')->get();
+
+        return view('teacher.exams.index', compact('rows', 'classrooms', 'filters'));
     }
 
     public function create(Request $request): View

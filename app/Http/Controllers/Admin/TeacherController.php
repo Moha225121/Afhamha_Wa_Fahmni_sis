@@ -35,7 +35,9 @@ class TeacherController extends Controller
 
     private function form(Teacher $teacher): View
     {
-        return view('admin.teachers.form', compact('teacher') + ['classrooms' => Classroom::all(), 'subjects' => Subject::all()]);
+        $assignments = DB::table('teacher_assignments')->where('teacher_id', $teacher->id)->get();
+
+        return view('admin.teachers.form', compact('teacher', 'assignments') + ['classrooms' => Classroom::all(), 'subjects' => Subject::all()]);
     }
 
     public function store(TeacherRequest $r): RedirectResponse

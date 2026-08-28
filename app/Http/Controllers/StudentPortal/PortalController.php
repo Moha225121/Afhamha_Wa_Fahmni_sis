@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Announcement;
 use App\Models\Student;
 use App\Models\Subject;
+use App\Models\TeacherStudentNote;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -25,6 +26,7 @@ class PortalController extends Controller
             'subjects' => $this->subjectsFor($student),
             'todaysSchedule' => $this->todaysScheduleFor($student),
             'announcements' => $this->announcementsFor($student, 4),
+            'teacherNotes' => TeacherStudentNote::with('teacher.user')->where('student_id', $student->id)->latest()->limit(4)->get(),
         ]);
     }
 

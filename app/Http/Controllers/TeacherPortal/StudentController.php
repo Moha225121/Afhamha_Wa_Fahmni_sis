@@ -5,7 +5,9 @@ namespace App\Http\Controllers\TeacherPortal;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\TeacherPortal\Concerns\InteractsWithTeacherScope;
 use App\Models\Classroom;
+use Illuminate\Http\RedirectResponse;
 use App\Models\Student;
+use App\Models\TeacherStudentNote;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
@@ -29,9 +31,7 @@ class StudentController extends Controller
             ->withQueryString();
 
         $students->getCollection()->transform(function (Student $student) use ($teacher) {
-            // Use overall average (المتوسط) for the students list so المعدل stays
-            // in sync with the student portal summary.
-            $student->average_percent = $this->overallAverageFor($student->id, $teacher);
+            $student->average_percent = $this->subjectAverageFor($student->id, $teacher);
 
             return $student;
         });
@@ -65,11 +65,18 @@ class StudentController extends Controller
             ->whereNotNull('assignment_submissions.submitted_at')
             ->count();
 
-        // Use overall average (المتوسط) so the student file reflects the same
-        // المعدل value shown elsewhere.
-        $averagePercent = $this->overallAverageFor($student->id, $teacher);
+        $subjectNames = DB::table('teacher_assignments')
+            ->join('subjects', 'teacher_assignments.subject_id', '=', 'subjects.id')
+            ->where('teacher_assignments.teacher_id', $teacher->id)
+            ->where('teacher_assignments.classroom_id', $student->classroom_id)
+            ->orderBy('subjects.name')
+            ->pluck('subjects.name')
+            ->unique()
+            ->values();
+        $averagePercent = $this->subjectAverageFor($student->id, $teacher);
 
         $recentResults = $this->recentResultsFor($teacher, $student->id, 6);
+        $notes = TeacherStudentNote::where('teacher_id', $teacher->id)->where('student_id', $student->id)->latest()->limit(5)->get();
 
         return view('teacher.students.show', [
             'student' => $student,
@@ -77,8 +84,20 @@ class StudentController extends Controller
             'assignmentsTotal' => $assignmentsTotal,
             'assignmentsSubmitted' => $assignmentsSubmitted,
             'averagePercent' => $averagePercent,
+            'subjectLabel' => $subjectNames->join('، '),
             'recentResults' => $recentResults,
+            'notes' => $notes,
         ]);
+    }
+
+    public function noteStore(Request $request, Student $student): RedirectResponse
+    {
+        $teacher = $this->teacher($request);
+        abort_unless($this->ownsStudent($teacher, $student->id), 404);
+        $data = $request->validate(['body' => ['required', 'string', 'max:2000']]);
+        TeacherStudentNote::create(['teacher_id' => $teacher->id, 'student_id' => $student->id, 'body' => $data['body']]);
+
+        return back()->with('success', 'تم إرسال الملاحظة وحفظها.');
     }
 
     private function averageFor($teacher, int $studentId): ?float
@@ -97,10 +116,9 @@ class StudentController extends Controller
     /**
      * Compute overall average percent for a student across all published grades.
      */
-    private function overallAverageFor(int $studentId, $teacher = null): ?float
+    private function subjectAverageFor(int $studentId, $teacher = null): ?float
     {
-        // If teacher and the student's classroom have a saved grade sheet scores,
-        // prefer that stored per-student average (not tied to exams).
+        // A teacher's saved sheet represents the subject average for that classroom.
         if ($teacher) {
             $classroomId = DB::table('students')->where('id', $studentId)->value('classroom_id');
             if ($classroomId) {
@@ -127,6 +145,7 @@ class StudentController extends Controller
         }
         $row = DB::table('grades')
             ->join('exams', 'grades.exam_id', '=', 'exams.id')
+            ->when($teacher, fn ($query) => $query->where('exams.teacher_id', $teacher->id))
             ->where('grades.student_id', $studentId)
             ->whereNotNull('grades.published_at')
             ->selectRaw('avg(case when exams.total_score > 0 then grades.score * 100.0 / exams.total_score end) as average_percent')
@@ -139,6 +158,7 @@ class StudentController extends Controller
         // Fallback: if grades exist but are not linked/compatible with exams,
         // compute simple average of the `score` column (assumed to be percent).
         $raw = DB::table('grades')
+            ->when($teacher, fn ($query) => $query->join('exams', 'grades.exam_id', '=', 'exams.id')->where('exams.teacher_id', $teacher->id))
             ->where('student_id', $studentId)
             ->selectRaw('avg(score) as average_percent')
             ->first();

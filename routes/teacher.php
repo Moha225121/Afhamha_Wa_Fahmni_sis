@@ -3,10 +3,12 @@
 use App\Http\Controllers\TeacherPortal\AssignmentController;
 use App\Http\Controllers\TeacherPortal\AttendanceController;
 use App\Http\Controllers\TeacherPortal\DashboardController;
+use App\Http\Controllers\TeacherPortal\ClassroomController;
 use App\Http\Controllers\TeacherPortal\ExamController;
 use App\Http\Controllers\TeacherPortal\GradeController;
 use App\Http\Controllers\TeacherPortal\ProfileController;
 use App\Http\Controllers\TeacherPortal\StudentController;
+use App\Http\Controllers\TeacherPortal\LessonController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('teacher')->name('teacher.')->middleware(['auth', 'teacher'])->group(function (): void {
@@ -16,6 +18,18 @@ Route::prefix('teacher')->name('teacher.')->middleware(['auth', 'teacher'])->gro
 
     Route::get('/students', [StudentController::class, 'index'])->name('students.index');
     Route::get('/students/{student}', [StudentController::class, 'show'])->name('students.show');
+    Route::post('/students/{student}/notes', [StudentController::class, 'noteStore'])->name('students.notes.store');
+
+    Route::get('/classes', [ClassroomController::class, 'index'])->name('classes.index');
+    Route::get('/classes/{classroom}', [ClassroomController::class, 'show'])->name('classes.show');
+
+    Route::get('/lessons', [LessonController::class, 'index'])->name('lessons.index');
+    Route::get('/lessons/create', [LessonController::class, 'create'])->name('lessons.create');
+    Route::post('/lessons', [LessonController::class, 'store'])->name('lessons.store');
+    Route::get('/lessons/{lesson}/edit', [LessonController::class, 'edit'])->name('lessons.edit');
+    Route::put('/lessons/{lesson}', [LessonController::class, 'update'])->name('lessons.update');
+    Route::patch('/lessons/{lesson}/publish', [LessonController::class, 'publish'])->name('lessons.publish');
+    Route::delete('/lessons/{lesson}', [LessonController::class, 'destroy'])->name('lessons.destroy');
 
     Route::get('/attendance', [AttendanceController::class, 'index'])->name('attendance.index');
     Route::post('/attendance', [AttendanceController::class, 'store'])->name('attendance.store');
@@ -42,5 +56,6 @@ Route::prefix('teacher')->name('teacher.')->middleware(['auth', 'teacher'])->gro
     Route::post('/grades', [GradeController::class, 'store'])->name('grades.store');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::get('/profile/avatar', [ProfileController::class, 'avatar'])->name('profile.avatar');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
 });

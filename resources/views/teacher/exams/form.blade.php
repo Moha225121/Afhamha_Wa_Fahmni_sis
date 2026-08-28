@@ -23,20 +23,20 @@
     <input name="title" required value="{{ old('title', $exam->title ?? '') }}" placeholder="مثال: اختبار الوحدة الأولى في التفسير">
 </label>
 <label>
-    <span class="label-head">الصف</span>
-    <select name="classroom_id" id="classroom-select" required>
+  <span class="label-head">المادة</span>
+  <select name="subject_id" id="subject-select" required>
+    <option value="">اختر المادة</option>
+    @foreach($subjects as $s)
+    <option value="{{ $s->id }}" @selected(old('subject_id', $exam->subject_id ?? '')==$s->id)>{{ $s->name }}</option>
+    @endforeach
+  </select>
+</label>
+<label>
+  <span class="label-head">الصف</span>
+  <select name="classroom_id" id="classroom-select" required>
         <option value="">اختر الصف</option>
         @foreach($classrooms as $c)
         <option value="{{ $c->id }}" data-subjects="{{ implode(',', $pairsByClassroom[$c->id] ?? []) }}" @selected(old('classroom_id', $exam->classroom_id ?? '')==$c->id)>{{ $c->name }} {{ $c->section }}</option>
-        @endforeach
-    </select>
-</label>
-<label>
-    <span class="label-head">المادة</span>
-    <select name="subject_id" id="subject-select" required>
-        <option value="">اختر المادة</option>
-        @foreach($subjects as $s)
-        <option value="{{ $s->id }}" @selected(old('subject_id', $exam->subject_id ?? '')==$s->id)>{{ $s->name }}</option>
         @endforeach
     </select>
 </label>
@@ -234,20 +234,19 @@
   const subjectSelect = document.getElementById('subject-select');
   let qCount = 0;
 
-  function filterSubjects(){
-    const opt = classroomSelect.options[classroomSelect.selectedIndex];
-    const allowed = (opt && opt.dataset.subjects) ? opt.dataset.subjects.split(',').filter(Boolean) : [];
-    let hasSelected = false;
-    Array.from(subjectSelect.options).forEach(o => {
+  function filterClassrooms(){
+    const selectedSubject = subjectSelect.value;
+    let selectedAllowed = false;
+    Array.from(classroomSelect.options).forEach(o => {
       if (!o.value) { o.hidden = false; return; }
-      const ok = allowed.includes(o.value);
-      o.hidden = !ok;
-      if (ok && o.selected) hasSelected = true;
+      const allowed = (o.dataset.subjects || '').split(',').filter(Boolean);
+      o.hidden = selectedSubject !== '' && !allowed.includes(selectedSubject);
+      if (!o.hidden && o.selected) selectedAllowed = true;
     });
-    if (!hasSelected) subjectSelect.value = '';
+    if (!selectedAllowed) classroomSelect.value = '';
   }
-  classroomSelect.addEventListener('change', filterSubjects);
-  filterSubjects();
+  subjectSelect.addEventListener('change', filterClassrooms);
+  filterClassrooms();
 
   function buildRichToolbar(prefix, isInline){
     const items = [
@@ -303,7 +302,7 @@
     wrap.innerHTML = `
       <div class="question-head">
         <h2>السؤال ${qIdx+1}</h2>
-        <button type="button" class="link-danger remove-question">حذف</button>
+        <button type="button" class="link-danger teacher-delete-action remove-question">حذف</button>
       </div>
       <div class="form-grid">
         <label>نوع السؤال<select name="questions[${qIdx}][type]" class="type-select">
