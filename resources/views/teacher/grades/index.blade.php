@@ -262,6 +262,10 @@
                         setTimeout(() => saveStatus.classList.remove('show'), 2000);
                         return;
                     }
+                    const columnTitle = state.columns[index]?.title || 'هذا العمود';
+                    if (!window.confirm(`هل أنت متأكد من حذف ${columnTitle}؟ سيتم حذف درجاته من شاشة هذا الصف.`)) {
+                        return;
+                    }
                     state.columns.splice(index, 1);
                     renderTable();
                 });
