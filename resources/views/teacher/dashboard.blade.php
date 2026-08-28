@@ -7,7 +7,7 @@
 <article class="card stat teacher-stat teacher-stat--students"><span>الطلاب</span><strong>{{ $stats['students'] }}</strong><small>في جميع الصفوف</small></article>
 <article class="card stat teacher-stat teacher-stat--attendance"><span>حضور اليوم</span><strong>{{ $stats['attendance_rate'] }}%</strong><small>{{ $stats['today_attendance'] }} سجل حضور</small></article>
 <article class="card stat teacher-stat teacher-stat--tasks"><span>تحتاج متابعة</span><strong>{{ $stats['draft_exams'] }}</strong><small>اختبارات مسودة</small></article>
-<article class="card stat teacher-stat teacher-stat--lessons"><span>الدروس</span><strong>{{ $stats['lessons'] }}</strong><small>{{ $stats['active_assignments'] }} واجبات نشطة</small></article>
+<article class="card stat teacher-stat teacher-stat--lessons"><span>إدارة الدروس</span><strong>{{ $stats['lessons'] }}</strong><small>دروس مجدولة</small></article>
 </section>
 <section class="teacher-dashboard-grid">
 <div class="panel teacher-detail-panel"><div class="panel-heading"><div><span class="eyebrow">تحديث اليوم</span><h2>تفاصيل الحضور</h2></div><a href="{{ route('teacher.attendance.index') }}">فتح سجل الحضور</a></div>

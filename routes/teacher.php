@@ -29,6 +29,7 @@ Route::prefix('teacher')->name('teacher.')->middleware(['auth', 'teacher'])->gro
     Route::get('/lessons/{lesson}/edit', [LessonController::class, 'edit'])->name('lessons.edit');
     Route::put('/lessons/{lesson}', [LessonController::class, 'update'])->name('lessons.update');
     Route::patch('/lessons/{lesson}/publish', [LessonController::class, 'publish'])->name('lessons.publish');
+    Route::patch('/lessons/{lesson}/cancel', [LessonController::class, 'cancel'])->name('lessons.cancel');
     Route::delete('/lessons/{lesson}', [LessonController::class, 'destroy'])->name('lessons.destroy');
 
     Route::get('/attendance', [AttendanceController::class, 'index'])->name('attendance.index');
@@ -41,6 +42,7 @@ Route::prefix('teacher')->name('teacher.')->middleware(['auth', 'teacher'])->gro
     Route::put('/exams/{exam}', [ExamController::class, 'update'])->name('exams.update');
     Route::delete('/exams/{exam}', [ExamController::class, 'destroy'])->name('exams.destroy');
     Route::patch('/exams/{exam}/status', [ExamController::class, 'status'])->name('exams.status');
+    Route::patch('/exams/{exam}/cancel', [ExamController::class, 'cancel'])->name('exams.cancel');
 
     Route::get('/assignments', [AssignmentController::class, 'index'])->name('assignments.index');
     Route::get('/assignments/create', [AssignmentController::class, 'create'])->name('assignments.create');
@@ -48,6 +50,8 @@ Route::prefix('teacher')->name('teacher.')->middleware(['auth', 'teacher'])->gro
     Route::get('/assignments/{assignment}/edit', [AssignmentController::class, 'edit'])->name('assignments.edit');
     Route::get('/assignments/{assignment}', [\App\Http\Controllers\TeacherPortal\AssignmentSubmissionController::class, 'show'])->name('assignments.show');
     Route::put('/assignments/{assignment}', [AssignmentController::class, 'update'])->name('assignments.update');
+    Route::patch('/assignments/{assignment}/cancel', [AssignmentController::class, 'cancel'])->name('assignments.cancel');
+    Route::delete('/assignments/{assignment}', [AssignmentController::class, 'destroy'])->name('assignments.destroy');
     Route::get('/assignments/{assignment}/submissions', [AssignmentController::class, 'submissions'])->name('assignments.submissions');
     Route::post('/assignments/{assignment}/submissions', [AssignmentController::class, 'submissionsStore'])->name('assignments.submissions.store');
     Route::get('/submissions/{submission}/file', [\App\Http\Controllers\TeacherPortal\AssignmentSubmissionController::class, 'download'])->middleware('throttle:60,1')->name('submissions.file');

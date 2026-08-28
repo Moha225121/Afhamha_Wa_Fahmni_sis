@@ -119,6 +119,11 @@ class GradeController extends Controller
             'sheet_columns.*.weight' => ['nullable', 'integer', 'min:1', 'max:100'],
             'sheet_columns.*.max_score' => ['nullable', 'numeric', 'gt:0', 'max:100'],
         ]);
+        abort_unless(
+            $this->assignedClassroomIds($teacher)->contains((int) $data['classroom_id']),
+            403,
+            'لا يمكنك تعديل درجات هذا الصف.'
+        );
 
         $classroomStudentIds = Student::where('classroom_id', $data['classroom_id'])->pluck('id');
         $studentNames = Student::with('user')->whereIn('id', $classroomStudentIds)->get()->mapWithKeys(fn ($student) => [

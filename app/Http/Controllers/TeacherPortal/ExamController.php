@@ -25,6 +25,7 @@ class ExamController extends Controller
         $filters = $request->validate([
             'classroom_id' => ['nullable', 'integer', 'exists:classrooms,id'],
             'starts_at' => ['nullable', 'date', 'date_format:Y-m-d'],
+            'status' => ['nullable', 'in:draft,scheduled,published,completed,cancelled'],
         ]);
 
         $rows = DB::table('exams')
@@ -33,6 +34,7 @@ class ExamController extends Controller
             ->where('exams.teacher_id', $teacher->id)
             ->when(! empty($filters['classroom_id']), fn ($query) => $query->where('exams.classroom_id', $filters['classroom_id']))
             ->when(! empty($filters['starts_at']), fn ($query) => $query->whereDate('exams.starts_at', $filters['starts_at']))
+            ->when(! empty($filters['status']), fn ($query) => $query->where('exams.status', $filters['status']))
             ->select('exams.*', 'subjects.name as subject', 'classrooms.name as classroom')
             ->selectSub(function ($query) {
                 $query->from('exam_questions')->selectRaw('count(*)')->whereColumn('exam_questions.exam_id', 'exams.id');
@@ -41,9 +43,27 @@ class ExamController extends Controller
             ->paginate(20)
             ->withQueryString();
 
+        $examSummary = ['draft' => 0, 'scheduled' => 0, 'published' => 0, 'completed' => 0, 'cancelled' => 0];
+        DB::table('exams')->where('teacher_id', $teacher->id)->get(['status', 'starts_at'])->each(function ($exam) use (&$examSummary) {
+            if ($exam->status === 'cancelled') {
+                $examSummary['cancelled']++;
+            } elseif ($exam->status === 'draft') {
+                $examSummary['draft']++;
+            } elseif ($exam->status === 'completed') {
+                $examSummary['completed']++;
+            } elseif (\Illuminate\Support\Carbon::parse($exam->starts_at)->isPast()) {
+                $examSummary['published']++;
+            } elseif ($exam->status === 'scheduled') {
+                $examSummary['scheduled']++;
+            } else {
+                $examSummary['published']++;
+            }
+        });
+        $examSummary = collect($examSummary);
+
         $classrooms = Classroom::whereIn('id', $this->assignedClassroomIds($teacher))->orderBy('name')->get();
 
-        return view('teacher.exams.index', compact('rows', 'classrooms', 'filters'));
+        return view('teacher.exams.index', compact('rows', 'classrooms', 'filters', 'examSummary'));
     }
 
     public function create(Request $request): View
@@ -231,6 +251,18 @@ class ExamController extends Controller
         AuditService::record('status_changed', 'exams');
 
         return back()->with('success', 'تم تحديث حالة الاختبار.');
+    }
+
+    public function cancel(Request $request, int $exam): RedirectResponse
+    {
+        $teacher = $this->teacher($request);
+        $examRow = DB::table('exams')->where('id', $exam)->first();
+        abort_unless($examRow && (int) $examRow->teacher_id === $teacher->id, 404);
+        abort_unless(\Illuminate\Support\Carbon::parse($examRow->starts_at)->isPast(), 422, 'لا يمكن إلغاء اختبار قبل موعده.');
+        DB::table('exams')->where('id', $exam)->update(['status' => 'cancelled', 'updated_at' => now()]);
+        AuditService::record('cancelled', 'exams');
+
+        return back()->with('success', 'تم إلغاء الاختبار وإيقاف مشاركته.');
     }
 
     public function destroy(Request $request, int $exam): RedirectResponse

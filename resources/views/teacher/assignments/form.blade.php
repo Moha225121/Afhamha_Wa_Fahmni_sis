@@ -38,7 +38,7 @@
 </label>
 <label>
     <span class="label-head">تاريخ التسليم</span>
-    <input type="date" name="due_date" required value="{{ old('due_date', $assignment->due_date ?? '') }}">
+    <input type="date" name="due_date" required value="{{ old('due_date', !empty($assignment?->due_date) ? \Illuminate\Support\Carbon::parse($assignment->due_date)->format('Y-m-d') : '') }}">
 </label>
 </div>
 <label class="wide">
@@ -62,7 +62,7 @@
 </label>
 <div class="form-actions">
 <button class="btn primary">{{ $assignment ? 'حفظ التعديلات' : 'إنشاء الواجب' }}</button>
-<a class="btn secondary" href="{{ route('teacher.assignments.index') }}">إلغاء</a>
+<a class="btn secondary" href="{{ route('teacher.assignments.index') }}">العودة إلى الواجبات</a>
 </div>
 </form>
 @section('scripts')

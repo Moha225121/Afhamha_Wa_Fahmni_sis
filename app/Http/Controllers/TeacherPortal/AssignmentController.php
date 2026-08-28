@@ -26,6 +26,7 @@ class AssignmentController extends Controller
         $filters = $request->validate([
             'classroom_id' => ['nullable', 'integer', 'exists:classrooms,id'],
             'due_date' => ['nullable', 'date', 'date_format:Y-m-d'],
+            'status' => ['nullable', 'in:active,closed,completed,cancelled'],
         ]);
 
         $rows = DB::table('assignments')
@@ -34,20 +35,62 @@ class AssignmentController extends Controller
             ->where('assignments.teacher_id', $teacher->id)
             ->when(! empty($filters['classroom_id']), fn ($query) => $query->where('assignments.classroom_id', $filters['classroom_id']))
             ->when(! empty($filters['due_date']), fn ($query) => $query->whereDate('assignments.due_date', $filters['due_date']))
+            ->when(! empty($filters['status']), function ($query) use ($filters) {
+                if ($filters['status'] === 'cancelled') {
+                    $query->where('assignments.status', 'cancelled');
+                } elseif ($filters['status'] === 'completed') {
+                    $query->where('assignments.status', '!=', 'cancelled')
+                        ->whereRaw('(select count(distinct assignment_submissions.student_id) from assignment_submissions inner join students on students.id = assignment_submissions.student_id where assignment_submissions.assignment_id = assignments.id and assignment_submissions.submitted_at is not null and students.classroom_id = assignments.classroom_id and students.status = \'active\') >= (select count(*) from students where students.classroom_id = assignments.classroom_id and students.status = \'active\')');
+                } elseif ($filters['status'] === 'closed') {
+                    $query->where('assignments.status', '!=', 'cancelled')->whereDate('assignments.due_date', '<=', today());
+                } else {
+                    $query->where('assignments.status', '!=', 'cancelled')->whereDate('assignments.due_date', '>', today());
+                }
+            })
             ->select('assignments.*', 'subjects.name as subject', 'classrooms.name as classroom')
             ->selectSub(function ($query) {
                 $query->from('students')->selectRaw('count(*)')->whereColumn('students.classroom_id', 'assignments.classroom_id')->where('students.status', 'active');
             }, 'students_total')
             ->selectSub(function ($query) {
-                $query->from('assignment_submissions')->selectRaw('count(*)')->whereColumn('assignment_submissions.assignment_id', 'assignments.id')->whereNotNull('submitted_at');
+                $query->from('assignment_submissions')
+                    ->join('students', 'students.id', '=', 'assignment_submissions.student_id')
+                    ->selectRaw('count(distinct assignment_submissions.student_id)')
+                    ->whereColumn('assignment_submissions.assignment_id', 'assignments.id')
+                    ->whereColumn('students.classroom_id', 'assignments.classroom_id')
+                    ->where('students.status', 'active')
+                    ->whereNotNull('assignment_submissions.submitted_at');
             }, 'submissions_count')
             ->latest('assignments.due_date')
             ->paginate(20)
             ->withQueryString();
 
+        $assignmentSummary = ['active' => 0, 'closed' => 0, 'completed' => 0, 'cancelled' => 0];
+        DB::table('assignments')->where('teacher_id', $teacher->id)->get(['id', 'classroom_id', 'status', 'due_date'])->each(function ($assignment) use (&$assignmentSummary) {
+            if ($assignment->status === 'cancelled') {
+                $assignmentSummary['cancelled']++;
+                return;
+            }
+            $studentsTotal = DB::table('students')->where('classroom_id', $assignment->classroom_id)->where('status', 'active')->count();
+            $submissions = DB::table('assignment_submissions')
+                ->join('students', 'students.id', '=', 'assignment_submissions.student_id')
+                ->where('assignment_submissions.assignment_id', $assignment->id)
+                ->where('students.classroom_id', $assignment->classroom_id)
+                ->where('students.status', 'active')
+                ->whereNotNull('assignment_submissions.submitted_at')
+                ->distinct('assignment_submissions.student_id')
+                ->count('assignment_submissions.student_id');
+            if ($studentsTotal > 0 && $submissions >= $studentsTotal) {
+                $assignmentSummary['completed']++;
+                return;
+            }
+            $isClosed = $assignment->due_date && \Illuminate\Support\Carbon::parse($assignment->due_date)->startOfDay()->lte(today());
+            $assignmentSummary[$isClosed ? 'closed' : 'active']++;
+        });
+        $assignmentSummary = collect($assignmentSummary);
+
         $classrooms = Classroom::whereIn('id', $this->assignedClassroomIds($teacher))->orderBy('name')->get();
 
-        return view('teacher.assignments.index', compact('rows', 'classrooms', 'filters'));
+        return view('teacher.assignments.index', compact('rows', 'classrooms', 'filters', 'assignmentSummary'));
     }
 
     public function create(Request $request): View
@@ -146,6 +189,38 @@ class AssignmentController extends Controller
         AuditService::record('updated', 'assignments');
 
         return redirect()->route('teacher.assignments.index')->with('success', 'تم تحديث الواجب.');
+    }
+
+    public function cancel(Request $request, int $assignment): RedirectResponse
+    {
+        $teacher = $this->teacher($request);
+        $row = DB::table('assignments')->where('id', $assignment)->first();
+        abort_unless($row && (int) $row->teacher_id === $teacher->id, 404);
+        abort_unless($row->due_at && \Illuminate\Support\Carbon::parse($row->due_at)->isPast(), 422, 'لا يمكن إلغاء واجب قبل موعد تسليمه.');
+        DB::table('assignments')->where('id', $assignment)->update(['status' => 'cancelled', 'updated_at' => now()]);
+        AuditService::record('cancelled', 'assignments');
+
+        return back()->with('success', 'تم إلغاء الواجب وإيقاف مشاركته.');
+    }
+
+    public function destroy(Request $request, int $assignment): RedirectResponse
+    {
+        $teacher = $this->teacher($request);
+        $row = DB::table('assignments')->where('id', $assignment)->first();
+        abort_unless($row && (int) $row->teacher_id === $teacher->id, 404);
+
+        $attachments = AssignmentAttachment::where('assignment_id', $assignment)->get();
+        foreach ($attachments as $attachment) {
+            Storage::disk($attachment->disk ?: 'local')->delete($attachment->path ?: $attachment->file_path);
+        }
+        DB::transaction(function () use ($assignment): void {
+            AssignmentAttachment::where('assignment_id', $assignment)->delete();
+            DB::table('assignment_submissions')->where('assignment_id', $assignment)->delete();
+            DB::table('assignments')->where('id', $assignment)->delete();
+        });
+        AuditService::record('deleted', 'assignments');
+
+        return redirect()->route('teacher.assignments.index')->with('success', 'تم حذف الواجب.');
     }
 
     private function uploadedFiles(Request $request): array

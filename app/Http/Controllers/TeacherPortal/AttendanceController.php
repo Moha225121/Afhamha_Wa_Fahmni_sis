@@ -26,9 +26,11 @@ class AttendanceController extends Controller
         $classroomId = $request->classroom_id && in_array((int) $request->classroom_id, $classroomIds->all(), true)
             ? (int) $request->classroom_id
             : null;
+        $search = trim((string) $request->query('q', ''));
 
-        $students = Student::with('user')
+        $students = Student::with(['user', 'classroom'])
             ->when($classroomId, fn ($q) => $q->where('classroom_id', $classroomId), fn ($q) => $q->whereIn('classroom_id', $classroomIds))
+            ->when($search !== '', fn ($q) => $q->whereHas('user', fn ($users) => $users->where('name', 'like', '%'.$search.'%')))
             ->where('status', 'active')
             ->orderBy('student_number')
             ->get();
@@ -38,7 +40,7 @@ class AttendanceController extends Controller
 
         $classrooms = Classroom::whereIn('id', $classroomIds)->get();
 
-        return view('teacher.attendance.index', compact('students', 'records', 'date', 'classroomId', 'classrooms', 'attendanceSummary'));
+        return view('teacher.attendance.index', compact('students', 'records', 'date', 'classroomId', 'classrooms', 'attendanceSummary', 'search'));
     }
 
     public function store(Request $request): RedirectResponse

@@ -22,13 +22,48 @@ class LessonController extends Controller
     public function index(Request $request): View
     {
         $teacher = $this->teacher($request);
+        $filters = $request->validate([
+            'status' => ['nullable', 'in:draft,scheduled,published,cancelled'],
+            'classroom_id' => ['nullable', 'integer', 'exists:classrooms,id'],
+            'published_at' => ['nullable', 'date', 'date_format:Y-m-d'],
+        ]);
+        $classroomIds = $this->assignedClassroomIds($teacher);
         $lessons = Lesson::query()
             ->with(['subject', 'unit', 'attachments'])
             ->where('teacher_id', $teacher->id)
+            ->when(! empty($filters['classroom_id']) && $classroomIds->contains((int) $filters['classroom_id']), fn ($query) => $query->where('classroom_id', $filters['classroom_id']))
+            ->when(! empty($filters['published_at']), fn ($query) => $query->whereDate('published_at', $filters['published_at']))
+            ->when(! empty($filters['status']), function ($query) use ($filters) {
+                if ($filters['status'] === 'draft') {
+                    $query->where('status', 'draft');
+                } elseif ($filters['status'] === 'cancelled') {
+                    $query->where('status', 'cancelled');
+                } elseif ($filters['status'] === 'scheduled') {
+                    $query->where('status', 'published')->where('published_at', '>', now());
+                } else {
+                    $query->where('status', 'published')->where('published_at', '<=', now());
+                }
+            })
             ->latest()
-            ->paginate(15);
+            ->paginate(15)
+            ->withQueryString();
 
-        return view('teacher.lessons.index', compact('teacher', 'lessons'));
+        $lessonSummary = ['draft' => 0, 'scheduled' => 0, 'published' => 0, 'cancelled' => 0];
+        Lesson::where('teacher_id', $teacher->id)->get(['status', 'published_at'])->each(function ($lesson) use (&$lessonSummary) {
+            if ($lesson->status === 'draft') {
+                $lessonSummary['draft']++;
+            } elseif ($lesson->status === 'cancelled') {
+                $lessonSummary['cancelled']++;
+            } elseif ($lesson->published_at?->isFuture()) {
+                $lessonSummary['scheduled']++;
+            } else {
+                $lessonSummary['published']++;
+            }
+        });
+        $lessonSummary = collect($lessonSummary);
+        $classrooms = Classroom::whereIn('id', $classroomIds)->orderBy('name')->get();
+
+        return view('teacher.lessons.index', compact('teacher', 'lessons', 'filters', 'lessonSummary', 'classrooms'));
     }
 
     public function create(Request $request): View
@@ -61,6 +96,13 @@ class LessonController extends Controller
         $teacher = $this->teacher($request);
         abort_unless((int) $lesson->teacher_id === (int) $teacher->id, 404);
         $data = $request->validated();
+        abort_if(
+            $data['status'] === 'draft'
+            && $lesson->status === 'published'
+            && $lesson->published_at?->isPast(),
+            422,
+            'لا يمكن حفظ الدرس المنشور كمسودة بعد موعد نشره.'
+        );
         $this->assertPair($teacher, $data);
         $lesson->update($this->lessonData($data, $teacher->id));
         $this->storeAttachment($request, $lesson);
@@ -76,6 +118,16 @@ class LessonController extends Controller
         $lesson->update(['status' => 'published', 'published_at' => now()]);
 
         return back()->with('success', 'تم نشر الدرس.');
+    }
+
+    public function cancel(Request $request, Lesson $lesson): RedirectResponse
+    {
+        $teacher = $this->teacher($request);
+        abort_unless((int) $lesson->teacher_id === (int) $teacher->id, 404);
+        abort_unless($lesson->published_at?->isPast(), 422, 'لا يمكن إلغاء درس قبل موعد نشره.');
+        $lesson->update(['status' => 'cancelled']);
+
+        return back()->with('success', 'تم إلغاء الدرس وإيقاف مشاركته.');
     }
 
     public function destroy(Request $request, Lesson $lesson): RedirectResponse

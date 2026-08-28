@@ -16,7 +16,7 @@
 <div class="grade-sheet-page">
     <div class="grade-top-row">
         <div class="grade-headline">
-            <div><span class="eyebrow">سجل الأداء الأكاديمي</span><h2>درجات الطلاب</h2></div>
+            <div><span class="eyebrow">سجل الأداء الأكاديمي</span><h2>درجات الطلاب</h2><div class="grade-context"><span>{{ $classroom?->name ?? 'لم يتم اختيار صف' }}{{ $classroom?->section ? ' · '.$classroom->section : '' }}</span><span>{{ $students->count() }} طالب</span></div></div>
             <form method="get" action="{{ route('teacher.grades.index') }}" class="grade-filter-form">
                 <select name="classroom_id" class="mini-select" onchange="this.form.submit()">
                     <option value="">اختر الصف</option>
@@ -30,12 +30,12 @@
         </div>
 
         <div class="grade-actions">
-            <button type="button" class="btn secondary" id="add-grade-column">إضافة عمود</button>
-            <button type="button" class="btn primary" id="save-grade-sheet">حفظ التغييرات</button>
+            <button type="button" class="btn secondary" id="add-grade-column" @disabled(! $classroom)>إضافة عمود</button>
+            <button type="button" class="btn primary" id="save-grade-sheet" @disabled(! $classroom)>حفظ التغييرات</button>
         </div>
     </div>
     <div class="form-hint grade-instructions">
-        يمكنك اضافة وتسمية كل عمود حسب نظام الدرجات المعتمد  في المدرسة، وتحديد الدرجة القصوى الخاصة به. أدخل درجات الطلاب ضمن الحد المحدد، ويمكنك حذف أي عمود غير مطلوب باستخدام زر الحذف.
+        أضف أعمدة التقييم وحدد الدرجة القصوى، ثم أدخل درجات الطلاب. يتم تحديث المتوسط تلقائيًا ويمكن حفظ التغييرات للصف المحدد.
     </div>
 
     @if($classroom)
@@ -75,43 +75,11 @@
             { key: 'activity', title: 'نشاط', weight: 20, max_score: 100, grades: {} }
         ];
 
-        const storageKey = 'teacherGradeSheet_' + classroomId;
-
         function hasVisibleColumns(columns) {
             return Array.isArray(columns) && columns.length > 0;
         }
 
-        function readSavedColumns() {
-            try {
-                const raw = localStorage.getItem(storageKey);
-                if (!raw) return null;
-                const parsed = JSON.parse(raw);
-                if (Array.isArray(parsed.columns) && parsed.columns.length) {
-                    return parsed.columns;
-                }
-            } catch (error) {
-                console.warn('Unable to read saved sheet', error);
-            }
-            return null;
-        }
-
-        function saveState(columns) {
-            localStorage.setItem(storageKey, JSON.stringify({ columns }));
-        }
-
         function buildColumnState() {
-            const saved = readSavedColumns();
-            // priority: client localStorage (teacher temporary view) -> server saved sheet -> defaults
-            if (saved && hasVisibleColumns(saved)) {
-                return saved.map((column, index) => ({
-                    key: column.key || 'column_' + index,
-                    title: column.title || 'عمود جديد',
-                    weight: Number(column.weight) > 0 ? Number(column.weight) : 20,
-                    max_score: Number(column.max_score) > 0 ? Number(column.max_score) : 100,
-                    grades: { ...(serverColumnScores[column.key] || {}), ...(column.grades || {}) }
-                }));
-            }
-
             if (Array.isArray(serverColumns) && serverColumns.length) {
                 return serverColumns.map((column, index) => ({
                     key: column.key || 'column_' + index,
@@ -257,7 +225,7 @@
                 button.addEventListener('click', function () {
                     const index = Number(this.dataset.columnIndex);
                     if (state.columns.length <= 1) {
-                        saveStatus.textContent = 'يجب оставить عمود واحد على الأقل.';
+                        saveStatus.textContent = 'يجب إبقاء عمود واحد على الأقل.';
                         saveStatus.classList.add('show');
                         setTimeout(() => saveStatus.classList.remove('show'), 2000);
                         return;
@@ -289,14 +257,10 @@
                 max_score: 100,
                 grades: {}
             });
-            saveState(state.columns);
             renderTable();
         });
 
         document.getElementById('save-grade-sheet')?.addEventListener('click', function () {
-            // persist sheet columns to localStorage and to server as sheet definition + computed scores
-            saveState(state.columns);
-
             const payload = {
                 classroom_id: Number(classroomId),
                 sheet_columns: state.columns.map(c => ({ key: c.key, title: c.title, max_score: c.max_score })),
@@ -579,6 +543,35 @@
         padding: 18px;
         color: #64748b;
         text-align: center;
+    }
+</style>
+<style>
+    .teacher-portal .grade-sheet-page { gap: 14px; }
+    .teacher-portal .grade-top-row { align-items: center; margin-bottom: 0; padding: 18px 22px; border-color: #d7e8e5; background: rgba(255, 255, 255, .96); }
+    .teacher-portal .grade-headline { gap: 18px; }
+    .teacher-portal .grade-headline h2 { font-size: 21px; }
+    .teacher-portal .grade-context { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 9px; color: #64748b; font-size: 12px; font-weight: 700; }
+    .teacher-portal .grade-context span { padding: 4px 9px; border: 1px solid #d7e8e5; border-radius: 999px; background: #f3faf9; }
+    .teacher-portal .grade-actions { gap: 8px; }
+    .teacher-portal .grade-actions .btn { min-height: 42px; }
+    .teacher-portal .grade-actions .btn:disabled { cursor: not-allowed; opacity: .5; transform: none; box-shadow: none; }
+    .teacher-portal .grade-instructions { margin: 0; padding: 11px 14px; }
+    .teacher-portal .grade-panel { border-color: #d7e8e5; box-shadow: 0 10px 26px rgba(15, 23, 42, .05); }
+    .teacher-portal .grade-grid-wrap { max-height: min(65vh, 680px); padding: 6px; border: 0; border-radius: 0; box-shadow: none; }
+    .teacher-portal .grade-grid { min-width: 880px; }
+    .teacher-portal .grade-grid th, .teacher-portal .grade-grid td { padding: 10px 12px; }
+    .teacher-portal .grade-grid thead th { background: #eff8f7; }
+    .teacher-portal .grade-grid .student-col { background: #e5f4f1; }
+    .teacher-portal .grade-grid .student-name { background: #fff; }
+    .teacher-portal .grade-grid .avg-col, .teacher-portal .grade-grid .avg-cell { background: #fff9eb; }
+    .teacher-portal .grade-grid tbody tr:hover .student-name { background: #f7fbfb; }
+    .teacher-portal .grade-input { min-height: 38px; }
+    .teacher-portal .grade-empty { padding: 44px 20px; }
+
+    @media (max-width: 600px) {
+        .teacher-portal .grade-top-row { padding: 16px; }
+        .teacher-portal .grade-headline h2 { font-size: 19px; }
+        .teacher-portal .grade-grid-wrap { max-height: 58vh; }
     }
 </style>
 @endsection

@@ -6,7 +6,7 @@
 @csrf @if($lesson->exists) @method('put') @endif
 @php($pairsByClassroom = $pairs->groupBy('classroom_id')->map(fn ($items) => $items->pluck('subject_id')->values())->all())
 <div class="form-grid">
-<label><span class="label-head">المادة</span><select name="subject_id" id="lesson-subject" required><option value="">اختر المادة</option>@foreach($subjects as $subject)<option value="{{ $subject->id }}" @selected(old('subject_id', $lesson->subject_id) == $subject->id)>{{ $subject->name }}</option>@endforeach</select></label>
+<label><span class="label-head">المادة</span><select name="subject_id" id="lesson-subject" required><option value="">اختر المادة</option>@foreach($subjects as $subject)<option value="{{ $subject->id }}" @selected(old('subject_id', $lesson->subject_id) == $subject->id)>{{ $subject->name }} - {{ $subject->code }}</option>@endforeach</select></label>
 <label><span class="label-head">الصف</span><select name="classroom_id" id="lesson-classroom" required><option value="">اختر الصف</option>@foreach($classrooms as $classroom)<option value="{{ $classroom->id }}" data-subjects="{{ implode(',', ($pairsByClassroom[$classroom->id] ?? collect())->all()) }}" @selected(old('classroom_id', $lesson->classroom_id) == $classroom->id)>{{ $classroom->name }} {{ $classroom->section }}</option>@endforeach</select></label>
 <label style="grid-column:1/-1"><span class="label-head">عنوان الدرس</span><input name="title" required value="{{ old('title', $lesson->title) }}"></label>
 <label><span class="label-head">الوحدة</span><input name="unit_title" value="{{ old('unit_title', $lesson->unit?->title) }}" placeholder="مثال: الوحدة الأولى"></label>
@@ -14,8 +14,10 @@
 <label><span class="label-head">موعد نشر الدرس</span><input type="datetime-local" name="published_at" value="{{ old('published_at', $lesson->published_at?->format('Y-m-d\TH:i')) }}"><small class="muted">اتركه فارغًا للنشر فورًا</small></label>
 <label style="grid-column:1/-1"><span class="label-head">مرفقات الدرس</span><input type="file" name="attachments[]" multiple accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.jpg,.jpeg,.png,.mp4">@if($lesson->exists && $lesson->attachments->isNotEmpty())<small class="muted">المرفقات الحالية: {{ $lesson->attachments->count() }}. يمكنك إضافة ملفات أخرى.</small>@endif</label>
 </div>
-<div class="form-actions"><a class="btn secondary" href="{{ route('teacher.lessons.index') }}">إلغاء</a><div class="lesson-actions"><button class="btn secondary" type="submit" name="status" value="draft">حفظ كمسودة</button><button class="btn primary" type="submit" name="status" value="published">{{ $lesson->exists && $lesson->status === 'published' ? 'تحديث الدرس' : 'نشر الدرس' }}</button></div></div>
+@php($pastPublishedLesson = $lesson->exists && $lesson->status === 'published' && $lesson->published_at?->isPast())
+<div class="form-actions"><a class="btn secondary" href="{{ route('teacher.lessons.index') }}">العودة إلى الدروس</a><div class="lesson-actions">@if(! $pastPublishedLesson)<button class="btn secondary" type="submit" name="status" value="draft">حفظ كمسودة</button>@endif<button class="btn primary" type="submit" name="status" value="published">{{ $lesson->exists && $lesson->status === 'published' ? 'تعديل' : 'نشر الدرس' }}</button></div></div>
 </form>
+@if($pastPublishedLesson)<form class="form-actions teacher-cancel-form" method="post" action="{{ route('teacher.lessons.cancel', $lesson) }}">@csrf @method('patch')<button class="btn secondary" type="submit" data-confirm="هل أنت متأكد من إلغاء هذا الدرس؟">إلغاء</button></form>@endif
 @section('scripts')
 <script>
 (function () {

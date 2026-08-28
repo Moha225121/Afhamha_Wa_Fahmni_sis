@@ -34,7 +34,16 @@ class DashboardController extends Controller
             'attendance_rate' => $attendanceRate ?? 0,
             'draft_exams' => DB::table('exams')->where('teacher_id', $teacher->id)->where('status', 'draft')->count(),
             'active_assignments' => DB::table('assignments')->where('teacher_id', $teacher->id)->whereIn('status', ['active', 'published'])->count(),
-            'lessons' => DB::table('lessons')->where('teacher_id', $teacher->id)->count(),
+            'lessons' => DB::table('lessons')
+                ->where('teacher_id', $teacher->id)
+                ->where(function ($query) {
+                    $query->where('status', 'draft')
+                        ->orWhere(function ($query) {
+                            $query->where('status', 'published')
+                                ->where('published_at', '>', now());
+                        });
+                })
+                ->count(),
         ];
 
         $upcomingExams = DB::table('exams')

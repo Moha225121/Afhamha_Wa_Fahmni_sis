@@ -7,9 +7,11 @@
 <form class="filters" method="get" action="{{ route('teacher.exams.index') }}">
     <label><span class="label-head">الصف</span><select name="classroom_id"><option value="">كل الصفوف</option>@foreach($classrooms as $classroom)<option value="{{ $classroom->id }}" @selected(($filters['classroom_id'] ?? '') == $classroom->id)>{{ $classroom->name }} {{ $classroom->section }}</option>@endforeach</select></label>
     <label><span class="label-head">تاريخ الاختبار</span><input type="date" name="starts_at" value="{{ $filters['starts_at'] ?? '' }}"></label>
+    <label><span class="label-head">الحالة</span><select name="status"><option value="">كل الحالات</option><option value="draft" @selected(($filters['status'] ?? '') === 'draft')>مسودة</option><option value="scheduled" @selected(($filters['status'] ?? '') === 'scheduled')>مجدولة</option><option value="published" @selected(($filters['status'] ?? '') === 'published')>منشورة</option><option value="completed" @selected(($filters['status'] ?? '') === 'completed')>مكتملة</option><option value="cancelled" @selected(($filters['status'] ?? '') === 'cancelled')>ملغاة</option></select></label>
     <button class="btn primary" type="submit">تصفية</button>
     <a class="btn secondary" href="{{ route('teacher.exams.index') }}">إعادة ضبط</a>
 </form>
+<section class="attendance-summary status-summary" aria-label="ملخص الاختبارات"><article><span>مسودة</span><strong>{{ $examSummary['draft'] }}</strong></article><article><span>مجدولة</span><strong>{{ $examSummary['scheduled'] }}</strong></article><article><span>منشورة</span><strong>{{ $examSummary['published'] }}</strong></article><article><span>ملغاة</span><strong>{{ $examSummary['cancelled'] }}</strong></article></section>
 <div class="table-wrap">
 <table class="exam-table">
 <thead><tr><th>الاختبار</th><th>المادة</th><th>الصف</th><th>التاريخ</th><th>الأسئلة</th><th>الحالة</th><th>الإجراءات</th></tr></thead>
@@ -21,7 +23,10 @@
     $statusLabel = 'مسودة';
     $statusClass = 'status-draft';
 
-    if ($r->status === 'completed') {
+    if ($r->status === 'cancelled') {
+        $statusLabel = 'ملغي';
+        $statusClass = 'status-cancelled';
+    } elseif ($r->status === 'completed') {
         $statusLabel = 'مكتمل';
         $statusClass = 'status-complete';
     } elseif ($isPassed && in_array($r->status, ['scheduled', 'published'], true)) {
@@ -54,10 +59,11 @@
 @else
 <span class="muted-inline">—</span>
 @endif
+@if($r->status !== 'cancelled' && $isPassed)<form method="post" action="{{ route('teacher.exams.cancel', $r->id) }}">@csrf @method('patch')<button type="submit" class="teacher-delete-action" title="إلغاء الاختبار" aria-label="إلغاء الاختبار" data-confirm="هل أنت متأكد من إلغاء هذا الاختبار؟">إلغاء</button></form>@endif
 <form method="post" action="{{ route('teacher.exams.destroy', $r->id) }}">
     @csrf
     @method('delete')
-    <button type="submit" class="link-danger teacher-delete-action" data-confirm="هل أنت متأكد أنك تريد حذف هذا الاختبار؟">حذف</button>
+    <button type="submit" class="delete-column-btn teacher-delete-action" title="حذف الاختبار" aria-label="حذف الاختبار" data-confirm="هل أنت متأكد أنك تريد حذف هذا الاختبار؟">×</button>
 </form>
     </div>
 </td>
