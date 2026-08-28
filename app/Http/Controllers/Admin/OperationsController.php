@@ -250,7 +250,9 @@ class OperationsController extends Controller
     {
         $row = DB::table('library_resources')->find($id);
         abort_unless($row, 404);
-        $disk = in_array($row->disk ?? 'public', ['local', 'public'], true) ? ($row->disk ?? 'public') : 'public';
+        $disk = in_array($row->disk ?? null, ['local', 'public'], true)
+            ? $row->disk
+            : ($row->is_public ? 'public' : 'local');
         Storage::disk($disk)->delete($row->file_path);
         DB::table('library_resources')->where('id', $id)->delete();
         AuditService::record('deleted', 'library');

@@ -31,6 +31,7 @@ return Application::configure(basePath: dirname(__DIR__))
             return route(match (true) {
                 $user?->isParent() => 'parent.dashboard',
                 $user?->isStudent() => 'student.dashboard',
+                $user?->isTeacher() => 'teacher.assignments.index',
                 default => 'admin.dashboard',
             });
         });

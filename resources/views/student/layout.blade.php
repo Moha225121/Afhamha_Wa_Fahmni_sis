@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="theme-color" content="#0e7c86">
-    <title>@yield('title', 'بوابة الطالب') | افهمها وفهمني</title>
+    <title>{{ strip_tags($__env->yieldContent('title', 'بوابة الطالب')) }} | افهمها وفهمني</title>
     <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="any">
     <link rel="apple-touch-icon" href="{{ asset('icons/parent-icon-192.png') }}">
     <link rel="stylesheet" href="{{ asset('css/parent.css') }}?v=portal-style-1">

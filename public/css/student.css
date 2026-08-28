@@ -1359,6 +1359,7 @@ html {
         bottom: auto;
         transform: none;
         align-self: stretch;
+        animation: none;
         flex-direction: column;
         align-items: stretch;
         gap: 7px;

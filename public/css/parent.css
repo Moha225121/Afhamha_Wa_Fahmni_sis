@@ -355,6 +355,14 @@ button {
     transition: transform .18s var(--motion-ease), color .18s ease;
 }
 
+.teacher-portal .logout-form button {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--ink);
+    padding: 8px 11px;
+}
+
 .teacher-portal .action-link {
     border-radius: 8px;
     background: var(--primary);
