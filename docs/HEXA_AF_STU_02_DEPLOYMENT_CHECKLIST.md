@@ -9,7 +9,7 @@
 - [ ] مراجعة `docs/HEXA_SHARED_EXAM_SCHEMA.md` واعتماد عقد أنواع الأسئلة والاختيارات ومفتاح الإجابة.
 - [ ] اعتماد سياسة عدد المحاولات؛ القيمة الافتراضية الحالية محاولة واحدة وليست قرارًا إداريًا نهائيًا.
 - [ ] تحديد الجهة التشغيلية المعتمدة لإنشاء الواجبات وربطها بجدولي `assignments` ومرفقاتها.
-- [ ] اعتماد إنشاء `assignment_attachments` داخل `database/migrations/2026_08_23_000003_create_student_academic_tables.php` وخطة التوافق مع `assignments.attachment_path` القديم.
+- [ ] اعتماد الإضافات غير المدمرة إلى جداول مرفقات الواجبات في `database/migrations/2026_08_28_000001_add_student_file_metadata_to_assignment_attachments.php`.
 - [ ] اعتماد آلية تتبع مصدر الدرجة قبل أي مزامنة للنتائج الآلية إلى `grades`.
 - [ ] تأكيد اسم المهندس المعتمد للتكليف `HEXA-AF-STU-02` في تقرير الساعات وطلب الدمج.
 - [ ] التأكد من عدم وجود جداول أو Models مكررة للواجبات أو أسئلة الاختبارات بعد تسوية الفروع.
@@ -18,9 +18,9 @@
 
 - [ ] مراجعة `git status --short` وفهم كل ملف معدل أو جديد قبل إعداد حزمة النشر.
 - [ ] تشغيل `git diff --check` والتأكد من نجاحه.
-- [ ] تشغيل `composer validate --no-check-publish` والتأكد من نجاحه.
+- [ ] تشغيل `composer validate --no-check-publish` والتأكد من نجاحه؛ النتيجة المثبتة في جولة الدمج الحالية `PASSED`.
 - [ ] تثبيت Dependencies من `composer.lock` باستخدام أمر مناسب لبيئة الإنتاج، مثل `composer install --no-dev --prefer-dist --optimize-autoloader`.
-- [ ] تشغيل PHP lint لكل ملفات PHP المعدلة.
+- [ ] تشغيل PHP lint لكل ملفات PHP التي يعيدها `rg`؛ خط الأساس المثبت في جولة الدمج الحالية هو `357 / 357` ملفًا ناجحًا.
 - [ ] التأكد من عدم تضمين `.env` أو `.env.testing` أو أسرار أو سجلات أو ملفات إعداد PHP محلية في الحزمة.
 - [ ] التأكد من عدم اعتماد الشفرة أو الوثائق على مسار جهاز محلي.
 - [ ] التحقق من أن نسخة الاختبار ونسخة المصدر المقصودة للنشر تحملان HEAD نفسه وManifest SHA-256 متطابقًا لملفات المصدر.
@@ -34,7 +34,7 @@
 - [ ] ضبط `APP_ENV=production` و`APP_DEBUG=false` و`APP_URL` الصحيحين.
 - [ ] إعداد `APP_KEY` آمن وثابت وعدم تغييره على تثبيت قائم، لأن تغييره يبطل البيانات المشفرة والجلسات.
 - [ ] تشغيل `php artisan optimize:clear` بعد نشر الملفات وقبل إعادة بناء Cache.
-- [ ] تشغيل أوامر Cache المناسبة بعد ضبط البيئة، مثل `php artisan config:cache` و`php artisan route:cache` و`php artisan view:cache`.
+- [ ] تشغيل أوامر Cache المناسبة بعد ضبط البيئة، مثل `php artisan config:cache` و`php artisan route:cache` و`php artisan view:cache`؛ نجح `php artisan view:cache` في جولة الدمج الحالية.
 - [ ] التأكد من أن Middleware الطالب والمعلم ومسارات `routes/student.php` و`routes/teacher.php` محمّلة في التطبيق.
 
 ## PostgreSQL وMigrations
@@ -42,12 +42,12 @@
 - [ ] التأكد من أن `DB_CONNECTION=pgsql` وأن الاتصال يشير إلى قاعدة الإنتاج المقصودة، من دون طباعة كلمة المرور في السجل أو التقرير.
 - [ ] أخذ نسخة احتياطية قابلة للاستعادة قبل تشغيل Migrations المعتمدة.
 - [ ] اختبار الاستعادة من النسخة الاحتياطية أو التحقق من صلاحيتها وفق سياسة التشغيل.
-- [ ] مراجعة خطة تنفيذ ورجوع كل Migration جديدة، ولا سيما `database/migrations/2026_08_23_000003_create_student_academic_tables.php` التي تنشئ `assignment_attachments` والجداول الأكاديمية الجديدة.
+- [ ] مراجعة خطة تنفيذ ورجوع كل Migration جديدة؛ Migration الطالب تنشئ جداول محاولات الاختبار فقط، بينما تبقى جداول الواجبات المشتركة مملوكة لمخطط `main`.
 - [ ] تشغيل `php artisan migrate:status` وتسجيل الحالة قبل التطبيق.
 - [ ] تطبيق Migrations المعتمدة فقط باستخدام `php artisan migrate --force` ضمن نافذة النشر المعتمدة.
 - [ ] تشغيل `php artisan migrate:status` بعد التطبيق والتأكد من اكتمالها.
 - [ ] عدم تشغيل `migrate:fresh` على الإنتاج تحت أي ظرف.
-- [ ] عدم حذف `assignments.attachment_path` أو أي بيانات قديمة قبل اكتمال مسار الترحيل والتوافق الرجعي المعتمد.
+- [ ] عدم حذف أو إعادة تسمية أعمدة جداول الواجبات المشتركة أو أي بيانات قديمة؛ الإضافات الجديدة تقتصر على metadata غير مدمرة.
 - [ ] التحقق من سلامة المفاتيح الأجنبية والفهارس والقيود الفريدة بعد التطبيق.
 - [ ] إبقاء النتيجة الآلية المرجعية في `exam_attempts`؛ لا تكتبها إلى `grades` قبل اعتماد مصدر قابل للتتبع.
 
@@ -108,9 +108,14 @@
 
 - [ ] `composer validate --no-check-publish` ناجح.
 - [ ] `php artisan optimize:clear` ناجح.
-- [ ] `php artisan migrate:fresh --env=testing --force` ناجح على قاعدة Testing المعزولة فقط.
-- [ ] `php artisan test tests/Feature/StudentAcademicPortalTest.php --env=testing` ناجح، ولا يقل العدد عن 39 اختبارًا.
-- [ ] `php artisan test --env=testing` ناجح، ولا يقل العدد عن 57 اختبارًا.
+- [ ] `php artisan migrate:fresh --env=testing --force` ناجح على قاعدة Testing المعزولة فقط، مع تنفيذ `12 / 12` Migration.
+- [ ] تشغيل `php artisan migrate --env=testing --force` بعد `migrate:fresh` يعيد `Nothing to migrate`.
+- [ ] محاكاة الترقية من مخطط `origin/main` ناجحة، مع بقاء أعداد ومعرّفات السجلات القائمة دون تغيير.
+- [ ] `php artisan test tests/Feature/StudentAcademicPortalTest.php tests/Feature/ParentPortalTest.php --env=testing` ناجح: `88 / 88` اختبارًا و`291` Assertion خلال `41.504s`.
+- [ ] `php artisan test --env=testing` ناجح: `143 / 143` اختبارًا و`750` Assertion خلال `49.351s`.
+- [ ] تدقيق Routes ناجح: `134` مسارًا، منها `132` باسم، و`0` أسماء مكررة.
+- [ ] `php artisan view:cache` ناجح لجميع Blade views.
+- [ ] Laravel Pint بوضع `--test` ناجح على ملفات PHP الـ`51` ضمن نطاق الدمج.
 - [ ] اختبارات المرفقات المتعددة، Snapshot، سياسة المحاولات، `pending_review`، Scheduler، والحدود بين الطلاب والمعلمين ناجحة.
 - [ ] `git diff --check` ناجح بعد الاختبارات.
 - [ ] حفظ الأوامر والأعداد وAssertions والمدة والإخفاقات الفعلية في تقرير القبول؛ لا تسجل نتيجة لم تُنفذ.
@@ -139,7 +144,7 @@
 ## ما بعد النشر والرجوع
 
 - [ ] التحقق من صحة عدد Migrations والجداول وعدم وجود جدول أسئلة أو واجبات مكرر.
-- [ ] التحقق من أن البيانات القديمة، ومنها مرفق الواجب الفردي، ما زالت قابلة للقراءة خلال فترة التوافق.
+- [ ] التحقق من أن بيانات الواجبات ومرفقاتها وتسليماتها السابقة ما زالت قابلة للقراءة، وأن أعدادها ومعرّفاتها ثابتة بعد الترقية.
 - [ ] توثيق وقت النشر والإصدار وHEAD واسم منفذ النشر من دون تسجيل أسرار.
 - [ ] إبقاء النسخة الاحتياطية متاحة حتى انتهاء فترة المراقبة المعتمدة.
 - [ ] عند الحاجة إلى الرجوع، أوقف الكتابة أولًا واتبع خطة الاستعادة المعتمدة؛ لا تستخدم `migrate:fresh` أو أوامر Git مدمرة.
@@ -155,4 +160,6 @@
 - `app/Services/ExamAttemptService.php`
 - `app/Http/Controllers/StudentPortal/AcademicController.php`
 - `database/migrations/2026_08_23_000003_create_student_academic_tables.php`
+- `database/migrations/2026_08_28_000001_add_student_file_metadata_to_assignment_attachments.php`
 - `tests/Feature/StudentAcademicPortalTest.php`
+- `tests/Feature/ParentPortalTest.php`

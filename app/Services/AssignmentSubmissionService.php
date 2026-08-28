@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Assignment;
 use App\Models\AssignmentSubmission;
+use App\Models\AssignmentSubmissionAttachment;
 use App\Models\Student;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
@@ -27,14 +28,14 @@ class AssignmentSubmissionService
         $originalName = Str::limit($originalName, 255, '');
 
         try {
-            [$submission, $oldPath] = DB::transaction(function () use ($assignment, $student, $path, $originalName, $file, $notes): array {
+            [$submission, $oldFile] = DB::transaction(function () use ($assignment, $student, $path, $originalName, $file, $notes): array {
                 $lockedAssignment = Assignment::query()->lockForUpdate()->findOrFail($assignment->id);
                 if ($lockedAssignment->classroom_id !== $student->classroom_id
-                    || $lockedAssignment->status !== 'published'
+                    || ! in_array($lockedAssignment->status, ['published', 'active'], true)
                     || ($lockedAssignment->published_at && $lockedAssignment->published_at->gt(now()))) {
                     throw ValidationException::withMessages(['file' => 'الواجب غير متاح لهذا الطالب.']);
                 }
-                if (now()->gte($lockedAssignment->due_at)) {
+                if ($lockedAssignment->due_at && now()->gte($lockedAssignment->due_at)) {
                     throw ValidationException::withMessages(['file' => 'انتهى موعد تسليم الواجب.']);
                 }
 
@@ -43,8 +44,12 @@ class AssignmentSubmissionService
                     ->where('student_id', $student->id)
                     ->lockForUpdate()
                     ->first();
-                $oldPath = $submission?->file_path;
-                $values = [
+                if ($submission && ($submission->graded_at || $submission->score !== null || $submission->status === 'graded')) {
+                    throw ValidationException::withMessages([
+                        'file' => 'لا يمكن استبدال التسليم بعد تصحيحه.',
+                    ]);
+                }
+                $submissionValues = [
                     'file_path' => $path,
                     'original_name' => $originalName,
                     'mime_type' => (string) $file->getMimeType(),
@@ -55,22 +60,70 @@ class AssignmentSubmissionService
                 ];
 
                 if ($submission) {
-                    $submission->update($values);
+                    $submission->update($submissionValues);
                 } else {
-                    $submission = AssignmentSubmission::query()->create($values + ['assignment_id' => $assignment->id, 'student_id' => $student->id]);
+                    $submission = AssignmentSubmission::query()->create($submissionValues + [
+                        'assignment_id' => $assignment->id,
+                        'student_id' => $student->id,
+                    ]);
                 }
 
-                return [$submission, $oldPath];
+                $attachment = AssignmentSubmissionAttachment::query()
+                    ->where('assignment_submission_id', $submission->id)
+                    ->orderByDesc('id')
+                    ->lockForUpdate()
+                    ->first();
+                $oldFile = $attachment ? [
+                    'disk' => $attachment->disk,
+                    'path' => $attachment->path,
+                ] : null;
+                $attachmentValues = [
+                    'disk' => 'local',
+                    'path' => $path,
+                    'original_name' => $originalName,
+                    'mime_type' => (string) $file->getMimeType(),
+                    'size' => (int) $file->getSize(),
+                ];
+
+                if ($attachment) {
+                    $attachment->update($attachmentValues);
+                } else {
+                    $submission->attachments()->create($attachmentValues);
+                }
+
+                return [$submission->load('fileAttachment'), $oldFile];
             });
         } catch (Throwable $exception) {
             Storage::disk('local')->delete($path);
             throw $exception;
         }
 
-        if ($oldPath && $oldPath !== $path) {
-            Storage::disk('local')->delete($oldPath);
+        if ($oldFile && $oldFile['path'] !== $path && $this->canDeleteSubmissionFile(
+            $oldFile['disk'],
+            $oldFile['path'],
+            $assignment,
+            $student,
+        )) {
+            Storage::disk($oldFile['disk'])->delete($oldFile['path']);
         }
 
         return $submission;
+    }
+
+    private function canDeleteSubmissionFile(
+        ?string $disk,
+        string $path,
+        Assignment $assignment,
+        Student $student,
+    ): bool {
+        $normalized = str_replace('\\', '/', $path);
+
+        return $disk === 'local'
+            && $normalized === $path
+            && ! str_contains($normalized, "\0")
+            && ! preg_match('#(^|/)\.\.(/|$)#', $normalized)
+            && ! str_starts_with($normalized, '/')
+            && ! preg_match('/^[a-z]:\//i', $normalized)
+            && str_starts_with($normalized, "assignment-submissions/{$assignment->id}/{$student->id}/");
     }
 }

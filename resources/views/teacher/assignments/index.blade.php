@@ -9,7 +9,7 @@
 <td>{{ $r->subject }}</td>
 <td>{{ $r->classroom }}</td>
 <td>{{ \Illuminate\Support\Carbon::parse($r->due_date)->format('Y-m-d') }}</td>
-<td>{{ $r->submissions_count }} / {{ $r->students_total }}</td>
+<td>{{ $r->submissions_count }} تسليم / {{ $r->students_total }}</td>
 <td><span class="badge {{ $r->status==='active'?'active':'inactive' }}">{{ $r->status==='active'?'نشط':'مغلق' }}</span></td>
 <td><a href="{{ route('teacher.assignments.edit',$r->id) }}">تعديل</a> · <a href="{{ route('teacher.assignments.submissions',$r->id) }}">التسليمات</a></td>
 </tr>

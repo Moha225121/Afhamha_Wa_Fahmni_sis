@@ -76,7 +76,13 @@ class StudentAcademicPortalTest extends TestCase
         $submission = AssignmentSubmission::firstOrFail();
         $this->assertSame($ctx['student']->id, $submission->student_id);
         $this->assertNotNull($submission->submitted_at);
-        Storage::disk('local')->assertExists($submission->file_path);
+        $attachment = $submission->fileAttachment()->firstOrFail();
+        Storage::disk('local')->assertExists($attachment->path);
+        $this->assertDatabaseHas('assignment_submission_attachments', [
+            'assignment_submission_id' => $submission->id,
+            'path' => $attachment->path,
+            'original_name' => 'answer.pdf',
+        ]);
     }
 
     public function test_submission_is_persisted_after_refresh(): void
@@ -94,11 +100,56 @@ class StudentAcademicPortalTest extends TestCase
         $ctx = $this->context('A8');
         $assignment = $this->assignment($ctx);
         $this->actingAs($ctx['student']->user)->post(route('student.assignments.submit', $assignment), ['file' => $this->pdf('first.pdf')]);
-        $firstPath = AssignmentSubmission::firstOrFail()->file_path;
+        $firstPath = AssignmentSubmission::firstOrFail()->fileAttachment()->firstOrFail()->path;
         $this->actingAs($ctx['student']->user)->post(route('student.assignments.submit', $assignment), ['file' => $this->pdf('second.pdf')]);
         $submission = AssignmentSubmission::firstOrFail();
-        $this->assertSame('second.pdf', $submission->original_name);
-        $this->assertNotSame($firstPath, $submission->file_path);
+        $attachment = $submission->fileAttachment()->firstOrFail();
+        $this->assertSame('second.pdf', $attachment->original_name);
+        $this->assertNotSame($firstPath, $attachment->path);
+        $this->assertDatabaseCount('assignment_submission_attachments', 1);
+    }
+
+    public function test_student_can_submit_assignment_without_deadline(): void
+    {
+        Storage::fake('local');
+        $ctx = $this->context('A8N');
+        $assignment = $this->assignment($ctx, ['due_at' => null]);
+
+        $this->actingAs($ctx['student']->user)
+            ->get(route('student.assignments.show', $assignment))
+            ->assertOk()
+            ->assertSeeText('بدون موعد نهائي');
+        $this->post(route('student.assignments.submit', $assignment), [
+            'file' => $this->pdf('no-deadline.pdf'),
+        ])->assertRedirect();
+
+        $this->assertDatabaseHas('assignment_submissions', [
+            'assignment_id' => $assignment->id,
+            'student_id' => $ctx['student']->id,
+        ]);
+    }
+
+    public function test_graded_submission_cannot_be_replaced_or_lose_its_manual_grade(): void
+    {
+        Storage::fake('local');
+        $ctx = $this->context('A8G');
+        $assignment = $this->assignment($ctx);
+        $submission = $this->submission($assignment, $ctx['student'], 'graded.pdf', 'graded.pdf');
+        $gradedAt = now()->subHour()->startOfSecond();
+        $submission->update(['score' => 8, 'graded_at' => $gradedAt]);
+
+        $originalPath = $submission->fileAttachment->path;
+        $this->actingAs($ctx['student']->user)->post(
+            route('student.assignments.submit', $assignment),
+            ['file' => $this->pdf('replacement.pdf')],
+        )->assertSessionHasErrors('file');
+
+        $submission->refresh();
+        $this->assertSame('8.00', $submission->score);
+        $this->assertTrue($submission->graded_at->equalTo($gradedAt));
+        $this->assertSame('graded.pdf', $submission->fileAttachment()->firstOrFail()->original_name);
+        Storage::disk('local')->assertExists($originalPath);
+        $this->assertDatabaseCount('assignment_submission_attachments', 1);
     }
 
     public function test_student_cannot_replace_another_students_submission(): void
@@ -109,8 +160,13 @@ class StudentAcademicPortalTest extends TestCase
         $assignment = $this->assignment($ctx);
         Storage::disk('local')->put('other/file.pdf', 'other');
         $foreign = $this->submission($assignment, $other, 'other/file.pdf', 'other.pdf');
+        $foreignPath = $foreign->fileAttachment->path;
         $this->actingAs($ctx['student']->user)->post(route('student.assignments.submit', $assignment), ['file' => $this->pdf('mine.pdf')]);
-        $this->assertDatabaseHas('assignment_submissions', ['id' => $foreign->id, 'student_id' => $other->id, 'file_path' => 'other/file.pdf']);
+        $this->assertDatabaseHas('assignment_submissions', ['id' => $foreign->id, 'student_id' => $other->id]);
+        $this->assertDatabaseHas('assignment_submission_attachments', [
+            'assignment_submission_id' => $foreign->id,
+            'path' => $foreignPath,
+        ]);
         $this->assertDatabaseCount('assignment_submissions', 2);
     }
 
@@ -123,6 +179,77 @@ class StudentAcademicPortalTest extends TestCase
         Storage::disk('local')->put('foreign.pdf', 'secret');
         $foreign = $this->submission($assignment, $other, 'foreign.pdf', 'foreign.pdf');
         $this->actingAs($ctx['student']->user)->get(route('student.assignments.submission-file', $foreign))->assertNotFound();
+    }
+
+    public function test_historical_main_submission_with_nullable_file_metadata_remains_downloadable(): void
+    {
+        Storage::fake('local');
+        $ctx = $this->context('A10H');
+        $assignment = $this->assignment($ctx);
+        $submission = AssignmentSubmission::create([
+            'assignment_id' => $assignment->id,
+            'student_id' => $ctx['student']->id,
+            'status' => 'submitted',
+            'submitted_at' => now(),
+        ]);
+        $path = "assignment-submissions/{$assignment->id}/{$ctx['student']->id}/legacy.pdf";
+        Storage::disk('local')->put($path, "%PDF-1.4\nhistorical submission");
+        $submission->attachments()->create([
+            'path' => $path,
+            'original_name' => 'legacy.pdf',
+            'mime_type' => null,
+            'size' => null,
+        ]);
+
+        $this->actingAs($ctx['student']->user)
+            ->get(route('student.assignments.show', $assignment))
+            ->assertOk()
+            ->assertSee(route('student.assignments.submission-file', $submission));
+        $this->get(route('student.assignments.submission-file', $submission))
+            ->assertOk()
+            ->assertDownload('legacy.pdf');
+        $this->actingAs($ctx['teacher']->user)
+            ->get(route('teacher.submissions.file', $submission))
+            ->assertOk()
+            ->assertDownload('legacy.pdf');
+    }
+
+    public function test_historical_submission_fallback_rejects_public_absolute_and_traversal_paths(): void
+    {
+        Storage::fake('local');
+        $ctx = $this->context('A10HS');
+        $assignment = $this->assignment($ctx);
+        $submission = AssignmentSubmission::create([
+            'assignment_id' => $assignment->id,
+            'student_id' => $ctx['student']->id,
+            'status' => 'submitted',
+            'submitted_at' => now(),
+        ]);
+        $attachment = $submission->attachments()->create([
+            'disk' => 'public',
+            'path' => 'historical/public.pdf',
+            'original_name' => 'public.pdf',
+            'mime_type' => 'application/pdf',
+            'size' => 10,
+        ]);
+
+        $this->actingAs($ctx['student']->user)
+            ->get(route('student.assignments.submission-file', $submission))
+            ->assertNotFound();
+
+        $attachment->update(['disk' => null, 'path' => 'C:/private/absolute.pdf']);
+        $this->get(route('student.assignments.submission-file', $submission))->assertNotFound();
+
+        $attachment->update(['path' => 'historical/../private.pdf']);
+        $this->get(route('student.assignments.submission-file', $submission))->assertNotFound();
+
+        Storage::disk('local')->put('library/unrelated-private.pdf', "%PDF-1.4\nunrelated private file");
+        $attachment->update([
+            'path' => 'library/unrelated-private.pdf',
+            'mime_type' => null,
+            'size' => null,
+        ]);
+        $this->get(route('student.assignments.submission-file', $submission))->assertNotFound();
     }
 
     public function test_invalid_file_type_is_rejected(): void
@@ -149,10 +276,10 @@ class StudentAcademicPortalTest extends TestCase
         $ctx = $this->context('A13');
         $assignment = $this->assignment($ctx);
         $this->actingAs($ctx['student']->user)->post(route('student.assignments.submit', $assignment), ['file' => $this->pdf('old.pdf')]);
-        $oldPath = AssignmentSubmission::firstOrFail()->file_path;
+        $oldPath = AssignmentSubmission::firstOrFail()->fileAttachment()->firstOrFail()->path;
         $this->actingAs($ctx['student']->user)->post(route('student.assignments.submit', $assignment), ['file' => $this->pdf('new.pdf')]);
         Storage::disk('local')->assertMissing($oldPath);
-        Storage::disk('local')->assertExists(AssignmentSubmission::firstOrFail()->file_path);
+        Storage::disk('local')->assertExists(AssignmentSubmission::firstOrFail()->fileAttachment()->firstOrFail()->path);
     }
 
     public function test_assignment_can_have_multiple_attachments(): void
@@ -210,21 +337,32 @@ class StudentAcademicPortalTest extends TestCase
         $ctx = $this->context('AM7');
         $assignment = $this->assignment($ctx);
         $attachment = $this->attachment($assignment, 'private.pdf');
-        Storage::disk('local')->assertExists($attachment->file_path);
-        Storage::disk('public')->assertMissing($attachment->file_path);
-        $this->actingAs($ctx['student']->user)->get(route('student.assignments.show', $assignment))->assertOk()->assertSee(route('student.assignments.attachments.file', $attachment))->assertDontSee('/storage/'.$attachment->file_path);
+        Storage::disk('local')->assertExists($attachment->path);
+        Storage::disk('public')->assertMissing($attachment->path);
+        $this->actingAs($ctx['student']->user)->get(route('student.assignments.show', $assignment))->assertOk()->assertSee(route('student.assignments.attachments.file', $attachment))->assertDontSee('/storage/'.$attachment->path);
         Storage::disk('public')->put("assignment-attachments/{$assignment->id}/public.pdf", 'public');
-        $publicAttachment = AssignmentAttachment::create(['assignment_id' => $assignment->id, 'disk' => 'public', 'file_path' => "assignment-attachments/{$assignment->id}/public.pdf", 'original_name' => 'public.pdf', 'mime_type' => 'application/pdf', 'file_size' => 6]);
+        $publicAttachment = AssignmentAttachment::create(['assignment_id' => $assignment->id, 'disk' => 'public', 'path' => "assignment-attachments/{$assignment->id}/public.pdf", 'original_name' => 'public.pdf', 'mime_type' => 'application/pdf', 'size' => 6]);
         $this->actingAs($ctx['student']->user)->get(route('student.assignments.attachments.file', $publicAttachment))->assertNotFound();
     }
 
-    public function test_legacy_single_assignment_attachment_remains_downloadable(): void
+    public function test_historical_main_assignment_attachment_remains_downloadable(): void
     {
         Storage::fake('local');
         $ctx = $this->context('AM8');
-        Storage::disk('local')->put('legacy/assignment.pdf', 'legacy');
-        $assignment = $this->assignment($ctx, ['attachment_path' => 'legacy/assignment.pdf']);
-        $this->actingAs($ctx['student']->user)->get(route('student.assignments.attachment', $assignment))->assertOk();
+        $assignment = $this->assignment($ctx);
+        $path = "assignment-attachments/{$assignment->id}/legacy.pdf";
+        Storage::disk('local')->put($path, "%PDF-1.4\nhistorical assignment");
+        $attachment = AssignmentAttachment::create([
+            'assignment_id' => $assignment->id,
+            'path' => $path,
+            'original_name' => 'legacy.pdf',
+            'mime_type' => null,
+            'size' => null,
+        ]);
+
+        $this->actingAs($ctx['student']->user)->get(route('student.assignments.attachment', $assignment))
+            ->assertOk()
+            ->assertDownload($attachment->original_name);
     }
 
     public function test_invalid_attachment_metadata_and_traversal_paths_are_rejected(): void
@@ -232,15 +370,48 @@ class StudentAcademicPortalTest extends TestCase
         Storage::fake('local');
         $ctx = $this->context('AM9');
         $assignment = $this->assignment($ctx);
-        $base = ['assignment_id' => $assignment->id, 'disk' => 'local', 'original_name' => 'unsafe.pdf', 'mime_type' => 'application/pdf', 'file_size' => 4];
+        $base = ['assignment_id' => $assignment->id, 'disk' => 'local', 'original_name' => 'unsafe.pdf', 'mime_type' => 'application/pdf', 'size' => 4];
         Storage::disk('local')->put("assignment-attachments/{$assignment->id}/mime.pdf", 'file');
-        $badMime = AssignmentAttachment::create(array_merge($base, ['file_path' => "assignment-attachments/{$assignment->id}/mime.pdf", 'mime_type' => 'application/x-php']));
+        $badMime = AssignmentAttachment::create(array_merge($base, ['path' => "assignment-attachments/{$assignment->id}/mime.pdf", 'mime_type' => 'application/x-php']));
         Storage::disk('local')->put("assignment-attachments/{$assignment->id}/large.pdf", 'file');
-        $oversized = AssignmentAttachment::create(array_merge($base, ['file_path' => "assignment-attachments/{$assignment->id}/large.pdf", 'file_size' => 10 * 1024 * 1024 + 1]));
-        $traversal = AssignmentAttachment::create(array_merge($base, ['file_path' => "assignment-attachments/{$assignment->id}/../secret.pdf"]));
+        $oversized = AssignmentAttachment::create(array_merge($base, ['path' => "assignment-attachments/{$assignment->id}/large.pdf", 'size' => 10 * 1024 * 1024 + 1]));
+        $traversal = AssignmentAttachment::create(array_merge($base, ['path' => "assignment-attachments/{$assignment->id}/../secret.pdf"]));
+        $absolute = AssignmentAttachment::create(array_merge($base, ['disk' => null, 'path' => 'C:/private/secret.pdf']));
         $this->actingAs($ctx['student']->user)->get(route('student.assignments.attachments.file', $badMime))->assertNotFound();
         $this->get(route('student.assignments.attachments.file', $oversized))->assertNotFound();
         $this->get(route('student.assignments.attachments.file', $traversal))->assertNotFound();
+        $this->get(route('student.assignments.attachments.file', $absolute))->assertNotFound();
+    }
+
+    public function test_submission_without_submitted_at_is_not_reported_as_delivered(): void
+    {
+        $ctx = $this->context('AS0');
+        $assignment = $this->assignment($ctx);
+        AssignmentSubmission::create([
+            'assignment_id' => $assignment->id,
+            'student_id' => $ctx['student']->id,
+            'status' => 'submitted',
+            'submitted_at' => null,
+        ]);
+
+        $this->actingAs($ctx['student']->user)
+            ->get(route('student.assignments.index'))
+            ->assertOk()
+            ->assertSeeText('متاح · لم يسلّم')
+            ->assertDontSeeText('تم التسليم');
+        $this->get(route('student.assignments.show', $assignment))
+            ->assertOk()
+            ->assertSeeText('لم يسلّم')
+            ->assertSeeText('تسليم الواجب')
+            ->assertDontSeeText('استبدال التسليم');
+
+        $this->actingAs($ctx['teacher']->user)
+            ->get(route('teacher.assignments.index'))
+            ->assertOk()
+            ->assertSeeText('0 تسليم');
+        $this->get(route('teacher.assignments.show', $assignment))
+            ->assertOk()
+            ->assertSeeText('لم يستلم هذا الواجب أي تسليم بعد.');
     }
 
     public function test_authorized_teacher_can_view_student_submission(): void
@@ -805,12 +976,31 @@ class StudentAcademicPortalTest extends TestCase
 
     private function assignment(array $ctx, array $overrides = []): Assignment
     {
-        return Assignment::create(array_merge(['title' => 'Homework', 'subject_id' => $ctx['subject']->id, 'classroom_id' => $ctx['classroom']->id, 'teacher_id' => $ctx['teacher']->id, 'due_at' => now()->addDay(), 'status' => 'published', 'published_at' => now()], $overrides));
+        return Assignment::create(array_merge(['title' => 'Homework', 'instructions' => 'Complete the assigned work.', 'subject_id' => $ctx['subject']->id, 'classroom_id' => $ctx['classroom']->id, 'teacher_id' => $ctx['teacher']->id, 'due_at' => now()->addDay(), 'status' => 'published', 'published_at' => now()], $overrides));
     }
 
     private function submission(Assignment $assignment, Student $student, string $path, string $name): AssignmentSubmission
     {
-        return AssignmentSubmission::create(['assignment_id' => $assignment->id, 'student_id' => $student->id, 'file_path' => $path, 'original_name' => $name, 'mime_type' => 'application/pdf', 'file_size' => 4, 'submitted_at' => now(), 'status' => 'submitted']);
+        $storedPath = "assignment-submissions/{$assignment->id}/{$student->id}/".basename($path);
+        $contents = Storage::disk('local')->exists($path)
+            ? Storage::disk('local')->get($path)
+            : '%PDF-1.4 submission';
+        Storage::disk('local')->put($storedPath, $contents);
+        $submission = AssignmentSubmission::create([
+            'assignment_id' => $assignment->id,
+            'student_id' => $student->id,
+            'submitted_at' => now(),
+            'status' => 'submitted',
+        ]);
+        $attachment = $submission->attachments()->create([
+            'disk' => 'local',
+            'path' => $storedPath,
+            'original_name' => $name,
+            'mime_type' => 'application/pdf',
+            'size' => strlen($contents),
+        ]);
+
+        return $submission->setRelation('fileAttachment', $attachment);
     }
 
     private function attachment(Assignment $assignment, string $name, int $sortOrder = 0): AssignmentAttachment
@@ -822,10 +1012,10 @@ class StudentAcademicPortalTest extends TestCase
         return AssignmentAttachment::create([
             'assignment_id' => $assignment->id,
             'disk' => 'local',
-            'file_path' => $path,
+            'path' => $path,
             'original_name' => $name,
             'mime_type' => 'application/pdf',
-            'file_size' => strlen($contents),
+            'size' => strlen($contents),
             'sort_order' => $sortOrder,
         ]);
     }

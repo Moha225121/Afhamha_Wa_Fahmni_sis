@@ -17,10 +17,12 @@ use App\Services\ExamAttemptPolicy;
 use App\Services\ExamAttemptService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Throwable;
 
 class AcademicController extends Controller
 {
@@ -34,7 +36,9 @@ class AcademicController extends Controller
     {
         $student = $this->student($request);
         $assignments = Assignment::query()
-            ->with(['subject', 'submissions' => fn ($query) => $query->where('student_id', $student->id)])
+            ->with(['subject', 'submissions' => fn ($query) => $query
+                ->where('student_id', $student->id)
+                ->whereNotNull('submitted_at')])
             ->where('classroom_id', $student->classroom_id)
             ->whereIn('status', ['published', 'active'])
             ->where(fn ($query) => $query->whereNull('published_at')->orWhere('published_at', '<=', now()))
@@ -49,7 +53,11 @@ class AcademicController extends Controller
         $student = $this->student($request);
         $this->authorizeAssignment($assignment, $student);
         $assignment->load(['subject', 'attachments']);
-        $submission = $assignment->submissions()->where('student_id', $student->id)->first();
+        $submission = $assignment->submissions()
+            ->with('fileAttachment')
+            ->where('student_id', $student->id)
+            ->whereNotNull('submitted_at')
+            ->first();
 
         return view('student.assignments.show', compact('student', 'assignment', 'submission'));
     }
@@ -58,7 +66,7 @@ class AcademicController extends Controller
     {
         $student = $this->student($request);
         $this->authorizeAssignment($assignment, $student);
-        abort_if(now()->gte($assignment->due_at), 422, 'انتهى موعد تسليم الواجب.');
+        abort_if($assignment->due_at && now()->gte($assignment->due_at), 422, 'انتهى موعد تسليم الواجب.');
 
         $validated = $request->validated();
         $this->submissions->save($assignment, $student, $request->file('file'), $validated['notes'] ?? null);
@@ -70,10 +78,9 @@ class AcademicController extends Controller
     {
         $student = $this->student($request);
         $this->authorizeAssignment($assignment, $student);
-        abort_unless($assignment->attachment_path, 404);
-        $this->authorizePrivateFile('local', $assignment->attachment_path);
+        $attachment = $assignment->attachments()->firstOrFail();
 
-        return Storage::disk('local')->download($assignment->attachment_path);
+        return $this->downloadAssignmentAttachment($attachment);
     }
 
     public function attachmentFile(Request $request, AssignmentAttachment $attachment): StreamedResponse
@@ -81,18 +88,25 @@ class AcademicController extends Controller
         $student = $this->student($request);
         $attachment->load('assignment');
         $this->authorizeAssignment($attachment->assignment, $student);
+
+        return $this->downloadAssignmentAttachment($attachment);
+    }
+
+    private function downloadAssignmentAttachment(AssignmentAttachment $attachment): StreamedResponse
+    {
         abort_unless($attachment->hasValidPrivateMetadata(), 404);
+        $disk = $attachment->privateDisk();
+        $path = $attachment->path ?: $attachment->file_path;
         $this->authorizePrivateFile(
-            $attachment->disk,
-            $attachment->file_path,
+            $disk,
+            $path,
             "assignment-attachments/{$attachment->assignment_id}/",
         );
 
-        $actualSize = Storage::disk($attachment->disk)->size($attachment->file_path);
-        abort_unless($actualSize > 0 && $actualSize <= (int) config('student_academic.private_files.max_bytes'), 404);
+        $this->authorizeActualFile($disk, $path, $attachment->mime_type);
 
-        return Storage::disk($attachment->disk)->download(
-            $attachment->file_path,
+        return Storage::disk($disk)->download(
+            $path,
             $this->safeDownloadName($attachment->original_name),
         );
     }
@@ -101,9 +115,21 @@ class AcademicController extends Controller
     {
         $student = $this->student($request);
         abort_unless($submission->student_id === $student->id, 404);
-        $this->authorizePrivateFile('local', $submission->file_path);
+        $submission->loadMissing('fileAttachment');
+        $attachment = $submission->fileAttachment;
+        abort_unless($attachment?->hasValidPrivateMetadata(), 404);
+        $disk = $attachment->privateDisk();
+        $this->authorizePrivateFile(
+            $disk,
+            $attachment->path,
+            "assignment-submissions/{$submission->assignment_id}/{$student->id}/",
+        );
+        $this->authorizeActualFile($disk, $attachment->path, $attachment->mime_type);
 
-        return Storage::disk('local')->download($submission->file_path, $this->safeDownloadName($submission->original_name));
+        return Storage::disk($disk)->download(
+            $attachment->path,
+            $this->safeDownloadName($attachment->original_name),
+        );
     }
 
     public function exams(Request $request): View
@@ -255,6 +281,74 @@ class AcademicController extends Controller
             && ! str_contains($normalized, "\0")
             && ($requiredPrefix === null || str_starts_with($normalized, $requiredPrefix))
             && Storage::disk($disk)->exists($normalized),
+            404,
+        );
+
+        if ($requiredPrefix !== null) {
+            $this->authorizeResolvedPath($disk, $normalized, $requiredPrefix);
+        }
+    }
+
+    private function authorizeResolvedPath(string $disk, string $path, string $requiredPrefix): void
+    {
+        try {
+            $diskRoot = realpath(Storage::disk($disk)->path(''));
+            $prefixRoot = realpath(Storage::disk($disk)->path(rtrim($requiredPrefix, '/')));
+            $filePath = realpath(Storage::disk($disk)->path($path));
+        } catch (Throwable) {
+            abort(404);
+        }
+
+        abort_unless(
+            is_string($diskRoot)
+            && is_string($prefixRoot)
+            && is_string($filePath)
+            && $this->resolvedPathIsWithin($prefixRoot, $diskRoot)
+            && $this->resolvedPathIsWithin($filePath, $prefixRoot),
+            404,
+        );
+    }
+
+    private function resolvedPathIsWithin(string $path, string $directory): bool
+    {
+        $path = str_replace('\\', '/', $path);
+        $directory = rtrim(str_replace('\\', '/', $directory), '/').'/';
+
+        if (PHP_OS_FAMILY === 'Windows') {
+            $path = strtolower($path);
+            $directory = strtolower($directory);
+        }
+
+        return str_starts_with($path, $directory);
+    }
+
+    private function authorizeActualFile(string $disk, string $path, ?string $recordedMimeType): void
+    {
+        try {
+            $actualSize = Storage::disk($disk)->size($path);
+        } catch (Throwable) {
+            abort(404);
+        }
+
+        abort_unless(
+            $actualSize > 0
+            && $actualSize <= (int) config('student_academic.private_files.max_bytes', 10 * 1024 * 1024),
+            404,
+        );
+
+        if (trim((string) $recordedMimeType) !== '') {
+            return;
+        }
+
+        try {
+            $actualMimeType = File::mimeType(Storage::disk($disk)->path($path));
+        } catch (Throwable) {
+            abort(404);
+        }
+
+        abort_unless(
+            is_string($actualMimeType)
+            && in_array(strtolower($actualMimeType), config('student_academic.private_files.allowed_mime_types', []), true),
             404,
         );
     }

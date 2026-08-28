@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class AssignmentSubmission extends Model
 {
@@ -28,5 +29,10 @@ class AssignmentSubmission extends Model
     public function attachments(): HasMany
     {
         return $this->hasMany(AssignmentSubmissionAttachment::class);
+    }
+
+    public function fileAttachment(): HasOne
+    {
+        return $this->hasOne(AssignmentSubmissionAttachment::class)->latestOfMany();
     }
 }

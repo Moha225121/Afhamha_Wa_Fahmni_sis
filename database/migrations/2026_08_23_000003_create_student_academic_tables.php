@@ -48,7 +48,7 @@ return new class extends Migration
             $table->string('mime_type', 150)->nullable();
             $table->unsignedBigInteger('file_size')->nullable();
             $table->text('notes')->nullable();
-            $table->timestamp('submitted_at');
+            $table->timestamp('submitted_at')->nullable();
             $table->string('status', 20)->default('submitted')->index();
             $table->timestamps();
             $table->unique(['assignment_id', 'student_id']);
@@ -68,7 +68,7 @@ return new class extends Migration
             $table->index(['exam_id', 'position']);
         });
 
-        Schema::create('exam_attempts', function (Blueprint $table) {
+        Schema::create('exam_attempts', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('exam_id')->constrained()->cascadeOnDelete();
             $table->foreignId('student_id')->constrained()->cascadeOnDelete();
@@ -86,7 +86,7 @@ return new class extends Migration
             $table->index(['student_id', 'status']);
         });
 
-        Schema::create('exam_answers', function (Blueprint $table) {
+        Schema::create('exam_answers', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('exam_attempt_id')->constrained()->cascadeOnDelete();
             $table->foreignId('exam_question_id')->constrained()->restrictOnDelete();
@@ -110,8 +110,5 @@ return new class extends Migration
         Schema::dropIfExists('exam_answers');
         Schema::dropIfExists('exam_attempts');
         Schema::dropIfExists('exam_questions');
-        Schema::dropIfExists('assignment_submissions');
-        Schema::dropIfExists('assignment_attachments');
-        Schema::dropIfExists('assignments');
     }
 };

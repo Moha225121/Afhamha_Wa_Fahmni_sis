@@ -1,16 +1,18 @@
 # تقرير القبول النهائي — `HEXA-AF-STU-02`
 
-تاريخ التحقق النهائي: 2026-08-24
+تاريخ التحقق النهائي: 2026-08-28
 
-الفرع: `main`
+فرع التكامل: `integration/hexa-af-stu-02-main`
 
-نقطة الأساس: `fef02e8f95529b42e2e3bc4ba7df94f630db7a69`
+نقطة الأساس: `origin/main` عند `de68be753b2489f0658d9e129340930ea4780a75`
 
-هذا التقرير يقيّم جاهزية رفع الفرع للمستودع وفتح المراجعة فقط. لم تُطبق أي Migration على الإنتاج، ولم تُنفذ أوامر `git add` أو `commit` أو `push` أو `merge`.
+مصدر تغييرات `HEXA-AF-STU-02`: `fc23efec4bfdb50d24154f647c696699210ff32d`
+
+هذا التقرير يوثق التحقق داخل دمج محلي مكتمل على فرع التكامل. لم تُطبق أي Migration على الإنتاج، وأُنشئ Merge commit محلي فقط، ولم يُنفذ `push`.
 
 ## Scope Completed
 
-- الواجبات: قائمة واجبات صف الطالب المنشورة، الحالة، التفاصيل، الموعد، المرفق القديم، والمرفقات المتعددة.
+- الواجبات: قائمة واجبات صف الطالب المنشورة، الحالة، التفاصيل، الموعد، والمرفقات المسجلة في `assignment_attachments`.
 - التسليمات: رفع ملف فعلي إلى Laravel Storage الخاص، حفظ الاسم والبيانات الوصفية ووقت الخادم والحالة، الاستبدال، حذف ملف الاستبدال السابق، وبقاء التسليم بعد تحديث الصفحة.
 - تكامل المعلم الضروري: عرض وتنزيل تسليمات الواجب للمعلم المالك أو المسند إلى الصف والمادة فقط، دون إضافة إنشاء واجبات أو اختبارات أو درجات.
 - الاختبارات: المتاحة والقادمة والمنفذة والسابقة، محاولة مرتبطة بالطالب والاختبار، منع التكرار غير المسموح، وSnapshot للأسئلة عند البدء.
@@ -21,20 +23,20 @@
 - الصلاحيات: اشتقاق الطالب من المستخدم المصادق عليه، عزل الواجبات والمرفقات والتسليمات والمحاولات والنتائج والإشعارات، وعزل المعلم غير المرتبط.
 - منع التسريب: لا تقبل الواجهات `student_id`, `score`, `percentage`, أو `is_correct` من المتصفح، ولا ترسل مفتاح الإجابة إلى HTML أو JavaScript.
 
-## Out of Scope Not Implemented
+## خارج نطاق تنفيذ `HEXA-AF-STU-02`
 
-- لم يُنفذ إنشاء الاختبارات أو منشئ الأسئلة في بوابة المعلم.
-- لم يُنفذ إدخال الدرجات أو تعديلها يدويًا من المعلم.
-- لم يُنفذ المرشد الذكي أو المكتبة أو المواد والدروس.
-- لم تُنفذ إدارة المستخدمين أو الإعدادات العامة.
-- لم تُنفذ وظائف بوابة ولي الأمر.
-- لم تُنشأ وظيفة إنتاجية جديدة لإنشاء الواجبات؛ التنفيذ يستهلك واجبًا منشأ مسبقًا.
+- إنشاء الاختبارات ومنشئ الأسئلة في بوابة المعلم ليسا من تنفيذ هذه المهمة.
+- إدخال الدرجات أو تعديلها يدويًا من المعلم ليسا من تنفيذ هذه المهمة.
+- المرشد الذكي والمكتبة والمواد والدروس موجودة في وحدات أخرى؛ لم تعدّل هذه المهمة نطاقها الوظيفي.
+- إدارة المستخدمين والإعدادات العامة موجودة في وحدات أخرى؛ لم تعدّل هذه المهمة نطاقها الوظيفي.
+- بوابة ولي الأمر خارج مساهمة `STU-02`، وقد حُفظ توافقها مع مخطط الواجبات المشترك ضمن الدمج.
+- لم تُضف هذه المهمة وظيفة إنتاجية لإنشاء الواجبات؛ التنفيذ يستهلك واجبًا منشأ مسبقًا.
 
 ## Files Included
 
-المحصلة: `13` ملفًا متتبعًا معدلًا و`35` ملفًا جديدًا، بإجمالي `48` ملفًا. لا توجد ملفات محذوفة أو معاد تسميتها.
+المحصلة الحالية للدمج: `25` ملفًا معدلًا و`34` ملفًا جديدًا، بإجمالي `59` ملفًا. لا توجد ملفات محذوفة أو معاد تسميتها.
 
-### REQUIRED — 22
+### REQUIRED — 24
 
 - `app/Http/Controllers/StudentPortal/AcademicController.php`
 - `app/Http/Controllers/StudentPortal/PortalController.php`
@@ -46,6 +48,7 @@
 - `app/Services/ExamAttemptPolicy.php`
 - `app/Services/ExamAttemptService.php`
 - `config/student_academic.php`
+- `public/css/student.css`
 - `resources/views/student/assignments/index.blade.php`
 - `resources/views/student/assignments/show.blade.php`
 - `resources/views/student/attendance.blade.php`
@@ -57,23 +60,30 @@
 - `resources/views/student/notifications.blade.php`
 - `resources/views/student/results.blade.php`
 - `resources/views/student/schedule.blade.php`
+- `resources/views/student/layout.blade.php`
 - `routes/student.php`
 
-### SHARED-BUT-REQUIRED — 19
+### SHARED-BUT-REQUIRED — 25
 
 - `.gitignore`
+- `app/Http/Controllers/Admin/OperationsController.php`
 - `app/Http/Controllers/AuthController.php`
+- `app/Http/Controllers/GuardianPortal/PortalController.php`
 - `app/Http/Controllers/TeacherPortal/AssignmentSubmissionController.php`
 - `app/Http/Middleware/EnsureUserIsTeacher.php`
+- `app/Http/Requests/LibraryResourceRequest.php`
 - `app/Models/Assignment.php`
 - `app/Models/AssignmentAttachment.php`
 - `app/Models/AssignmentSubmission.php`
+- `app/Models/AssignmentSubmissionAttachment.php`
 - `app/Models/Exam.php`
 - `app/Models/ExamQuestion.php`
 - `app/Models/User.php`
 - `bootstrap/app.php`
 - `database/migrations/2026_08_23_000003_create_student_academic_tables.php`
+- `database/migrations/2026_08_28_000001_add_student_file_metadata_to_assignment_attachments.php`
 - `public/css/parent.css`
+- `resources/views/parent/exams.blade.php`
 - `resources/views/teacher/assignments/index.blade.php`
 - `resources/views/teacher/assignments/show.blade.php`
 - `resources/views/teacher/layout.blade.php`
@@ -81,12 +91,15 @@
 - `routes/teacher.php`
 - `routes/web.php`
 
-### TEST — 4
+### TEST — 7
 
 - `.env.testing.example`
 - `phpunit.xml`
 - `tests/TestCase.php`
+- `tests/Feature/ParentPortalTest.php`
 - `tests/Feature/StudentAcademicPortalTest.php`
+- `tests/Feature/StudentEducationTest.php`
+- `tests/Feature/StudentLibraryTest.php`
 
 ### DOCUMENTATION — 3
 
@@ -99,64 +112,80 @@
 ## Database and Security Decisions
 
 - أُعيد استخدام `users`, `students`, `teachers`, `classrooms`, `subjects`, `teacher_assignments`, `exams`, `grades`, `attendance_records`, `schedules`, `notifications`, و`announcements`؛ لم يُنشأ نظام دخول أو جدول اختبارات بديل.
-- تنشئ Migration الجديدة `assignments`, `assignment_attachments`, `assignment_submissions`, `exam_questions`, `exam_attempts`, و`exam_answers` مرة واحدة، بمفاتيح أجنبية وقيود فريدة وفهارس و`down()` عكسي صحيح على PostgreSQL.
-- بقي `assignments.attachment_path` للتوافق الرجعي. مساره القديم يُقبل فقط من قرص `local` كمسار نسبي موجود بلا traversal أو مسار مطلق؛ لا تتوفر له metadata تاريخية تسمح بادعاء فحص MIME والحجم.
+- يعاد استخدام جداول `assignments`, `assignment_attachments`, `assignment_submissions`, و`assignment_submission_attachments` الموجودة في `main`. تنشئ Migration الطالب فقط `exam_questions`, `exam_attempts`, و`exam_answers`، وتضيف Migration لاحقة حقلي `disk` و`sort_order` بصورة غير مدمرة.
+- يعتمد وصف الواجب على `instructions`، وتبقى ملفات التسليم داخل `assignment_submission_attachments` بدل تكرار بيانات الملف داخل `assignment_submissions`.
 - المرفقات المتعددة الجديدة تتحقق عند التنزيل من القرص الخاص، البادئة، الامتداد، MIME والحجم المسجلين، وجود الملف، وحجمه الفعلي. أما ملفات تسليم الطالب فتُفحص فعليًا عند الرفع بواسطة Laravel File validation وتُخزن بمسار يولده الخادم.
 - تعيد خدمة التسليم فحص الصف والنشر والموعد داخل قفل قاعدة البيانات قبل الحفظ، وتزيل الملف الجديد عند فشل المعاملة والقديم بعد نجاح الاستبدال.
 - تنشأ المحاولة والإجابات داخل Transaction مع قفل صف الطالب وقيد فريد، ويُعاد استخدام المحاولة الفعالة. التصحيح يعتمد على Snapshot ولا يكتب في جدول `grades`.
-- حارس الاختبارات يرفض تشغيل Feature tests ما لم تكن البيئة `testing` والاتصال `pgsql` واسم القاعدة `afhamha_testing`. تم إثبات الرفض بتشغيل مقصود باسم قاعدة وهمي؛ فشل قبل أي اتصال أو Migration كما هو متوقع.
+- حارس الاختبارات يرفض تشغيل Feature tests ما لم تكن البيئة `testing` والاتصال `pgsql` واسم القاعدة `afhamha_testing`. لم تُنسب تجربة الرفض المتعمد القديمة إلى جولة الدمج الحالية.
 
 ## Test Results
 
-استخدمت جميع أوامر Laravel قاعدة PostgreSQL Testing معزولة بعد التحقق من `APP_ENV=testing`, `DB_CONNECTION=pgsql`, و`DB_DATABASE=afhamha_testing`. لم تُسجل كلمة مرور قاعدة البيانات في هذا التقرير.
+استخدمت أوامر Laravel أدناه قاعدة PostgreSQL Testing معزولة بعد التحقق من `APP_ENV=testing`, `DB_CONNECTION=pgsql`, و`DB_DATABASE=afhamha_testing`. لم تُسجل كلمة مرور قاعدة البيانات في هذا التقرير. حُذفت مدد ونتائج أوامر الجولة القديمة التي لم تُعد في جولة الدمج الحالية.
 
-| Command | Status | Tests | Assertions | Failures | Duration |
+| Command / Verification | Status | Result | Assertions | Failures | Duration |
 |---|---:|---:|---:|---:|---:|
-| `composer validate --no-check-publish` | `PASSED` | — | — | 0 | 2.397 s |
-| `php artisan optimize:clear` | `PASSED` | — | — | 0 | 1.169 s |
-| `php artisan about` | `PASSED` | — | — | 0 | 1.593 s |
-| `php artisan env` | `PASSED` | — | — | 0 | 1.084 s |
-| `php artisan migrate:fresh --env=testing --force` | `PASSED` | 6 migrations | — | 0 | 2.638 s |
-| `php artisan test tests/Feature/StudentAcademicPortalTest.php --env=testing` | `PASSED` | 71 / 71 | 196 | 0 | 16.731 s |
-| `php artisan test --env=testing` | `PASSED` | 89 / 89 | 262 | 0 | 18.524 s |
-| `php artisan view:cache` | `PASSED` | جميع Blade views | — | 0 | 3.021 s |
-| `php artisan view:clear` | `PASSED` | — | — | 0 | 1.223 s |
-| PHP lint لملفات PHP المتغيرة والجديدة | `PASSED` | 41 / 41 files | — | 0 | 6.024 s |
-| Laravel Pint `--test` لملفات المهمة فقط | `PASSED` | 41 / 41 files | — | 0 | 5.489 s |
-| تدقيق Routes بصيغة JSON | `PASSED` | 25 task routes | — | 0 duplicate / 0 unprotected | — |
-| `php artisan schedule:list` | `PASSED` | أمر كل دقيقة | — | 0 | 1.031 s |
-| `git diff --check` | `PASSED` | — | — | 0 | 0.175 s |
+| `composer validate --no-check-publish` | `PASSED` | `composer.json` صالح | — | 0 | — |
+| `php artisan migrate:fresh --env=testing --force` | `PASSED` | `12 / 12` migrations | — | 0 | — |
+| `php artisan migrate --env=testing --force` بعد `migrate:fresh` | `PASSED` | `Nothing to migrate` | — | 0 | — |
+| محاكاة الترقية من مخطط `origin/main` | `PASSED` | حُفظت أعداد ومعرّفات السجلات القائمة | — | 0 | — |
+| `php artisan test tests/Feature/StudentAcademicPortalTest.php tests/Feature/ParentPortalTest.php --env=testing` | `PASSED` | `88 / 88` tests | 291 | 0 | `41.504s` |
+| `php artisan test --env=testing` | `PASSED` | `143 / 143` tests | 750 | 0 | `49.351s` |
+| PHP lint لجميع ملفات PHP التي يعيدها `rg` | `PASSED` | `357 / 357` files | — | 0 | — |
+| تدقيق Routes | `PASSED` | `134` routes / `132` named / `0` duplicate names | — | 0 | — |
+| `php artisan view:cache` | `PASSED` | جميع Blade views | — | 0 | — |
+| Laravel Pint `--test` لملفات PHP ضمن نطاق الدمج | `PASSED` | `51 / 51` files | — | 0 | — |
 
-تجاوزت الحزمة المستهدفة الحد المطلوب `69` باختبارين جديدين يمنعان استخدام أخطاء Validation لاستكشاف واجب صف آخر أو محاولة طالب آخر. لذلك أصبح العدد `71` بدل `69`، وأصبح العدد الكامل `89` بدل `87`، مع زيادة Assertions من `194/260` إلى `196/262`.
+النتيجة الحالية: نجحت Migrations الاثنتا عشرة على PostgreSQL، وأكد تشغيل `migrate` اللاحق عدم وجود Migration معلقة، وحافظت محاكاة الترقية على أعداد ومعرّفات البيانات القائمة. نجحت الحزمة المستهدفة بـ`88 / 88` اختبارًا و`291` Assertion، والحزمة الكاملة بـ`143 / 143` اختبارًا و`750` Assertion. نجح PHP lint على `357 / 357` ملفًا، ونجح Composer validation وBlade view cache وتدقيق Routes وPint على ملفات PHP الـ`51` ضمن نطاق الدمج. لم يُدّع تشغيل Pint كامل للمستودع.
 
-أظهر تدقيق Routes: `25` مسارًا للمهمة، `0` أسماء مكررة، `0` مسارات بلا `auth` والدور المناسب، و`5/5` عمليات كتابة عليها Rate Limit. يظهر Scheduler الأمر `student-exams:finalize-expired` كل دقيقة مع قفل تداخل مدته عشر دقائق.
+## Browser Smoke Test
 
-## Manual Smoke Test
+نُفذ التحقق اليدوي عبر المتصفح على نسخة الدمج الحالية باستخدام قاعدة PostgreSQL Testing المعزولة، وكانت النتائج:
 
-نُفذ السيناريو فعليًا عبر المتصفح على بيئة الاختبار المعزولة:
+- بوابة الطالب: نجحت لوحة التحكم، والواجبات، وقائمة الواجبات وتفاصيل الواجب، وتسليم الواجب، والاختبارات، والنتائج، والحضور، والجدول، والإشعارات.
+- بوابة ولي الأمر: نجحت لوحة التحكم، والواجبات، والاختبارات، والنتائج، والحضور، والإشعارات، وتفاصيل الابن.
+- بعد آخر إصلاح، أُعيد فحص صفحات الواجبات: قائمة واجبات الطالب، تفاصيل الواجب وتسليمه، وصفحة واجبات ولي الأمر؛ نجحت جميعها على نسخة الدمج الحالية.
+- لم تظهر أي صفحة بخطأ Server Error خلال السيناريوهات المنفذة.
+- سجل Browser Console عدد `0` Errors وعدد `0` Warnings.
 
-1. سجل الطالب دخوله، ورأى واجب صفه المنشور وتفاصيله والمرفق القديم والمرفقين المتعددين.
-2. رفع PDF ثم استبدله بملف ثانٍ؛ بعد تحديث الصفحة بقي الاسم والملاحظات والحالة ووقت التسليم الجديد.
-3. سجل المعلم المرتبط دخوله، ورأى التسليم البديل ونزّله فعليًا.
-4. رأى الطالب الاختبارات المتاحة والقادمة والسابقة، وبدأ الاختبار الموضوعي.
-5. حفظ إجابتين، ثم حدّث الصفحة؛ بقيت الإجابتان محددتين وانخفض المؤقت بدل إعادة ضبطه.
-6. أرسل الاختبار الموضوعي، فظهرت وخُزنت `15 / 15` و`100%`.
-7. أرسل اختبارًا مختلطًا، فظهرت `pending_review` بلا نسبة نهائية؛ خُزن المجموع الموضوعي الداخلي `5 / 20` مع `percentage=null`.
-8. ظهرت صفحة النتائج والحضور وجدول الصف والإشعارات، ونجح تعليم الإشعار المملوك كمقروء.
-9. جُربت معرفات واجب ومرفق وتسليم ومحاولة ونتيجة لطالب آخر؛ أعادت المسارات الخمسة `404`.
-10. لم تسجل جلسة المتصفح أي Console warning أو error.
+## Original Merge Conflict Resolution
 
-أكد فحص قاعدة البيانات بعد السيناريو أن التسليم البديل بحالة `submitted` وملفه موجود على القرص الخاص، وأن النتيجتين والإشعار المقروء مخزنة بالقيم المعروضة أعلاه.
+كانت ملفات التعارض الأصلية أربعة فقط، وحُلّت كما يلي:
 
-## Repository Hygiene
+### 1. `app/Models/Assignment.php`
 
-- لا توجد أسرار أو مفاتيح أو كلمات مرور حقيقية في الملفات الـ48. قيم الاختبار ثابتة ووهمية، و`DB_PASSWORD` فارغ في القالب والـPHPUnit configuration.
-- لا يوجد ملف `.env` في المستودع. الملف المحلي `.env.testing` متجاهل ومطابق لقالب `.env.testing.example`، ولن يدخل الرفع.
-- لا توجد ضمن المستودع مجلدات `vendor`, `node_modules`, أو `public/storage`، ولا ملفات Log أو Cache أو Session أو Coverage أو Uploads مولدة.
-- لا توجد ملفات قواعد محلية أو SQL/ZIP/Patch أو `php.ini` أو DLL أو PHP scan configuration ضمن مسارات الرفع.
-- لا توجد مسارات جهاز محلية أو شيفرة Debug أو علامات عمل مؤجل في الملفات المرفوعة. توجد مراجع محلية قديمة في `README.md` و`start-local.ps1` داخل `HEAD`، لكنها غير معدلة وليست ضمن هذه الحزمة.
-- ملف Patch الاحتياطي وسجل Smoke وملفات اختبار الرفع موجودة خارج المستودع ولا يمكن أن تدخل أمر staging المقترح.
-- `git diff --check` ناجح، ولا توجد ملفات staged حاليًا.
+- **المحفوظ من فرع الميزة:** علاقة المرفقات المتعددة مع ترتيب ثابت بواسطة `sort_order` ثم `id`، وعلاقات الواجب والتسليم التي تعتمد عليها بوابة الطالب.
+- **المحفوظ من `origin/main`:** مخطط الحقول الموحد، وبالأخص `instructions`, `status`, `published_at`, و`due_at` القابل للفراغ، إضافة إلى علاقات الصف والمادة والمعلم.
+- **تغيير التوافق:** كُيّف كود الميزة من `description` و`attachment_path` إلى `instructions` وعلاقة `assignment_attachments` الموحدة، مع دعم الواجب الذي لا يملك موعدًا نهائيًا.
+- **تغير السلوك:** نعم، تغير التمثيل الداخلي ليتبع مخطط `origin/main` ويدعم عدة مرفقات وموعدًا اختياريًا؛ بقي سلوك عرض واجب الطالب ووصوله المصرح به كما هو مطلوب.
+
+### 2. `app/Models/AssignmentAttachment.php`
+
+- **المحفوظ من فرع الميزة:** `disk`, `sort_order`، والتحقق من امتداد الملف وMIME والحجم، مع casts العددية.
+- **المحفوظ من `origin/main`:** أسماء الأعمدة المعتمدة `path` و`size`، وعلاقة الواجب، والتوافق مع الصفوف التاريخية التي قد تكون فيها `disk`, `mime_type`, أو `size` فارغة.
+- **تغيير التوافق:** أضيفت metadata الجديدة عبر Migration غير مدمرة، واستُخدمت `path/size` بدل `file_path/file_size`. أضيف تحقق من الحجم وMIME الفعليين، وبادئة مسار مرتبطة بالواجب، وفحص `realpath` لمنع traversal أو symlink/junction escape.
+- **تغير السلوك:** نعم، الملفات الخاصة الصحيحة تبقى قابلة للتنزيل، بينما المسارات العامة أو المطلقة أو غير المرتبطة أو غير الآمنة تعيد `404` بدل فتحها.
+
+### 3. `app/Models/AssignmentSubmission.php`
+
+- **المحفوظ من فرع الميزة:** سير تسليم الملف الفعلي، وربط التسليم بالطالب والواجب، والملاحظات والحالة ووقت التسليم.
+- **المحفوظ من `origin/main`:** الحقول المشتركة `status`, `notes`, `submitted_at`, `graded_at`, و`score`، وعلاقة `assignment_submission_attachments` المستخدمة لحفظ الملفات دون تكرار المخطط.
+- **تغيير التوافق:** نُقلت بيانات الملف من حقول مباشرة داخل `assignment_submissions` إلى جدول المرفقات المشترك، وأضيفت علاقة `fileAttachment()` لاختيار أحدث ملف، مع إبقاء الدرجة ووقت التصحيح وعدم عد السجل ذي `submitted_at = null` كتسليم.
+- **تغير السلوك:** نعم، أصبح تخزين الملف متوافقًا مع مخطط `origin/main`، ولا يمكن استبدال تسليم مصحح أو إظهار سجل غير مرسل كتسليم؛ بقيت عملية الرفع والاستبدال المسموح وحفظ وقت الخادم فعالة.
+
+### 4. `public/css/parent.css`
+
+- **المحفوظ من فرع الميزة:** تنسيق رابط الإجراء اللازم لتنزيل تسليم الطالب من واجهة المعلم.
+- **المحفوظ من `origin/main`:** ملف تصميم بوابة ولي الأمر كاملًا، بما فيه الألوان والخطوط والتجاوب وخصائص الواجهات وPWA.
+- **تغيير التوافق:** لم تُدمج قواعد الميزة العامة فوق بوابة ولي الأمر؛ أضيفت قاعدة من ثمانية أسطر فقط تحت `.teacher-portal .action-link`، مع إبقاء تنسيقات الطالب في `public/css/student.css`.
+- **تغير السلوك:** لا يوجد تغير وظيفي في بوابة ولي الأمر؛ التغير مرئي ومحصور في رابط الإجراء داخل بوابة المعلم فقط.
+
+## حالة المستودع وقت التقرير
+
+- شمل Merge commit المحلي `59` مسارًا مميزًا: `34` ملفًا جديدًا و`25` ملفًا معدلًا، بلا حذف أو إعادة تسمية.
+- أُنشئ Merge commit المحلي `490ddaddb3e7ea5af94457cd0f60744e02302574` على فرع `integration/hexa-af-stu-02-main` بوالدين: نقطة أساس `origin/main` ومصدر تغييرات `HEXA-AF-STU-02` المذكوران أعلى التقرير.
+- أكد تدقيق حالة المستودع اللاحق وجود `0` تعارضات غير محلولة، و`0` علامات تعارض، و`0` تغييرات كود غير مفسرة، و`0` ملفات untracked غير متوقعة. تحديث هذا التقرير فقط موضوع في الـIndex وينتظر موافقة المستخدم، ولا يوجد أي `push`.
+- لم تُنسب فحوص النظافة والمدد التاريخية من الجولة السابقة إلى جولة الدمج الحالية؛ تسجل أي نتائج إضافية فقط بعد إعادة تنفيذها.
 
 ## External Review Notes
 
@@ -167,6 +196,6 @@
 
 ## Final Status
 
-`UPLOAD READY FOR REVIEW`
+`INTEGRATION ACCEPTANCE VERIFIED — LOCAL MERGE COMMIT CREATED / REPORT UPDATE STAGED / PUSH PENDING`
 
-نطاق `HEXA-AF-STU-02` نظيف ومختبر على PostgreSQL وجاهز للرفع إلى المستودع وفتح Pull Request. تجهيزات واعتمادات الإنتاج أعلاه لا تمنع رفع الفرع للمراجعة، لكنها تبقى مطلوبة قبل الدمج أو النشر الإنتاجي.
+نجح التحقق الآلي الحالي لنطاق `HEXA-AF-STU-02` على PostgreSQL بالأعداد المثبتة أعلاه، ونجح Browser Smoke Test لبوابتي الطالب وولي الأمر دون Server Error أو أخطاء وتحذيرات في Console. أُنشئ Merge commit محلي على فرع التكامل، ويبقى تحديث التقرير الحالي وأي `push` أو دمج في `main` معلقًا حتى موافقة المستخدم، كما تبقى تجهيزات واعتمادات الإنتاج مطلوبة قبل النشر الإنتاجي.
