@@ -1,12 +1,7 @@
 @extends('teacher.layout') @section('title','الاختبارات') @section('subtitle','إعداد الاختبارات ومتابعة النتائج') @section('actions')<a class="btn primary" href="{{ route('teacher.exams.create') }}">إنشاء اختبار</a>@endsection @section('content')
 <div class="exam-intro">
     <div>
-        <strong>إدارة الاختبارات</strong>
         <p>أنشئ اختبارًا جديدًا، أو تابع المسودات الحالية، ثم عدّلها قبل موعد التطبيق لضمان تجهيز الاختبار بشكل جيد.</p>
-    </div>
-    <div class="exam-summary">
-        <span>الحالة</span>
-        <strong>{{ $rows->count() ?: 0 }}</strong>
     </div>
 </div>
 <div class="table-wrap">
