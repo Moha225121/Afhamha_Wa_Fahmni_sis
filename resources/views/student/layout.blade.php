@@ -3,17 +3,21 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <meta name="theme-color" content="#0f766e">
-    <title>@yield('title', 'بوابة الطالب') | افهمها وفهمني</title>
-    <link rel="stylesheet" href="{{ asset('css/parent.css') }}">
+    <meta name="theme-color" content="#0e7c86">
+    <title>{{ strip_tags($__env->yieldContent('title', 'بوابة الطالب')) }} | افهمها وفهمني</title>
+    <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="any">
+    <link rel="apple-touch-icon" href="{{ asset('icons/parent-icon-192.png') }}">
+    <link rel="stylesheet" href="{{ asset('css/parent.css') }}?v=portal-style-1">
+    <link rel="stylesheet" href="{{ asset('css/student.css') }}?v=20260827-1">
     <script src="{{ asset('js/student-tutor.js') }}" defer></script>
+    <script src="{{ asset('js/enhanced-selects.js') }}" defer></script>
 </head>
 <body class="student-portal">
 <a class="skip-link" href="#student-main">تجاوز إلى المحتوى</a>
 <div class="app-shell">
     <header class="app-header">
         <a class="brand" href="{{ route('student.dashboard') }}" aria-label="بوابة الطالب">
-            <span class="brand-mark">أف</span>
+            <span class="brand-mark">AWF</span>
             <span class="brand-copy">
                 <b>افهمها وفهمني</b>
                 <small>بوابة الطالب</small>

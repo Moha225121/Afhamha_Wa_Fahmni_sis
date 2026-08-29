@@ -125,6 +125,9 @@ class StudentLibraryTest extends TestCase
             'file' => UploadedFile::fake()->create('invalid.pdf', 20, 'application/pdf'),
         ])->assertSessionHasErrors('subject_id');
         $this->assertDatabaseMissing('library_resources', ['title' => 'ملف خاص بلا نطاق']);
+
+        $this->actingAs($admin)->delete(route('admin.library.destroy', $resource->id))->assertRedirect();
+        Storage::disk('local')->assertMissing($resource->file_path);
     }
 
     public function test_legacy_private_files_are_moved_to_local_storage_idempotently(): void

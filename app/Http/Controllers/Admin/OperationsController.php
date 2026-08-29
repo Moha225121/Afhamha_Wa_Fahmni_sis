@@ -14,8 +14,10 @@ use App\Models\Subject;
 use App\Models\Teacher;
 use App\Models\User;
 use App\Services\AuditService;
+use App\Services\ParentNotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
@@ -58,31 +60,86 @@ class OperationsController extends Controller
     public function attendance(Request $r): View
     {
         $date = $r->date ?: now()->toDateString();
-        $classroomId = $r->classroom_id;
-        $students = Student::with('user')->when($classroomId, fn ($q, $v) => $q->where('classroom_id', $v))->where('status', 'active')->get();
-        $records = DB::table('attendance_records')->whereDate('date', $date)->whereIn('student_id', $students->pluck('id'))->get()->keyBy('student_id');
+        $attendance = DB::table('classrooms')
+            ->leftJoin('students', function ($join): void {
+                $join->on('students.classroom_id', '=', 'classrooms.id')->where('students.status', 'active');
+            })
+            ->leftJoin('attendance_records', function ($join) use ($date): void {
+                $join->on('attendance_records.student_id', '=', 'students.id')->whereDate('attendance_records.date', $date);
+            })
+            ->join('academic_years', 'academic_years.id', '=', 'classrooms.academic_year_id')
+            ->select('classrooms.id', 'classrooms.name as classroom', 'classrooms.section', 'academic_years.name as academic_year')
+            ->selectRaw('count(distinct students.id) as students_total')
+            ->selectRaw("count(case when attendance_records.status = 'present' then 1 end) as present")
+            ->selectRaw("count(case when attendance_records.status = 'absent' then 1 end) as absent")
+            ->selectRaw("count(case when attendance_records.status = 'late' then 1 end) as late")
+            ->selectRaw("count(case when attendance_records.status = 'excused' then 1 end) as excused")
+            ->groupBy('classrooms.id', 'classrooms.name', 'classrooms.section', 'academic_years.name')
+            ->orderBy('academic_years.name')
+            ->orderBy('classrooms.name')
+            ->get()
+            ->map(function ($row) {
+                $recorded = $row->present + $row->absent + $row->late + $row->excused;
+                $row->rate = $recorded ? round($row->present / $recorded * 100, 1) : 0;
 
-        return view('admin.operations.attendance', compact('students', 'records', 'date', 'classroomId') + ['classrooms' => Classroom::all()]);
+                return $row;
+            });
+
+        return view('admin.operations.attendance', compact('attendance', 'date'));
     }
 
-    public function attendanceStore(Request $r): RedirectResponse
+    public function attendanceStore(Request $r, ParentNotificationService $notifications): RedirectResponse
     {
         $d = $r->validate(['date' => ['required', 'date'], 'records' => ['required', 'array'], 'records.*' => ['required', Rule::in(['present', 'absent', 'late', 'excused'])]]);
-        DB::transaction(function () use ($d, $r) {
+        $alerts = DB::transaction(function () use ($d, $r) {
+            $alerts = [];
             foreach ($d['records'] as $id => $status) {
                 $s = Student::findOrFail($id);
                 DB::table('attendance_records')->updateOrInsert(['student_id' => $s->id, 'date' => $d['date']], ['classroom_id' => $s->classroom_id, 'status' => $status, 'recorded_by' => $r->user()->id, 'updated_at' => now(), 'created_at' => now()]);
+                if ($status !== 'present') {
+                    $alerts[] = [$s, $status];
+                }
             }AuditService::record('recorded', 'attendance');
+
+            return $alerts;
         });
+
+        $labels = ['absent' => 'غياب', 'late' => 'تأخر', 'excused' => 'غياب بعذر'];
+        foreach ($alerts as [$student, $status]) {
+            $notifications->sendToGuardians($student, [
+                'title' => 'تنبيه حضور',
+                'body' => 'تم تسجيل '.$labels[$status].' للطالب '.$student->user->name.' بتاريخ '.$d['date'].'.',
+                'url' => route('parent.attendance', ['student' => $student->id]),
+                'category' => 'attendance',
+            ]);
+        }
 
         return back()->with('success', 'تم حفظ الحضور.');
     }
 
     public function exams(): View
     {
-        $rows = DB::table('exams')->join('subjects', 'exams.subject_id', '=', 'subjects.id')->join('classrooms', 'exams.classroom_id', '=', 'classrooms.id')->select('exams.*', 'subjects.name as subject', 'classrooms.name as classroom')->latest('starts_at')->paginate(20);
+        $rows = DB::table('exams')->join('subjects', 'exams.subject_id', '=', 'subjects.id')->join('classrooms', 'exams.classroom_id', '=', 'classrooms.id')->join('teachers', 'exams.teacher_id', '=', 'teachers.id')->join('users', 'teachers.user_id', '=', 'users.id')->select('exams.*', 'subjects.name as subject', 'classrooms.name as classroom', 'users.name as teacher')->latest('starts_at')->paginate(20);
+        $rows->getCollection()->transform(function ($exam) {
+            $exam->effective_status = $this->effectiveExamStatus($exam);
+
+            return $exam;
+        });
 
         return view('admin.operations.exams', compact('rows'));
+    }
+
+    private function effectiveExamStatus(object $exam): string
+    {
+        if ($exam->status === 'completed') {
+            return 'completed';
+        }
+
+        if (in_array($exam->status, ['scheduled', 'published'], true) && Carbon::parse($exam->starts_at)->isPast()) {
+            return 'published';
+        }
+
+        return $exam->status;
     }
 
     public function examCreate(): View
@@ -109,25 +166,64 @@ class OperationsController extends Controller
 
     public function grades(Request $r): View
     {
-        $exams = DB::table('exams')->latest('starts_at')->get();
-        $exam = $r->exam_id ? DB::table('exams')->find($r->exam_id) : null;
-        $students = $exam ? Student::with('user')->where('classroom_id', $exam->classroom_id)->get() : collect();
-        $grades = $exam ? DB::table('grades')->where('exam_id', $exam->id)->get()->keyBy('student_id') : collect();
+        $grades = Classroom::with('academicYear')->get()->map(function (Classroom $classroom) {
+            $studentsTotal = Student::where('classroom_id', $classroom->id)->where('status', 'active')->count();
+            $values = collect();
 
-        return view('admin.operations.grades', compact('exams', 'exam', 'students', 'grades'));
+            DB::table('grade_sheets')->where('classroom_id', $classroom->id)->pluck('scores')->each(function ($scores) use ($values): void {
+                $decoded = json_decode($scores ?? '{}', true);
+                if (is_array($decoded)) {
+                    collect($decoded)->each(function ($score) use ($values): void {
+                        if (is_numeric($score)) {
+                            $values->push((float) $score);
+                        }
+                    });
+                }
+            });
+
+            return (object) [
+                'classroom' => $classroom->name,
+                'section' => $classroom->section,
+                'academic_year' => $classroom->academicYear?->name,
+                'students_total' => $studentsTotal,
+                'graded_students' => $values->count(),
+                'average' => $values->isEmpty() ? null : round((float) $values->average(), 1),
+                'highest' => $values->max(),
+                'lowest' => $values->min(),
+            ];
+        });
+
+        return view('admin.operations.grades', compact('grades'));
     }
 
-    public function gradesStore(Request $r): RedirectResponse
+    public function gradesStore(Request $r, ParentNotificationService $notifications): RedirectResponse
     {
         $d = $r->validate(['exam_id' => ['required', 'exists:exams,id'], 'scores' => ['required', 'array'], 'scores.*' => ['nullable', 'numeric', 'min:0']]);
-        $exam = DB::table('exams')->find($d['exam_id']);
-        DB::transaction(function () use ($d, $exam) {
+        $exam = DB::table('exams')
+            ->join('subjects', 'exams.subject_id', '=', 'subjects.id')
+            ->where('exams.id', $d['exam_id'])
+            ->select('exams.*', 'subjects.name as subject')
+            ->first();
+        $publishedStudentIds = DB::transaction(function () use ($d, $exam) {
+            $studentIds = [];
             foreach ($d['scores'] as $id => $score) {
                 if ($score === null) {
                     continue;
                 }abort_if((float) $score > (float) $exam->total_score, 422, 'الدرجة تتجاوز الدرجة الكلية.');
                 DB::table('grades')->updateOrInsert(['exam_id' => $exam->id, 'student_id' => $id], ['score' => $score, 'published_at' => now(), 'created_at' => now(), 'updated_at' => now()]);
+                $studentIds[] = $id;
             }AuditService::record('published', 'grades');
+
+            return $studentIds;
+        });
+
+        Student::with('user')->whereIn('id', $publishedStudentIds)->get()->each(function (Student $student) use ($notifications, $exam): void {
+            $notifications->sendToGuardians($student, [
+                'title' => 'تم نشر نتيجة جديدة',
+                'body' => 'تم نشر نتيجة '.$exam->title.' في مادة '.$exam->subject.' للطالب '.$student->user->name.'.',
+                'url' => route('parent.results', ['student' => $student->id]),
+                'category' => 'grade',
+            ]);
         });
 
         return back()->with('success', 'تم حفظ الدرجات.');
@@ -140,8 +236,11 @@ class OperationsController extends Controller
 
     public function libraryStore(LibraryResourceRequest $r): RedirectResponse
     {
-        $path = $r->file('file')->store('library', 'public');
-        DB::table('library_resources')->insert($r->safe()->except(['file', 'is_public']) + ['file_path' => $path, 'is_public' => $r->boolean('is_public'), 'status' => 'active', 'created_by' => $r->user()->id, 'created_at' => now(), 'updated_at' => now()]);
+        $isPublic = $r->boolean('is_public');
+        $disk = $isPublic ? 'public' : 'local';
+        $path = $r->file('file')->store('library', $disk);
+
+        DB::table('library_resources')->insert($r->safe()->except(['file', 'is_public']) + ['file_path' => $path, 'disk' => $disk, 'is_public' => $isPublic, 'status' => 'active', 'created_by' => $r->user()->id, 'created_at' => now(), 'updated_at' => now()]);
         AuditService::record('created', 'library');
 
         return back()->with('success', 'تم رفع المورد.');
@@ -151,7 +250,10 @@ class OperationsController extends Controller
     {
         $row = DB::table('library_resources')->find($id);
         abort_unless($row, 404);
-        Storage::disk('public')->delete($row->file_path);
+        $disk = in_array($row->disk ?? null, ['local', 'public'], true)
+            ? $row->disk
+            : ($row->is_public ? 'public' : 'local');
+        Storage::disk($disk)->delete($row->file_path);
         DB::table('library_resources')->where('id', $id)->delete();
         AuditService::record('deleted', 'library');
 

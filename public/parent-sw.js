@@ -1,8 +1,8 @@
-const CACHE_NAME = 'afhamha-parent-static-v2';
+const CACHE_NAME = 'afhamha-parent-static-v7';
 const OFFLINE_URL = '/parent-offline.html';
 const STATIC_ASSETS = [
     OFFLINE_URL,
-    '/css/parent.css',
+    '/favicon.ico',
     '/icons/parent-icon.svg',
     '/icons/parent-icon-192.png',
     '/icons/parent-icon-512.png',
@@ -42,4 +42,21 @@ self.addEventListener('fetch', (event) => {
     if (STATIC_ASSETS.includes(url.pathname)) {
         event.respondWith(caches.match(request).then((cached) => cached || fetch(request)));
     }
+});
+
+self.addEventListener('push', (event) => {
+    const payload = event.data ? event.data.json() : {};
+    event.waitUntil(self.registration.showNotification(payload.title || 'افهمها وفهمني', {
+        body: payload.body || 'لديك إشعار جديد.',
+        icon: '/icons/parent-icon-192.png',
+        badge: '/icons/parent-maskable-512.png',
+        data: { url: payload.url || '/parent/notifications' },
+        dir: 'rtl',
+        lang: 'ar',
+    }));
+});
+
+self.addEventListener('notificationclick', (event) => {
+    event.notification.close();
+    event.waitUntil(clients.openWindow(event.notification.data.url));
 });

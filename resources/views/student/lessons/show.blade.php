@@ -19,7 +19,7 @@
     </section>
 
     <article class="lesson-content">
-        <div class="content-copy">{{ $lesson->content }}</div>
+        <div class="content-copy">{!! nl2br(e(strip_tags($lesson->content ?? ''))) !!}</div>
     </article>
 
     <section class="list-section">

@@ -3,11 +3,16 @@
 namespace Tests\Feature;
 
 use App\Models\AcademicYear;
+use App\Models\Assignment;
+use App\Models\AssignmentSubmission;
 use App\Models\Classroom;
+use App\Models\Conversation;
 use App\Models\Guardian;
 use App\Models\Student;
 use App\Models\Subject;
+use App\Models\Teacher;
 use App\Models\User;
+use App\Notifications\ParentPortalNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
@@ -136,13 +141,25 @@ class ParentPortalTest extends TestCase
     {
         $this->actingAs($this->parentUser)
             ->put('/parent/profile', ['name' => 'Updated Parent', 'phone' => '0911111111'])
-            ->assertRedirect();
+            ->assertRedirect('/parent/dashboard');
 
         $this->assertDatabaseHas('users', [
             'id' => $this->parentUser->id,
             'name' => 'Updated Parent',
             'phone' => '0911111111',
         ]);
+    }
+
+    public function test_parent_more_menu_is_available_without_bottom_more_tab(): void
+    {
+        $this->actingAs($this->parentUser)
+            ->get('/parent/dashboard')
+            ->assertOk()
+            ->assertSee('data-more-toggle', false)
+            ->assertSee('more-menu-panel', false)
+            ->assertSeeText('المزيد')
+            ->assertDontSee('class="logout-form"', false)
+            ->assertDontSee('href="http://localhost/parent/more"', false);
     }
 
     public function test_parent_pwa_assets_are_available_without_sensitive_page_caching(): void
@@ -156,11 +173,190 @@ class ParentPortalTest extends TestCase
             ->assertOk()
             ->assertSee('STATIC_ASSETS', false)
             ->assertSee('/parent-offline.html', false)
+            ->assertSee("addEventListener('push'", false)
             ->assertDontSee('/parent/dashboard', false);
 
         $this->get('/parent-offline.html')
             ->assertOk()
             ->assertSeeText('أنت غير متصل');
+    }
+
+    public function test_parent_can_follow_linked_child_attendance_assignments_and_exams_only(): void
+    {
+        $subject = Subject::create(['name' => 'Math', 'code' => 'MATH-2', 'stage' => 'Primary', 'status' => 'active']);
+        $teacher = $this->teacherForClassroom($this->classroom, $subject);
+        DB::table('attendance_records')->insert([
+            'student_id' => $this->linkedStudent->id,
+            'classroom_id' => $this->classroom->id,
+            'date' => '2026-08-23',
+            'status' => 'present',
+            'recorded_by' => $teacher->user_id,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        $assignment = Assignment::create([
+            'classroom_id' => $this->classroom->id,
+            'subject_id' => $subject->id,
+            'teacher_id' => $teacher->id,
+            'title' => 'Homework One',
+            'due_at' => now()->addDay(),
+            'status' => 'published',
+            'published_at' => now(),
+        ]);
+        AssignmentSubmission::create([
+            'assignment_id' => $assignment->id,
+            'student_id' => $this->linkedStudent->id,
+            'status' => 'submitted',
+            'submitted_at' => now(),
+        ]);
+        DB::table('exams')->insert([
+            'title' => 'Upcoming Exam',
+            'subject_id' => $subject->id,
+            'classroom_id' => $this->classroom->id,
+            'teacher_id' => $teacher->id,
+            'starts_at' => now()->addDay(),
+            'duration_minutes' => 30,
+            'total_score' => 20,
+            'status' => 'published',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $this->actingAs($this->parentUser)->get('/parent/attendance?student='.$this->linkedStudent->id)
+            ->assertOk()->assertSeeText('حاضر');
+        $this->actingAs($this->parentUser)->get('/parent/assignments?student='.$this->linkedStudent->id)
+            ->assertOk()->assertSeeText('Homework One')->assertSeeText('تم التسليم');
+        $this->actingAs($this->parentUser)->get('/parent/exams?student='.$this->linkedStudent->id)
+            ->assertOk()->assertSeeText('Upcoming Exam');
+        $this->actingAs($this->parentUser)->get('/parent/assignments?student='.$this->unlinkedStudent->id)
+            ->assertNotFound();
+    }
+
+    public function test_parent_sees_automatic_result_only_for_linked_child(): void
+    {
+        $subject = Subject::create(['name' => 'Automatic Results', 'code' => 'AUTO-1', 'stage' => 'Primary', 'status' => 'active']);
+        $teacher = $this->teacherForClassroom($this->classroom, $subject);
+        $linkedExam = DB::table('exams')->insertGetId([
+            'title' => 'Linked Automatic Exam',
+            'subject_id' => $subject->id,
+            'classroom_id' => $this->classroom->id,
+            'teacher_id' => $teacher->id,
+            'starts_at' => now()->subHour(),
+            'duration_minutes' => 30,
+            'total_score' => 10,
+            'status' => 'published',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        $foreignExam = DB::table('exams')->insertGetId([
+            'title' => 'Foreign Automatic Exam',
+            'subject_id' => $subject->id,
+            'classroom_id' => $this->unlinkedStudent->classroom_id,
+            'teacher_id' => $teacher->id,
+            'starts_at' => now()->subHour(),
+            'duration_minutes' => 30,
+            'total_score' => 10,
+            'status' => 'published',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        foreach ([
+            [$linkedExam, $this->linkedStudent->id, 9, 90],
+            [$foreignExam, $this->unlinkedStudent->id, 2, 20],
+        ] as [$examId, $studentId, $score, $percentage]) {
+            DB::table('exam_attempts')->insert([
+                'exam_id' => $examId,
+                'student_id' => $studentId,
+                'attempt_number' => 1,
+                'started_at' => now()->subHour(),
+                'expires_at' => now()->subMinutes(30),
+                'submitted_at' => now()->subMinutes(30),
+                'graded_at' => now()->subMinutes(30),
+                'status' => 'submitted',
+                'score' => $score,
+                'maximum_score' => 10,
+                'percentage' => $percentage,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        $this->actingAs($this->parentUser)
+            ->get('/parent/results?student='.$this->linkedStudent->id)
+            ->assertOk()
+            ->assertSeeText('Linked Automatic Exam')
+            ->assertSeeText('9 / 10')
+            ->assertDontSeeText('Foreign Automatic Exam');
+        $this->get('/parent/exams?student='.$this->linkedStudent->id)
+            ->assertOk()
+            ->assertSeeText('Linked Automatic Exam')
+            ->assertSeeText('9 / 10')
+            ->assertSeeText('Foreign Automatic Exam')
+            ->assertDontSeeText('2 / 10');
+        $this->get('/parent/results?student='.$this->unlinkedStudent->id)->assertNotFound();
+    }
+
+    public function test_parent_can_message_only_admin_or_teacher_assigned_to_the_child_classroom(): void
+    {
+        $subject = Subject::create(['name' => 'Science', 'code' => 'SCI-1', 'stage' => 'Primary', 'status' => 'active']);
+        $teacher = $this->teacherForClassroom($this->classroom, $subject);
+        $unassignedTeacherUser = User::factory()->create(['role' => 'teacher', 'status' => 'active']);
+        Teacher::create(['user_id' => $unassignedTeacherUser->id, 'status' => 'active']);
+
+        $this->actingAs($this->parentUser)->post('/parent/conversations', [
+            'student_id' => $this->linkedStudent->id,
+            'recipient_id' => $teacher->user_id,
+            'subject' => 'Question',
+            'body' => 'Please contact me.',
+        ])->assertRedirect();
+
+        $conversation = Conversation::firstOrFail();
+        $this->assertDatabaseHas('conversation_participants', ['conversation_id' => $conversation->id, 'user_id' => $this->parentUser->id]);
+        $this->assertDatabaseHas('conversation_participants', ['conversation_id' => $conversation->id, 'user_id' => $teacher->user_id]);
+        $this->assertDatabaseHas('messages', ['conversation_id' => $conversation->id, 'sender_id' => $this->parentUser->id, 'body' => 'Please contact me.']);
+        $this->actingAs($this->parentUser)->get('/parent/conversations/'.$conversation->id)
+            ->assertOk()->assertSeeText('Please contact me.');
+
+        $this->actingAs($this->parentUser)->post('/parent/conversations', [
+            'student_id' => $this->linkedStudent->id,
+            'recipient_id' => $unassignedTeacherUser->id,
+            'body' => 'This must not be sent.',
+        ])->assertNotFound();
+    }
+
+    public function test_parent_can_open_notifications_and_save_a_subscription_for_own_device(): void
+    {
+        $this->parentUser->notify(new ParentPortalNotification([
+            'title' => 'New grade',
+            'body' => 'A result was published.',
+            'category' => 'grade',
+        ]));
+
+        $this->actingAs($this->parentUser)->get('/parent/notifications')
+            ->assertOk()->assertSeeText('New grade');
+        $this->actingAs($this->parentUser)->postJson('/parent/push-subscriptions', [
+            'endpoint' => 'https://push.example.test/parent-device',
+            'keys' => ['p256dh' => 'public-key', 'auth' => 'auth-token'],
+        ])->assertOk()->assertJsonPath('ok', true);
+        $this->assertDatabaseHas('push_subscriptions', [
+            'user_id' => $this->parentUser->id,
+            'endpoint' => 'https://push.example.test/parent-device',
+        ]);
+    }
+
+    public function test_parent_cannot_open_another_users_conversation_or_subscription(): void
+    {
+        $otherParent = User::factory()->create(['role' => 'parent', 'status' => 'active']);
+        $conversation = Conversation::create(['created_by' => $otherParent->id, 'status' => 'open']);
+        $conversation->participants()->attach($otherParent->id);
+        $subscription = $otherParent->pushSubscriptions()->create([
+            'endpoint' => 'https://push.example.test/subscription',
+            'public_key' => 'public-key',
+            'auth_token' => 'auth-token',
+        ]);
+
+        $this->actingAs($this->parentUser)->get('/parent/conversations/'.$conversation->id)->assertNotFound();
+        $this->actingAs($this->parentUser)->delete('/parent/push-subscriptions/'.$subscription->id)->assertNotFound();
     }
 
     private function student(string $name, string $number): Student
@@ -177,5 +373,18 @@ class ParentPortalTest extends TestCase
             'classroom_id' => $this->classroom->id,
             'status' => 'active',
         ]);
+    }
+
+    private function teacherForClassroom(Classroom $classroom, Subject $subject): Teacher
+    {
+        $teacherUser = User::factory()->create(['role' => 'teacher', 'status' => 'active']);
+        $teacher = Teacher::create(['user_id' => $teacherUser->id, 'status' => 'active']);
+        DB::table('teacher_assignments')->insert([
+            'teacher_id' => $teacher->id,
+            'classroom_id' => $classroom->id,
+            'subject_id' => $subject->id,
+        ]);
+
+        return $teacher;
     }
 }
