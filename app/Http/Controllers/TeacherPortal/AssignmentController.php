@@ -33,6 +33,14 @@ class AssignmentController extends Controller
             ->join('subjects', 'assignments.subject_id', '=', 'subjects.id')
             ->join('classrooms', 'assignments.classroom_id', '=', 'classrooms.id')
             ->where('assignments.teacher_id', $teacher->id)
+            // Filter to only assigned classrooms and subjects
+            ->whereExists(function ($query) use ($teacher) {
+                $query->selectRaw('1')
+                    ->from('teacher_assignments')
+                    ->whereColumn('teacher_assignments.classroom_id', 'assignments.classroom_id')
+                    ->whereColumn('teacher_assignments.subject_id', 'assignments.subject_id')
+                    ->where('teacher_assignments.teacher_id', $teacher->id);
+            })
             ->when(! empty($filters['classroom_id']), fn ($query) => $query->where('assignments.classroom_id', $filters['classroom_id']))
             ->when(! empty($filters['due_date']), fn ($query) => $query->whereDate('assignments.due_date', $filters['due_date']))
             ->when(! empty($filters['status']), function ($query) use ($filters) {
@@ -65,21 +73,32 @@ class AssignmentController extends Controller
             ->withQueryString();
 
         $assignmentSummary = ['active' => 0, 'closed' => 0, 'completed' => 0, 'cancelled' => 0];
-        DB::table('assignments')->where('teacher_id', $teacher->id)->get(['id', 'classroom_id', 'status', 'due_date'])->each(function ($assignment) use (&$assignmentSummary) {
-            if ($assignment->status === 'cancelled') {
-                $assignmentSummary['cancelled']++;
-                return;
-            }
-            $studentsTotal = DB::table('students')->where('classroom_id', $assignment->classroom_id)->where('status', 'active')->count();
-            $submissions = DB::table('assignment_submissions')
-                ->join('students', 'students.id', '=', 'assignment_submissions.student_id')
-                ->where('assignment_submissions.assignment_id', $assignment->id)
-                ->where('students.classroom_id', $assignment->classroom_id)
-                ->where('students.status', 'active')
-                ->whereNotNull('assignment_submissions.submitted_at')
-                ->distinct('assignment_submissions.student_id')
-                ->count('assignment_submissions.student_id');
-            if ($studentsTotal > 0 && $submissions >= $studentsTotal) {
+        DB::table('assignments')
+            ->where('teacher_id', $teacher->id)
+            // Filter to only assigned classrooms and subjects
+            ->whereExists(function ($query) use ($teacher) {
+                $query->selectRaw('1')
+                    ->from('teacher_assignments')
+                    ->whereColumn('teacher_assignments.classroom_id', 'assignments.classroom_id')
+                    ->whereColumn('teacher_assignments.subject_id', 'assignments.subject_id')
+                    ->where('teacher_assignments.teacher_id', $teacher->id);
+            })
+            ->get(['id', 'classroom_id', 'status', 'due_date'])
+            ->each(function ($assignment) use (&$assignmentSummary) {
+                if ($assignment->status === 'cancelled') {
+                    $assignmentSummary['cancelled']++;
+                    return;
+                }
+                $studentsTotal = DB::table('students')->where('classroom_id', $assignment->classroom_id)->where('status', 'active')->count();
+                $submissions = DB::table('assignment_submissions')
+                    ->join('students', 'students.id', '=', 'assignment_submissions.student_id')
+                    ->where('assignment_submissions.assignment_id', $assignment->id)
+                    ->where('students.classroom_id', $assignment->classroom_id)
+                    ->where('students.status', 'active')
+                    ->whereNotNull('assignment_submissions.submitted_at')
+                    ->distinct('assignment_submissions.student_id')
+                    ->count('assignment_submissions.student_id');
+                if ($studentsTotal > 0 && $submissions >= $studentsTotal) {
                 $assignmentSummary['completed']++;
                 return;
             }
