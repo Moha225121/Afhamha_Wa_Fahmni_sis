@@ -37,14 +37,28 @@ class ProfileController extends Controller
             'phone' => ['nullable', 'string', 'max:30'],
             'specialization' => ['nullable', 'string', 'max:100'],
             'avatar' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+            'avatar_data' => ['nullable', 'string', 'regex:/^data:image\/(png|jpeg|jpg|webp);base64,.+$/'],
         ]);
 
         $user = $request->user();
-        $user->update(collect($validated)->except(['specialization', 'avatar'])->all());
+        $user->update(collect($validated)->except(['specialization', 'avatar', 'avatar_data'])->all());
         if (array_key_exists('specialization', $validated)) {
             $this->teacher($request)->update(['specialization' => $validated['specialization']]);
         }
-        if ($request->hasFile('avatar')) {
+
+        // Handle cropped image data (base64)
+        if ($validated['avatar_data'] ?? false) {
+            if ($user->avatar_path) {
+                Storage::disk('public')->delete($user->avatar_path);
+            }
+            $imageData = $validated['avatar_data'];
+            // Extract base64 string and decode
+            $base64Image = preg_replace('/^data:image\/\w+;base64,/', '', $imageData);
+            $imageContent = base64_decode($base64Image);
+            $filename = 'teacher-avatars/' . uniqid('avatar_') . '.png';
+            Storage::disk('public')->put($filename, $imageContent);
+            $user->update(['avatar_path' => $filename]);
+        } elseif ($request->hasFile('avatar')) {
             if ($user->avatar_path) {
                 Storage::disk('public')->delete($user->avatar_path);
             }

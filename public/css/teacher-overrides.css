@@ -898,6 +898,124 @@ textarea:focus {
 .teacher-portal .teacher-detail-row { min-height: 0; padding: 9px 0; }
 .teacher-portal .quick-action { min-height: 0; padding-top: 11px; padding-bottom: 11px; }
 
+/* Image Cropper Modal Styles */
+.avatar-cropper-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+}
+
+.avatar-cropper-modal:not([hidden]) {
+    display: block;
+}
+
+.avatar-cropper-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+}
+
+.avatar-cropper-dialog {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1001;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    max-width: 600px;
+    width: 90%;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.avatar-cropper-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid #edf1f5;
+}
+
+.avatar-cropper-header h3 {
+    margin: 0;
+    color: #17223a;
+    font-size: 18px;
+    font-weight: 800;
+}
+
+.avatar-cropper-close {
+    background: none;
+    border: none;
+    font-size: 32px;
+    color: #69778a;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.avatar-cropper-close:hover {
+    color: #17223a;
+}
+
+.avatar-cropper-body {
+    flex: 1;
+    overflow: auto;
+    padding: 20px 24px;
+}
+
+.avatar-cropper-container {
+    width: 100%;
+    max-height: 450px;
+    background: #f5f7fa;
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.avatar-cropper-container img {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.avatar-cropper-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 20px 24px;
+    border-top: 1px solid #edf1f5;
+}
+
+.avatar-cropper-footer .btn {
+    min-width: 120px;
+}
+
+@media (max-width: 600px) {
+    .avatar-cropper-dialog {
+        width: 95%;
+        max-height: 95vh;
+    }
+
+    .avatar-cropper-body {
+        max-height: 60vh;
+    }
+
+    .avatar-cropper-container {
+        max-height: 300px;
+    }
+}
+
 @media (max-width: 600px) {
     .teacher-portal .content { padding: 18px 14px 28px; }
     .teacher-portal .teacher-welcome { min-height: 176px; padding: 21px; }

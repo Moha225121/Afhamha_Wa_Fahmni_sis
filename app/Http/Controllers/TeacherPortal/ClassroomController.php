@@ -46,8 +46,13 @@ class ClassroomController extends Controller
             $classroom->assignment_labels = $assignmentLabels->get($classroom->id, collect())
                 ->map(fn ($assignment) => $assignment->subject_name)
                 ->values();
-            $scores = json_decode($gradeSheets->get($classroom->id)?->scores ?? '', true);
-            $classroom->average_grade = is_array($scores) && count($scores) > 0 ? round(collect($scores)->avg(), 1) : $classroom->average_grade;
+            // Only show average if classroom has students
+            if ($classroom->students_count > 0) {
+                $scores = json_decode($gradeSheets->get($classroom->id)?->scores ?? '', true);
+                $classroom->average_grade = is_array($scores) && count($scores) > 0 ? round(collect($scores)->avg(), 1) : $classroom->average_grade;
+            } else {
+                $classroom->average_grade = null;
+            }
         });
 
         return view('teacher.classes.index', compact('teacher', 'classrooms'));
@@ -65,10 +70,19 @@ class ClassroomController extends Controller
         $attendanceToday = (clone $attendance)->where('status', 'present')->count();
         $attendanceTotal = (clone $attendance)->count();
         $attendanceRate = $attendanceTotal > 0 ? round($attendanceToday * 100 / $attendanceTotal) : 0;
-        $gradeSheet = DB::table('grade_sheets')->where('teacher_id', $teacher->id)->where('classroom_id', $classroom->id)->first();
-        $sheetScores = json_decode($gradeSheet?->scores ?? '', true);
-        $sheetScores = is_array($sheetScores) ? collect($sheetScores)->mapWithKeys(fn ($score, $studentId) => [(int) $studentId => (float) $score]) : collect();
-        $averageGrade = $sheetScores->isNotEmpty() ? $sheetScores->avg() : DB::table('grades')->whereIn('student_id', $studentIds)->avg('score');
+
+        // Only calculate average if classroom has students
+        $averageGrade = null;
+        if ($classroom->students_count > 0) {
+            $gradeSheet = DB::table('grade_sheets')->where('teacher_id', $teacher->id)->where('classroom_id', $classroom->id)->first();
+            $sheetScores = json_decode($gradeSheet?->scores ?? '', true);
+            $sheetScores = is_array($sheetScores) ? collect($sheetScores)->mapWithKeys(fn ($score, $studentId) => [(int) $studentId => (float) $score]) : collect();
+            $averageGrade = $sheetScores->isNotEmpty() ? $sheetScores->avg() : DB::table('grades')->whereIn('student_id', $studentIds)->avg('score');
+        } else {
+            $gradeSheet = null;
+            $sheetScores = collect();
+        }
+
         $studentAverages = DB::table('grades')->whereIn('student_id', $studentIds)->groupBy('student_id')->select('student_id')->selectRaw('avg(score) as average')->pluck('average', 'student_id');
         $studentAverages = $sheetScores->union($studentAverages);
         $studentAttendance = DB::table('attendance_records')->whereIn('student_id', $studentIds)->whereDate('date', today())->pluck('status', 'student_id');

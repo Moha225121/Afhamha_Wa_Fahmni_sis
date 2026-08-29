@@ -114,7 +114,7 @@ class StudentController extends Controller
     }
 
     /**
-     * Compute overall average percent for a student across all published grades.
+     * Compute overall average percent for a student across assigned subjects only.
      */
     private function subjectAverageFor(int $studentId, $teacher = null): ?float
     {
@@ -143,9 +143,24 @@ class StudentController extends Controller
                 }
             }
         }
+
+        // Get the classroom for this student
+        $classroomId = DB::table('students')->where('id', $studentId)->value('classroom_id');
+
+        // Get only the subject IDs assigned to this teacher for this classroom
+        $assignedSubjectIds = DB::table('teacher_assignments')
+            ->where('teacher_id', $teacher->id)
+            ->where('classroom_id', $classroomId)
+            ->pluck('subject_id')
+            ->toArray();
+
+        if (empty($assignedSubjectIds)) {
+            return null;
+        }
+
         $row = DB::table('grades')
             ->join('exams', 'grades.exam_id', '=', 'exams.id')
-            ->when($teacher, fn ($query) => $query->where('exams.teacher_id', $teacher->id))
+            ->whereIn('exams.subject_id', $assignedSubjectIds)
             ->where('grades.student_id', $studentId)
             ->whereNotNull('grades.published_at')
             ->selectRaw('avg(case when exams.total_score > 0 then grades.score * 100.0 / exams.total_score end) as average_percent')
@@ -158,7 +173,8 @@ class StudentController extends Controller
         // Fallback: if grades exist but are not linked/compatible with exams,
         // compute simple average of the `score` column (assumed to be percent).
         $raw = DB::table('grades')
-            ->when($teacher, fn ($query) => $query->join('exams', 'grades.exam_id', '=', 'exams.id')->where('exams.teacher_id', $teacher->id))
+            ->join('exams', 'grades.exam_id', '=', 'exams.id')
+            ->whereIn('exams.subject_id', $assignedSubjectIds)
             ->where('student_id', $studentId)
             ->selectRaw('avg(score) as average_percent')
             ->first();
