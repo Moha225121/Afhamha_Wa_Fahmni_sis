@@ -355,6 +355,22 @@ button {
     transition: transform .18s var(--motion-ease), color .18s ease;
 }
 
+.teacher-portal .logout-form button {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--ink);
+    padding: 8px 11px;
+}
+
+.teacher-portal .action-link {
+    border-radius: 8px;
+    background: var(--primary);
+    color: #fff;
+    padding: 9px 12px;
+    font-weight: 700;
+}
+
 .app-content {
     position: relative;
     z-index: 1;

@@ -5,10 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class AssignmentSubmission extends Model
 {
-    protected $fillable = ['assignment_id', 'student_id', 'status', 'notes', 'submitted_at', 'graded_at', 'score'];
+    protected $fillable = ['assignment_id', 'student_id', 'file_path', 'original_name', 'mime_type', 'file_size', 'status', 'notes', 'submitted_at', 'graded_at', 'score'];
 
     protected function casts(): array
     {
@@ -28,5 +29,10 @@ class AssignmentSubmission extends Model
     public function attachments(): HasMany
     {
         return $this->hasMany(AssignmentSubmissionAttachment::class);
+    }
+
+    public function fileAttachment(): HasOne
+    {
+        return $this->hasOne(AssignmentSubmissionAttachment::class)->latestOfMany();
     }
 }

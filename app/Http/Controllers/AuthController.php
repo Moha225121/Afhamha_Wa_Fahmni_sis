@@ -25,6 +25,7 @@ class AuthController
         $fallback = match (true) {
             $request->user()->isParent() => route('parent.dashboard'),
             $request->user()->isStudent() => route('student.dashboard'),
+            $request->user()->isTeacher() => route('teacher.dashboard'),
             default => route('admin.dashboard'),
         };
 

@@ -1,0 +1,2157 @@
+[1mdiff --git a/app/Http/Controllers/AuthController.php b/app/Http/Controllers/AuthController.php[m
+[1mindex 4f41db2..8458ef4 100644[m
+[1m--- a/app/Http/Controllers/AuthController.php[m
+[1m+++ b/app/Http/Controllers/AuthController.php[m
+[36m@@ -9,8 +9,19 @@[m
+ [m
+ class AuthController[m
+ {[m
+[31m-    public function create(): View[m
+[32m+[m[32m    public function create(): View|RedirectResponse[m
+     {[m
+[32m+[m[32m        if (Auth::check()) {[m
+[32m+[m[32m            $fallback = match (true) {[m
+[32m+[m[32m                Auth::user()->isParent() => route('parent.dashboard'),[m
+[32m+[m[32m                Auth::user()->isStudent() => route('student.dashboard'),[m
+[32m+[m[32m                Auth::user()->isTeacher() => route('teacher.dashboard'),[m
+[32m+[m[32m                default => route('admin.dashboard'),[m
+[32m+[m[32m            };[m
+[32m+[m
+[32m+[m[32m            return redirect()->to($fallback);[m
+[32m+[m[32m        }[m
+[32m+[m
+         return view('auth.login');[m
+     }[m
+ [m
+[36m@@ -25,6 +36,7 @@[m [mpublic function store(Request $request): RedirectResponse[m
+         $fallback = match (true) {[m
+             $request->user()->isParent() => route('parent.dashboard'),[m
+             $request->user()->isStudent() => route('student.dashboard'),[m
+[32m+[m[32m            $request->user()->isTeacher() => route('teacher.dashboard'),[m
+             default => route('admin.dashboard'),[m
+         };[m
+ [m
+[1mdiff --git a/app/Http/Controllers/StudentPortal/PortalController.php b/app/Http/Controllers/StudentPortal/PortalController.php[m
+[1mindex fa6a3ef..742d2c1 100644[m
+[1m--- a/app/Http/Controllers/StudentPortal/PortalController.php[m
+[1m+++ b/app/Http/Controllers/StudentPortal/PortalController.php[m
+[36m@@ -5,7 +5,6 @@[m
+ use App\Http\Controllers\Controller;[m
+ use App\Models\Announcement;[m
+ use App\Models\Student;[m
+[31m-use App\Models\Subject;[m
+ use Illuminate\Http\Request;[m
+ use Illuminate\Support\Collection;[m
+ use Illuminate\Support\Facades\DB;[m
+[36m@@ -20,8 +19,8 @@[m [mpublic function dashboard(Request $request): View[m
+         return view('student.dashboard', [[m
+             'student' => $student,[m
+             'summary' => $this->summaryFor($student),[m
+[31m-            'subjects' => $this->subjectsFor($student),[m
+[31m-            'todaysSchedule' => $this->todaysScheduleFor($student),[m
+[32m+[m[32m            'recentGrades' => $this->recentGradesFor($student, 3),[m
+[32m+[m[32m            'upcomingExams' => $this->upcomingExamsFor($student, 4),[m
+             'announcements' => $this->announcementsFor($student, 4),[m
+         ]);[m
+     }[m
+[36m@@ -107,40 +106,21 @@[m [mprivate function recentGradesFor(Student $student, int $limit): Collection[m
+             ->get();[m
+     }[m
+ [m
+[31m-    private function subjectsFor(Student $student): Collection[m
+[32m+[m[32m    private function upcomingExamsFor(Student $student, int $limit): Collection[m
+     {[m
+[31m-        if (! $student->classroom_id) {[m
+[31m-            return collect();[m
+[31m-        }[m
+[31m-[m
+[31m-        return Subject::query()[m
+[31m-            ->where('status', 'active')[m
+[31m-            ->whereHas('classrooms', fn ($query) => $query->whereKey($student->classroom_id))[m
+[31m-            ->orderBy('name')[m
+[31m-            ->get();[m
+[31m-    }[m
+[31m-[m
+[31m-    private function todaysScheduleFor(Student $student): Collection[m
+[31m-    {[m
+[31m-        if (! $student->classroom_id) {[m
+[31m-            return collect();[m
+[31m-        }[m
+[31m-[m
+[31m-        return DB::table('schedules')[m
+[31m-            ->join('subjects', 'schedules.subject_id', '=', 'subjects.id')[m
+[31m-            ->join('teachers', 'schedules.teacher_id', '=', 'teachers.id')[m
+[31m-            ->join('users', 'teachers.user_id', '=', 'users.id')[m
+[31m-            ->where('schedules.classroom_id', $student->classroom_id)[m
+[31m-            ->where('schedules.day_of_week', now()->dayOfWeek)[m
+[31m-            ->where('subjects.status', 'active')[m
+[32m+[m[32m        return DB::table('exams')[m
+[32m+[m[32m            ->join('subjects', 'exams.subject_id', '=', 'subjects.id')[m
+[32m+[m[32m            ->where('exams.classroom_id', $student->classroom_id)[m
+[32m+[m[32m            ->whereIn('exams.status', ['scheduled', 'published'])[m
+[32m+[m[32m            ->where('exams.starts_at', '>=', now())[m
+             ->select([[m
+[31m-                'schedules.starts_at',[m
+[31m-                'schedules.ends_at',[m
+[31m-                'schedules.room',[m
+[32m+[m[32m                'exams.id',[m
+[32m+[m[32m                'exams.title',[m
+[32m+[m[32m                'exams.starts_at',[m
+                 'subjects.name as subject',[m
+[31m-                'users.name as teacher',[m
+             ])[m
+[31m-            ->orderBy('schedules.starts_at')[m
+[32m+[m[32m            ->orderBy('exams.starts_at')[m
+[32m+[m[32m            ->limit($limit)[m
+             ->get();[m
+     }[m
+ [m
+[36m@@ -154,11 +134,7 @@[m [mprivate function announcementsFor(Student $student, int $limit): Collection[m
+                 $query->whereIn('audience', ['all', 'students']);[m
+ [m
+                 if ($student->classroom_id) {[m
+[31m-                    $query->orWhere(function ($classroomQuery) use ($student): void {[m
+[31m-                        $classroomQuery[m
+[31m-                            ->where('audience', 'classroom')[m
+[31m-                            ->where('classroom_id', $student->classroom_id);[m
+[31m-                    });[m
+[32m+[m[32m                    $query->orWhere('classroom_id', $student->classroom_id);[m
+                 }[m
+             })[m
+             ->latest('published_at')[m
+[1mdiff --git a/app/Models/Student.php b/app/Models/Student.php[m
+[1mindex 505ef56..8d2e1cb 100644[m
+[1m--- a/app/Models/Student.php[m
+[1m+++ b/app/Models/Student.php[m
+[36m@@ -6,7 +6,6 @@[m
+ use Illuminate\Database\Eloquent\Model;[m
+ use Illuminate\Database\Eloquent\Relations\BelongsTo;[m
+ use Illuminate\Database\Eloquent\Relations\BelongsToMany;[m
+[31m-use Illuminate\Database\Eloquent\Relations\HasMany;[m
+ use Illuminate\Database\Eloquent\SoftDeletes;[m
+ [m
+ #[Fillable(['user_id', 'student_number', 'classroom_id', 'birth_date', 'gender', 'address', 'status'])] class Student extends Model[m
+[36m@@ -32,14 +31,4 @@[m [mpublic function guardians(): BelongsToMany[m
+     {[m
+         return $this->belongsToMany(Guardian::class, 'guardian_student');[m
+     }[m
+[31m-[m
+[31m-    public function tutorConversations(): HasMany[m
+[31m-    {[m
+[31m-        return $this->hasMany(TutorConversation::class);[m
+[31m-    }[m
+[31m-[m
+[31m-    public function assignmentSubmissions(): HasMany[m
+[31m-    {[m
+[31m-        return $this->hasMany(AssignmentSubmission::class);[m
+[31m-    }[m
+ }[m
+[1mdiff --git a/app/Models/Subject.php b/app/Models/Subject.php[m
+[1mindex c6d29a3..5b0d1af 100644[m
+[1m--- a/app/Models/Subject.php[m
+[1m+++ b/app/Models/Subject.php[m
+[36m@@ -5,7 +5,6 @@[m
+ use Illuminate\Database\Eloquent\Attributes\Fillable;[m
+ use Illuminate\Database\Eloquent\Model;[m
+ use Illuminate\Database\Eloquent\Relations\BelongsToMany;[m
+[31m-use Illuminate\Database\Eloquent\Relations\HasMany;[m
+ [m
+ #[Fillable(['name', 'code', 'stage', 'description', 'status'])] class Subject extends Model[m
+ {[m
+[36m@@ -18,19 +17,4 @@[m [mpublic function teachers(): BelongsToMany[m
+     {[m
+         return $this->belongsToMany(Teacher::class, 'teacher_assignments')->withPivot('classroom_id');[m
+     }[m
+[31m-[m
+[31m-    public function units(): HasMany[m
+[31m-    {[m
+[31m-        return $this->hasMany(Unit::class);[m
+[31m-    }[m
+[31m-[m
+[31m-    public function lessons(): HasMany[m
+[31m-    {[m
+[31m-        return $this->hasMany(Lesson::class);[m
+[31m-    }[m
+[31m-[m
+[31m-    public function libraryResources(): HasMany[m
+[31m-    {[m
+[31m-        return $this->hasMany(LibraryResource::class);[m
+[31m-    }[m
+ }[m
+[1mdiff --git a/app/Models/User.php b/app/Models/User.php[m
+[1mindex 9f7e54d..d3abe4b 100644[m
+[1m--- a/app/Models/User.php[m
+[1m+++ b/app/Models/User.php[m
+[36m@@ -5,8 +5,6 @@[m
+ use Illuminate\Database\Eloquent\Attributes\Fillable;[m
+ use Illuminate\Database\Eloquent\Attributes\Hidden;[m
+ use Illuminate\Database\Eloquent\Factories\HasFactory;[m
+[31m-use Illuminate\Database\Eloquent\Relations\BelongsToMany;[m
+[31m-use Illuminate\Database\Eloquent\Relations\HasMany;[m
+ use Illuminate\Database\Eloquent\Relations\HasOne;[m
+ use Illuminate\Foundation\Auth\User as Authenticatable;[m
+ use Illuminate\Notifications\Notifiable;[m
+[36m@@ -37,9 +35,14 @@[m [mpublic function isStudent(): bool[m
+         return $this->role === 'student' && $this->status === 'active';[m
+     }[m
+ [m
+[32m+[m[32m    public function isTeacher(): bool[m
+[32m+[m[32m    {[m
+[32m+[m[32m        return $this->role === 'teacher' && $this->status === 'active';[m
+[32m+[m[32m    }[m
+[32m+[m
+     public function hasPermission(string $permission): bool[m
+     {[m
+[31m-        if (! $this->isAdmin()) {[m
+[32m+[m[32m        if ($this->status !== 'active') {[m
+             return false;[m
+         } $p = config('permissions.roles.'.$this->role, []);[m
+ [m
+[36m@@ -60,21 +63,4 @@[m [mpublic function guardian(): HasOne[m
+     {[m
+         return $this->hasOne(Guardian::class);[m
+     }[m
+[31m-[m
+[31m-    public function conversations(): BelongsToMany[m
+[31m-    {[m
+[31m-        return $this->belongsToMany(Conversation::class, 'conversation_participants')[m
+[31m-            ->withPivot('last_read_at')[m
+[31m-            ->withTimestamps();[m
+[31m-    }[m
+[31m-[m
+[31m-    public function sentMessages(): HasMany[m
+[31m-    {[m
+[31m-        return $this->hasMany(Message::class, 'sender_id');[m
+[31m-    }[m
+[31m-[m
+[31m-    public function pushSubscriptions(): HasMany[m
+[31m-    {[m
+[31m-        return $this->hasMany(PushSubscription::class);[m
+[31m-    }[m
+ }[m
+[1mdiff --git a/app/Providers/AppServiceProvider.php b/app/Providers/AppServiceProvider.php[m
+[1mindex 1dcd159..452e6b6 100644[m
+[1m--- a/app/Providers/AppServiceProvider.php[m
+[1m+++ b/app/Providers/AppServiceProvider.php[m
+[36m@@ -2,11 +2,6 @@[m
+ [m
+ namespace App\Providers;[m
+ [m
+[31m-use App\Contracts\SmartTutorGateway;[m
+[31m-use App\Services\UnavailableSmartTutorGateway;[m
+[31m-use Illuminate\Cache\RateLimiting\Limit;[m
+[31m-use Illuminate\Http\Request;[m
+[31m-use Illuminate\Support\Facades\RateLimiter;[m
+ use Illuminate\Support\ServiceProvider;[m
+ [m
+ class AppServiceProvider extends ServiceProvider[m
+[36m@@ -16,7 +11,7 @@[m [mclass AppServiceProvider extends ServiceProvider[m
+      */[m
+     public function register(): void[m
+     {[m
+[31m-        $this->app->singleton(SmartTutorGateway::class, UnavailableSmartTutorGateway::class);[m
+[32m+[m[32m        //[m
+     }[m
+ [m
+     /**[m
+[36m@@ -24,35 +19,6 @@[m [mpublic function register(): void[m
+      */[m
+     public function boot(): void[m
+     {[m
+[31m-        RateLimiter::for('smart-tutor-conversations', function (Request $request): Limit {[m
+[31m-            $maximum = max(1, (int) config('smart_tutor.rate_limits.conversations_per_minute', 10));[m
+[31m-[m
+[31m-            return Limit::perMinute($maximum)[m
+[31m-                ->by($this->rateLimitKey($request, 'conversations'))[m
+[31m-                ->response(fn (Request $request, array $headers) => response([m
+[31m-                    'تم تجاوز الحد المؤقت لإنشاء المحادثات. يرجى المحاولة بعد قليل.',[m
+[31m-                    429,[m
+[31m-                    $headers,[m
+[31m-                ));[m
+[31m-        });[m
+[31m-[m
+[31m-        RateLimiter::for('smart-tutor-messages', function (Request $request): Limit {[m
+[31m-            $maximum = max(1, (int) config('smart_tutor.rate_limits.messages_per_minute', 20));[m
+[31m-[m
+[31m-            return Limit::perMinute($maximum)[m
+[31m-                ->by($this->rateLimitKey($request, 'messages'))[m
+[31m-                ->response(fn (Request $request, array $headers) => response([m
+[31m-                    'تم تجاوز الحد المؤقت لرسائل المعلّم الذكي. يرجى المحاولة بعد قليل.',[m
+[31m-                    429,[m
+[31m-                    $headers,[m
+[31m-                ));[m
+[31m-        });[m
+[31m-    }[m
+[31m-[m
+[31m-    private function rateLimitKey(Request $request, string $scope): string[m
+[31m-    {[m
+[31m-        $actor = $request->user()?->getAuthIdentifier() ?: $request->ip();[m
+[31m-[m
+[31m-        return "smart-tutor:{$scope}:{$actor}";[m
+[32m+[m[32m        //[m
+     }[m
+ }[m
+[1mdiff --git a/bootstrap/app.php b/bootstrap/app.php[m
+[1mindex 7a1fc9d..83f7572 100644[m
+[1m--- a/bootstrap/app.php[m
+[1m+++ b/bootstrap/app.php[m
+[36m@@ -4,6 +4,7 @@[m
+ use App\Http\Middleware\EnsureUserIsAdmin;[m
+ use App\Http\Middleware\EnsureUserIsParent;[m
+ use App\Http\Middleware\EnsureUserIsStudent;[m
+[32m+[m[32muse App\Http\Middleware\EnsureUserIsTeacher;[m
+ use Illuminate\Foundation\Application;[m
+ use Illuminate\Foundation\Configuration\Exceptions;[m
+ use Illuminate\Foundation\Configuration\Middleware;[m
+[36m@@ -20,6 +21,7 @@[m
+             'admin' => EnsureUserIsAdmin::class,[m
+             'parent' => EnsureUserIsParent::class,[m
+             'student' => EnsureUserIsStudent::class,[m
+[32m+[m[32m            'teacher' => EnsureUserIsTeacher::class,[m
+             'permission' => EnsureUserHasPermission::class,[m
+         ]);[m
+     })[m
+[1mdiff --git a/config/permissions.php b/config/permissions.php[m
+[1mindex d227eaa..c24ef04 100644[m
+[1m--- a/config/permissions.php[m
+[1m+++ b/config/permissions.php[m
+[36m@@ -1,3 +1,3 @@[m
+ <?php[m
+ [m
+[31m-return ['roles' => ['admin' => ['*'], 'teacher' => ['attendance.manage', 'exams.manage', 'grades.manage'], 'student' => [], 'parent' => []]];[m
+[32m+[m[32mreturn ['roles' => ['admin' => ['*'], 'teacher' => ['attendance.manage', 'exams.manage', 'grades.manage', 'homework.manage'], 'student' => [], 'parent' => []]];[m
+[1mdiff --git a/database/seeders/LocalDemoSeeder.php b/database/seeders/LocalDemoSeeder.php[m
+[1mindex 7395f0d..1ba9a04 100644[m
+[1m--- a/database/seeders/LocalDemoSeeder.php[m
+[1m+++ b/database/seeders/LocalDemoSeeder.php[m
+[36m@@ -3,9 +3,6 @@[m
+ namespace Database\Seeders;[m
+ [m
+ use App\Models\AcademicYear;[m
+[31m-use App\Models\Announcement;[m
+[31m-use App\Models\Assignment;[m
+[31m-use App\Models\AssignmentSubmission;[m
+ use App\Models\Classroom;[m
+ use App\Models\Guardian;[m
+ use App\Models\Student;[m
+[36m@@ -29,6 +26,12 @@[m [mpublic function run(): void[m
+             ['stage' => 'أساسي'],[m
+         );[m
+ [m
+[32m+[m[32m        $subject = Subject::firstOrCreate([m
+[32m+[m[32m            ['code' => 'MATH-101'],[m
+[32m+[m[32m            ['name' => 'الرياضيات', 'stage' => 'أساسي', 'status' => 'active'],[m
+[32m+[m[32m        );[m
+[32m+[m[32m        $classroom->subjects()->syncWithoutDetaching([$subject->id]);[m
+[32m+[m
+         $parentUser = User::updateOrCreate([m
+             ['email' => 'parent@example.test'],[m
+             ['name' => 'ولي أمر تجريبي', 'password' => 'password123', 'role' => 'parent', 'status' => 'active', 'phone' => '0911111111'],[m
+[36m@@ -44,88 +47,26 @@[m [mpublic function run(): void[m
+ [m
+         $guardian->students()->syncWithoutDetaching([$firstStudent->id, $secondStudent->id]);[m
+ [m
+[31m-        $admin = User::updateOrCreate([m
+[32m+[m[32m        User::updateOrCreate([m
+             ['email' => 'admin@example.test'],[m
+             ['name' => 'مدير النظام', 'password' => 'password123', 'role' => 'admin', 'status' => 'active'],[m
+         );[m
+ [m
+         $teacherUser = User::updateOrCreate([m
+             ['email' => 'teacher@example.test'],[m
+[31m-            ['name' => 'المعلمة مريم', 'password' => 'password123', 'role' => 'teacher', 'status' => 'active'],[m
+[32m+[m[32m            ['name' => 'أ. خالد العرفي', 'password' => 'password123', 'role' => 'teacher', 'status' => 'active', 'phone' => '0922222222'],[m
+         );[m
+[31m-        $teacher = Teacher::updateOrCreate(['user_id' => $teacherUser->id], ['specialization' => 'رياضيات', 'status' => 'active']);[m
+[31m-        $subject = Subject::updateOrCreate([m
+[31m-            ['code' => 'MATH-1'],[m
+[31m-            ['name' => 'الرياضيات', 'stage' => 'أساسي', 'description' => 'المادة التجريبية', 'status' => 'active'],[m
+[32m+[m
+[32m+[m[32m        $teacher = Teacher::updateOrCreate([m
+[32m+[m[32m            ['user_id' => $teacherUser->id],[m
+[32m+[m[32m            ['specialization' => 'الرياضيات', 'status' => 'active'],[m
+         );[m
+ [m
+[31m-        DB::table('classroom_subject')->updateOrInsert(['classroom_id' => $classroom->id, 'subject_id' => $subject->id]);[m
+         DB::table('teacher_assignments')->updateOrInsert([[m
+             'teacher_id' => $teacher->id,[m
+             'classroom_id' => $classroom->id,[m
+             'subject_id' => $subject->id,[m
+         ]);[m
+[31m-[m
+[31m-        DB::table('attendance_records')->updateOrInsert([m
+[31m-            ['student_id' => $firstStudent->id, 'date' => now()->subDay()->toDateString()],[m
+[31m-            ['classroom_id' => $classroom->id, 'status' => 'present', 'recorded_by' => $admin->id, 'created_at' => now(), 'updated_at' => now()],[m
+[31m-        );[m
+[31m-        DB::table('attendance_records')->updateOrInsert([m
+[31m-            ['student_id' => $secondStudent->id, 'date' => now()->subDay()->toDateString()],[m
+[31m-            ['classroom_id' => $classroom->id, 'status' => 'late', 'recorded_by' => $admin->id, 'created_at' => now(), 'updated_at' => now()],[m
+[31m-        );[m
+[31m-[m
+[31m-        DB::table('exams')->updateOrInsert([m
+[31m-            ['title' => 'اختبار الوحدة الأولى', 'classroom_id' => $classroom->id],[m
+[31m-            [[m
+[31m-                'subject_id' => $subject->id,[m
+[31m-                'teacher_id' => $teacher->id,[m
+[31m-                'starts_at' => now()->subDays(3),[m
+[31m-                'duration_minutes' => 45,[m
+[31m-                'total_score' => 20,[m
+[31m-                'status' => 'published',[m
+[31m-                'created_at' => now(),[m
+[31m-                'updated_at' => now(),[m
+[31m-            ],[m
+[31m-        );[m
+[31m-        $exam = DB::table('exams')->where('title', 'اختبار الوحدة الأولى')->where('classroom_id', $classroom->id)->first();[m
+[31m-[m
+[31m-        DB::table('grades')->updateOrInsert([m
+[31m-            ['exam_id' => $exam->id, 'student_id' => $firstStudent->id],[m
+[31m-            ['score' => 18, 'published_at' => now()->subDay(), 'created_at' => now(), 'updated_at' => now()],[m
+[31m-        );[m
+[31m-        DB::table('grades')->updateOrInsert([m
+[31m-            ['exam_id' => $exam->id, 'student_id' => $secondStudent->id],[m
+[31m-            ['score' => 16, 'published_at' => now()->subDay(), 'created_at' => now(), 'updated_at' => now()],[m
+[31m-        );[m
+[31m-[m
+[31m-        $assignment = Assignment::updateOrCreate([m
+[31m-            ['title' => 'حل تمارين الجمع', 'classroom_id' => $classroom->id],[m
+[31m-            [[m
+[31m-                'subject_id' => $subject->id,[m
+[31m-                'teacher_id' => $teacher->id,[m
+[31m-                'instructions' => 'حل التمارين من صفحة 12 ورفع الحل قبل الموعد.',[m
+[31m-                'due_at' => now()->addDays(2),[m
+[31m-                'status' => 'published',[m
+[31m-                'published_at' => now()->subHour(),[m
+[31m-            ],[m
+[31m-        );[m
+[31m-        AssignmentSubmission::updateOrCreate([m
+[31m-            ['assignment_id' => $assignment->id, 'student_id' => $firstStudent->id],[m
+[31m-            ['status' => 'submitted', 'submitted_at' => now()->subMinutes(30)],[m
+[31m-        );[m
+[31m-[m
+[31m-        Announcement::updateOrCreate([m
+[31m-            ['title' => 'تنبيه لأولياء الأمور'],[m
+[31m-            [[m
+[31m-                'content' => 'نرجو متابعة الواجبات والنتائج من خلال بوابة ولي الأمر.',[m
+[31m-                'audience' => 'parents',[m
+[31m-                'classroom_id' => $classroom->id,[m
+[31m-                'published_at' => now()->subHour(),[m
+[31m-                'status' => 'published',[m
+[31m-                'created_by' => $admin->id,[m
+[31m-            ],[m
+[31m-        );[m
+     }[m
+ [m
+     private function student(string $email, string $name, string $number, Classroom $classroom): Student[m
+[1mdiff --git a/public/css/admin.css b/public/css/admin.css[m
+[1mindex df3b826..cd63513 100644[m
+[1m--- a/public/css/admin.css[m
+[1m+++ b/public/css/admin.css[m
+[36m@@ -1,793 +1,3 @@[m
+ @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap');[m
+[31m-[m
+[31m-:root {[m
+[31m-    --ink: #172033;[m
+[31m-    --nav: #101827;[m
+[31m-    --nav-soft: #1b2638;[m
+[31m-    --orange: #f28c28;[m
+[31m-    --orange-deep: #d96f11;[m
+[31m-    --teal: #0f766e;[m
+[31m-    --bg: #f6f7fb;[m
+[31m-    --surface: #ffffff;[m
+[31m-    --surface-soft: #f8fafc;[m
+[31m-    --line: #dde4ee;[m
+[31m-    --line-strong: #c8d3e1;[m
+[31m-    --muted: #697386;[m
+[31m-    --green: #1f9d72;[m
+[31m-    --red: #d94b58;[m
+[31m-    --blue: #2563eb;[m
+[31m-    --shadow-sm: 0 1px 2px rgba(23, 32, 51, .06);[m
+[31m-    --shadow-md: 0 14px 34px rgba(23, 32, 51, .08);[m
+[31m-    --focus: 0 0 0 4px rgba(242, 140, 40, .16);[m
+[31m-}[m
+[31m-[m
+[31m-* {[m
+[31m-    box-sizing: border-box;[m
+[31m-}[m
+[31m-[m
+[31m-html {[m
+[31m-    color-scheme: light;[m
+[31m-}[m
+[31m-[m
+[31m-body {[m
+[31m-    margin: 0;[m
+[31m-    background: var(--bg);[m
+[31m-    color: var(--ink);[m
+[31m-    font-family: Cairo, Arial, sans-serif;[m
+[31m-    letter-spacing: 0;[m
+[31m-}[m
+[31m-[m
+[31m-a {[m
+[31m-    color: inherit;[m
+[31m-}[m
+[31m-[m
+[31m-button,[m
+[31m-input,[m
+[31m-select,[m
+[31m-textarea {[m
+[31m-    font: inherit;[m
+[31m-}[m
+[31m-[m
+[31m-button {[m
+[31m-    cursor: pointer;[m
+[31m-}[m
+[31m-[m
+[31m-.sidebar {[m
+[31m-    position: fixed;[m
+[31m-    inset-block: 0;[m
+[31m-    inset-inline-end: 0;[m
+[31m-    z-index: 20;[m
+[31m-    width: 260px;[m
+[31m-    padding: 22px 16px;[m
+[31m-    overflow: auto;[m
+[31m-    background: linear-gradient(180deg, var(--nav), #162033);[m
+[31m-    color: #fff;[m
+[31m-}[m
+[31m-[m
+[31m-.logo {[m
+[31m-    display: flex;[m
+[31m-    gap: 12px;[m
+[31m-    align-items: center;[m
+[31m-    padding: 0 8px 20px;[m
+[31m-    color: #fff;[m
+[31m-    text-decoration: none;[m
+[31m-}[m
+[31m-[m
+[31m-.logo small,[m
+[31m-.logo b {[m
+[31m-    display: block;[m
+[31m-}[m
+[31m-[m
+[31m-.logo small {[m
+[31m-    opacity: .6;[m
+[31m-}[m
+[31m-[m
+[31m-.brand-mark {[m
+[31m-    width: 43px;[m
+[31m-    height: 43px;[m
+[31m-    display: grid;[m
+[31m-    place-items: center;[m
+[31m-    border-radius: 8px;[m
+[31m-    background: linear-gradient(135deg, var(--orange), #ffb158);[m
+[31m-    color: #fff;[m
+[31m-    direction: ltr;[m
+[31m-    font-size: 13px;[m
+[31m-    font-weight: 800;[m
+[31m-    box-shadow: 0 10px 22px rgba(242, 140, 40, .28);[m
+[31m-}[m
+[31m-[m
+[31m-.sidebar nav a {[m
+[31m-    min-height: 42px;[m
+[31m-    display: flex;[m
+[31m-    gap: 12px;[m
+[31m-    align-items: center;[m
+[31m-    margin-bottom: 4px;[m
+[31m-    padding: 10px 13px;[m
+[31m-    border: 1px solid transparent;[m
+[31m-    border-radius: 8px;[m
+[31m-    color: #bac2d1;[m
+[31m-    font-size: 14px;[m
+[31m-    text-decoration: none;[m
+[31m-    transition: background .18s ease, border-color .18s ease, color .18s ease, transform .18s ease;[m
+[31m-}[m
+[31m-[m
+[31m-.sidebar nav a i {[m
+[31m-    font-style: normal;[m
+[31m-    font-size: 11px;[m
+[31m-    opacity: .62;[m
+[31m-}[m
+[31m-[m
+[31m-.sidebar nav a:hover,[m
+[31m-.sidebar nav a.active {[m
+[31m-    background: rgba(255, 255, 255, .08);[m
+[31m-    border-color: rgba(255, 255, 255, .08);[m
+[31m-    color: #fff;[m
+[31m-}[m
+[31m-[m
+[31m-.sidebar nav a:hover {[m
+[31m-    transform: translateX(-2px);[m
+[31m-}[m
+[31m-[m
+[31m-.sidebar nav a.active {[m
+[31m-    border-inline-end: 3px solid var(--orange);[m
+[31m-}[m
+[31m-[m
+[31m-.partner {[m
+[31m-    margin: 25px 12px;[m
+[31m-    color: #8390a6;[m
+[31m-    font-size: 12px;[m
+[31m-}[m
+[31m-[m
+[31m-.partner b {[m
+[31m-    color: #fff;[m
+[31m-}[m
+[31m-[m
+[31m-.page {[m
+[31m-    margin-inline-end: 260px;[m
+[31m-}[m
+[31m-[m
+[31m-.topbar {[m
+[31m-    height: 76px;[m
+[31m-    display: flex;[m
+[31m-    align-items: center;[m
+[31m-    justify-content: space-between;[m
+[31m-    gap: 16px;[m
+[31m-    padding: 0 32px;[m
+[31m-    border-bottom: 1px solid var(--line);[m
+[31m-    background: rgba(255, 255, 255, .9);[m
+[31m-    backdrop-filter: blur(14px);[m
+[31m-}[m
+[31m-[m
+[31m-.global-search input {[m
+[31m-    width: min(340px, 38vw);[m
+[31m-    border-color: transparent;[m
+[31m-    background: #f2f5f9;[m
+[31m-}[m
+[31m-[m
+[31m-.account {[m
+[31m-    display: flex;[m
+[31m-    gap: 16px;[m
+[31m-    align-items: center;[m
+[31m-}[m
+[31m-[m
+[31m-.account a,[m
+[31m-.account button {[m
+[31m-    border: 0;[m
+[31m-    background: none;[m
+[31m-    color: var(--ink);[m
+[31m-    font-family: inherit;[m
+[31m-    text-decoration: none;[m
+[31m-}[m
+[31m-[m
+[31m-.content {[m
+[31m-    max-width: 1500px;[m
+[31m-    margin: auto;[m
+[31m-    padding: 30px;[m
+[31m-}[m
+[31m-[m
+[31m-.page-head {[m
+[31m-    display: flex;[m
+[31m-    justify-content: space-between;[m
+[31m-    align-items: end;[m
+[31m-    gap: 16px;[m
+[31m-    margin-bottom: 24px;[m
+[31m-}[m
+[31m-[m
+[31m-.page-head h1 {[m
+[31m-    margin: 3px 0;[m
+[31m-    font-size: 28px;[m
+[31m-    line-height: 1.3;[m
+[31m-}[m
+[31m-[m
+[31m-.eyebrow {[m
+[31m-    margin: 0;[m
+[31m-    color: var(--orange);[m
+[31m-    font-size: 12px;[m
+[31m-    font-weight: 800;[m
+[31m-}[m
+[31m-[m
+[31m-.muted {[m
+[31m-    color: var(--muted);[m
+[31m-}[m
+[31m-[m
+[31m-.cards {[m
+[31m-    display: grid;[m
+[31m-    grid-template-columns: repeat(4, minmax(0, 1fr));[m
+[31m-    gap: 16px;[m
+[31m-}[m
+[31m-[m
+[31m-.card,[m
+[31m-.panel {[m
+[31m-    border: 1px solid var(--line);[m
+[31m-    border-radius: 8px;[m
+[31m-    background: var(--surface);[m
+[31m-    box-shadow: var(--shadow-sm);[m
+[31m-    padding: 20px;[m
+[31m-}[m
+[31m-[m
+[31m-.stat strong {[m
+[31m-    display: block;[m
+[31m-    margin-top: 8px;[m
+[31m-    font-size: 30px;[m
+[31m-    line-height: 1;[m
+[31m-}[m
+[31m-[m
+[31m-.stat span {[m
+[31m-    color: var(--muted);[m
+[31m-    font-size: 13px;[m
+[31m-}[m
+[31m-[m
+[31m-.grid-2 {[m
+[31m-    display: grid;[m
+[31m-    grid-template-columns: 2fr 1fr;[m
+[31m-    gap: 18px;[m
+[31m-    margin-top: 18px;[m
+[31m-}[m
+[31m-[m
+[31m-.panel h2 {[m
+[31m-    margin-top: 0;[m
+[31m-    font-size: 18px;[m
+[31m-}[m
+[31m-[m
+[31m-.activity {[m
+[31m-    padding: 12px 0;[m
+[31m-    border-bottom: 1px solid var(--line);[m
+[31m-}[m
+[31m-[m
+[31m-.activity:last-child {[m
+[31m-    border: 0;[m
+[31m-}[m
+[31m-[m
+[31m-.activity small {[m
+[31m-    display: block;[m
+[31m-    color: var(--muted);[m
+[31m-}[m
+[31m-[m
+[31m-.btn {[m
+[31m-    min-height: 42px;[m
+[31m-    display: inline-flex;[m
+[31m-    align-items: center;[m
+[31m-    justify-content: center;[m
+[31m-    gap: 8px;[m
+[31m-    border: 0;[m
+[31m-    border-radius: 8px;[m
+[31m-    padding: 10px 16px;[m
+[31m-    font: 700 14px Cairo;[m
+[31m-    text-decoration: none;[m
+[31m-    transition: background .18s ease, box-shadow .18s ease, transform .18s ease;[m
+[31m-}[m
+[31m-[m
+[31m-.btn:hover {[m
+[31m-    transform: translateY(-1px);[m
+[31m-}[m
+[31m-[m
+[31m-.btn.primary {[m
+[31m-    background: linear-gradient(135deg, var(--orange), var(--orange-deep));[m
+[31m-    color: #fff;[m
+[31m-    box-shadow: 0 10px 24px rgba(242, 140, 40, .25);[m
+[31m-}[m
+[31m-[m
+[31m-.btn.secondary {[m
+[31m-    border: 1px solid var(--line);[m
+[31m-    background: #eef3f8;[m
+[31m-    color: var(--ink);[m
+[31m-}[m
+[31m-[m
+[31m-.filters {[m
+[31m-    display: flex;[m
+[31m-    gap: 10px;[m
+[31m-    flex-wrap: wrap;[m
+[31m-    align-items: center;[m
+[31m-    margin-bottom: 16px;[m
+[31m-}[m
+[31m-[m
+[31m-.filters input {[m
+[31m-    min-width: 240px;[m
+[31m-}[m
+[31m-[m
+[31m-input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),[m
+[31m-select,[m
+[31m-textarea {[m
+[31m-    width: auto;[m
+[31m-    min-height: 46px;[m
+[31m-    border: 1px solid var(--line);[m
+[31m-    border-radius: 8px;[m
+[31m-    background-color: var(--surface);[m
+[31m-    color: var(--ink);[m
+[31m-    padding: 10px 13px;[m
+[31m-    outline: 0;[m
+[31m-    box-shadow: 0 1px 0 rgba(23, 32, 51, .02);[m
+[31m-    transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;[m
+[31m-}[m
+[31m-[m
+[31m-input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):hover,[m
+[31m-select:hover,[m
+[31m-textarea:hover {[m
+[31m-    border-color: var(--line-strong);[m
+[31m-}[m
+[31m-[m
+[31m-input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):focus,[m
+[31m-select:focus,[m
+[31m-textarea:focus {[m
+[31m-    border-color: var(--orange);[m
+[31m-    box-shadow: var(--focus);[m
+[31m-}[m
+[31m-[m
+[31m-input::placeholder,[m
+[31m-textarea::placeholder {[m
+[31m-    color: #9aa4b2;[m
+[31m-}[m
+[31m-[m
+[31m-textarea {[m
+[31m-    min-height: 112px;[m
+[31m-    resize: vertical;[m
+[31m-    line-height: 1.8;[m
+[31m-}[m
+[31m-[m
+[31m-select {[m
+[31m-    cursor: pointer;[m
+[31m-}[m
+[31m-[m
+[31m-select:not([multiple]) {[m
+[31m-    appearance: none;[m
+[31m-    -webkit-appearance: none;[m
+[31m-    padding-inline-start: 44px;[m
+[31m-    padding-inline-end: 13px;[m
+[31m-    background-image:[m
+[31m-        linear-gradient(45deg, transparent 50%, var(--muted) 50%),[m
+[31m-        linear-gradient(135deg, var(--muted) 50%, transparent 50%);[m
+[31m-    background-position:[m
+[31m-        left 18px center,[m
+[31m-        left 12px center;[m
+[31m-    background-repeat: no-repeat;[m
+[31m-    background-size: 7px 7px;[m
+[31m-}[m
+[31m-[m
+[31m-select[multiple] {[m
+[31m-    min-height: 136px;[m
+[31m-    padding: 8px;[m
+[31m-    cursor: default;[m
+[31m-}[m
+[31m-[m
+[31m-select[multiple] option {[m
+[31m-    border-radius: 7px;[m
+[31m-    padding: 8px 10px;[m
+[31m-}[m
+[31m-[m
+[31m-select[multiple] option:checked {[m
+[31m-    background: linear-gradient(135deg, rgba(15, 118, 110, .16), rgba(242, 140, 40, .14));[m
+[31m-    color: var(--ink);[m
+[31m-}[m
+[31m-[m
+[31m-input[type="file"] {[m
+[31m-    padding: 7px;[m
+[31m-}[m
+[31m-[m
+[31m-input[type="file"]::file-selector-button {[m
+[31m-    margin-inline-end: 10px;[m
+[31m-    border: 0;[m
+[31m-    border-radius: 7px;[m
+[31m-    background: #eef3f8;[m
+[31m-    color: var(--ink);[m
+[31m-    padding: 8px 12px;[m
+[31m-    font: 700 13px Cairo;[m
+[31m-}[m
+[31m-[m
+[31m-input[type="checkbox"],[m
+[31m-input[type="radio"] {[m
+[31m-    width: 18px;[m
+[31m-    height: 18px;[m
+[31m-    margin: 0;[m
+[31m-    accent-color: var(--orange);[m
+[31m-}[m
+[31m-[m
+[31m-select.native-select-hidden {[m
+[31m-    position: absolute !important;[m
+[31m-    inline-size: 1px !important;[m
+[31m-    block-size: 1px !important;[m
+[31m-    min-width: 0 !important;[m
+[31m-    min-height: 0 !important;[m
+[31m-    margin: 0 !important;[m
+[31m-    padding: 0 !important;[m
+[31m-    border: 0 !important;[m
+[31m-    opacity: 0 !important;[m
+[31m-    pointer-events: none !important;[m
+[31m-}[m
+[31m-[m
+[31m-.select-ui {[m
+[31m-    position: relative;[m
+[31m-    display: inline-block;[m
+[31m-    width: 100%;[m
+[31m-    min-width: 0;[m
+[31m-    vertical-align: middle;[m
+[31m-}[m
+[31m-[m
+[31m-.filters .select-ui {[m
+[31m-    width: auto;[m
+[31m-    min-width: 180px;[m
+[31m-}[m
+[31m-[m
+[31m-.select-ui__button {[m
+[31m-    position: relative;[m
+[31m-    width: 100%;[m
+[31m-    min-height: 46px;[m
+[31m-    border: 1px solid var(--line);[m
+[31m-    border-radius: 8px;[m
+[31m-    background: var(--surface);[m
+[31m-    color: var(--ink);[m
+[31m-    padding: 10px 13px 10px 44px;[m
+[31m-    text-align: right;[m
+[31m-    box-shadow: 0 1px 0 rgba(23, 32, 51, .02);[m
+[31m-    transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;[m
+[31m-}[m
+[31m-[m
+[31m-.select-ui__button::after {[m
+[31m-    content: "";[m
+[31m-    position: absolute;[m
+[31m-    top: 50%;[m
+[31m-    left: 17px;[m
+[31m-    width: 8px;[m
+[31m-    height: 8px;[m
+[31m-    border-inline-end: 2px solid var(--muted);[m
+[31m-    border-bottom: 2px solid var(--muted);[m
+[31m-    transform: translateY(-65%) rotate(45deg);[m
+[31m-    transition: transform .18s ease, border-color .18s ease;[m
+[31m-}[m
+[31m-[m
+[31m-.select-ui__button:hover,[m
+[31m-.select-ui--open .select-ui__button {[m
+[31m-    border-color: var(--line-strong);[m
+[31m-    background: #fff;[m
+[31m-}[m
+[31m-[m
+[31m-.select-ui__button.is-placeholder {[m
+[31m-    color: #8b95a5;[m
+[31m-}[m
+[31m-[m
+[31m-.select-ui__button:focus-visible,[m
+[31m-.select-ui--open .select-ui__button {[m
+[31m-    border-color: var(--orange);[m
+[31m-    box-shadow: var(--focus);[m
+[31m-    outline: 0;[m
+[31m-}[m
+[31m-[m
+[31m-.select-ui--open .select-ui__button::after {[m
+[31m-    border-color: var(--orange);[m
+[31m-    transform: translateY(-35%) rotate(225deg);[m
+[31m-}[m
+[31m-[m
+[31m-.select-ui__menu {[m
+[31m-    position: fixed;[m
+[31m-    z-index: 1000;[m
+[31m-    display: none;[m
+[31m-    max-height: 280px;[m
+[31m-    overflow: auto;[m
+[31m-    border: 1px solid var(--line);[m
+[31m-    border-radius: 8px;[m
+[31m-    background: #fff;[m
+[31m-    box-shadow: 0 18px 45px rgba(23, 32, 51, .16);[m
+[31m-    padding: 6px;[m
+[31m-    direction: rtl;[m
+[31m-}[m
+[31m-[m
+[31m-.select-ui__menu.open {[m
+[31m-    display: grid;[m
+[31m-    gap: 3px;[m
+[31m-}[m
+[31m-[m
+[31m-.select-ui__option {[m
+[31m-    width: 100%;[m
+[31m-    min-height: 38px;[m
+[31m-    border: 0;[m
+[31m-    border-radius: 7px;[m
+[31m-    background: transparent;[m
+[31m-    color: var(--ink);[m
+[31m-    padding: 8px 10px;[m
+[31m-    text-align: right;[m
+[31m-}[m
+[31m-[m
+[31m-.select-ui__option:hover,[m
+[31m-.select-ui__option:focus-visible {[m
+[31m-    background: #f3f6fa;[m
+[31m-    outline: 0;[m
+[31m-}[m
+[31m-[m
+[31m-.select-ui__option.is-selected {[m
+[31m-    background: linear-gradient(135deg, rgba(242, 140, 40, .16), rgba(15, 118, 110, .12));[m
+[31m-    color: var(--ink);[m
+[31m-    font-weight: 800;[m
+[31m-}[m
+[31m-[m
+[31m-.select-ui__option:disabled {[m
+[31m-    color: #9aa4b2;[m
+[31m-    cursor: not-allowed;[m
+[31m-}[m
+[31m-[m
+[31m-.table-wrap {[m
+[31m-    overflow-x: auto;[m
+[31m-    border: 1px solid var(--line);[m
+[31m-    border-radius: 8px;[m
+[31m-    background: var(--surface);[m
+[31m-    box-shadow: var(--shadow-sm);[m
+[31m-}[m
+[31m-[m
+[31m-table {[m
+[31m-    width: 100%;[m
+[31m-    min-width: 750px;[m
+[31m-    border-collapse: collapse;[m
+[31m-}[m
+[31m-[m
+[31m-th,[m
+[31m-td {[m
+[31m-    border-bottom: 1px solid var(--line);[m
+[31m-    padding: 13px 16px;[m
+[31m-    text-align: right;[m
+[31m-    font-size: 14px;[m
+[31m-}[m
+[31m-[m
+[31m-th {[m
+[31m-    background: var(--surface-soft);[m
+[31m-    color: var(--muted);[m
+[31m-    font-weight: 800;[m
+[31m-}[m
+[31m-[m
+[31m-td a {[m
+[31m-    color: var(--blue);[m
+[31m-    font-weight: 700;[m
+[31m-    text-decoration: none;[m
+[31m-}[m
+[31m-[m
+[31m-td form {[m
+[31m-    display: inline-flex;[m
+[31m-    align-items: center;[m
+[31m-    gap: 8px;[m
+[31m-    flex-wrap: wrap;[m
+[31m-}[m
+[31m-[m
+[31m-td .select-ui {[m
+[31m-    width: auto;[m
+[31m-    min-width: 128px;[m
+[31m-}[m
+[31m-[m
+[31m-td input[type="number"] {[m
+[31m-    width: 140px;[m
+[31m-}[m
+[31m-[m
+[31m-tbody tr:hover {[m
+[31m-    background: #fbfcfe;[m
+[31m-}[m
+[31m-[m
+[31m-.badge {[m
+[31m-    display: inline-block;[m
+[31m-    border-radius: 999px;[m
+[31m-    background: #eef1f5;[m
+[31m-    padding: 4px 9px;[m
+[31m-    font-size: 12px;[m
+[31m-    font-weight: 700;[m
+[31m-}[m
+[31m-[m
+[31m-.badge.active,[m
+[31m-.badge.present,[m
+[31m-.badge.published {[m
+[31m-    background: #e5f6ef;[m
+[31m-    color: var(--green);[m
+[31m-}[m
+[31m-[m
+[31m-.badge.inactive,[m
+[31m-.badge.absent {[m
+[31m-    background: #fdebee;[m
+[31m-    color: var(--red);[m
+[31m-}[m
+[31m-[m
+[31m-.empty {[m
+[31m-    padding: 55px;[m
+[31m-    color: var(--muted);[m
+[31m-    text-align: center;[m
+[31m-}[m
+[31m-[m
+[31m-.alert {[m
+[31m-    margin-bottom: 18px;[m
+[31m-    border-radius: 8px;[m
+[31m-    padding: 13px 16px;[m
+[31m-}[m
+[31m-[m
+[31m-.success {[m
+[31m-    background: #e5f6ef;[m
+[31m-    color: #147252;[m
+[31m-}[m
+[31m-[m
+[31m-.error {[m
+[31m-    background: #fdebee;[m
+[31m-    color: #a92535;[m
+[31m-}[m
+[31m-[m
+[31m-.form-card {[m
+[31m-    max-width: 950px;[m
+[31m-    border: 1px solid var(--line);[m
+[31m-    border-radius: 8px;[m
+[31m-    background: var(--surface);[m
+[31m-    box-shadow: var(--shadow-md);[m
+[31m-    padding: 22px;[m
+[31m-}[m
+[31m-[m
+[31m-.form-grid {[m
+[31m-    display: grid;[m
+[31m-    grid-template-columns: repeat(2, minmax(0, 1fr));[m
+[31m-    gap: 17px;[m
+[31m-}[m
+[31m-[m
+[31m-.form-grid label {[m
+[31m-    display: grid;[m
+[31m-    gap: 7px;[m
+[31m-    color: #344056;[m
+[31m-    font-size: 14px;[m
+[31m-    font-weight: 700;[m
+[31m-}[m
+[31m-[m
+[31m-.form-grid .wide {[m
+[31m-    grid-column: 1 / -1;[m
+[31m-}[m
+[31m-[m
+[31m-.form-grid input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),[m
+[31m-.form-grid select,[m
+[31m-.form-grid textarea,[m
+[31m-.login-card input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]) {[m
+[31m-    width: 100%;[m
+[31m-}[m
+[31m-[m
+[31m-.form-actions {[m
+[31m-    display: flex;[m
+[31m-    gap: 10px;[m
+[31m-    flex-wrap: wrap;[m
+[31m-    margin-top: 22px;[m
+[31m-}[m
+[31m-[m
+[31m-.pagination {[m
+[31m-    margin-top: 16px;[m
+[31m-}[m
+[31m-[m
+[31m-.menu-toggle {[m
+[31m-    display: none;[m
+[31m-}[m
+[31m-[m
+[31m-.login-page {[m
+[31m-    min-height: 100vh;[m
+[31m-    display: grid;[m
+[31m-    place-items: center;[m
+[31m-    background:[m
+[31m-        radial-gradient(circle at 20% 20%, rgba(242, 140, 40, .18), transparent 30%),[m
+[31m-        linear-gradient(135deg, #111827, #203047 58%, #0f766e);[m
+[31m-}[m
+[31m-[m
+[31m-.login-card {[m
+[31m-    width: min(430px, 92vw);[m
+[31m-    border: 1px solid rgba(255, 255, 255, .64);[m
+[31m-    border-radius: 8px;[m
+[31m-    background: rgba(255, 255, 255, .94);[m
+[31m-    box-shadow: 0 24px 60px rgba(8, 13, 23, .22);[m
+[31m-    padding: 35px;[m
+[31m-}[m
+[31m-[m
+[31m-.login-card h1 {[m
+[31m-    margin-bottom: 4px;[m
+[31m-}[m
+[31m-[m
+[31m-.login-card label {[m
+[31m-    display: grid;[m
+[31m-    gap: 7px;[m
+[31m-    margin: 15px 0;[m
+[31m-    color: #344056;[m
+[31m-    font-weight: 700;[m
+[31m-}[m
+[31m-[m
+[31m-.login-card .btn {[m
+[31m-    width: 100%;[m
+[31m-}[m
+[31m-[m
+[31m-.check {[m
+[31m-    display: flex !important;[m
+[31m-    grid-template-columns: auto 1fr !important;[m
+[31m-    align-items: center;[m
+[31m-    color: var(--ink) !important;[m
+[31m-}[m
+[31m-[m
+[31m-.check input {[m
+[31m-    width: 18px;[m
+[31m-}[m
+[31m-[m
+[31m-@media (max-width: 1024px) {[m
+[31m-    .cards {[m
+[31m-        grid-template-columns: repeat(2, minmax(0, 1fr));[m
+[31m-    }[m
+[31m-}[m
+[31m-[m
+[31m-@media (max-width: 768px) {[m
+[31m-    .sidebar {[m
+[31m-        transform: translateX(105%);[m
+[31m-        transition: transform .25s ease;[m
+[31m-    }[m
+[31m-[m
+[31m-    .sidebar.open {[m
+[31m-        transform: translateX(0);[m
+[31m-    }[m
+[31m-[m
+[31m-    .page {[m
+[31m-        margin-inline-end: 0;[m
+[31m-    }[m
+[31m-[m
+[31m-    .menu-toggle {[m
+[31m-        position: fixed;[m
+[31m-        top: 18px;[m
+[31m-        right: 12px;[m
+[31m-        z-index: 30;[m
+[31m-        display: block;[m
+[31m-        border: 0;[m
+[31m-        border-radius: 8px;[m
+[31m-        background: var(--orange);[m
+[31m-        color: #fff;[m
+[31m-        padding: 8px;[m
+[31m-    }[m
+[31m-[m
+[31m-    .topbar {[m
+[31m-        padding: 0 60px 0 15px;[m
+[31m-    }[m
+[31m-[m
+[31m-    .global-search {[m
+[31m-        display: none;[m
+[31m-    }[m
+[31m-[m
+[31m-    .content {[m
+[31m-        padding: 20px 14px;[m
+[31m-    }[m
+[31m-[m
+[31m-    .grid-2,[m
+[31m-    .form-grid {[m
+[31m-        grid-template-columns: 1fr;[m
+[31m-    }[m
+[31m-[m
+[31m-    .form-grid .wide {[m
+[31m-        grid-column: auto;[m
+[31m-    }[m
+[31m-}[m
+[31m-[m
+[31m-@media (max-width: 480px) {[m
+[31m-    .cards {[m
+[31m-        grid-template-columns: 1fr;[m
+[31m-    }[m
+[31m-[m
+[31m-    .page-head {[m
+[31m-        align-items: start;[m
+[31m-        gap: 12px;[m
+[31m-    }[m
+[31m-[m
+[31m-    .page-head h1 {[m
+[31m-        font-size: 23px;[m
+[31m-    }[m
+[31m-[m
+[31m-    .filters input,[m
+[31m-    .filters .select-ui,[m
+[31m-    .filters select {[m
+[31m-        width: 100%;[m
+[31m-        min-width: 0;[m
+[31m-    }[m
+[31m-}[m
+[32m+[m[32m:root{--ink:#1d2a40;--nav:#0d294f;--nav-2:#122f67;--orange:#f2b13d;--bg:#f3f4f7;--card:#f7f8fa;--line:#dfe3eb;--muted:#6b7688;--green:#53b58a;--green-soft:#eaf7f0;--red:#d9534f;--warning:#e2b628;--blue:#1d5ad8}*{box-sizing:border-box}html,body{margin:0;padding:0}body{background:var(--bg);color:var(--ink);font-family:Cairo,Arial,sans-serif}.sidebar{position:fixed;right:0;top:0;width:220px;height:100vh;background:linear-gradient(180deg,#0d2a62 0%,#0a234b 100%);color:#fff;padding:14px 12px 18px;overflow:auto;z-index:20;box-shadow:-3px 0 18px rgba(12,24,51,.12)}.logo{display:flex;gap:10px;align-items:center;color:#fff;text-decoration:none;padding:0 8px 16px;border-bottom:1px solid rgba(255,255,255,.12);margin-bottom:8px}.logo small,.logo b{display:block}.logo small{opacity:.62;font-size:11px}.logo b{font-size:18px;line-height:1.25}.brand-mark{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#f7d58a,#f0a63d);display:grid;place-items:center;color:#fff;font-weight:800;border:2px solid rgba(255,255,255,.8)}.sidebar nav{display:flex;flex-direction:column;gap:3px;padding-top:4px}.sidebar nav a{display:flex;gap:12px;align-items:center;color:rgba(255,255,255,.92);text-decoration:none;padding:8px 10px;border-radius:8px;font-size:14px;margin:0;transition:.2s ease;line-height:1.3}.sidebar nav a i{font-style:normal;font-size:11px;opacity:.8;min-width:24px;height:22px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.08);font-weight:700}.sidebar nav a:hover{background:rgba(255,255,255,.05);color:#fff}.sidebar nav a.active{background:rgba(255,255,255,.14);color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}.partner{margin-top:auto;padding:18px 10px 0;border-top:1px solid rgba(255,255,255,.12);color:#a8b7d3;font-size:12px;text-align:center;line-height:1.7}.partner b{color:#fff}.page{margin-right:220px;min-height:100vh;min-width:0;overflow-x:auto}.topbar{height:60px;background:transparent;border-bottom:0;display:flex;align-items:center;justify-content:space-between;padding:0 22px 0 14px;gap:18px}.global-search{margin-inline-start:auto;display:flex;align-items:center}.global-search input{border:1px solid #dfe3eb;background:#f7f9fc;border-radius:12px;padding:11px 14px;width:220px;font-family:inherit;font-size:14px;color:var(--ink)}.account{display:flex;gap:16px;align-items:center}.account span{font-weight:700}.account a,.account button{color:var(--ink);text-decoration:none;background:none;border:0;font-family:inherit;cursor:pointer}.content{padding:10px 26px 30px 34px;max-width:none;margin:0}.page-head{display:flex;justify-content:space-between;align-items:flex-start;margin:6px 0 18px}.page-head h1{margin:0;font-size:31px;line-height:1.2;color:var(--ink)}.page-head>div{display:flex;flex-direction:column;align-items:flex-start;gap:2px}.page-head .muted{color:var(--muted);margin:0;font-size:14px}.page-head .btn{margin-inline-start:auto}.eyebrow{display:none}.muted{color:var(--muted);margin-top:4px;font-size:14px}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}.card,.panel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px}.stat strong{display:block;font-size:30px;margin-top:8px}.stat span{font-size:13px;color:var(--muted)}.grid-2{display:grid;grid-template-columns:2fr 1fr;gap:18px;margin-top:18px}.panel h2{margin-top:0;font-size:18px}.activity{padding:12px 0;border-bottom:1px solid var(--line)}.activity:last-child{border:0}.activity small{display:block;color:var(--muted)}.btn{display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:9px;padding:10px 16px;text-decoration:none;font:600 14px Cairo;cursor:pointer;line-height:1.2}.btn.primary{background:#1d5ad8;color:#fff;box-shadow:0 2px 0 rgba(17,46,112,.08)}.btn.secondary{background:#eef1f6;color:var(--ink)}.filters{display:flex;gap:12px;flex-wrap:wrap;justify-content:flex-start;margin:6px 0 18px}.filters input,.filters select,input,select,textarea{border:1px solid var(--line);border-radius:8px;padding:10px 12px;font:inherit;background:#fff;height:42px}.filters input{min-width:200px}.filters select{min-width:160px}.table-wrap{overflow-x:auto;background:#fff;border-radius:12px;border:1px solid var(--line);box-shadow:none}.table-wrap table{width:100%;border-collapse:collapse;min-width:700px}.table-wrap th,.table-wrap td{text-align:right;padding:15px 16px;border-bottom:1px solid var(--line);font-size:14px;vertical-align:middle}.table-wrap th{background:#f2f5f8;color:#5f6979;font-weight:700}.table-wrap tr:last-child td{border-bottom:0}.badge{display:inline-block;padding:4px 10px;border-radius:16px;background:#eef1f5;font-size:12px;min-width:52px;text-align:center}.badge.active,.badge.present,.badge.published{background:#e5f6ef;color:var(--green)}.badge.inactive,.badge.absent{background:#fdebee;color:var(--red)}.badge.pending,.badge.late{background:#fff3dc;color:#b98600}.empty{text-align:center;padding:55px;color:var(--muted)}.alert{padding:13px 16px;border-radius:9px;margin-bottom:18px}.success{background:#e5f6ef;color:#147252}.error{background:#fdebee;color:#a92535}.form-card{background:#fff;border:1px solid var(--line);padding:22px;border-radius:14px;max-width:950px}.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:17px}.form-grid label{display:grid;gap:7px;font-size:14px}.form-grid .wide{grid-column:1/-1}.form-grid input,.form-grid select,.form-grid textarea{width:100%}.form-actions{display:flex;gap:10px;margin-top:22px}.pagination{margin-top:16px}.menu-toggle{display:none}.login-page{min-height:100vh;display:grid;place-items:center;background:linear-gradient(135deg,#121b30,#263653)}.login-card{width:min(430px,92vw);background:#fff;border-radius:18px;padding:35px}.login-card h1{margin-bottom:4px}.login-card label{display:grid;gap:7px;margin:15px 0}.login-card .btn{width:100%}.check{display:flex!important;grid-template-columns:auto 1fr!important;align-items:center}.check input{width:auto}@media(max-width:1024px){.cards{grid-template-columns:repeat(2,1fr)}}@media(max-width:768px){.sidebar{transform:translateX(105%);transition:.25s}.sidebar.open{transform:translateX(0)}.page{margin-right:0}.menu-toggle{display:block;position:fixed;right:12px;top:18px;z-index:30;border:0;background:var(--orange);color:#fff;border-radius:8px;padding:8px}.topbar{padding:0 60px 0 15px}.global-search{display:none}.content{padding:20px 14px}.grid-2,.form-grid{grid-template-columns:1fr}.form-grid .wide{grid-column:auto}}@media(max-width:480px){.cards{grid-template-columns:1fr}.page-head{align-items:start;gap:12px}.page-head h1{font-size:23px}}[m
+[32m+[m[32m.question-card{margin-bottom:16px}.question-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.question-head h2{margin:0;font-size:16px}.link-danger{background:none;border:0;color:var(--red);cursor:pointer;font:600 13px Cairo;padding:0}.choices-list{display:grid;gap:8px;margin:10px 0}.choice-row{display:flex;align-items:center;gap:10px}.choice-row input[type=text]{flex:1}.correct-toggle{appearance:none;-webkit-appearance:none;width:20px;height:20px;min-width:20px;border:2px solid var(--line);border-radius:50%;cursor:pointer;position:relative}.correct-toggle:checked{border-color:var(--green);background:var(--green)}.correct-toggle:checked::after{content:'';position:absolute;inset:4px;border-radius:50%;background:#fff}.btn.small{padding:7px 12px;font-size:13px}.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}[m
+[1mdiff --git a/public/css/parent.css b/public/css/parent.css[m
+[1mindex 8b31a8f..eb3ab97 100644[m
+[1m--- a/public/css/parent.css[m
+[1m+++ b/public/css/parent.css[m
+[36m@@ -1,19 +1,14 @@[m
+[31m-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap');[m
+[31m-[m
+ :root {[m
+[31m-    --bg: #f7f9f6;[m
+[32m+[m[32m    --bg: #f7f8f5;[m
+     --surface: #ffffff;[m
+     --surface-soft: #eef6f4;[m
+     --ink: #14213d;[m
+     --muted: #687182;[m
+[31m-    --line: #dce5e1;[m
+[31m-    --line-strong: #c7d5ce;[m
+[32m+[m[32m    --line: #dde5e1;[m
+     --primary: #0f766e;[m
+[31m-    --primary-deep: #0b5f59;[m
+     --accent: #f59e0b;[m
+     --rose: #e85d75;[m
+     --shadow: 0 12px 30px rgba(20, 33, 61, .08);[m
+[31m-    --focus: 0 0 0 4px rgba(15, 118, 110, .16);[m
+ }[m
+ [m
+ * {[m
+[36m@@ -22,14 +17,13 @@[m [m:root {[m
+ [m
+ html {[m
+     background: #dfe7e4;[m
+[31m-    color-scheme: light;[m
+ }[m
+ [m
+ body {[m
+     margin: 0;[m
+     background: var(--bg);[m
+     color: var(--ink);[m
+[31m-    font-family: Cairo, Tahoma, Arial, sans-serif;[m
+[32m+[m[32m    font-family: Tahoma, Arial, sans-serif;[m
+     letter-spacing: 0;[m
+ }[m
+ [m
+[36m@@ -40,21 +34,16 @@[m [ma {[m
+ [m
+ button,[m
+ input,[m
+[31m-select,[m
+[31m-textarea {[m
+[32m+[m[32mselect {[m
+     font: inherit;[m
+ }[m
+ [m
+[31m-button {[m
+[31m-    cursor: pointer;[m
+[31m-}[m
+[31m-[m
+ .app-shell {[m
+[31m-    position: relative;[m
+     min-height: 100dvh;[m
+     max-width: 520px;[m
+     margin: 0 auto;[m
+     background: var(--bg);[m
+[32m+[m[32m    position: relative;[m
+     box-shadow: 0 0 0 1px rgba(20, 33, 61, .06);[m
+ }[m
+ [m
+[36m@@ -66,10 +55,9 @@[m [m.app-header {[m
+     display: flex;[m
+     align-items: center;[m
+     justify-content: space-between;[m
+[31m-    gap: 12px;[m
+     padding: 14px 16px;[m
+[32m+[m[32m    background: rgba(247, 248, 245, .94);[m
+     border-bottom: 1px solid var(--line);[m
+[31m-    background: rgba(247, 249, 246, .94);[m
+     backdrop-filter: blur(12px);[m
+ }[m
+ [m
+[36m@@ -77,7 +65,6 @@[m [m.brand {[m
+     display: flex;[m
+     align-items: center;[m
+     gap: 10px;[m
+[31m-    min-width: 0;[m
+ }[m
+ [m
+ .brand-mark,[m
+[36m@@ -85,7 +72,7 @@[m [m.avatar,[m
+ .large-avatar {[m
+     display: grid;[m
+     place-items: center;[m
+[31m-    background: linear-gradient(135deg, var(--primary), #17a398);[m
+[32m+[m[32m    background: var(--primary);[m
+     color: #fff;[m
+     font-weight: 800;[m
+ }[m
+[36m@@ -94,21 +81,11 @@[m [m.brand-mark {[m
+     width: 42px;[m
+     height: 42px;[m
+     border-radius: 8px;[m
+[31m-    direction: ltr;[m
+[31m-    flex: 0 0 auto;[m
+[31m-    font-size: 13px;[m
+[31m-}[m
+[31m-[m
+[31m-.brand-copy {[m
+[31m-    min-width: 0;[m
+ }[m
+ [m
+ .brand-copy b,[m
+ .brand-copy small {[m
+     display: block;[m
+[31m-    overflow: hidden;[m
+[31m-    text-overflow: ellipsis;[m
+[31m-    white-space: nowrap;[m
+ }[m
+ [m
+ .brand-copy b {[m
+[36m@@ -123,9 +100,9 @@[m [m.brand-copy small {[m
+ [m
+ .logout-form button {[m
+     border: 1px solid var(--line);[m
+[31m-    border-radius: 8px;[m
+     background: var(--surface);[m
+     color: var(--ink);[m
+[32m+[m[32m    border-radius: 8px;[m
+     padding: 8px 11px;[m
+ }[m
+ [m
+[36m@@ -139,13 +116,11 @@[m [m.hero {[m
+     flex-direction: column;[m
+     justify-content: flex-end;[m
+     gap: 8px;[m
+[32m+[m[32m    padding: 20px;[m
+     border-radius: 8px;[m
+[31m-    background:[m
+[31m-        linear-gradient(135deg, rgba(15, 118, 110, .96), rgba(20, 33, 61, .92)),[m
+[31m-        var(--primary);[m
+[32m+[m[32m    background: var(--primary);[m
+     color: #fff;[m
+     box-shadow: var(--shadow);[m
+[31m-    padding: 20px;[m
+ }[m
+ [m
+ .hero p,[m
+[36m@@ -179,7 +154,7 @@[m [m.page-title {[m
+ .page-title p {[m
+     margin: 0 0 5px;[m
+     color: var(--primary);[m
+[31m-    font-weight: 800;[m
+[32m+[m[32m    font-weight: 700;[m
+     font-size: 13px;[m
+ }[m
+ [m
+[36m@@ -213,15 +188,15 @@[m [m.profile-form,[m
+ .more-list,[m
+ .message-card,[m
+ .empty-state {[m
+[32m+[m[32m    background: var(--surface);[m
+     border: 1px solid var(--line);[m
+     border-radius: 8px;[m
+[31m-    background: var(--surface);[m
+     box-shadow: var(--shadow);[m
+ }[m
+ [m
+ .child-switch {[m
+     display: grid;[m
+[31m-    grid-template-columns: auto minmax(0, 1fr);[m
+[32m+[m[32m    grid-template-columns: auto 1fr;[m
+     align-items: center;[m
+     gap: 10px;[m
+     margin-top: 14px;[m
+[36m@@ -231,172 +206,17 @@[m [m.child-switch {[m
+ .child-switch label {[m
+     color: var(--muted);[m
+     font-size: 13px;[m
+[31m-    font-weight: 700;[m
+[31m-}[m
+[31m-[m
+[31m-input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),[m
+[31m-select,[m
+[31m-textarea {[m
+[31m-    width: 100%;[m
+[31m-    min-height: 46px;[m
+[31m-    border: 1px solid var(--line);[m
+[31m-    border-radius: 8px;[m
+[31m-    background-color: #fff;[m
+[31m-    color: var(--ink);[m
+[31m-    padding: 11px 12px;[m
+[31m-    outline: 0;[m
+[31m-    transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;[m
+[31m-}[m
+[31m-[m
+[31m-input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):hover,[m
+[31m-select:hover,[m
+[31m-textarea:hover {[m
+[31m-    border-color: var(--line-strong);[m
+[31m-}[m
+[31m-[m
+[31m-input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):focus,[m
+[31m-select:focus,[m
+[31m-textarea:focus {[m
+[31m-    border-color: var(--primary);[m
+[31m-    box-shadow: var(--focus);[m
+[31m-}[m
+[31m-[m
+[31m-select:not([multiple]) {[m
+[31m-    appearance: none;[m
+[31m-    -webkit-appearance: none;[m
+[31m-    padding-inline-start: 42px;[m
+[31m-    padding-inline-end: 12px;[m
+[31m-    background-image:[m
+[31m-        linear-gradient(45deg, transparent 50%, var(--muted) 50%),[m
+[31m-        linear-gradient(135deg, var(--muted) 50%, transparent 50%);[m
+[31m-    background-position:[m
+[31m-        left 18px center,[m
+[31m-        left 12px center;[m
+[31m-    background-repeat: no-repeat;[m
+[31m-    background-size: 7px 7px;[m
+[31m-}[m
+[31m-[m
+[31m-input[type="checkbox"],[m
+[31m-input[type="radio"] {[m
+[31m-    width: 18px;[m
+[31m-    height: 18px;[m
+[31m-    margin: 0;[m
+[31m-    accent-color: var(--primary);[m
+ }[m
+ [m
+[31m-select.native-select-hidden {[m
+[31m-    position: absolute !important;[m
+[31m-    inline-size: 1px !important;[m
+[31m-    block-size: 1px !important;[m
+[31m-    min-width: 0 !important;[m
+[31m-    min-height: 0 !important;[m
+[31m-    margin: 0 !important;[m
+[31m-    padding: 0 !important;[m
+[31m-    border: 0 !important;[m
+[31m-    opacity: 0 !important;[m
+[31m-    pointer-events: none !important;[m
+[31m-}[m
+[31m-[m
+[31m-.select-ui {[m
+[31m-    position: relative;[m
+[31m-    display: inline-block;[m
+[32m+[m[32m.child-switch select,[m
+[32m+[m[32m.profile-form input {[m
+     width: 100%;[m
+     min-width: 0;[m
+[31m-    vertical-align: middle;[m
+[31m-}[m
+[31m-[m
+[31m-.select-ui__button {[m
+[31m-    position: relative;[m
+[31m-    width: 100%;[m
+[31m-    min-height: 46px;[m
+     border: 1px solid var(--line);[m
+     border-radius: 8px;[m
+     background: #fff;[m
+     color: var(--ink);[m
+[31m-    padding: 10px 12px 10px 42px;[m
+[31m-    text-align: right;[m
+[31m-    transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;[m
+[31m-}[m
+[31m-[m
+[31m-.select-ui__button::after {[m
+[31m-    content: "";[m
+[31m-    position: absolute;[m
+[31m-    top: 50%;[m
+[31m-    left: 17px;[m
+[31m-    width: 8px;[m
+[31m-    height: 8px;[m
+[31m-    border-inline-end: 2px solid var(--muted);[m
+[31m-    border-bottom: 2px solid var(--muted);[m
+[31m-    transform: translateY(-65%) rotate(45deg);[m
+[31m-    transition: transform .18s ease, border-color .18s ease;[m
+[31m-}[m
+[31m-[m
+[31m-.select-ui__button:hover,[m
+[31m-.select-ui--open .select-ui__button {[m
+[31m-    border-color: var(--line-strong);[m
+[31m-}[m
+[31m-[m
+[31m-.select-ui__button.is-placeholder {[m
+[31m-    color: #8a948f;[m
+[31m-}[m
+[31m-[m
+[31m-.select-ui__button:focus-visible,[m
+[31m-.select-ui--open .select-ui__button {[m
+[31m-    border-color: var(--primary);[m
+[31m-    box-shadow: var(--focus);[m
+[31m-    outline: 0;[m
+[31m-}[m
+[31m-[m
+[31m-.select-ui--open .select-ui__button::after {[m
+[31m-    border-color: var(--primary);[m
+[31m-    transform: translateY(-35%) rotate(225deg);[m
+[31m-}[m
+[31m-[m
+[31m-.select-ui__menu {[m
+[31m-    position: fixed;[m
+[31m-    z-index: 1000;[m
+[31m-    display: none;[m
+[31m-    max-height: 260px;[m
+[31m-    overflow: auto;[m
+[31m-    border: 1px solid var(--line);[m
+[31m-    border-radius: 8px;[m
+[31m-    background: #fff;[m
+[31m-    box-shadow: 0 18px 45px rgba(20, 33, 61, .16);[m
+[31m-    padding: 6px;[m
+[31m-    direction: rtl;[m
+[31m-}[m
+[31m-[m
+[31m-.select-ui__menu.open {[m
+[31m-    display: grid;[m
+[31m-    gap: 3px;[m
+[31m-}[m
+[31m-[m
+[31m-.select-ui__option {[m
+[31m-    width: 100%;[m
+[31m-    min-height: 38px;[m
+[31m-    border: 0;[m
+[31m-    border-radius: 7px;[m
+[31m-    background: transparent;[m
+[31m-    color: var(--ink);[m
+[31m-    padding: 8px 10px;[m
+[31m-    text-align: right;[m
+[31m-}[m
+[31m-[m
+[31m-.select-ui__option:hover,[m
+[31m-.select-ui__option:focus-visible {[m
+[31m-    background: #eef6f4;[m
+[31m-    outline: 0;[m
+[31m-}[m
+[31m-[m
+[31m-.select-ui__option.is-selected {[m
+[31m-    background: linear-gradient(135deg, rgba(15, 118, 110, .16), rgba(245, 158, 11, .14));[m
+[31m-    color: var(--ink);[m
+[31m-    font-weight: 800;[m
+[31m-}[m
+[31m-[m
+[31m-.select-ui__option:disabled {[m
+[31m-    color: #9aa4b2;[m
+[31m-    cursor: not-allowed;[m
+[32m+[m[32m    padding: 11px 12px;[m
+ }[m
+ [m
+ .student-focus {[m
+[36m@@ -431,147 +251,12 @@[m [m.profile-form button {[m
+     border-radius: 8px;[m
+     background: var(--accent);[m
+     color: #fff;[m
+[31m-    font-weight: 800;[m
+[31m-}[m
+[31m-[m
+[31m-.section-gap {[m
+[31m-    margin-top: 14px;[m
+[31m-}[m
+[31m-[m
+[31m-.section-title-plain {[m
+[31m-    margin-bottom: 0;[m
+[31m-}[m
+[31m-[m
+[31m-.primary-action,[m
+[31m-.secondary-action {[m
+[31m-    width: 100%;[m
+[31m-    min-height: 46px;[m
+[31m-    display: grid;[m
+[31m-    place-items: center;[m
+[31m-    margin-top: 14px;[m
+[31m-    border: 0;[m
+[31m-    border-radius: 8px;[m
+[31m-    background: var(--primary);[m
+[31m-    color: #fff;[m
+[31m-    font-weight: 700;[m
+[31m-}[m
+[31m-[m
+[31m-.secondary-action {[m
+[31m-    margin-top: 0;[m
+[31m-    background: var(--surface-soft);[m
+[31m-    color: var(--primary);[m
+[31m-}[m
+[31m-[m
+[31m-.quick-links {[m
+[31m-    display: grid;[m
+[31m-    grid-template-columns: repeat(2, minmax(0, 1fr));[m
+[31m-    gap: 10px;[m
+[31m-    margin-top: 14px;[m
+[31m-}[m
+[31m-[m
+[31m-.quick-links a {[m
+[31m-    padding: 13px;[m
+[31m-    border: 1px solid var(--line);[m
+[31m-    border-radius: 8px;[m
+[31m-    background: var(--surface);[m
+[31m-    color: var(--primary);[m
+[31m-    font-weight: 700;[m
+[31m-    text-align: center;[m
+[31m-    box-shadow: var(--shadow);[m
+[31m-}[m
+[31m-[m
+[31m-.status-line {[m
+[31m-    display: flex;[m
+[31m-    justify-content: space-between;[m
+[31m-    gap: 10px;[m
+[31m-    margin-top: 14px;[m
+[31m-    padding-top: 12px;[m
+[31m-    border-top: 1px solid var(--line);[m
+[31m-    color: var(--primary);[m
+[31m-}[m
+[31m-[m
+[31m-.status-line small,[m
+[31m-.conversation-card small {[m
+[31m-    color: var(--muted);[m
+[31m-}[m
+[31m-[m
+[31m-.conversation-card {[m
+[31m-    display: block;[m
+[31m-}[m
+[31m-[m
+[31m-.thread {[m
+[31m-    display: grid;[m
+[31m-    gap: 10px;[m
+[31m-}[m
+[31m-[m
+[31m-.bubble {[m
+[31m-    width: fit-content;[m
+[31m-    max-width: 88%;[m
+[31m-    padding: 12px;[m
+[31m-    border: 1px solid var(--line);[m
+[31m-    border-radius: 8px 8px 8px 2px;[m
+[31m-    background: var(--surface);[m
+[31m-    box-shadow: var(--shadow);[m
+[31m-}[m
+[31m-[m
+[31m-.bubble.mine {[m
+[31m-    justify-self: end;[m
+[31m-    border-radius: 8px 8px 2px 8px;[m
+[31m-    background: var(--surface-soft);[m
+[31m-}[m
+[31m-[m
+[31m-.bubble p,[m
+[31m-.bubble span {[m
+[31m-    margin: 0;[m
+[31m-    line-height: 1.8;[m
+[31m-    overflow-wrap: anywhere;[m
+[31m-}[m
+[31m-[m
+[31m-.bubble span {[m
+[31m-    display: block;[m
+[31m-    margin-top: 7px;[m
+[31m-    color: var(--muted);[m
+[31m-    font-size: 11px;[m
+[31m-}[m
+[31m-[m
+[31m-.message-composer {[m
+[31m-    display: grid;[m
+[31m-    gap: 10px;[m
+[31m-    margin-top: 14px;[m
+[31m-}[m
+[31m-[m
+[31m-.message-composer textarea {[m
+[31m-    width: 100%;[m
+[31m-    border: 1px solid var(--line);[m
+[31m-    border-radius: 8px;[m
+[31m-    padding: 11px 12px;[m
+[31m-    resize: vertical;[m
+[31m-}[m
+[31m-[m
+[31m-.message-composer button,[m
+[31m-.text-action {[m
+[31m-    border: 0;[m
+[31m-    border-radius: 8px;[m
+[31m-    padding: 10px 14px;[m
+[31m-    background: var(--primary);[m
+[31m-    color: #fff;[m
+     font-weight: 700;[m
+ }[m
+ [m
+[31m-.text-action {[m
+[31m-    margin-top: 12px;[m
+[31m-    background: transparent;[m
+[31m-    color: var(--primary);[m
+[31m-    padding: 0;[m
+[31m-}[m
+[31m-[m
+[31m-.unread-card {[m
+[31m-    border-color: var(--primary);[m
+[31m-}[m
+[31m-[m
+ .student-focus a {[m
+[31m-    flex: 0 0 auto;[m
+     padding: 9px 12px;[m
+[32m+[m[32m    flex: 0 0 auto;[m
+ }[m
+ [m
+ .metrics-grid {[m
+[36m@@ -586,10 +271,10 @@[m [m.metric {[m
+     display: flex;[m
+     flex-direction: column;[m
+     justify-content: space-between;[m
+[32m+[m[32m    padding: 14px;[m
+     border: 1px solid var(--line);[m
+     border-radius: 8px;[m
+     background: var(--surface);[m
+[31m-    padding: 14px;[m
+ }[m
+ [m
+ .metric.wide {[m
+[36m@@ -686,14 +371,14 @@[m [m.messages-list {[m
+ [m
+ .child-card {[m
+     display: grid;[m
+[31m-    grid-template-columns: 48px minmax(0, 1fr) auto;[m
+[32m+[m[32m    grid-template-columns: 48px 1fr auto;[m
+     align-items: center;[m
+     gap: 12px;[m
+[32m+[m[32m    padding: 14px;[m
+[32m+[m[32m    background: var(--surface);[m
+     border: 1px solid var(--line);[m
+     border-radius: 8px;[m
+[31m-    background: var(--surface);[m
+     box-shadow: var(--shadow);[m
+[31m-    padding: 14px;[m
+ }[m
+ [m
+ .avatar {[m
+[36m@@ -720,8 +405,8 @@[m [m.child-card i {[m
+ }[m
+ [m
+ .student-profile {[m
+[31m-    padding: 14px 0 18px;[m
+     text-align: center;[m
+[32m+[m[32m    padding: 14px 0 18px;[m
+ }[m
+ [m
+ .large-avatar {[m
+[36m@@ -776,7 +461,7 @@[m [m.message-card {[m
+ .message-card span {[m
+     color: var(--primary);[m
+     font-size: 12px;[m
+[31m-    font-weight: 800;[m
+[32m+[m[32m    font-weight: 700;[m
+ }[m
+ [m
+ .message-card h2 {[m
+[36m@@ -802,7 +487,6 @@[m [m.profile-form label {[m
+     gap: 7px;[m
+     color: var(--muted);[m
+     font-size: 13px;[m
+[31m-    font-weight: 700;[m
+ }[m
+ [m
+ .profile-form input:disabled {[m
+[36m@@ -810,9 +494,9 @@[m [m.profile-form input:disabled {[m
+ }[m
+ [m
+ .profile-form button {[m
+[32m+[m[32m    border: 0;[m
+     min-height: 46px;[m
+     margin-top: 4px;[m
+[31m-    border: 0;[m
+ }[m
+ [m
+ .more-list {[m
+[36m@@ -821,11 +505,11 @@[m [m.more-list {[m
+ [m
+ .more-list a,[m
+ .more-list button {[m
+[31m-    width: 100%;[m
+     min-height: 54px;[m
+     display: flex;[m
+     align-items: center;[m
+     gap: 12px;[m
+[32m+[m[32m    width: 100%;[m
+     border: 0;[m
+     border-top: 1px solid var(--line);[m
+     background: transparent;[m
+[36m@@ -848,7 +532,7 @@[m [m.tech-partner {[m
+     margin: 20px 0 0;[m
+     color: var(--muted);[m
+     text-align: center;[m
+[31m-    font-weight: 800;[m
+[32m+[m[32m    font-weight: 700;[m
+ }[m
+ [m
+ .empty-state {[m
+[36m@@ -875,10 +559,10 @@[m [m.bottom-nav {[m
+     z-index: 10;[m
+     width: min(100%, 520px);[m
+     display: grid;[m
+[31m-    grid-template-columns: repeat(5, minmax(0, 1fr));[m
+[32m+[m[32m    grid-template-columns: repeat(5, 1fr);[m
+     transform: translateX(-50%);[m
+[31m-    border-top: 1px solid var(--line);[m
+     background: rgba(255, 255, 255, .96);[m
+[32m+[m[32m    border-top: 1px solid var(--line);[m
+     padding: 8px max(8px, env(safe-area-inset-left)) calc(8px + env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-right));[m
+     backdrop-filter: blur(14px);[m
+ }[m
+[36m@@ -890,7 +574,7 @@[m [m.bottom-nav a {[m
+     gap: 3px;[m
+     color: var(--muted);[m
+     font-size: 11px;[m
+[31m-    font-weight: 800;[m
+[32m+[m[32m    font-weight: 700;[m
+ }[m
+ [m
+ .bottom-nav span {[m
+[1mdiff --git a/resources/views/student/dashboard.blade.php b/resources/views/student/dashboard.blade.php[m
+[1mindex ed1e095..d265c96 100644[m
+[1m--- a/resources/views/student/dashboard.blade.php[m
+[1m+++ b/resources/views/student/dashboard.blade.php[m
+[36m@@ -30,42 +30,44 @@[m
+ [m
+     <section class="list-section">[m
+         <div class="section-title">[m
+[31m-            <h2>مواد صفي</h2>[m
+[31m-            <a href="{{ route('student.subjects.index') }}">الكل</a>[m
+[32m+[m[32m            <h2>آخر النتائج</h2>[m
+[32m+[m[32m            <a href="{{ route('student.results') }}">الكل</a>[m
+         </div>[m
+[31m-        @forelse($subjects as $subject)[m
+[31m-            <a class="list-row" href="{{ route('student.subjects.show', $subject) }}">[m
+[32m+[m[32m        @forelse($recentGrades as $grade)[m
+[32m+[m[32m            @php($score = rtrim(rtrim(number_format((float) $grade->score, 2, '.', ''), '0'), '.'))[m
+[32m+[m[32m            @php($total = rtrim(rtrim(number_format((float) $grade->total_score, 2, '.', ''), '0'), '.'))[m
+[32m+[m[32m            <div class="list-row">[m
+                 <div>[m
+[31m-                    <strong>{{ $subject->name }}</strong>[m
+[31m-                    <span>{{ $subject->code }}{{ $subject->description ? ' · '.$subject->description : '' }}</span>[m
+[32m+[m[32m                    <strong>{{ $grade->subject }}</strong>[m
+[32m+[m[32m                    <span>{{ $grade->title }}</span>[m
+                 </div>[m
+[31m-                <b>‹</b>[m
+[31m-            </a>[m
+[32m+[m[32m                <b>{{ $score }} / {{ $total }}</b>[m
+[32m+[m[32m            </div>[m
+         @empty[m
+[31m-            <p class="muted-line">لا توجد مواد نشطة مرتبطة بصفك حاليًا.</p>[m
+[32m+[m[32m            <p class="muted-line">لا توجد نتائج منشورة.</p>[m
+         @endforelse[m
+     </section>[m
+ [m
+     <section class="list-section">[m
+         <div class="section-title">[m
+[31m-            <h2>جدول اليوم</h2>[m
+[32m+[m[32m            <h2>الاختبارات القادمة</h2>[m
+         </div>[m
+[31m-        @forelse($todaysSchedule as $session)[m
+[32m+[m[32m        @forelse($upcomingExams as $exam)[m
+             <div class="list-row">[m
+                 <div>[m
+[31m-                    <strong>{{ $session->subject }}</strong>[m
+[31m-                    <span>{{ $session->teacher }}{{ $session->room ? ' · '.$session->room : '' }}</span>[m
+[32m+[m[32m                    <strong>{{ $exam->subject }}</strong>[m
+[32m+[m[32m                    <span>{{ $exam->title }}</span>[m
+                 </div>[m
+[31m-                <b>{{ substr($session->starts_at, 0, 5) }} – {{ substr($session->ends_at, 0, 5) }}</b>[m
+[32m+[m[32m                <b>{{ \Illuminate\Support\Carbon::parse($exam->starts_at)->format('Y-m-d') }}</b>[m
+             </div>[m
+         @empty[m
+[31m-            <p class="muted-line">لا توجد حصص مسجلة لهذا اليوم.</p>[m
+[32m+[m[32m            <p class="muted-line">لا توجد اختبارات مجدولة حاليًا.</p>[m
+         @endforelse[m
+     </section>[m
+ [m
+     <section class="list-section">[m
+         <div class="section-title">[m
+[31m-            <h2>التنبيهات</h2>[m
+[32m+[m[32m            <h2>الرسائل</h2>[m
+             <a href="{{ route('student.messages') }}">الكل</a>[m
+         </div>[m
+         @forelse($announcements as $announcement)[m
+[1mdiff --git a/resources/views/student/layout.blade.php b/resources/views/student/layout.blade.php[m
+[1mindex acb67a8..3b0a832 100644[m
+[1m--- a/resources/views/student/layout.blade.php[m
+[1m+++ b/resources/views/student/layout.blade.php[m
+[36m@@ -6,15 +6,12 @@[m
+     <meta name="theme-color" content="#0f766e">[m
+     <title>@yield('title', 'بوابة الطالب') | افهمها وفهمني</title>[m
+     <link rel="stylesheet" href="{{ asset('css/parent.css') }}">[m
+[31m-    <script src="{{ asset('js/student-tutor.js') }}" defer></script>[m
+[31m-    <script src="{{ asset('js/enhanced-selects.js') }}" defer></script>[m
+ </head>[m
+[31m-<body class="student-portal">[m
+[31m-<a class="skip-link" href="#student-main">تجاوز إلى المحتوى</a>[m
+[32m+[m[32m<body>[m
+ <div class="app-shell">[m
+     <header class="app-header">[m
+         <a class="brand" href="{{ route('student.dashboard') }}" aria-label="بوابة الطالب">[m
+[31m-            <span class="brand-mark">AWF</span>[m
+[32m+[m[32m            <span class="brand-mark">أف</span>[m
+             <span class="brand-copy">[m
+                 <b>افهمها وفهمني</b>[m
+                 <small>بوابة الطالب</small>[m
+[36m@@ -26,29 +23,25 @@[m
+         </form>[m
+     </header>[m
+ [m
+[31m-    <main class="app-content" id="student-main" tabindex="-1">[m
+[32m+[m[32m    <main class="app-content">[m
+         @yield('content')[m
+     </main>[m
+ [m
+     <nav class="bottom-nav" aria-label="تنقل الطالب">[m
+[31m-        <a href="{{ route('student.dashboard') }}" class="{{ request()->routeIs('student.dashboard') ? 'active' : '' }}" @if(request()->routeIs('student.dashboard')) aria-current="page" @endif>[m
+[31m-            <span aria-hidden="true">⌂</span>[m
+[32m+[m[32m        <a href="{{ route('student.dashboard') }}" class="{{ request()->routeIs('student.dashboard') ? 'active' : '' }}">[m
+[32m+[m[32m            <span>⌂</span>[m
+             الرئيسية[m
+         </a>[m
+[31m-        <a href="{{ route('student.subjects.index') }}" class="{{ request()->routeIs('student.subjects.*', 'student.lessons.*') ? 'active' : '' }}" @if(request()->routeIs('student.subjects.*', 'student.lessons.*')) aria-current="page" @endif>[m
+[31m-            <span aria-hidden="true">▤</span>[m
+[31m-            المواد[m
+[32m+[m[32m        <a href="{{ route('student.results') }}" class="{{ request()->routeIs('student.results') ? 'active' : '' }}">[m
+[32m+[m[32m            <span>◌</span>[m
+[32m+[m[32m            النتائج[m
+         </a>[m
+[31m-        <a href="{{ route('student.library.index') }}" class="{{ request()->routeIs('student.library.*') ? 'active' : '' }}" @if(request()->routeIs('student.library.*')) aria-current="page" @endif>[m
+[31m-            <span aria-hidden="true">▦</span>[m
+[31m-            المكتبة[m
+[32m+[m[32m        <a href="{{ route('student.messages') }}" class="{{ request()->routeIs('student.messages') ? 'active' : '' }}">[m
+[32m+[m[32m            <span>✉</span>[m
+[32m+[m[32m            الرسائل[m
+         </a>[m
+[31m-        <a href="{{ route('student.tutor.index') }}" class="{{ request()->routeIs('student.tutor.*') ? 'active' : '' }}" @if(request()->routeIs('student.tutor.*')) aria-current="page" @endif>[m
+[31m-            <span aria-hidden="true">✦</span>[m
+[31m-            المعلّم[m
+[31m-        </a>[m
+[31m-        <a href="{{ route('student.profile') }}" class="{{ request()->routeIs('student.profile') ? 'active' : '' }}" @if(request()->routeIs('student.profile')) aria-current="page" @endif>[m
+[31m-            <span aria-hidden="true">◉</span>[m
+[32m+[m[32m        <a href="{{ route('student.profile') }}" class="{{ request()->routeIs('student.profile') ? 'active' : '' }}">[m
+[32m+[m[32m            <span>◉</span>[m
+             الملف[m
+         </a>[m
+     </nav>[m
+[1mdiff --git a/resources/views/student/profile.blade.php b/resources/views/student/profile.blade.php[m
+[1mindex 5d4a5fd..5de9132 100644[m
+[1m--- a/resources/views/student/profile.blade.php[m
+[1m+++ b/resources/views/student/profile.blade.php[m
+[36m@@ -27,9 +27,4 @@[m
+             <strong>{{ $student->classroom?->academicYear?->name ?? '-' }}</strong>[m
+         </div>[m
+     </section>[m
+[31m-[m
+[31m-    <section class="more-list" aria-label="روابط الطالب الأخرى">[m
+[31m-        <a href="{{ route('student.results') }}"><span aria-hidden="true">◌</span>النتائج</a>[m
+[31m-        <a href="{{ route('student.messages') }}"><span aria-hidden="true">✉</span>الإعلانات والرسائل</a>[m
+[31m-    </section>[m
+ @endsection[m
+[1mdiff --git a/routes/student.php b/routes/student.php[m
+[1mindex 2169bdd..3f95bca 100644[m
+[1m--- a/routes/student.php[m
+[1m+++ b/routes/student.php[m
+[36m@@ -1,24 +1,11 @@[m
+ <?php[m
+ [m
+[31m-use App\Http\Controllers\StudentPortal\EducationController;[m
+ use App\Http\Controllers\StudentPortal\PortalController;[m
+[31m-use App\Http\Controllers\StudentPortal\TutorController;[m
+ use Illuminate\Support\Facades\Route;[m
+ [m
+ Route::prefix('student')->name('student.')->middleware(['auth', 'student'])->group(function (): void {[m
+     Route::get('/', fn () => redirect()->route('student.dashboard'));[m
+     Route::get('/dashboard', [PortalController::class, 'dashboard'])->name('dashboard');[m
+[31m-    Route::get('/subjects', [EducationController::class, 'subjects'])->name('subjects.index');[m
+[31m-    Route::get('/subjects/{subject}/lessons', [EducationController::class, 'lessons'])->whereNumber('subject')->name('lessons.index');[m
+[31m-    Route::get('/subjects/{subject}/lessons/{lesson}', [EducationController::class, 'lesson'])->whereNumber(['subject', 'lesson'])->name('lessons.show');[m
+[31m-    Route::get('/subjects/{subject}', [EducationController::class, 'subject'])->whereNumber('subject')->name('subjects.show');[m
+[31m-    Route::get('/library', [EducationController::class, 'library'])->name('library.index');[m
+[31m-    Route::get('/library/{resource}/download', [EducationController::class, 'downloadResource'])->whereNumber('resource')->name('library.download');[m
+[31m-    Route::get('/subjects/{subject}/lessons/{lesson}/attachments/{attachment}', [EducationController::class, 'downloadAttachment'])->whereNumber(['subject', 'lesson', 'attachment'])->name('lessons.attachments.download');[m
+[31m-    Route::get('/tutor', [TutorController::class, 'index'])->name('tutor.index');[m
+[31m-    Route::post('/tutor/conversations', [TutorController::class, 'storeConversation'])->middleware('throttle:smart-tutor-conversations')->name('tutor.conversations.store');[m
+[31m-    Route::get('/tutor/conversations/{conversation}', [TutorController::class, 'show'])->whereNumber('conversation')->name('tutor.show');[m
+[31m-    Route::post('/tutor/conversations/{conversation}/messages', [TutorController::class, 'storeMessage'])->whereNumber('conversation')->middleware('throttle:smart-tutor-messages')->name('tutor.messages.store');[m
+     Route::get('/results', [PortalController::class, 'results'])->name('results');[m
+     Route::get('/messages', [PortalController::class, 'messages'])->name('messages');[m
+     Route::get('/profile', [PortalController::class, 'profile'])->name('profile');[m
+[1mdiff --git a/routes/web.php b/routes/web.php[m
+[1mindex 145731a..2fc5059 100644[m
+[1m--- a/routes/web.php[m
+[1m+++ b/routes/web.php[m
+[36m@@ -1,11 +1,25 @@[m
+ <?php[m
+ [m
+ use App\Http\Controllers\AuthController;[m
+[32m+[m[32muse Illuminate\Support\Facades\Auth;[m
+ use Illuminate\Support\Facades\File;[m
+ use Illuminate\Support\Facades\Response;[m
+ use Illuminate\Support\Facades\Route;[m
+ [m
+[31m-Route::redirect('/', '/login');[m
+[32m+[m[32mRoute::get('/', function () {[m
+[32m+[m[32m    if (! Auth::check()) {[m
+[32m+[m[32m        return redirect()->route('login');[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    $fallback = match (true) {[m
+[32m+[m[32m        Auth::user()->isParent() => route('parent.dashboard'),[m
+[32m+[m[32m        Auth::user()->isStudent() => route('student.dashboard'),[m
+[32m+[m[32m        Auth::user()->isTeacher() => route('teacher.dashboard'),[m
+[32m+[m[32m        default => route('admin.dashboard'),[m
+[32m+[m[32m    };[m
+[32m+[m
+[32m+[m[32m    return redirect()->to($fallback);[m
+[32m+[m[32m});[m
+ Route::get('/parent-manifest.webmanifest', fn () => Response::make(File::get(public_path('parent-manifest.webmanifest')), 200, ['Content-Type' => 'application/manifest+json']))->name('parent.pwa.manifest');[m
+ Route::get('/parent-sw.js', fn () => Response::make(File::get(public_path('parent-sw.js')), 200, ['Content-Type' => 'application/javascript']))->name('parent.pwa.service-worker');[m
+ Route::view('/parent-offline.html', 'parent.offline')->name('parent.offline');[m
+[36m@@ -16,4 +30,5 @@[m
+ Route::post('/logout', [AuthController::class, 'destroy'])->middleware('auth')->name('logout');[m
+ require __DIR__.'/student.php';[m
+ require __DIR__.'/parent.php';[m
+[32m+[m[32mrequire __DIR__.'/teacher.php';[m
+ require __DIR__.'/admin.php';[m
+[1mdiff --git a/tests/Feature/PublicLoginTest.php b/tests/Feature/PublicLoginTest.php[m
+[1mindex 6f70834..4d96130 100644[m
+[1m--- a/tests/Feature/PublicLoginTest.php[m
+[1m+++ b/tests/Feature/PublicLoginTest.php[m
+[36m@@ -44,6 +44,92 @@[m [mpublic function test_student_portal_is_only_for_student_accounts(): void[m
+         $this->actingAs($studentUser)->get('/student/dashboard')->assertOk()->assertSeeText($studentUser->name);[m
+     }[m
+ [m
+[32m+[m[32m    public function test_student_dashboard_shows_published_exams_for_their_class_only(): void[m
+[32m+[m[32m    {[m
+[32m+[m[32m        $year = AcademicYear::create([[m
+[32m+[m[32m            'name' => '2026/2027',[m
+[32m+[m[32m            'starts_at' => '2026-09-01',[m
+[32m+[m[32m            'ends_at' => '2027-06-30',[m
+[32m+[m[32m            'is_current' => true,[m
+[32m+[m[32m        ]);[m
+[32m+[m
+[32m+[m[32m        $classroomA = Classroom::create([[m
+[32m+[m[32m            'name' => 'Grade 1',[m
+[32m+[m[32m            'stage' => 'Primary',[m
+[32m+[m[32m            'section' => 'A',[m
+[32m+[m[32m            'academic_year_id' => $year->id,[m
+[32m+[m[32m        ]);[m
+[32m+[m
+[32m+[m[32m        $classroomB = Classroom::create([[m
+[32m+[m[32m            'name' => 'Grade 1',[m
+[32m+[m[32m            'stage' => 'Primary',[m
+[32m+[m[32m            'section' => 'B',[m
+[32m+[m[32m            'academic_year_id' => $year->id,[m
+[32m+[m[32m        ]);[m
+[32m+[m
+[32m+[m[32m        $subject = \App\Models\Subject::create([[m
+[32m+[m[32m            'name' => 'Math',[m
+[32m+[m[32m            'code' => 'MATH-CLASS-EXAM',[m
+[32m+[m[32m            'stage' => 'Primary',[m
+[32m+[m[32m            'status' => 'active',[m
+[32m+[m[32m        ]);[m
+[32m+[m
+[32m+[m[32m        $teacherUser = User::factory()->create(['role' => 'teacher', 'status' => 'active']);[m
+[32m+[m[32m        $teacherId = \Illuminate\Support\Facades\DB::table('teachers')->insertGetId([[m
+[32m+[m[32m            'user_id' => $teacherUser->id,[m
+[32m+[m[32m            'status' => 'active',[m
+[32m+[m[32m            'created_at' => now(),[m
+[32m+[m[32m            'updated_at' => now(),[m
+[32m+[m[32m        ]);[m
+[32m+[m
+[32m+[m[32m        \Illuminate\Support\Facades\DB::table('exams')->insert([[m
+[32m+[m[32m            [[m
+[32m+[m[32m                'title' => 'Quiz 1',[m
+[32m+[m[32m                'subject_id' => $subject->id,[m
+[32m+[m[32m                'classroom_id' => $classroomA->id,[m
+[32m+[m[32m                'teacher_id' => $teacherId,[m
+[32m+[m[32m                'starts_at' => now()->addDay(),[m
+[32m+[m[32m                'duration_minutes' => 30,[m
+[32m+[m[32m                'total_score' => 20,[m
+[32m+[m[32m                'status' => 'published',[m
+[32m+[m[32m                'created_at' => now(),[m
+[32m+[m[32m                'updated_at' => now(),[m
+[32m+[m[32m            ],[m
+[32m+[m[32m            [[m
+[32m+[m[32m                'title' => 'Quiz 2',[m
+[32m+[m[32m                'subject_id' => $subject->id,[m
+[32m+[m[32m                'classroom_id' => $classroomB->id,[m
+[32m+[m[32m                'teacher_id' => $teacherId,[m
+[32m+[m[32m                'starts_at' => now()->addDay(),[m
+[32m+[m[32m                'duration_minutes' => 30,[m
+[32m+[m[32m                'total_score' => 20,[m
+[32m+[m[32m                'status' => 'published',[m
+[32m+[m[32m                'created_at' => now(),[m
+[32m+[m[32m                'updated_at' => now(),[m
+[32m+[m[32m            ],[m
+[32m+[m[32m        ]);[m
+[32m+[m
+[32m+[m[32m        $studentUser = User::factory()->create([[m
+[32m+[m[32m            'name' => 'Student A',[m
+[32m+[m[32m            'role' => 'student',[m
+[32m+[m[32m            'status' => 'active',[m
+[32m+[m[32m            'password' => 'password123',[m
+[32m+[m[32m        ]);[m
+[32m+[m
+[32m+[m[32m        Student::create([[m
+[32m+[m[32m            'user_id' => $studentUser->id,[m
+[32m+[m[32m            'student_number' => 'S-A-EXAM',[m
+[32m+[m[32m            'classroom_id' => $classroomA->id,[m
+[32m+[m[32m            'status' => 'active',[m
+[32m+[m[32m        ]);[m
+[32m+[m
+[32m+[m[32m        $this->actingAs($studentUser)[m
+[32m+[m[32m            ->get('/student/dashboard')[m
+[32m+[m[32m            ->assertOk()[m
+[32m+[m[32m            ->assertSeeText('Quiz 1')[m
+[32m+[m[32m            ->assertDontSeeText('Quiz 2');[m
+[32m+[m[32m    }[m
+[32m+[m
+     private function createStudentAccount(): User[m
+     {[m
+         $year = AcademicYear::create([[m

@@ -25,7 +25,7 @@
                     </div>
                 </article>
             @empty
-                <section class="empty-state"><h2>لا توجد واجبات منشورة</h2><p>تظهر الواجبات المنشورة لصف الابن هنا عند إدخالها من البوابة التعليمية.</p></section>
+                <section class="empty-state"><h2>لا توجد واجبات حاليًا</h2><p>تظهر واجبات صف الابن هنا عند إدخالها من البوابة التعليمية.</p></section>
             @endforelse
         </section>
     @endif

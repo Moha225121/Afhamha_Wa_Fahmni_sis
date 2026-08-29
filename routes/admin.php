@@ -29,8 +29,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::get('attendance', [OperationsController::class, 'attendance'])->name('attendance.index');
     Route::post('attendance', [OperationsController::class, 'attendanceStore'])->name('attendance.store');
     Route::get('exams', [OperationsController::class, 'exams'])->name('exams.index');
-    Route::get('exams/create', [OperationsController::class, 'examCreate'])->name('exams.create');
-    Route::post('exams', [OperationsController::class, 'examStore'])->name('exams.store');
     Route::patch('exams/{id}/status', [OperationsController::class, 'examStatus'])->name('exams.status');
     Route::get('grades', [OperationsController::class, 'grades'])->name('grades.index');
     Route::post('grades', [OperationsController::class, 'gradesStore'])->name('grades.store');

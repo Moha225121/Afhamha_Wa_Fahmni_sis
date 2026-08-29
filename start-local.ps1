@@ -2,7 +2,7 @@ param(
     [switch]$NoBrowser
 )
 
-$php = 'C:\php-8.4.12\php.exe'
+$php = 'C:\php\php.exe'
 $hostAddress = '127.0.0.1'
 $port = 5500
 $loginUrl = "http://${hostAddress}:$port/login"
@@ -25,8 +25,6 @@ Write-Host "Checking local database migrations..."
 & $php `
     -d extension=fileinfo `
     -d extension=zip `
-    -d extension=pdo_sqlite `
-    -d extension=sqlite3 `
     artisan migrate --force
 
 if ($LASTEXITCODE -ne 0) {
@@ -45,8 +43,6 @@ if (-not $NoBrowser) {
 & $php `
     -d extension=fileinfo `
     -d extension=zip `
-    -d extension=pdo_sqlite `
-    -d extension=sqlite3 `
     -S ${hostAddress}:$port `
     -t public `
     start-local-router.php

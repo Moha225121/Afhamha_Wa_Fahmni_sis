@@ -37,11 +37,18 @@ class User extends Authenticatable
         return $this->role === 'student' && $this->status === 'active';
     }
 
+    public function isTeacher(): bool
+    {
+        return $this->role === 'teacher' && $this->status === 'active';
+    }
+
     public function hasPermission(string $permission): bool
     {
-        if (! $this->isAdmin()) {
+        $p = config('permissions.roles.'.$this->role, []);
+
+        if (empty($p)) {
             return false;
-        } $p = config('permissions.roles.'.$this->role, []);
+        }
 
         return in_array('*', $p, true) || in_array($permission, $p, true);
     }

@@ -6,11 +6,11 @@ The current implementation is one unified Laravel application. The parent and st
 
 ## Local Development
 
-The project is configured to work locally with SQLite for now. PostgreSQL will be connected later by changing the `.env` database settings.
+The project uses the PostgreSQL database configured in `.env`. The application reads and writes real records through Laravel's database connection; browser storage is not the source of truth.
 
 ### Requirements
 
-- PHP 8.3 or newer. The local machine used for this project has `C:\php-8.4.12\php.exe`.
+- PHP 8.3 or newer. The local machine used for this project has `C:\php\php.exe`.
 - Composer dependencies installed in `vendor/`.
 - SQLite PHP extensions enabled when running locally.
 
@@ -34,7 +34,7 @@ Use `Ctrl + F5` in the browser if the page was previously cached without styling
 
 In VS Code, use the task named `Start Laravel local server`. You can also double-click `start-local.cmd` on Windows. The Live Server extension's `Go Live` button can only open the helper page at the project root; it cannot run Laravel/PHP. The workspace moves Live Server to port `5501` so it does not take Laravel's `5500` port.
 
-Why this script exists: `php artisan serve` may start without the SQLite extensions on this machine. `start-local.ps1` starts PHP directly with `pdo_sqlite` and `sqlite3` enabled and uses `start-local-router.php` so static files such as CSS, icons, and service worker files are served correctly.
+Why this script exists: `start-local.ps1` starts PHP directly and uses `start-local-router.php` so static files such as CSS, icons, and service worker files are served correctly.
 
 ## Demo Accounts
 
@@ -152,19 +152,9 @@ Only active admin users can access administration pages.
 
 ## Database
 
-The approved production database target is PostgreSQL. Local development currently uses SQLite so the project can run before PostgreSQL is installed/configured.
+The application database target is PostgreSQL. Keep the existing database name and credentials in `.env`; do not use `migrate:fresh` against the real database.
 
 Current local `.env` values:
-
-```text
-DB_CONNECTION=sqlite
-DB_DATABASE=database/database.sqlite
-SESSION_DRIVER=file
-QUEUE_CONNECTION=sync
-CACHE_STORE=file
-```
-
-When PostgreSQL is ready, update `.env` back to a PostgreSQL connection and run migrations against the PostgreSQL database:
 
 ```text
 DB_CONNECTION=pgsql
@@ -173,22 +163,26 @@ DB_PORT=5432
 DB_DATABASE=afhamha_sis
 DB_USERNAME=postgres
 DB_PASSWORD=
+SESSION_DRIVER=file
+QUEUE_CONNECTION=sync
+CACHE_STORE=file
 ```
 
 ## Local Database Setup
 
-Create the SQLite file and run migrations:
+Run pending migrations against PostgreSQL:
 
 ```powershell
-New-Item -ItemType File -Force database\database.sqlite
-C:\php-8.4.12\php.exe -d extension=fileinfo -d extension=zip -d extension=pdo_sqlite -d extension=sqlite3 artisan migrate --force
+C:\php\php.exe artisan migrate --force
 ```
 
-Seed demo accounts and linked parent/student data:
+The default `DatabaseSeeder` is intentionally empty and does not modify real data. Seed demo accounts only when explicitly needed:
 
 ```powershell
-C:\php-8.4.12\php.exe -d extension=fileinfo -d extension=zip -d extension=pdo_sqlite -d extension=sqlite3 artisan db:seed --class=LocalDemoSeeder --force
+C:\php\php.exe artisan db:seed --class=LocalDemoSeeder --force
 ```
+
+Do not run `php artisan migrate:fresh` on `afhamha_sis`; it deletes all tables and data.
 
 ## PWA Files
 
@@ -219,10 +213,10 @@ On Windows you can also double-click `audit-pwa.cmd`.
 
 ## Tests
 
-Run the full test suite with PHP 8.4 and SQLite extensions enabled:
+Run the full test suite with the configured test database:
 
 ```powershell
-C:\php-8.4.12\php.exe -d extension=fileinfo -d extension=zip -d extension=pdo_sqlite -d extension=sqlite3 vendor\phpunit\phpunit\phpunit
+C:\php\php.exe vendor\phpunit\phpunit\phpunit
 ```
 
 Or use the included helper:

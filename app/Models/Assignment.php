@@ -9,12 +9,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Assignment extends Model
 {
     protected $fillable = [
-        'classroom_id', 'subject_id', 'teacher_id', 'title', 'instructions', 'due_at', 'status', 'published_at',
+        'classroom_id', 'subject_id', 'teacher_id', 'title', 'instructions', 'description', 'due_at', 'due_date', 'attachment_path', 'status', 'published_at',
     ];
 
     protected function casts(): array
     {
-        return ['due_at' => 'datetime', 'published_at' => 'datetime'];
+        return ['due_at' => 'datetime', 'due_date' => 'date', 'published_at' => 'datetime'];
     }
 
     public function classroom(): BelongsTo
@@ -34,7 +34,7 @@ class Assignment extends Model
 
     public function attachments(): HasMany
     {
-        return $this->hasMany(AssignmentAttachment::class);
+        return $this->hasMany(AssignmentAttachment::class)->orderBy('sort_order')->orderBy('id');
     }
 
     public function submissions(): HasMany

@@ -30,6 +30,7 @@ class EducationController extends Controller
             'units' => fn ($query) => $query->orderBy('position')->orderBy('id'),
             'units.lessons' => fn ($query) => $query
                 ->where('subject_id', $subject->id)
+                ->where(fn ($query) => $query->where('classroom_id', $student->classroom_id)->orWhereNull('classroom_id'))
                 ->published()
                 ->orderBy('position')
                 ->orderBy('id'),
@@ -37,6 +38,7 @@ class EducationController extends Controller
 
         $unassignedLessons = $subject->lessons()
             ->published()
+            ->where(fn ($query) => $query->where('classroom_id', $student->classroom_id)->orWhereNull('classroom_id'))
             ->whereNull('unit_id')
             ->orderBy('position')
             ->orderBy('id')
@@ -60,6 +62,7 @@ class EducationController extends Controller
             'units' => fn ($query) => $query->orderBy('position')->orderBy('id'),
             'units.lessons' => fn ($query) => $query
                 ->where('subject_id', $subject->id)
+                ->where(fn ($query) => $query->where('classroom_id', $student->classroom_id)->orWhereNull('classroom_id'))
                 ->published()
                 ->orderBy('position')
                 ->orderBy('id'),
@@ -67,6 +70,7 @@ class EducationController extends Controller
 
         $unassignedLessons = $subject->lessons()
             ->published()
+            ->where(fn ($query) => $query->where('classroom_id', $student->classroom_id)->orWhereNull('classroom_id'))
             ->whereNull('unit_id')
             ->orderBy('position')
             ->orderBy('id')
@@ -82,6 +86,7 @@ class EducationController extends Controller
         $lesson = $subject->lessons()
             ->published()
             ->whereKey($lesson)
+            ->where(fn ($query) => $query->where('classroom_id', $student->classroom_id)->orWhereNull('classroom_id'))
             ->where(function ($query) use ($subject): void {
                 $query
                     ->whereNull('unit_id')
