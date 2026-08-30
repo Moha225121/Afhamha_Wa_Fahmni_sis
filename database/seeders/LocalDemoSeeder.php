@@ -14,6 +14,7 @@ use App\Models\Teacher;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class LocalDemoSeeder extends Seeder
 {
@@ -31,7 +32,7 @@ class LocalDemoSeeder extends Seeder
 
         $parentUser = User::updateOrCreate(
             ['email' => 'parent@example.test'],
-            ['name' => 'ولي أمر تجريبي', 'password' => 'password123', 'role' => 'parent', 'status' => 'active', 'phone' => '0911111111'],
+            ['name' => 'ولي أمر تجريبي', 'password' => Hash::make('password123'), 'role' => 'parent', 'status' => 'active', 'phone' => '0911111111'],
         );
 
         $guardian = Guardian::updateOrCreate(
@@ -46,12 +47,12 @@ class LocalDemoSeeder extends Seeder
 
         $admin = User::updateOrCreate(
             ['email' => 'admin@example.test'],
-            ['name' => 'مدير النظام', 'password' => 'password123', 'role' => 'admin', 'status' => 'active'],
+            ['name' => 'مدير النظام', 'password' => Hash::make('password123'), 'role' => 'admin', 'status' => 'active'],
         );
 
         $teacherUser = User::updateOrCreate(
             ['email' => 'teacher1@example.test'],
-            ['name' => 'المعلمة مريم', 'password' => 'password123', 'role' => 'teacher', 'status' => 'active'],
+            ['name' => 'المعلمة مريم', 'password' => Hash::make('password123'), 'role' => 'teacher', 'status' => 'active'],
         );
         $teacher = Teacher::updateOrCreate(['user_id' => $teacherUser->id], ['specialization' => 'رياضيات', 'status' => 'active']);
         $subject = Subject::updateOrCreate(
@@ -151,7 +152,7 @@ class LocalDemoSeeder extends Seeder
     {
         $user = User::updateOrCreate(
             ['email' => $email],
-            ['name' => $name, 'password' => 'password123', 'role' => 'student', 'status' => 'active'],
+            ['name' => $name, 'password' => Hash::make('password123'), 'role' => 'student', 'status' => 'active'],
         );
 
         return Student::updateOrCreate(

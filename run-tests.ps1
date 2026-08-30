@@ -1,21 +1,33 @@
 $ErrorActionPreference = 'Stop'
 
-Set-Location $PSScriptRoot
-
-$preferredPhp = 'C:\php-8.4.12\php.exe'
-
-if (Test-Path $preferredPhp) {
-    $php = $preferredPhp
-} else {
+function Resolve-PhpExecutable {
     $phpCommand = Get-Command php -ErrorAction SilentlyContinue
-
-    if (-not $phpCommand) {
-        Write-Host 'PHP was not found. Install PHP 8.3+ or update run-tests.ps1 with your PHP path.'
-        exit 1
+    if ($phpCommand) {
+        return $phpCommand.Source
     }
 
-    $php = $phpCommand.Source
+    $commonPaths = @(
+        'C:\laragon\bin\php\php-8.3.33-Win32-vs16-x64\php.exe',
+        'C:\php\php.exe',
+        'C:\php-8.4.12\php.exe',
+        'C:\Program Files\PHP\php.exe',
+        'C:\Program Files (x86)\PHP\php.exe',
+        "$env:LOCALAPPDATA\Programs\PHP\php.exe"
+    )
+
+    foreach ($path in $commonPaths) {
+        if (Test-Path $path) {
+            return $path
+        }
+    }
+
+    Write-Host 'PHP was not found. Install PHP 8.3+ or add it to PATH.'
+    exit 1
 }
+
+Set-Location $PSScriptRoot
+
+$php = Resolve-PhpExecutable
 
 $phpunit = Join-Path $PSScriptRoot 'vendor\phpunit\phpunit\phpunit'
 

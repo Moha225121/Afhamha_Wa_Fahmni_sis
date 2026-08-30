@@ -494,9 +494,25 @@ class StudentAcademicPortalTest extends TestCase
     public function test_student_cannot_start_exam_before_start_time(): void
     {
         $ctx = $this->context('E3');
-        $exam = $this->exam($ctx, ['starts_at' => now()->addMinute()]);
+        $exam = $this->exam($ctx, ['starts_at' => now()->addDay()->setTime(9, 0)]);
         $this->actingAs($ctx['student']->user)->post(route('student.exams.start', $exam))->assertStatus(422);
         $this->assertDatabaseCount('exam_attempts', 0);
+    }
+
+    public function test_student_can_start_exam_when_it_is_scheduled_for_today(): void
+    {
+        $ctx = $this->context('E3A');
+        $exam = $this->exam($ctx, ['starts_at' => now()->copy()->addMinutes(5), 'duration_minutes' => 30]);
+        $this->question($exam);
+
+        $this->actingAs($ctx['student']->user)
+            ->post(route('student.exams.start', $exam))
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('exam_attempts', [
+            'exam_id' => $exam->id,
+            'student_id' => $ctx['student']->id,
+        ]);
     }
 
     public function test_student_cannot_start_exam_after_end_time(): void

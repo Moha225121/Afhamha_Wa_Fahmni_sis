@@ -2,7 +2,31 @@ param(
     [switch]$NoBrowser
 )
 
-$php = 'C:\php\php.exe'
+function Resolve-PhpExecutable {
+    $phpCommand = Get-Command php -ErrorAction SilentlyContinue
+    if ($phpCommand) {
+        return $phpCommand.Source
+    }
+
+    $commonPaths = @(
+        'C:\laragon\bin\php\php-8.3.33-Win32-vs16-x64\php.exe',
+        'C:\php\php.exe',
+        'C:\php-8.4.12\php.exe',
+        'C:\Program Files\PHP\php.exe',
+        'C:\Program Files (x86)\PHP\php.exe',
+        "$env:LOCALAPPDATA\Programs\PHP\php.exe"
+    )
+
+    foreach ($path in $commonPaths) {
+        if (Test-Path $path) {
+            return $path
+        }
+    }
+
+    throw "PHP 8.3+ was not found. Install PHP or add it to PATH."
+}
+
+$php = Resolve-PhpExecutable
 $hostAddress = '127.0.0.1'
 $port = 5500
 $loginUrl = "http://${hostAddress}:$port/login"

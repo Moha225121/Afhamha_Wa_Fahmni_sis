@@ -26,7 +26,8 @@ class ExamAttemptService
             if ($lockedExam->status !== 'published' || $lockedExam->classroom_id !== $lockedStudent->classroom_id) {
                 throw ValidationException::withMessages(['exam' => 'الاختبار غير متاح لهذا الطالب.']);
             }
-            if (now()->lt($lockedExam->starts_at) || now()->gte($scheduledEnd)) {
+            $isSameDayExam = $lockedExam->starts_at->isSameDay(now());
+            if (($lockedExam->starts_at->isFuture() && ! $isSameDayExam) || now()->gte($scheduledEnd)) {
                 throw ValidationException::withMessages(['exam' => 'الاختبار خارج نافذة الوقت المتاحة.']);
             }
             $existingAttempts = ExamAttempt::query()

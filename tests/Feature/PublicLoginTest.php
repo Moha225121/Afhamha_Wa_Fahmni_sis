@@ -9,7 +9,9 @@ use App\Models\Student;
 use App\Models\Subject;
 use App\Models\Teacher;
 use App\Models\User;
+use Database\Seeders\LocalDemoSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
@@ -24,6 +26,19 @@ class PublicLoginTest extends TestCase
             ->assertSeeText('دخول المنصة')
             ->assertDontSeeText('حساب واحد للوصول إلى بوابة الإدارة أو ولي الأمر أو الطالب.')
             ->assertDontSeeText('أنواع بوابات المنصة');
+    }
+
+    public function test_demo_seeded_users_can_authenticate_with_password123(): void
+    {
+        $this->seed(LocalDemoSeeder::class);
+
+        $user = User::where('email', 'admin@example.test')->firstOrFail();
+
+        $this->assertTrue(Hash::check('password123', $user->password));
+        $this->post('/login', ['email' => 'admin@example.test', 'password' => 'password123'])
+            ->assertRedirect('/admin/dashboard');
+
+        $this->assertAuthenticatedAs($user);
     }
 
     public function test_student_login_redirects_to_student_portal(): void

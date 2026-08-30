@@ -21,7 +21,7 @@ Use the project script:
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\start-local.ps1
 ```
-
+ 
 Then open the local login page:
 
 ```text
