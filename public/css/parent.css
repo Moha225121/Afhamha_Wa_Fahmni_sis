@@ -25,6 +25,16 @@
     --motion-ease: cubic-bezier(.2, .8, .2, 1);
 }
 
+.install-app-button { display:inline-flex; align-items:center; gap:7px; min-height:42px; padding:8px 14px; border:1px solid color-mix(in srgb,var(--primary) 28%,transparent); border-radius:12px; background:var(--primary); color:#fff; font-weight:800; box-shadow:var(--shadow-tight); }
+.install-app-button:hover { filter:brightness(.94); transform:translateY(-1px); }
+.install-dialog { width:min(92vw,480px); padding:24px; border:0; border-radius:18px; color:var(--ink); direction:rtl; box-shadow:0 24px 70px rgba(16,32,51,.25); }
+.install-dialog::backdrop { background:rgba(16,32,51,.55); backdrop-filter:blur(3px); }
+.install-dialog h2 { margin:0 0 10px; }
+.install-dialog ol { padding-inline-start:22px; line-height:2; }
+.install-dialog-close { position:absolute; inset-block-start:10px; inset-inline-end:12px; border:0; background:transparent; color:var(--muted); font-size:26px; }
+.install-dialog-done { width:100%; padding:11px; border:0; border-radius:10px; background:var(--primary); color:#fff; font-weight:800; }
+@media (max-width:640px) { .app-header > .header-actions > .install-app-button { display:none; } }
+
 * {
     box-sizing: border-box;
 }

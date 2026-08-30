@@ -50,6 +50,12 @@ class LocalDemoSeeder extends Seeder
             ['name' => 'مدير النظام', 'password' => Hash::make('password123'), 'role' => 'admin', 'status' => 'active'],
         );
 
+        $supervisor = User::updateOrCreate(
+            ['email' => 'supervisor@example.test'],
+            ['name' => 'المشرف التجريبي', 'password' => Hash::make('password123'), 'role' => 'supervisor', 'status' => 'active'],
+        );
+        $supervisor->supervisedClassrooms()->syncWithoutDetaching([$classroom->id]);
+
         $teacherUser = User::updateOrCreate(
             ['email' => 'teacher1@example.test'],
             ['name' => 'المعلمة مريم', 'password' => Hash::make('password123'), 'role' => 'teacher', 'status' => 'active'],

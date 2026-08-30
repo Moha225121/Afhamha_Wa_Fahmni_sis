@@ -1,8 +1,8 @@
 <!doctype html>
-<html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>@yield('title') | افهمها وفهمني</title><link rel="stylesheet" href="{{ asset('css/admin.css') }}"><link rel="stylesheet" href="{{ asset('css/teacher-overrides.css') }}"></head>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>@yield('title') | افهمها وفهمني</title><link rel="stylesheet" href="{{ asset('css/admin.css') }}"><link rel="stylesheet" href="{{ asset('css/teacher-overrides.css') }}">@include('shared.branding-style')</head>
 <body class="teacher-portal"><a class="skip-link" href="#teacher-main">تجاوز إلى المحتوى</a><button class="menu-toggle" id="menu" aria-label="فتح القائمة" aria-controls="sidebar" aria-expanded="false">☰</button>
-<aside class="sidebar" id="sidebar"><a class="logo" href="{{ route('teacher.dashboard') }}"><span class="brand-mark">AWF</span><span><b>افهمها وفهمني</b><small>بوابة المعلم</small></span></a>
-<nav>@php($nav=['dashboard'=>['label'=>'الرئيسية','code'=>'01'],'classes'=>['label'=>'صفوفي','code'=>'02'],'students'=>['label'=>'الطلاب','code'=>'03'],'lessons'=>['label'=>'الدروس','code'=>'04'],'assignments'=>['label'=>'الواجبات','code'=>'05'],'exams'=>['label'=>'الاختبارات','code'=>'06'],'grades'=>['label'=>'الدرجات','code'=>'08'],'attendance'=>['label'=>'الحضور','code'=>'07']])
+<aside class="sidebar" id="sidebar"><a class="logo" href="{{ route('teacher.dashboard') }}"><span class="brand-mark">@include('shared.brand-mark')</span><span><b>افهمها وفهمني</b><small>بوابة المعلم</small></span></a>
+<nav>@php($nav=['dashboard'=>['label'=>'الرئيسية','code'=>'01'],'classes'=>['label'=>'صفوفي','code'=>'02'],'students'=>['label'=>'الطلاب','code'=>'03'],'lessons'=>['label'=>'الدروس','code'=>'04'],'assignments'=>['label'=>'الواجبات','code'=>'05'],'exams'=>['label'=>'الاختبارات','code'=>'06'],'grades'=>['label'=>'الدرجات','code'=>'07']])
 @foreach($nav as $key=>$item)
 <a href="{{ route('teacher.'.$key.'.index') }}" class="{{ request()->routeIs('teacher.'.$key.'*')?'active':'' }}" @if(request()->routeIs('teacher.'.$key.'*')) aria-current="page" @endif><i>{{ $item['code'] }}</i><span>{{ $item['label'] }}</span></a>
 @endforeach

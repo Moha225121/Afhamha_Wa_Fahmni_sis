@@ -42,6 +42,16 @@ class User extends Authenticatable
         return $this->role === 'teacher' && $this->status === 'active';
     }
 
+    public function isSupervisor(): bool
+    {
+        return $this->role === 'supervisor' && $this->status === 'active';
+    }
+
+    public function supervisedClassrooms(): BelongsToMany
+    {
+        return $this->belongsToMany(Classroom::class, 'supervisor_class_assignments', 'supervisor_id', 'classroom_id')->withTimestamps();
+    }
+
     public function hasPermission(string $permission): bool
     {
         $p = config('permissions.roles.'.$this->role, []);

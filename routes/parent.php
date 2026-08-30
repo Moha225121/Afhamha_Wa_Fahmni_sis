@@ -12,6 +12,8 @@ Route::prefix('parent')->name('parent.')->middleware(['auth', 'parent'])->group(
     Route::get('/children/{student}', [PortalController::class, 'child'])->name('children.show');
     Route::get('/results', [PortalController::class, 'results'])->name('results');
     Route::get('/attendance', [PortalController::class, 'attendance'])->name('attendance');
+    Route::get('/guardian-calls', [PortalController::class, 'guardianCalls'])->name('guardian-calls');
+    Route::get('/student-followup', [PortalController::class, 'studentFollowup'])->name('student-followup');
     Route::get('/assignments', [PortalController::class, 'assignments'])->name('assignments');
     Route::get('/exams', [PortalController::class, 'exams'])->name('exams');
     Route::get('/messages', [PortalController::class, 'messages'])->name('messages');

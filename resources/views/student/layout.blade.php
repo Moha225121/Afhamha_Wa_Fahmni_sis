@@ -9,6 +9,7 @@
     <link rel="apple-touch-icon" href="{{ asset('icons/parent-icon-192.png') }}">
     <link rel="stylesheet" href="{{ asset('css/parent.css') }}?v=portal-style-1">
     <link rel="stylesheet" href="{{ asset('css/student.css') }}?v=20260827-1">
+    @include('shared.branding-style')
     <script src="{{ asset('js/student-tutor.js') }}" defer></script>
     <script src="{{ asset('js/enhanced-selects.js') }}" defer></script>
 </head>
@@ -17,7 +18,7 @@
 <div class="app-shell">
     <header class="app-header">
         <a class="brand" href="{{ route('student.dashboard') }}" aria-label="بوابة الطالب">
-            <span class="brand-mark">AWF</span>
+            <span class="brand-mark">@include('shared.brand-mark')</span>
             <span class="brand-copy">
                 <b>افهمها وفهمني</b>
                 <small>بوابة الطالب</small>

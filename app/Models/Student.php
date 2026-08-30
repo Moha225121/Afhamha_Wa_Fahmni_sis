@@ -42,4 +42,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
     {
         return $this->hasMany(AssignmentSubmission::class);
     }
+
+    public function attendances(): HasMany { return $this->hasMany(Attendance::class); }
+    public function studentNotes(): HasMany { return $this->hasMany(StudentNote::class); }
+    public function guardianCalls(): HasMany { return $this->hasMany(GuardianCall::class); }
 }

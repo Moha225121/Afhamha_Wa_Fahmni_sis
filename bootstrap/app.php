@@ -5,6 +5,7 @@ use App\Http\Middleware\EnsureUserIsAdmin;
 use App\Http\Middleware\EnsureUserIsParent;
 use App\Http\Middleware\EnsureUserIsStudent;
 use App\Http\Middleware\EnsureUserIsTeacher;
+use App\Http\Middleware\EnsureUserIsSupervisor;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -22,6 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'parent' => EnsureUserIsParent::class,
             'student' => EnsureUserIsStudent::class,
             'teacher' => EnsureUserIsTeacher::class,
+            'supervisor' => EnsureUserIsSupervisor::class,
             'permission' => EnsureUserHasPermission::class,
         ]);
 
@@ -32,6 +34,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 $user?->isParent() => 'parent.dashboard',
                 $user?->isStudent() => 'student.dashboard',
                 $user?->isTeacher() => 'teacher.assignments.index',
+                $user?->isSupervisor() => 'supervisor.dashboard',
                 default => 'admin.dashboard',
             });
         });

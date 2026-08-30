@@ -6,7 +6,7 @@
     "start_url": "/parent/dashboard",
     "scope": "/parent/",
     "display": "standalone",
-    "orientation": "portrait",
+    "orientation": "any",
     "dir": "rtl",
     "lang": "ar",
     "background_color": "#f7f8f5",

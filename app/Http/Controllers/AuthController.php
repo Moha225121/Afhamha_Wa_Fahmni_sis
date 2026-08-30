@@ -26,10 +26,12 @@ class AuthController
             $request->user()->isParent() => route('parent.dashboard'),
             $request->user()->isStudent() => route('student.dashboard'),
             $request->user()->isTeacher() => route('teacher.dashboard'),
+            $request->user()->isSupervisor() => route('supervisor.dashboard'),
             default => route('admin.dashboard'),
         };
 
-        return redirect()->intended($fallback);
+        // Avoid stale intended URLs sending a role into another role's portal.
+        return redirect()->to($fallback);
     }
 
     public function destroy(Request $request): RedirectResponse

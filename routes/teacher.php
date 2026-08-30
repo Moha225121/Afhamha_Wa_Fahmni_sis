@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\TeacherPortal\AssignmentController;
-use App\Http\Controllers\TeacherPortal\AttendanceController;
 use App\Http\Controllers\TeacherPortal\DashboardController;
 use App\Http\Controllers\TeacherPortal\ClassroomController;
 use App\Http\Controllers\TeacherPortal\ExamController;
@@ -31,9 +30,6 @@ Route::prefix('teacher')->name('teacher.')->middleware(['auth', 'teacher'])->gro
     Route::patch('/lessons/{lesson}/publish', [LessonController::class, 'publish'])->name('lessons.publish');
     Route::patch('/lessons/{lesson}/cancel', [LessonController::class, 'cancel'])->name('lessons.cancel');
     Route::delete('/lessons/{lesson}', [LessonController::class, 'destroy'])->name('lessons.destroy');
-
-    Route::get('/attendance', [AttendanceController::class, 'index'])->name('attendance.index');
-    Route::post('/attendance', [AttendanceController::class, 'store'])->name('attendance.store');
 
     Route::get('/exams', [ExamController::class, 'index'])->name('exams.index');
     Route::get('/exams/create', [ExamController::class, 'create'])->name('exams.create');

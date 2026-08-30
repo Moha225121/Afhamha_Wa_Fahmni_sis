@@ -7,6 +7,9 @@ use App\Services\UnavailableSmartTutorGateway;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -24,6 +27,15 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        View::composer('*', function ($view): void {
+            $settings = Schema::hasTable('settings') ? DB::table('settings')->pluck('value','key') : collect();
+            $view->with('schoolBranding', [
+                'platform_name' => 'افهمها وفهمني',
+                'school_name' => $settings['school_name'] ?? 'إدارة المدرسة',
+                'logo' => $settings['school_logo'] ?? null,
+                'theme_color' => $settings['theme_color'] ?? '#008C95',
+            ]);
+        });
         RateLimiter::for('smart-tutor-conversations', function (Request $request): Limit {
             $maximum = max(1, (int) config('smart_tutor.rate_limits.conversations_per_minute', 10));
 

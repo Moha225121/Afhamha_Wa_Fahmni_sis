@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\Admin\SubjectController;
 use App\Http\Controllers\Admin\TeacherController;
+use App\Http\Controllers\Admin\SupervisorController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function (): void {
@@ -18,6 +19,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::get('/dashboard/index', fn () => redirect()->route('admin.dashboard'))->name('dashboard.index');
     Route::resource('students', StudentController::class)->except('destroy');
     Route::resource('teachers', TeacherController::class)->except('destroy');
+    Route::resource('supervisors', SupervisorController::class)->only(['index','create','store','edit','update']);
     Route::resource('parents', GuardianController::class)->except('destroy');
     Route::resource('classes', ClassroomController::class)->except('destroy');
     Route::resource('subjects', SubjectController::class)->except('destroy');
@@ -27,7 +29,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::post('schedules', [OperationsController::class, 'scheduleStore'])->name('schedules.store');
     Route::delete('schedules/{id}', [OperationsController::class, 'scheduleDestroy'])->name('schedules.destroy');
     Route::get('attendance', [OperationsController::class, 'attendance'])->name('attendance.index');
-    Route::post('attendance', [OperationsController::class, 'attendanceStore'])->name('attendance.store');
     Route::get('exams', [OperationsController::class, 'exams'])->name('exams.index');
     Route::patch('exams/{id}/status', [OperationsController::class, 'examStatus'])->name('exams.status');
     Route::get('grades', [OperationsController::class, 'grades'])->name('grades.index');

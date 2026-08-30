@@ -13,6 +13,6 @@ class ScheduleRequest extends FormRequest
 
     public function rules(): array
     {
-        return ['classroom_id' => ['required', 'exists:classrooms,id'], 'teacher_id' => ['required', 'exists:teachers,id'], 'subject_id' => ['required', 'exists:subjects,id'], 'day_of_week' => ['required', 'integer', 'between:0,6'], 'starts_at' => ['required', 'date_format:H:i'], 'ends_at' => ['required', 'date_format:H:i', 'after:starts_at'], 'room' => ['nullable', 'string', 'max:100']];
+        return ['classroom_id' => ['required', 'exists:classrooms,id'], 'teacher_id' => ['required', 'exists:teachers,id'], 'subject_id' => ['required', 'exists:subjects,id'], 'day_of_week' => ['required', 'integer', 'between:0,4'], 'period_number' => ['required','integer','between:1,12'], 'room' => ['nullable', 'string', 'max:100']];
     }
 }

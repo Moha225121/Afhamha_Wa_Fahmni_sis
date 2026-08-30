@@ -13,19 +13,23 @@
     <link rel="icon" href="{{ asset('icons/parent-icon.svg') }}" type="image/svg+xml">
     <link rel="apple-touch-icon" href="{{ asset('icons/parent-icon-192.png') }}">
     <link rel="stylesheet" href="{{ asset('css/parent.css') }}?v=portal-style-1">
+    @include('shared.branding-style')
     <script src="{{ asset('js/enhanced-selects.js') }}" defer></script>
 </head>
 <body>
 <div class="app-shell">
     <header class="app-header">
         <a class="brand" href="{{ route('parent.dashboard') }}" aria-label="بوابة ولي الأمر">
-            <span class="brand-mark">AWF</span>
+            <span class="brand-mark">@include('shared.brand-mark')</span>
             <span class="brand-copy">
                 <b>افهمها وفهمني</b>
                 <small>بوابة ولي الأمر</small>
             </span>
         </a>
         <div class="header-actions">
+            <button type="button" class="install-app-button" data-install-app>
+                <span aria-hidden="true">⇩</span><span>تثبيت التطبيق</span>
+            </button>
             <button type="button" class="more-menu-toggle" data-more-toggle aria-expanded="false" aria-controls="parent-more-menu">
                 <span class="more-menu-toggle-icon" aria-hidden="true">☰</span>
                 <span>المزيد</span>
@@ -40,6 +44,7 @@
             <button type="button" data-more-close aria-label="إغلاق">×</button>
         </div>
         <div class="more-list">
+            <button type="button" data-install-app><span aria-hidden="true">⇩</span> تثبيت التطبيق</button>
             <a href="{{ route('parent.profile') }}" class="{{ request()->routeIs('parent.profile') ? 'active' : '' }}">
                 <span aria-hidden="true">◉</span>
                 الملف الشخصي
@@ -56,6 +61,8 @@
                 <span aria-hidden="true">✓</span>
                 الحضور
             </a>
+            <a href="{{ route('parent.guardian-calls') }}"><span aria-hidden="true">!</span> استدعاءات ولي الأمر</a>
+            <a href="{{ route('parent.student-followup') }}"><span aria-hidden="true">◇</span> متابعة الطالب</a>
             <a href="{{ route('parent.assignments') }}" class="{{ request()->routeIs('parent.assignments') ? 'active' : '' }}">
                 <span aria-hidden="true">▤</span>
                 الواجبات
@@ -74,6 +81,14 @@
             </form>
         </div>
     </nav>
+
+    <dialog class="install-dialog" id="parent-install-dialog" aria-labelledby="install-dialog-title">
+        <form method="dialog"><button class="install-dialog-close" aria-label="إغلاق">×</button></form>
+        <h2 id="install-dialog-title">تثبيت تطبيق ولي الأمر</h2>
+        <p data-install-message>يمكن تثبيت التطبيق من قائمة المتصفح.</p>
+        <ol data-install-steps></ol>
+        <form method="dialog"><button class="install-dialog-done">حسنًا</button></form>
+    </dialog>
 
     <main class="app-content">
         @if(session('success'))
@@ -112,6 +127,43 @@ const moreToggle = document.querySelector('[data-more-toggle]');
 const moreMenu = document.getElementById('parent-more-menu');
 const moreBackdrop = document.querySelector('[data-more-backdrop]');
 const moreClose = document.querySelector('[data-more-close]');
+const installButtons = [...document.querySelectorAll('[data-install-app]')];
+const installDialog = document.getElementById('parent-install-dialog');
+const installMessage = installDialog?.querySelector('[data-install-message]');
+const installSteps = installDialog?.querySelector('[data-install-steps]');
+let deferredInstallPrompt = null;
+
+const isStandalone = () => window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+const hideInstallButtons = () => installButtons.forEach(button => button.hidden = true);
+const showInstallHelp = () => {
+    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    const isAndroid = /android/i.test(navigator.userAgent);
+    installMessage.textContent = isIOS ? 'لتثبيت التطبيق على iPhone أو iPad:' : 'لم يعرض المتصفح نافذة التثبيت التلقائي. يمكنك تثبيته يدويًا:';
+    const steps = isIOS
+        ? ['افتح هذه الصفحة في Safari.', 'اضغط زر المشاركة.', 'اختر «إضافة إلى الشاشة الرئيسية»، ثم اضغط «إضافة».']
+        : isAndroid
+            ? ['افتح قائمة المتصفح ⋮.', 'اختر «تثبيت التطبيق» أو «إضافة إلى الشاشة الرئيسية».', 'أكد التثبيت.']
+            : ['افتح قائمة المتصفح.', 'اختر «تثبيت افهمها وفهمني» أو Apps ثم Install.', 'أكد التثبيت ليظهر التطبيق على سطح المكتب.'];
+    installSteps.replaceChildren(...steps.map(text => { const item = document.createElement('li'); item.textContent = text; return item; }));
+    installDialog.showModal();
+};
+
+window.addEventListener('beforeinstallprompt', event => {
+    event.preventDefault();
+    deferredInstallPrompt = event;
+    if (! isStandalone()) installButtons.forEach(button => button.hidden = false);
+});
+
+installButtons.forEach(button => button.addEventListener('click', async () => {
+    if (isStandalone()) { hideInstallButtons(); return; }
+    if (! deferredInstallPrompt) { showInstallHelp(); return; }
+    deferredInstallPrompt.prompt();
+    await deferredInstallPrompt.userChoice;
+    deferredInstallPrompt = null;
+}));
+
+window.addEventListener('appinstalled', () => { deferredInstallPrompt = null; hideInstallButtons(); });
+if (isStandalone()) hideInstallButtons();
 
 if (moreToggle && moreMenu && moreBackdrop) {
     const closeMoreMenu = () => {

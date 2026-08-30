@@ -99,6 +99,20 @@ class PublicLoginTest extends TestCase
         $this->assertAuthenticatedAs($teacherUser);
     }
 
+    public function test_supervisor_login_redirects_to_supervisor_portal(): void
+    {
+        $supervisor = User::factory()->create([
+            'role' => 'supervisor',
+            'status' => 'active',
+            'password' => 'password123',
+        ]);
+
+        $this->post('/login', ['email' => $supervisor->email, 'password' => 'password123'])
+            ->assertRedirect('/supervisor/dashboard');
+
+        $this->assertAuthenticatedAs($supervisor);
+    }
+
     public function test_teacher_attendance_is_saved_to_database_and_preserves_selected_date(): void
     {
         $teacherUser = User::factory()->create(['role' => 'teacher', 'status' => 'active', 'password' => 'password123']);

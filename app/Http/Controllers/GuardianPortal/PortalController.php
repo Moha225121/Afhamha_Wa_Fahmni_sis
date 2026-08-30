@@ -74,14 +74,27 @@ class PortalController extends Controller
     {
         [, $children, $selectedStudent] = $this->parentContext($request);
 
+        $range = match ($request->query('period')) { 'week' => now()->startOfWeek(), 'semester' => now()->subMonths(4), 'custom' => $request->date('from'), default => now()->startOfMonth() };
         return view('parent.attendance', [
             'children' => $children,
             'selectedStudent' => $selectedStudent,
             'summary' => $this->summaryFor($selectedStudent),
             'records' => $selectedStudent
-                ? DB::table('attendance_records')->where('student_id', $selectedStudent->id)->latest('date')->get()
+                ? DB::table('attendance_records')->where('student_id', $selectedStudent->id)->when($range, fn ($q) => $q->whereDate('date', '>=', $range))->when($request->date('to'), fn ($q,$v) => $q->whereDate('date','<=',$v))->latest('date')->get()
                 : collect(),
         ]);
+    }
+
+    public function guardianCalls(Request $request): View
+    {
+        [, $children, $selectedStudent] = $this->parentContext($request);
+        return view('parent.guardian-calls', ['children'=>$children,'selectedStudent'=>$selectedStudent,'calls'=>$selectedStudent ? \App\Models\GuardianCall::where('student_id',$selectedStudent->id)->latest()->get() : collect()]);
+    }
+
+    public function studentFollowup(Request $request): View
+    {
+        [, $children, $selectedStudent] = $this->parentContext($request);
+        return view('parent.student-followup', ['children'=>$children,'selectedStudent'=>$selectedStudent,'notes'=>$selectedStudent ? \App\Models\StudentNote::where('student_id',$selectedStudent->id)->where('visibility','guardian')->latest()->get() : collect()]);
     }
 
     public function assignments(Request $request): View
@@ -213,7 +226,8 @@ class PortalController extends Controller
             ->selectRaw("sum(case when status = 'present' then 1 else 0 end) as present")
             ->selectRaw("sum(case when status = 'absent' then 1 else 0 end) as absent")
             ->selectRaw("sum(case when status = 'late' then 1 else 0 end) as late")
-            ->selectRaw("sum(case when status = 'excused' then 1 else 0 end) as excused")
+            ->selectRaw("sum(case when status = 'excused_absence' then 1 else 0 end) as excused_absence")
+            ->selectRaw("sum(case when status = 'excused_late' then 1 else 0 end) as excused_late")
             ->first();
 
         $results = $this->publishedResultsFor($student);
@@ -229,7 +243,9 @@ class PortalController extends Controller
             'present' => $present,
             'absent' => (int) ($attendance->absent ?? 0),
             'late' => (int) ($attendance->late ?? 0),
-            'excused' => (int) ($attendance->excused ?? 0),
+            'excused' => (int) (($attendance->excused_absence ?? 0) + ($attendance->excused_late ?? 0)),
+            'excused_absence' => (int) ($attendance->excused_absence ?? 0),
+            'excused_late' => (int) ($attendance->excused_late ?? 0),
             'attendance_percent' => $total ? round(($present / $total) * 100, 1) : null,
             'published_grades' => $results->count(),
             'average_percent' => $percentages->isEmpty() ? null : round((float) $percentages->avg(), 1),
