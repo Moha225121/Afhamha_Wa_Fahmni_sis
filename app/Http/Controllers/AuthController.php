@@ -16,13 +16,14 @@ class AuthController
 
     public function store(Request $request): RedirectResponse
     {
-        $credentials = $request->validate(['email' => ['required', 'email'], 'password' => ['required', 'string']]);
+        $credentials = $request->validate(['email' => ['required', 'string', 'max:254'], 'password' => ['required', 'string']]);
         if (! Auth::attempt($credentials, $request->boolean('remember'))) {
             return back()->withErrors(['email' => 'بيانات الدخول غير صحيحة.'])->onlyInput('email');
         } $request->session()->regenerate();
         $request->user()->update(['last_login_at' => now()]);
 
         $fallback = match (true) {
+            $request->user()->role === 'financial_officer' => route('finance.index'),
             $request->user()->isParent() => route('parent.dashboard'),
             $request->user()->isStudent() => route('student.dashboard'),
             $request->user()->isTeacher() => route('teacher.dashboard'),

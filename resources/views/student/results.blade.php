@@ -3,6 +3,7 @@
 @section('title', 'نتائج الطالب')
 
 @section('content')
+@include('shared.published-results')
     <section class="page-title">
         <p>{{ $student->user->name }}</p>
         <h1>النتائج</h1>

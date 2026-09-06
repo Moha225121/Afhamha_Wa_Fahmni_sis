@@ -17,7 +17,7 @@ class SupervisorRequest extends FormRequest
             'email' => ['required','email',Rule::unique('users')->ignore($supervisor?->id)],
             'phone' => ['nullable','string','max:30'],
             'status' => ['required',Rule::in(['active','inactive'])],
-            'password' => [$supervisor ? 'nullable' : 'required','string','min:8','confirmed'],
+            'password' => ['nullable','string','min:8','confirmed'],
             'classroom_ids' => ['required','array','min:1'],
             'classroom_ids.*' => ['integer','distinct','exists:classrooms,id'],
         ];

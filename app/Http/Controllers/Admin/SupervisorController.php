@@ -7,6 +7,7 @@ use App\Http\Requests\SupervisorRequest;
 use App\Models\Classroom;
 use App\Models\User;
 use App\Services\AuditService;
+use App\Services\AccountPasswordService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -30,10 +31,11 @@ class SupervisorController extends Controller
         return $this->form($supervisor->load('supervisedClassrooms'));
     }
 
-    public function store(SupervisorRequest $request): RedirectResponse
+    public function store(SupervisorRequest $request, AccountPasswordService $passwords): RedirectResponse
     {
-        $supervisor = DB::transaction(function () use ($request): User {
-            $supervisor = User::create($request->only('name','email','phone','password','status') + ['role'=>'supervisor']);
+        $supervisor = DB::transaction(function () use ($request, $passwords): User {
+            app(\App\Services\SchoolAccountService::class)->settings(true);
+            $supervisor = User::create($request->only('name','email','phone','status') + ['role'=>'supervisor', 'password' => $passwords->forNewAccount($request->validated('password'))]);
             $supervisor->supervisedClassrooms()->sync($request->validated('classroom_ids'));
             AuditService::record('created','supervisors',$supervisor);
             return $supervisor;

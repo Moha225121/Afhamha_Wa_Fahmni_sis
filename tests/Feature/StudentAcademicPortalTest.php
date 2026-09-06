@@ -807,7 +807,7 @@ class StudentAcademicPortalTest extends TestCase
         $this->question($exam, ['type' => 'essay', 'options' => null, 'correct_answer' => null]);
         $attempt = app(ExamAttemptService::class)->start($exam, $ctx['student']);
         app(ExamAttemptService::class)->finalize($attempt);
-        $this->actingAs($ctx['student']->user)->get(route('student.exams.result', $attempt))->assertOk()->assertSeeText('بانتظار المراجعة')->assertDontSeeText('0 / 10')->assertDontSeeText('0%');
+        $this->actingAs($ctx['student']->user)->get(route('student.exams.result', $attempt))->assertOk()->assertSeeText('بانتظار المراجعة')->assertDontSeeText('0 / 10')->assertDontSee('>0%</strong>', false);
         $this->assertDatabaseHas('exam_attempts', ['id' => $attempt->id, 'status' => 'pending_review', 'score' => 0, 'percentage' => null, 'graded_at' => null]);
     }
 

@@ -1,5 +1,7 @@
 <?php
 
+require __DIR__.'/finance.php';
+
 use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Response;

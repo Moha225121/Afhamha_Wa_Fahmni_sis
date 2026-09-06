@@ -43,19 +43,19 @@ class AdminOperationsTest extends TestCase
 
     public function test_schedule_conflicts_are_rejected(): void
     {
-        $payload = ['classroom_id' => $this->classroom->id, 'teacher_id' => $this->teacher->id, 'subject_id' => $this->subject->id, 'day_of_week' => 0, 'starts_at' => '08:00', 'ends_at' => '09:00'];
+        $payload = ['classroom_id' => $this->classroom->id, 'teacher_id' => $this->teacher->id, 'subject_id' => $this->subject->id, 'day_of_week' => 0, 'period_number' => 1, 'starts_at' => '08:00', 'ends_at' => '09:00'];
         $this->actingAs($this->admin)->post('/admin/schedules', $payload)->assertRedirect('/admin/schedules');
-        $this->actingAs($this->admin)->from('/admin/schedules/create')->post('/admin/schedules', $payload + ['starts_at' => '08:30', 'ends_at' => '09:30'])->assertSessionHasErrors('starts_at');
+        $this->actingAs($this->admin)->from('/admin/schedules/create')->post('/admin/schedules', $payload + ['starts_at' => '08:30', 'ends_at' => '09:30'])->assertSessionHasErrors('period_number');
         $this->assertDatabaseCount('schedules', 1);
     }
 
-    public function test_admin_can_record_attendance_and_publish_grade(): void
+    public function test_admin_can_record_attendance_and_save_draft_grade(): void
     {
         $this->actingAs($this->admin)->post('/admin/attendance', ['date' => '2026-08-23', 'records' => [$this->student->id => 'present']])->assertSessionHasNoErrors();
         $exam = DB::table('exams')->insertGetId(['title' => 'اختبار', 'subject_id' => $this->subject->id, 'classroom_id' => $this->classroom->id, 'teacher_id' => $this->teacher->id, 'starts_at' => now(), 'duration_minutes' => 30, 'total_score' => 20, 'status' => 'published', 'created_at' => now(), 'updated_at' => now()]);
         $this->actingAs($this->admin)->post('/admin/grades', ['exam_id' => $exam, 'scores' => [$this->student->id => 18]])->assertSessionHasNoErrors();
         $this->assertDatabaseHas('attendance_records', ['student_id' => $this->student->id, 'status' => 'present']);
-        $this->assertDatabaseHas('grades', ['student_id' => $this->student->id, 'score' => 18]);
+        $this->assertDatabaseHas('grades', ['student_id' => $this->student->id, 'score' => 18, 'published_at' => null]);
     }
 
     public function test_library_upload_uses_storage(): void

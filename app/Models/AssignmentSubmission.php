@@ -13,7 +13,7 @@ class AssignmentSubmission extends Model
 
     protected function casts(): array
     {
-        return ['submitted_at' => 'datetime', 'graded_at' => 'datetime'];
+        return ['score' => 'decimal:2', 'submitted_at' => 'datetime', 'graded_at' => 'datetime'];
     }
 
     public function assignment(): BelongsTo

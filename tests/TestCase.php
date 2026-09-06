@@ -13,9 +13,12 @@ abstract class TestCase extends BaseTestCase
         $connection = $app['config']->get('database.default');
         $database = $app['config']->get("database.connections.{$connection}.database");
 
-        if (! $app->environment('testing') || $connection !== 'pgsql' || $database !== 'afhamha_testing') {
+        $isolatedDatabase = ($connection === 'pgsql' && $database === 'afhamha_testing')
+            || ($connection === 'sqlite' && $database === ':memory:');
+
+        if (! $app->environment('testing') || ! $isolatedDatabase) {
             throw new RuntimeException(
-                'Refusing to run application tests outside PostgreSQL database afhamha_testing.',
+                'Refusing to run application tests outside PostgreSQL afhamha_testing or in-memory SQLite.',
             );
         }
 

@@ -16,6 +16,6 @@ class GuardianRequest extends FormRequest
     {
         $g = $this->route('parent');
 
-        return ['name' => ['required', 'string', 'max:255'], 'email' => ['required', 'email', Rule::unique('users')->ignore($g?->user_id)], 'phone' => ['required', 'string', 'max:30'], 'relationship' => ['nullable', 'string', 'max:100'], 'status' => ['required', Rule::in(['active', 'inactive'])], 'password' => [$g ? 'nullable' : 'required', 'string', 'min:8', 'confirmed'], 'student_ids' => ['nullable', 'array'], 'student_ids.*' => ['integer', 'exists:students,id']];
+        return ['name' => ['required', 'string', 'max:255'], 'email' => ['required', 'email', Rule::unique('users')->ignore($g?->user_id)], 'phone' => ['required', 'string', 'max:30'], 'relationship' => ['nullable', 'string', 'max:100'], 'status' => ['required', Rule::in(['active', 'inactive'])], 'password' => ['nullable', 'string', 'min:8', 'confirmed'], 'student_ids' => ['nullable', 'array'], 'student_ids.*' => ['integer', 'exists:students,id']];
     }
 }

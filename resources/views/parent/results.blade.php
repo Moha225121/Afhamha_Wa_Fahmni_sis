@@ -3,6 +3,7 @@
 @section('title', 'النتائج')
 
 @section('content')
+@include('shared.published-results')
     <section class="page-title">
         <p>نتائج الاختبارات المنشورة</p>
         <h1>النتائج</h1>

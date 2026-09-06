@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-#[Fillable(['user_id', 'specialization', 'status'])] class Teacher extends Model
+#[Fillable(['user_id', 'specialization', 'status', 'teacher_number'])] class Teacher extends Model
 {
     use SoftDeletes;
 

@@ -102,6 +102,7 @@ class ParentPortalTest extends TestCase
         $teacherUser = User::factory()->create(['role' => 'teacher', 'status' => 'active']);
         $teacherId = DB::table('teachers')->insertGetId(['user_id' => $teacherUser->id, 'status' => 'active', 'created_at' => now(), 'updated_at' => now()]);
         $examId = DB::table('exams')->insertGetId([
+            'legacy_results_published' => true,
             'title' => 'Unit Exam',
             'subject_id' => $subject->id,
             'classroom_id' => $this->classroom->id,
@@ -188,7 +189,7 @@ class ParentPortalTest extends TestCase
         DB::table('attendance_records')->insert([
             'student_id' => $this->linkedStudent->id,
             'classroom_id' => $this->classroom->id,
-            'date' => '2026-08-23',
+            'date' => now()->toDateString(),
             'status' => 'present',
             'recorded_by' => $teacher->user_id,
             'created_at' => now(),
@@ -210,6 +211,7 @@ class ParentPortalTest extends TestCase
             'submitted_at' => now(),
         ]);
         DB::table('exams')->insert([
+            'legacy_results_published' => true,
             'title' => 'Upcoming Exam',
             'subject_id' => $subject->id,
             'classroom_id' => $this->classroom->id,
@@ -237,6 +239,7 @@ class ParentPortalTest extends TestCase
         $subject = Subject::create(['name' => 'Automatic Results', 'code' => 'AUTO-1', 'stage' => 'Primary', 'status' => 'active']);
         $teacher = $this->teacherForClassroom($this->classroom, $subject);
         $linkedExam = DB::table('exams')->insertGetId([
+            'legacy_results_published' => true,
             'title' => 'Linked Automatic Exam',
             'subject_id' => $subject->id,
             'classroom_id' => $this->classroom->id,
@@ -249,6 +252,7 @@ class ParentPortalTest extends TestCase
             'updated_at' => now(),
         ]);
         $foreignExam = DB::table('exams')->insertGetId([
+            'legacy_results_published' => true,
             'title' => 'Foreign Automatic Exam',
             'subject_id' => $subject->id,
             'classroom_id' => $this->unlinkedStudent->classroom_id,

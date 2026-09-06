@@ -113,7 +113,7 @@ class PublicLoginTest extends TestCase
         $this->assertAuthenticatedAs($supervisor);
     }
 
-    public function test_teacher_attendance_is_saved_to_database_and_preserves_selected_date(): void
+    public function test_legacy_teacher_attendance_endpoint_cannot_write_daily_records(): void
     {
         $teacherUser = User::factory()->create(['role' => 'teacher', 'status' => 'active', 'password' => 'password123']);
         $teacher = Teacher::create(['user_id' => $teacherUser->id, 'specialization' => 'رياضيات', 'status' => 'active']);
@@ -160,13 +160,8 @@ class PublicLoginTest extends TestCase
             'records' => [$student->id => 'late'],
         ]);
 
-        $response->assertRedirect('/teacher/attendance?date=2026-08-15&classroom_id=' . $classroom->id);
-        $this->assertDatabaseHas('attendance_records', [
-            'student_id' => $student->id,
-            'date' => '2026-08-15',
-            'status' => 'late',
-            'classroom_id' => $classroom->id,
-        ]);
+        $response->assertNotFound();
+        $this->assertDatabaseMissing('attendance_records', ['student_id' => $student->id, 'date' => '2026-08-15']);
     }
 
     public function test_teacher_can_open_assignment_creation_form(): void

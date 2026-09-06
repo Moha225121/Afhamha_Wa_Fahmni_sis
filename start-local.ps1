@@ -64,9 +64,28 @@ if (-not $NoBrowser) {
     } -ArgumentList $loginUrl | Out-Null
 }
 
-& $php `
-    -d extension=fileinfo `
-    -d extension=zip `
-    -S ${hostAddress}:$port `
-    -t public `
-    start-local-router.php
+$artisanPath = Join-Path $PSScriptRoot 'artisan'
+$existingScheduler = Get-CimInstance Win32_Process -Filter "Name='php.exe'" -ErrorAction SilentlyContinue |
+    Where-Object { $_.CommandLine -and $_.CommandLine.Contains($artisanPath) -and $_.CommandLine.Contains('schedule:work') }
+$scheduler = $null
+if (-not $existingScheduler) {
+    $scheduler = Start-Process -FilePath $php -ArgumentList @(('"' + $artisanPath + '"'), 'schedule:work', '--no-interaction') `
+        -WorkingDirectory $PSScriptRoot -WindowStyle Hidden -PassThru `
+        -RedirectStandardOutput (Join-Path $PSScriptRoot 'storage\logs\scheduler-output.log') `
+        -RedirectStandardError (Join-Path $PSScriptRoot 'storage\logs\scheduler-error.log')
+}
+Write-Host "Scheduled result publishing and installment reminders are running with the app."
+
+try {
+    & $php `
+        -d extension=fileinfo `
+        -d extension=zip `
+        -S ${hostAddress}:$port `
+        -t public `
+        start-local-router.php
+}
+finally {
+    if ($scheduler -and -not $scheduler.HasExited) {
+        Stop-Process -Id $scheduler.Id -ErrorAction SilentlyContinue
+    }
+}

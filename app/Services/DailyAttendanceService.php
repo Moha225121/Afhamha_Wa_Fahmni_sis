@@ -25,7 +25,8 @@ class DailyAttendanceService
                 $old = $existing?->getAttributes() ?? [];
                 $document = $data['excuse_document'] ?? null;
                 $path = $document instanceof UploadedFile ? $document->store('attendance-excuses', 'private') : $existing?->excuse_document;
-                $attendance = Attendance::updateOrCreate(['student_id'=>$studentId,'date'=>$date], ['classroom_id'=>$classroomId,'status'=>$status,'arrival_time'=>$status->isLate()?($data['arrival_time']??null):null,'late_minutes'=>$status->isLate()?($data['late_minutes']??null):null,'excuse_reason'=>$status->needsExcuse()?($data['excuse_reason']??null):null,'excuse_document'=>$status->needsExcuse()?$path:null,'notes'=>$data['notes']??null,'recorded_by'=>$existing?->recorded_by ?: $supervisor->id,'updated_by'=>$supervisor->id]);
+                $attendance = $existing ?? new Attendance(['student_id'=>$studentId,'date'=>$date]);
+                $attendance->fill(['classroom_id'=>$classroomId,'status'=>$status,'arrival_time'=>$status->isLate()?($data['arrival_time']??null):null,'late_minutes'=>$status->isLate()?($data['late_minutes']??null):null,'excuse_reason'=>$status->needsExcuse()?($data['excuse_reason']??null):null,'excuse_document'=>$status->needsExcuse()?$path:null,'notes'=>$data['notes']??null,'recorded_by'=>$existing?->recorded_by ?: $supervisor->id,'updated_by'=>$supervisor->id])->save();
                 AuditService::record($existing?'updated':'created', 'attendance', $attendance, $old);
             }
         });

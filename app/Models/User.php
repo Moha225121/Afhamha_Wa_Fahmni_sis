@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['name', 'email', 'password', 'role', 'status', 'phone', 'avatar_path', 'last_login_at'])]
+#[Fillable(['name', 'email', 'password', 'role', 'status', 'phone', 'avatar_path', 'last_login_at', 'first_name_en', 'last_name_en', 'school_email_generated', 'financial_permissions'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -19,7 +19,7 @@ class User extends Authenticatable
 
     protected function casts(): array
     {
-        return ['email_verified_at' => 'datetime', 'password' => 'hashed', 'last_login_at' => 'datetime'];
+        return ['financial_permissions' => 'array', 'school_email_generated' => 'boolean', 'email_verified_at' => 'datetime', 'password' => 'hashed', 'last_login_at' => 'datetime'];
     }
 
     public function isAdmin(): bool
@@ -55,6 +55,7 @@ class User extends Authenticatable
     public function hasPermission(string $permission): bool
     {
         $p = config('permissions.roles.'.$this->role, []);
+        if ($this->role === 'supervisor') $p = array_merge($p, array_intersect($this->financial_permissions ?? [], ['finance.view', 'finance.pay', 'finance.reports']));
 
         if (empty($p)) {
             return false;

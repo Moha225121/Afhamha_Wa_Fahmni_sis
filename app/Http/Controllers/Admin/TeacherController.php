@@ -9,6 +9,7 @@ use App\Models\Subject;
 use App\Models\Teacher;
 use App\Models\User;
 use App\Services\AuditService;
+use App\Services\AccountPasswordService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -40,11 +41,11 @@ class TeacherController extends Controller
         return view('admin.teachers.form', compact('teacher', 'assignments') + ['classrooms' => Classroom::all(), 'subjects' => Subject::all()]);
     }
 
-    public function store(TeacherRequest $r): RedirectResponse
+    public function store(TeacherRequest $r, AccountPasswordService $passwords): RedirectResponse
     {
-        $t = DB::transaction(function () use ($r) {
-            $u = User::create($r->only('name', 'email', 'phone', 'password') + ['role' => 'teacher', 'status' => $r->status]);
-            $t = $u->teacher()->create($r->only('specialization', 'status'));
+        $t = DB::transaction(function () use ($r, $passwords) {
+            app(\App\Services\SchoolAccountService::class)->settings(true);
+            $t = app(\App\Services\SchoolAccountService::class)->create('teacher', $r->safe()->only(['name', 'email', 'phone', 'first_name_en', 'last_name_en']) + ['password' => $passwords->forNewAccount($r->validated('password')), 'status' => $r->status], $r->only('specialization', 'status'));
             $this->sync($t, $r->input('assignments', []));
             AuditService::record('created', 'teachers', $t);
 
@@ -57,14 +58,17 @@ class TeacherController extends Controller
     public function update(TeacherRequest $r, Teacher $teacher): RedirectResponse
     {
         DB::transaction(function () use ($r, $teacher) {
+            app(\App\Services\SchoolAccountService::class)->settings(true);
+            $oldUser = $teacher->user->getAttributes();
             $old = $teacher->getAttributes();
-            $d = $r->only('name', 'email', 'phone', 'status');
+            $d = $r->only('name', 'email', 'phone', 'status', 'first_name_en', 'last_name_en');
             if ($r->filled('password')) {
                 $d['password'] = $r->password;
             }$teacher->user->update($d);
             $teacher->update($r->only('specialization', 'status'));
             $this->sync($teacher, $r->input('assignments', []));
             AuditService::record('updated', 'teachers', $teacher, $old);
+            AuditService::record('updated', 'teacher_accounts', $teacher->user, $oldUser);
         });
 
         return redirect()->route('admin.teachers.show', $teacher)->with('success', 'تم تحديث المعلم.');

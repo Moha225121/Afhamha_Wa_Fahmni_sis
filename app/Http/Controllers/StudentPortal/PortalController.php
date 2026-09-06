@@ -39,6 +39,7 @@ class PortalController extends Controller
             'summary' => $this->summaryFor($student),
             'recentGrades' => $this->recentGradesFor($student, 10),
             'automaticResults' => $this->automaticResultsFor($student, 20),
+            'publications' => app(\App\Services\ResultPublicationService::class)->publications($student),
         ]);
     }
 
@@ -112,35 +113,7 @@ class PortalController extends Controller
             ->selectRaw("sum(case when status = 'late' then 1 else 0 end) as late")
             ->first();
 
-        $savedGradeValues = collect();
-        $gradeSheets = DB::table('grade_sheets')
-            ->whereExists(function ($query): void {
-                $query->selectRaw('1')
-                    ->from('teacher_assignments')
-                    ->whereColumn('teacher_assignments.teacher_id', 'grade_sheets.teacher_id')
-                    ->whereColumn('teacher_assignments.classroom_id', 'grade_sheets.classroom_id');
-            })
-            ->where('grade_sheets.classroom_id', $student->classroom_id)
-            ->select('grade_sheets.scores')
-            ->pluck('scores');
-
-        foreach ($gradeSheets as $scores) {
-            $scores = json_decode($scores ?? '{}', true);
-
-            if (is_array($scores) && array_key_exists((string) $student->id, $scores)) {
-                $studentScore = $scores[(string) $student->id];
-
-                if (is_array($studentScore)) {
-                    $studentScore = collect($studentScore)
-                        ->filter(fn ($value): bool => is_numeric($value))
-                        ->average();
-                }
-
-                if (is_numeric($studentScore)) {
-                    $savedGradeValues->push((float) $studentScore);
-                }
-            }
-        }
+        $savedGradeValues = app(\App\Services\ResultPublicationService::class)->visibleResults($student)->filter(fn ($r) => $r->total_score > 0)->map(fn ($r) => $r->score * 100 / $r->total_score);
 
         return [
             'attendance_total' => (int) ($attendance->total ?? 0),
@@ -154,34 +127,12 @@ class PortalController extends Controller
 
     private function recentGradesFor(Student $student, int $limit): Collection
     {
-        return DB::table('grades')
-            ->join('exams', 'grades.exam_id', '=', 'exams.id')
-            ->join('subjects', 'exams.subject_id', '=', 'subjects.id')
-            ->where('grades.student_id', $student->id)
-            ->whereNotNull('grades.published_at')
-            ->select([
-                'grades.score',
-                'grades.published_at',
-                'exams.title',
-                'exams.total_score',
-                'subjects.name as subject',
-            ])
-            ->latest('grades.published_at')
-            ->limit($limit)
-            ->get();
+        return app(\App\Services\ResultPublicationService::class)->visibleResults($student)->take($limit)->values();
     }
 
     private function automaticResultsFor(Student $student, int $limit): Collection
     {
-        return DB::table('exam_attempts')
-            ->join('exams', 'exam_attempts.exam_id', '=', 'exams.id')
-            ->join('subjects', 'exams.subject_id', '=', 'subjects.id')
-            ->where('exam_attempts.student_id', $student->id)
-            ->whereIn('exam_attempts.status', ['submitted', 'pending_review'])
-            ->select(['exam_attempts.id', 'exam_attempts.score', 'exam_attempts.maximum_score', 'exam_attempts.percentage', 'exam_attempts.status', 'exam_attempts.submitted_at', 'exams.title', 'subjects.name as subject'])
-            ->latest('exam_attempts.submitted_at')
-            ->limit($limit)
-            ->get();
+        return collect();
     }
 
     private function subjectsFor(Student $student): Collection

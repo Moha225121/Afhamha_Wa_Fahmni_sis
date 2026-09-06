@@ -226,26 +226,14 @@ class OperationsController extends Controller
             ->where('exams.id', $d['exam_id'])
             ->select('exams.*', 'subjects.name as subject')
             ->first();
-        $publishedStudentIds = DB::transaction(function () use ($d, $exam) {
-            $studentIds = [];
+        DB::transaction(function () use ($d, $exam): void {
             foreach ($d['scores'] as $id => $score) {
-                if ($score === null) {
-                    continue;
-                }abort_if((float) $score > (float) $exam->total_score, 422, 'الدرجة تتجاوز الدرجة الكلية.');
-                DB::table('grades')->updateOrInsert(['exam_id' => $exam->id, 'student_id' => $id], ['score' => $score, 'published_at' => now(), 'created_at' => now(), 'updated_at' => now()]);
-                $studentIds[] = $id;
-            }AuditService::record('published', 'grades');
-
-            return $studentIds;
-        });
-
-        Student::with('user')->whereIn('id', $publishedStudentIds)->get()->each(function (Student $student) use ($notifications, $exam): void {
-            $notifications->sendToGuardians($student, [
-                'title' => 'تم نشر نتيجة جديدة',
-                'body' => 'تم نشر نتيجة '.$exam->title.' في مادة '.$exam->subject.' للطالب '.$student->user->name.'.',
-                'url' => route('parent.results', ['student' => $student->id]),
-                'category' => 'grade',
-            ]);
+                if ($score === null) continue;
+                abort_unless(Student::whereKey($id)->where('classroom_id', $exam->classroom_id)->exists(), 422, 'الطالب خارج صف الاختبار.');
+                abort_if((float) $score > (float) $exam->total_score, 422, 'الدرجة تتجاوز الدرجة الكلية.');
+                DB::table('grades')->updateOrInsert(['exam_id' => $exam->id, 'student_id' => $id], ['score' => $score, 'published_at' => null, 'created_at' => now(), 'updated_at' => now()]);
+            }
+            AuditService::record('saved_draft', 'grades');
         });
 
         return back()->with('success', 'تم حفظ الدرجات.');
@@ -293,10 +281,10 @@ class OperationsController extends Controller
 
     public function userUpdate(Request $r, User $user): RedirectResponse
     {
-        $d = $r->validate(['role' => ['required', Rule::in(['admin', 'supervisor', 'teacher', 'student', 'parent'])], 'status' => ['required', Rule::in(['active', 'inactive'])], 'classroom_ids'=>['nullable','array'],'classroom_ids.*'=>['integer','exists:classrooms,id']]);
+        $d = $r->validate(['role' => ['required', Rule::in(['admin', 'supervisor', 'teacher', 'student', 'parent', 'financial_officer'])], 'status' => ['required', Rule::in(['active', 'inactive'])], 'financial_permissions'=>['nullable','array'], 'financial_permissions.*'=>[Rule::in(['finance.view','finance.pay','finance.reports'])], 'classroom_ids'=>['nullable','array'],'classroom_ids.*'=>['integer','exists:classrooms,id']]);
         abort_if($user->is($r->user()) && $d['status'] === 'inactive', 422, 'لا يمكنك تعطيل حسابك.');
         $old = $user->getAttributes();
-        $user->update(collect($d)->only(['role','status'])->all());
+        $user->update(collect($d)->only(['role','status'])->all() + ['financial_permissions' => $d['role'] === 'supervisor' ? ($d['financial_permissions'] ?? []) : null]);
         if ($d['role'] === 'supervisor') {
             $user->supervisedClassrooms()->sync($d['classroom_ids'] ?? []);
         } else {

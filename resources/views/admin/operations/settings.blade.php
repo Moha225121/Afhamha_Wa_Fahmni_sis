@@ -1,6 +1,18 @@
 @extends('admin.layout')
 @section('title','إعدادات المدرسة')
 @section('content')
+<p><a class="btn primary" href="{{ route('admin.accounts.index') }}">إعدادات الترقيم والحسابات والبريد المدرسي</a></p>
+<form class="form-card" method="post" action="{{ route('admin.settings.account-password.update') }}">
+    @csrf @method('put')
+    <h2>كلمة المرور الافتراضية للحسابات الجديدة</h2>
+    <p class="muted">تُستخدم عند إضافة طالب أو معلم أو ولي أمر أو مشرف وترك كلمة المرور فارغة. يبقى الرمز ثابتًا حتى تغيّره الإدارة، ويؤثر التغيير على الحسابات التي تُنشأ لاحقًا فقط.</p>
+    <p class="muted">للحفاظ على خصوصية الرمز، لا تُعرض قيمته المحفوظة. أدخل رمزًا جديدًا لتغييره.</p>
+    <div class="form-grid">
+        <label>كلمة المرور الافتراضية الجديدة<input type="password" name="password" dir="ltr" minlength="7" maxlength="72" required autocomplete="new-password"></label>
+        <label>تأكيد كلمة المرور<input type="password" name="password_confirmation" dir="ltr" minlength="7" maxlength="72" required autocomplete="new-password"></label>
+    </div>
+    <button class="btn primary" type="submit">حفظ كلمة المرور الافتراضية</button>
+</form>
 <form class="form-card" method="post" action="{{ route('admin.settings.update') }}" enctype="multipart/form-data">@csrf @method('put')
 <div class="form-grid">
 <label>اسم المدرسة<input name="school_name" value="{{ old('school_name',$settings['school_name']??'مدرسة النسبية') }}" required></label><label>الهاتف<input name="school_phone" value="{{ old('school_phone',$settings['school_phone']??'') }}"></label><label>البريد<input type="email" name="school_email" value="{{ old('school_email',$settings['school_email']??'') }}"></label><label>اسم المنصة<input value="افهمها وفهمني" disabled><small>اسم المنصة ثابت ولا يمكن تغييره.</small></label><label>شعار المدرسة<input type="file" name="school_logo" accept=".png,.jpg,.jpeg,.webp,.svg"><small>PNG أو JPG أو WEBP أو SVG، بحد أقصى 2MB.</small></label><label>المنطقة الزمنية<input name="timezone" value="{{ old('timezone',$settings['timezone']??'Africa/Tripoli') }}" required></label><label class="wide">العنوان<textarea name="school_address">{{ old('school_address',$settings['school_address']??'') }}</textarea></label>

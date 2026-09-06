@@ -6,6 +6,7 @@ use App\Http\Controllers\GuardianPortal\PortalController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('parent')->name('parent.')->middleware(['auth', 'parent'])->group(function (): void {
+    Route::get('/finance', [\App\Http\Controllers\FinanceController::class, 'parent'])->name('finance');
     Route::get('/', fn () => redirect()->route('parent.dashboard'));
     Route::get('/dashboard', [PortalController::class, 'dashboard'])->name('dashboard');
     Route::get('/children', [PortalController::class, 'children'])->name('children.index');

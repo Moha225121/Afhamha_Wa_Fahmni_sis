@@ -67,6 +67,7 @@ class PortalController extends Controller
             'selectedStudent' => $selectedStudent,
             'summary' => $this->summaryFor($selectedStudent),
             'recentGrades' => $this->recentGradesFor($selectedStudent, 30),
+            'publications' => $selectedStudent ? app(\App\Services\ResultPublicationService::class)->publications($selectedStudent) : collect(),
         ]);
     }
 
@@ -143,7 +144,7 @@ class PortalController extends Controller
                 ->where('exams.classroom_id', $selectedStudent->classroom_id)
                 ->whereIn('exams.status', ['published', 'scheduled'])
                 ->select([
-                    'exams.id', 'exams.title', 'exams.starts_at', 'exams.duration_minutes', 'exams.total_score',
+                    'exams.id', 'exams.status', 'exams.exam_period_id', 'exams.legacy_results_published', 'exams.title', 'exams.starts_at', 'exams.duration_minutes', 'exams.total_score',
                     'subjects.name as subject', 'grades.score', 'grades.published_at as grade_published_at',
                     'automatic_attempts.status as automatic_status',
                     'automatic_attempts.score as automatic_score',
@@ -151,7 +152,12 @@ class PortalController extends Controller
                     'automatic_attempts.percentage as automatic_percentage',
                 ])
                 ->orderBy('exams.starts_at')
-                ->get();
+                ->get()->map(function ($exam) {
+                    if (!app(\App\Services\ResultPublicationService::class)->legacyAttemptVisible($exam)) {
+                        $exam->score = null; $exam->automatic_score = null; $exam->automatic_percentage = null; $exam->grade_published_at = null;
+                    }
+                    return $exam;
+                });
         }
 
         return view('parent.exams', [
@@ -259,45 +265,7 @@ class PortalController extends Controller
 
     private function publishedResultsFor(?Student $student): Collection
     {
-        if (! $student) {
-            return collect();
-        }
-
-        $manual = DB::table('grades')
-            ->join('exams', 'grades.exam_id', '=', 'exams.id')
-            ->join('subjects', 'exams.subject_id', '=', 'subjects.id')
-            ->where('grades.student_id', $student->id)
-            ->where('exams.status', 'published')
-            ->whereNotNull('grades.published_at')
-            ->select([
-                'exams.id as exam_id', 'grades.score', 'grades.published_at', 'exams.title',
-                'exams.total_score', 'subjects.name as subject',
-            ])
-            ->get();
-
-        $automatic = DB::table('exam_attempts')
-            ->join('exams', 'exam_attempts.exam_id', '=', 'exams.id')
-            ->join('subjects', 'exams.subject_id', '=', 'subjects.id')
-            ->where('exam_attempts.student_id', $student->id)
-            ->where('exam_attempts.status', 'submitted')
-            ->whereNotNull('exam_attempts.percentage')
-            ->where('exams.status', 'published')
-            ->when(
-                $manual->isNotEmpty(),
-                fn ($query) => $query->whereNotIn('exam_attempts.exam_id', $manual->pluck('exam_id')),
-            )
-            ->select([
-                'exams.id as exam_id', 'exam_attempts.score', 'exam_attempts.submitted_at as published_at',
-                'exams.title', 'exam_attempts.maximum_score as total_score', 'subjects.name as subject',
-            ])
-            ->orderByDesc('exam_attempts.id')
-            ->get()
-            ->unique('exam_id');
-
-        return $manual
-            ->concat($automatic)
-            ->sortByDesc(fn ($result) => $result->published_at ? Carbon::parse($result->published_at)->getTimestamp() : 0)
-            ->values();
+        return app(\App\Services\ResultPublicationService::class)->visibleResults($student);
     }
 
     /** @param Collection<int, Student> $children */

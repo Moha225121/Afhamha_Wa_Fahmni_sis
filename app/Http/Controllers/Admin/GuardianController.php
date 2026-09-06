@@ -8,6 +8,7 @@ use App\Models\Guardian;
 use App\Models\Student;
 use App\Models\User;
 use App\Services\AuditService;
+use App\Services\AccountPasswordService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -37,10 +38,11 @@ class GuardianController extends Controller
         return view('admin.parents.form', compact('parent') + ['students' => Student::with('user')->get()]);
     }
 
-    public function store(GuardianRequest $r): RedirectResponse
+    public function store(GuardianRequest $r, AccountPasswordService $passwords): RedirectResponse
     {
-        $g = DB::transaction(function () use ($r) {
-            $u = User::create($r->only('name', 'email', 'phone', 'password') + ['role' => 'parent', 'status' => $r->status]);
+        $g = DB::transaction(function () use ($r, $passwords) {
+            app(\App\Services\SchoolAccountService::class)->settings(true);
+            $u = User::create($r->only('name', 'email', 'phone') + ['password' => $passwords->forNewAccount($r->validated('password')), 'role' => 'parent', 'status' => $r->status]);
             $g = $u->guardian()->create($r->only('relationship', 'status'));
             $g->students()->sync($r->input('student_ids', []));
             AuditService::record('created', 'parents', $g);

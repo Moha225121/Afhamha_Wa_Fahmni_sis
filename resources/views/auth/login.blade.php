@@ -19,7 +19,7 @@
         @csrf
         <label>
             البريد الإلكتروني
-            <input name="email" type="email" value="{{ old('email') }}" required autofocus autocomplete="email">
+            <input name="email" type="text" inputmode="email" value="{{ old('email') }}" required autofocus autocomplete="email">
         </label>
         <label>
             كلمة المرور

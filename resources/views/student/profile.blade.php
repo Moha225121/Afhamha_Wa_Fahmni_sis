@@ -2,7 +2,7 @@
 
 @section('title', 'ملف الطالب')
 
-@section('content')
+@section('content')@if(app(\App\Services\SchoolAccountService::class)->settings()['student_finance_visible'])<p><a href="{{ route('student.finance') }}">الحالة المالية والإيصالات</a></p>@endif
     <section class="student-profile">
         <span class="large-avatar">{{ mb_substr($student->user->name, 0, 1) }}</span>
         <h1>{{ $student->user->name }}</h1>
