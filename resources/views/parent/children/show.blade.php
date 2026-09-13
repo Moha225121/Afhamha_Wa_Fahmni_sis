@@ -2,7 +2,7 @@
 
 @section('title', $student->user->name)
 
-@section('content')<p><a href="{{ route('parent.finance',['student'=>$student->id]) }}">الحالة المالية والإيصالات</a></p>
+@section('content')<p><a class="btn secondary" href="{{ route('parent.students.analysis', $student) }}">تحليل مستوى الطالب وخطة الدعم بالذكاء الاصطناعي</a></p><p><a href="{{ route('parent.finance',['student'=>$student->id]) }}">الحالة المالية والإيصالات</a></p>
     <section class="student-profile">
         <span class="large-avatar">{{ mb_substr($student->user->name, 0, 1) }}</span>
         <h1>{{ $student->user->name }}</h1>

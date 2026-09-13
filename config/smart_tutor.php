@@ -1,6 +1,13 @@
 <?php
 
 return [
+    'gemini' => [
+        'api_key' => env('GEMINI_API_KEY', ''),
+        'model' => env('GEMINI_MODEL', 'gemini-3.5-flash'),
+        'timeout_seconds' => 60,
+        'max_output_tokens' => 4096,
+    ],
+
     'input' => [
         'min_characters' => 2,
         'max_characters' => 4000,

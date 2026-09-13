@@ -6,6 +6,8 @@ use App\Http\Controllers\GuardianPortal\PortalController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('parent')->name('parent.')->middleware(['auth', 'parent'])->group(function (): void {
+    Route::get('/students/{student}/analysis', \App\Http\Controllers\StudentLevelAnalysisController::class)->name('students.analysis');
+    Route::post('/students/{student}/analysis', \App\Http\Controllers\StudentLevelAnalysisController::class)->middleware('throttle:6,1')->name('students.analysis.generate');
     Route::get('/finance', [\App\Http\Controllers\FinanceController::class, 'parent'])->name('finance');
     Route::get('/', fn () => redirect()->route('parent.dashboard'));
     Route::get('/dashboard', [PortalController::class, 'dashboard'])->name('dashboard');

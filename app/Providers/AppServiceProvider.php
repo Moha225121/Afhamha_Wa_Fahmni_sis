@@ -3,11 +3,11 @@
 namespace App\Providers;
 
 use App\Contracts\SmartTutorGateway;
-use App\Services\UnavailableSmartTutorGateway;
+use App\Services\GeminiSmartTutorGateway;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -19,7 +19,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->singleton(SmartTutorGateway::class, UnavailableSmartTutorGateway::class);
+        $this->app->singleton(SmartTutorGateway::class, GeminiSmartTutorGateway::class);
     }
 
     /**
@@ -28,7 +28,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         View::composer('*', function ($view): void {
-            $settings = Schema::hasTable('settings') ? DB::table('settings')->pluck('value','key') : collect();
+            $settings = Schema::hasTable('settings') ? DB::table('settings')->pluck('value', 'key') : collect();
             $view->with('schoolBranding', [
                 'platform_name' => 'افهمها وفهمني',
                 'school_name' => $settings['school_name'] ?? 'إدارة المدرسة',
