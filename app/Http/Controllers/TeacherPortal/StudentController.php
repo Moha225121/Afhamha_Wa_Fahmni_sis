@@ -130,15 +130,8 @@ class StudentController extends Controller
                 if ($record && !empty($record->scores)) {
                     $decoded = json_decode($record->scores, true);
                     if (is_array($decoded) && array_key_exists((string)$studentId, $decoded)) {
-                        $v = (float) $decoded[(string)$studentId];
-                        // Normalize stored value: if fraction (0..1) -> percent; if mistakenly scaled (>100) divide by 100 until reasonable
-                        if ($v > 0 && $v <= 1) {
-                            $v = $v * 100.0;
-                        }
-                        while ($v > 100) {
-                            $v = $v / 100.0;
-                        }
-                        return round($v, 1);
+                        // Saved sheet scores are already percentages out of 100.
+                        return round((float) $decoded[(string)$studentId], 1);
                     }
                 }
             }

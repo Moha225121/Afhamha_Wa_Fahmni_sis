@@ -24,7 +24,7 @@
         </div>
         <div>
             <span>الحالة</span>
-            <strong>{{ $student->status }}</strong>
+            <strong>{{ $student->status === 'active' ? 'نشط' : 'موقوف' }}</strong>
         </div>
     </section>
 
@@ -57,7 +57,7 @@
                     <strong>{{ $latestAttendance->date }}</strong>
                     <span>{{ $latestAttendance->notes ?? 'بدون ملاحظات' }}</span>
                 </div>
-                <b>{{ $latestAttendance->status }}</b>
+                <b>{{ \App\Enums\AttendanceStatus::tryFrom($latestAttendance->status)?->label() ?? 'غير محدد' }}</b>
             </div>
         @else
             <p class="muted-line">لا يوجد حضور مسجل لهذا الطالب.</p>

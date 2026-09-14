@@ -44,7 +44,7 @@ class DashboardController extends Controller
 
             return (object) [
                 'date' => $date,
-                'label' => now()->subDays($daysAgo)->translatedFormat('D'),
+                'label' => now()->subDays($daysAgo)->locale('ar')->translatedFormat('D'),
                 'rate' => $total ? round($present * 100 / $total) : 0,
             ];
         });

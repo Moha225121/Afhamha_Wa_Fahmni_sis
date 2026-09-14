@@ -17,7 +17,7 @@ class AuthController
     public function store(Request $request): RedirectResponse
     {
         $credentials = $request->validate(['email' => ['required', 'string', 'max:254'], 'password' => ['required', 'string']]);
-        if (! Auth::attempt($credentials, $request->boolean('remember'))) {
+        if (! Auth::attempt($credentials + ['status' => 'active'], $request->boolean('remember'))) {
             return back()->withErrors(['email' => 'بيانات الدخول غير صحيحة.'])->onlyInput('email');
         } $request->session()->regenerate();
         $request->user()->update(['last_login_at' => now()]);

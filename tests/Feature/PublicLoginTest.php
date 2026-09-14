@@ -19,6 +19,15 @@ class PublicLoginTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_inactive_account_cannot_start_an_authenticated_session(): void
+    {
+        $user = User::factory()->create(['status' => 'inactive', 'password' => Hash::make('password123')]);
+        $this->from('/login')->post('/login', ['email' => $user->email, 'password' => 'password123'])
+            ->assertRedirect('/login')->assertSessionHasErrors('email');
+        $this->assertGuest();
+        $this->assertNull($user->fresh()->last_login_at);
+    }
+
     public function test_public_login_page_serves_all_main_portals(): void
     {
         $this->get('/login')

@@ -7,7 +7,7 @@
     <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="any">
     <link rel="apple-touch-icon" href="{{ asset('icons/parent-icon-192.png') }}">
     <link rel="stylesheet" href="{{ asset('css/admin.css') }}?v=login-style-1">
-    @include('shared.branding-style')
+    @include('shared.branding-style')@include('shared.portal-assets')
 </head>
 <body class="login-page">
 <main class="login-card">

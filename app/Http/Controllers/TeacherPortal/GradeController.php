@@ -115,6 +115,7 @@ class GradeController extends Controller
             'column_scores.*' => ['nullable', 'array'],
             'column_scores.*.*' => ['nullable', 'numeric', 'min:0', 'max:100'],
             'sheet_columns' => ['nullable', 'array'],
+            'sheet_columns.*.key' => ['nullable', 'string', 'max:100', 'regex:/^[a-zA-Z0-9_-]+$/', 'distinct'],
             'sheet_columns.*.title' => ['nullable', 'string', 'max:255'],
             'sheet_columns.*.weight' => ['nullable', 'integer', 'min:1', 'max:100'],
             'sheet_columns.*.max_score' => ['nullable', 'numeric', 'gt:0', 'max:100'],
@@ -165,15 +166,8 @@ class GradeController extends Controller
             }
 
             abort_unless($classroomStudentIds->contains((int) $studentId), 403, 'الطالب ليس ضمن هذا الصف.');
-            $val = (float) $score;
-            if ($val > 0 && $val <= 1) {
-                $val = $val * 100.0;
-            }
-            while ($val > 100) {
-                $val = $val / 100.0;
-            }
-
-            $scoresToSave[(int)$studentId] = round($val, 2);
+            // The client submits percentages out of 100, including values below 1.
+            $scoresToSave[(int)$studentId] = round((float) $score, 2);
         }
 
         foreach ($data['column_scores'] ?? [] as $columnKey => $studentScores) {

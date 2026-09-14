@@ -13,7 +13,7 @@
     <link rel="icon" href="{{ asset('icons/parent-icon.svg') }}" type="image/svg+xml">
     <link rel="apple-touch-icon" href="{{ asset('icons/parent-icon-192.png') }}">
     <link rel="stylesheet" href="{{ asset('css/parent.css') }}?v=portal-style-1">
-    @include('shared.branding-style')
+    @include('shared.branding-style')@include('shared.portal-assets')
     <script src="{{ asset('js/enhanced-selects.js') }}" defer></script>
 </head>
 <body>
