@@ -773,7 +773,7 @@ nav[role="navigation"] span[aria-disabled="true"] {
     overflow: hidden;
     isolation: isolate;
     background:
-        linear-gradient(135deg, #eef6f3 0%, #dcefeb 42%, #fff7e7 100%);
+        linear-gradient(135deg, #ffffff 0%, #f1f2f5 48%, #fffdf0 100%);
 }
 
 .login-page::before {
@@ -782,8 +782,8 @@ nav[role="navigation"] span[aria-disabled="true"] {
     inset: 0;
     z-index: -1;
     background:
-        linear-gradient(120deg, transparent 0 18%, rgba(15, 118, 110, .1) 18% 32%, transparent 32% 100%),
-        linear-gradient(60deg, transparent 0 56%, rgba(242, 140, 40, .16) 56% 68%, transparent 68% 100%);
+        linear-gradient(120deg, transparent 0 18%, rgba(16, 22, 50, .18) 18% 32%, transparent 32% 100%),
+        linear-gradient(60deg, transparent 0 56%, rgba(239, 215, 92, .3) 56% 68%, transparent 68% 100%);
 }
 
 .login-card {
