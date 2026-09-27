@@ -310,7 +310,7 @@ class OperationsController extends Controller
         $d = $r->validate([
             'school_name' => ['required','string','max:255'], 'school_phone' => ['nullable','string','max:30'], 'school_email' => ['nullable','email'], 'school_address' => ['nullable','string'],
             'school_logo' => ['nullable','image','mimes:png,jpg,jpeg,webp,svg','max:2048'],
-            'theme_color' => ['required', Rule::in(['#1239B3','#078DB5','#008C95','#00B978','#6D4AFF','#102A43'])],
+            'theme_color' => ['required', Rule::in(['#101632','#1A2346','#E6C52A','#1239B3','#078DB5','#008C95','#00B978','#6D4AFF','#102A43'])],
             'timezone' => ['required','timezone'], 'academic_year_name' => ['required','string','max:30'], 'academic_year_starts_at' => ['required','date'], 'academic_year_ends_at' => ['required','date','after:academic_year_starts_at'],
             'periods_sunday' => ['required','integer','min:1','max:12'], 'periods_monday' => ['required','integer','min:1','max:12'], 'periods_tuesday' => ['required','integer','min:1','max:12'], 'periods_wednesday' => ['required','integer','min:1','max:12'], 'periods_thursday' => ['required','integer','min:1','max:12'],
             'break_after_period' => ['required','integer','min:1','max:11'], 'break_duration_minutes' => ['required','integer','min:5','max:120'],
