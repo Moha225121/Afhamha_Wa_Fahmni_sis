@@ -1,0 +1,1 @@
+@extends('admin.layout') @section('title',$announcement->title) @section('content')<div class="panel"><p>{{ $announcement->content }}</p><p class="muted">الجمهور: {{ $announcement->audience }}</p></div>@endsection

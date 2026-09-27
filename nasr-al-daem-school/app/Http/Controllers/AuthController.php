@@ -1,0 +1,51 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
+
+class AuthController
+{
+    public function create(): View
+    {
+        return view('auth.login');
+    }
+
+    public function store(Request $request): RedirectResponse
+    {
+        $credentials = $request->validate(['email' => ['required', 'string', 'max:254'], 'password' => ['required', 'string']]);
+        if (! Auth::attempt($credentials + ['status' => 'active'], $request->boolean('remember'))) {
+            return back()->withErrors(['email' => 'بيانات الدخول غير صحيحة.'])->onlyInput('email');
+        } $request->session()->regenerate();
+        if ($request->user()->role === 'financial_officer') {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+            return back()->withErrors(['email' => 'هذا النوع من الحسابات لم يعد متاحًا.'])->onlyInput('email');
+        }
+        $request->user()->update(['last_login_at' => now()]);
+
+        $fallback = match (true) {
+            $request->user()->isParent() => route('parent.dashboard'),
+            $request->user()->isStudent() => route('student.dashboard'),
+            $request->user()->isTeacher() => route('teacher.dashboard'),
+            $request->user()->isSupervisor() => route('supervisor.dashboard'),
+            default => route('admin.dashboard'),
+        };
+
+        // Avoid stale intended URLs sending a role into another role's portal.
+        return redirect()->to($fallback);
+    }
+
+    public function destroy(Request $request): RedirectResponse
+    {
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()->route('login');
+    }
+}
