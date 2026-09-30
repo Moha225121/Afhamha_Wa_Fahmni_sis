@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\LibraryCatalogController;
 use App\Http\Controllers\StudentPortal\AcademicController;
 use App\Http\Controllers\StudentPortal\EducationController;
 use App\Http\Controllers\StudentPortal\PortalController;
@@ -13,8 +14,10 @@ Route::prefix('student')->name('student.')->middleware(['auth', 'student'])->gro
     Route::get('/subjects/{subject}/lessons', [EducationController::class, 'lessons'])->whereNumber('subject')->name('lessons.index');
     Route::get('/subjects/{subject}/lessons/{lesson}', [EducationController::class, 'lesson'])->whereNumber(['subject', 'lesson'])->name('lessons.show');
     Route::get('/subjects/{subject}', [EducationController::class, 'subject'])->whereNumber('subject')->name('subjects.show');
-    Route::get('/library', [EducationController::class, 'library'])->name('library.index');
-    Route::get('/library/{resource}/download', [EducationController::class, 'downloadResource'])->whereNumber('resource')->name('library.download');
+    Route::get('/library', [LibraryCatalogController::class, 'index'])->name('library.index');
+    Route::get('/library/{resource}/read', [LibraryCatalogController::class, 'read'])->whereNumber('resource')->name('library.read');
+    Route::get('/library/{resource}/file', [LibraryCatalogController::class, 'file'])->whereNumber('resource')->name('library.file');
+    Route::get('/library/{resource}/download', [LibraryCatalogController::class, 'download'])->whereNumber('resource')->name('library.download');
     Route::get('/subjects/{subject}/lessons/{lesson}/attachments/{attachment}', [EducationController::class, 'downloadAttachment'])->whereNumber(['subject', 'lesson', 'attachment'])->name('lessons.attachments.download');
     Route::get('/tutor', [TutorController::class, 'index'])->name('tutor.index');
     Route::post('/tutor/conversations', [TutorController::class, 'storeConversation'])->middleware('throttle:smart-tutor-conversations')->name('tutor.conversations.store');

@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\Admin\SubjectController;
 use App\Http\Controllers\Admin\TeacherController;
 use App\Http\Controllers\Admin\SupervisorController;
+use App\Http\Controllers\LibraryCatalogController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function (): void {
@@ -41,6 +42,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::get('grades', [OperationsController::class, 'grades'])->name('grades.index');
     Route::post('grades', [OperationsController::class, 'gradesStore'])->name('grades.store');
     Route::get('library', [OperationsController::class, 'library'])->name('library.index');
+    Route::get('library/{resource}/read', [LibraryCatalogController::class, 'read'])->whereNumber('resource')->name('library.read');
+    Route::get('library/{resource}/file', [LibraryCatalogController::class, 'file'])->whereNumber('resource')->name('library.file');
+    Route::get('library/{resource}/download', [LibraryCatalogController::class, 'download'])->whereNumber('resource')->name('library.download');
     Route::post('library', [OperationsController::class, 'libraryStore'])->name('library.store');
     Route::delete('library/{id}', [OperationsController::class, 'libraryDestroy'])->name('library.destroy');
     Route::get('users', [OperationsController::class, 'users'])->name('users.index');

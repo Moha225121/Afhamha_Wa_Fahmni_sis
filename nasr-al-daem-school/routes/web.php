@@ -19,3 +19,4 @@ require __DIR__.'/teacher.php';
 require __DIR__.'/parent.php';
 require __DIR__.'/supervisor.php';
 require __DIR__.'/admin.php';
+require __DIR__.'/library-uploads.php';
