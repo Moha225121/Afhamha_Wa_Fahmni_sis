@@ -9,11 +9,15 @@ use App\Http\Requests\ScheduleRequest;
 use App\Models\AcademicYear;
 use App\Models\AuditLog;
 use App\Models\Classroom;
+use App\Models\LibraryResource;
 use App\Models\Student;
 use App\Models\Subject;
 use App\Models\Teacher;
 use App\Models\User;
 use App\Services\AuditService;
+use App\Services\LibraryBookNaming;
+use App\Services\LibraryCatalogService;
+use App\Services\LibraryUploadService;
 use App\Services\ParentNotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -239,21 +243,55 @@ class OperationsController extends Controller
         return back()->with('success', 'تم حفظ الدرجات.');
     }
 
-    public function library(): View
+    public function library(Request $request, LibraryCatalogService $catalog): View
     {
-        return view('admin.operations.library', ['rows' => DB::table('library_resources')->latest()->paginate(15), 'subjects' => Subject::all(), 'classrooms' => Classroom::all()]);
+        return view('admin.operations.library', $catalog->data($request, $request->user()) + ['subjects' => Subject::all(), 'classrooms' => Classroom::all()]);
     }
 
     public function libraryStore(LibraryResourceRequest $r): RedirectResponse
     {
-        $isPublic = $r->boolean('is_public');
-        $disk = $isPublic ? 'public' : 'local';
-        $path = $r->file('file')->store('library', $disk);
+        $file = $r->file('file');
+        $data = $r->safe()->except(['file', 'upload_id', 'is_public']);
+        if (empty($data['subject_name']) && ! empty($data['subject_id'])) {
+            $data['subject_name'] = Subject::find($data['subject_id'])?->name;
+        }
+        $data = array_replace($data, app(LibraryBookNaming::class)->metadata($file->getClientOriginalName(), $data));
+        $hash = hash_file('sha256', $file->getRealPath());
+        $existing = LibraryResource::where('sha256', $hash)->first();
+        if ($existing) {
+            if ($data['audience'] === 'teachers' && $existing->audience !== 'teachers') {
+                $existing->update(['audience' => 'teachers', 'book_type' => $data['book_type']]);
+            }
+            if ($r->filled('upload_id')) {
+                app(LibraryUploadService::class)->discard($r->input('upload_id'), $r->user()->id);
+            }
 
-        DB::table('library_resources')->insert($r->safe()->except(['file', 'is_public']) + ['file_path' => $path, 'disk' => $disk, 'is_public' => $isPublic, 'status' => 'active', 'created_by' => $r->user()->id, 'created_at' => now(), 'updated_at' => now()]);
-        AuditService::record('created', 'library');
+            return back()->with('success', 'هذا الملف موجود بالفعل في المكتبة؛ لم تُنشأ نسخة مكررة.');
+        }
+        $path = $file->storeAs('library', $hash.'.'.strtolower($file->getClientOriginalExtension()), 'local');
+        if (! $path) {
+            throw new \RuntimeException('Unable to store library file.');
+        }
+        try {
+            DB::transaction(function () use ($data, $path, $r, $hash, $file): void {
+                LibraryResource::create($data + [
+                    'file_path' => $path, 'disk' => 'local', 'is_public' => $r->boolean('is_public'),
+                    'status' => 'active', 'created_by' => $r->user()->id, 'sha256' => $hash,
+                    'file_size' => $file->getSize(), 'original_name' => $file->getClientOriginalName(), 'mime_type' => $file->getMimeType(),
+                ]);
+                AuditService::record('created', 'library');
+            });
+        } catch (\Throwable $error) {
+            if (! LibraryResource::where('file_path', $path)->exists()) {
+                Storage::disk('local')->delete($path);
+            }
+            throw $error;
+        }
+        if ($r->filled('upload_id')) {
+            app(LibraryUploadService::class)->discard($r->input('upload_id'), $r->user()->id);
+        }
 
-        return back()->with('success', 'تم رفع المورد.');
+        return back()->with('success', 'تمت إضافة الكتاب وفهرسته في المكتبة.');
     }
 
     public function libraryDestroy(int $id): RedirectResponse
