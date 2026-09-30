@@ -281,10 +281,10 @@ class OperationsController extends Controller
 
     public function userUpdate(Request $r, User $user): RedirectResponse
     {
-        $d = $r->validate(['role' => ['required', Rule::in(['admin', 'supervisor', 'teacher', 'student', 'parent', 'financial_officer'])], 'status' => ['required', Rule::in(['active', 'inactive'])], 'financial_permissions'=>['nullable','array'], 'financial_permissions.*'=>[Rule::in(['finance.view','finance.pay','finance.reports'])], 'classroom_ids'=>['nullable','array'],'classroom_ids.*'=>['integer','exists:classrooms,id']]);
+        $d = $r->validate(['role' => ['required', Rule::in(['admin', 'supervisor', 'teacher', 'student', 'parent'])], 'status' => ['required', Rule::in(['active', 'inactive'])], 'classroom_ids'=>['nullable','array'],'classroom_ids.*'=>['integer','exists:classrooms,id']]);
         abort_if($user->is($r->user()) && $d['status'] === 'inactive', 422, 'لا يمكنك تعطيل حسابك.');
         $old = $user->getAttributes();
-        $user->update(collect($d)->only(['role','status'])->all() + ['financial_permissions' => $d['role'] === 'supervisor' ? ($d['financial_permissions'] ?? []) : null]);
+        $user->update(collect($d)->only(['role','status'])->all());
         if ($d['role'] === 'supervisor') {
             $user->supervisedClassrooms()->sync($d['classroom_ids'] ?? []);
         } else {

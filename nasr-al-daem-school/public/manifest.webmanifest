@@ -1,6 +1,6 @@
 {
-    "name": "مدرسة النسيبة - افهمها وفهمني",
-    "short_name": "مدرسة النسيبة",
+    "name": "مدرسة النصر الدائم",
+    "short_name": "النصر الدائم",
     "description": "النظام المدرسي المتكامل للطلاب وأولياء الأمور والمعلمين والإدارة",
     "id": "/",
     "start_url": "/login?source=pwa",
@@ -11,15 +11,14 @@
     "dir": "rtl",
     "lang": "ar",
     "background_color": "#ffffff",
-    "theme_color": "#0e7c86",
+    "theme_color": "#101632",
     "categories": ["education", "productivity"],
     "icons": [
-        { "src": "/icons/app-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-        { "src": "/icons/app-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-        { "src": "/icons/app-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+        { "src": "/icons/nasr-icon-192.png?v=7", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+        { "src": "/icons/nasr-icon-512.png?v=7", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+        { "src": "/icons/nasr-icon-512.png?v=7", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
     ],
     "shortcuts": [
-        { "name": "تسجيل الدخول", "short_name": "الدخول", "url": "/login", "icons": [{ "src": "/icons/app-icon-192.png", "sizes": "192x192", "type": "image/png" }] }
+        { "name": "تسجيل الدخول", "short_name": "الدخول", "url": "/login", "icons": [{ "src": "/icons/nasr-icon-192.png?v=7", "sizes": "192x192", "type": "image/png" }] }
     ]
 }
-

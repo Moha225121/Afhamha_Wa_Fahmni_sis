@@ -4,16 +4,16 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>دخول المنصة | افهمها وفهمني</title>
-    <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="any">
-    <link rel="apple-touch-icon" href="{{ asset('icons/parent-icon-192.png') }}">
+    <title>دخول المنصة | مدرسة النصر الدائم</title>
+    <link rel="icon" href="{{ asset('icons/nasr-logo.jpg') }}?v=7" type="image/jpeg">
+    <link rel="apple-touch-icon" href="{{ asset('icons/nasr-logo.jpg') }}?v=7">
     <link rel="stylesheet" href="{{ asset('css/admin.css') }}?v=login-style-1">
     @include('shared.branding-style')@include('shared.portal-assets')
 </head>
 <body class="login-page">
 <main class="login-card">
     <div class="brand-mark">@include('shared.brand-mark')</div>
-    <p class="eyebrow">منصة افهمها وفهمني</p>
+    <p class="eyebrow">منصة مدرسة النصر الدائم</p>
     <h1>دخول المنصة</h1>
 
     <form method="post" action="{{ route('login.store') }}">

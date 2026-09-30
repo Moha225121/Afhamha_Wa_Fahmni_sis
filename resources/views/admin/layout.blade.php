@@ -1,7 +1,8 @@
 <!doctype html>
+@include('shared.pwa-head')
 <html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>@yield('title') | افهمها وفهمني</title><link rel="icon" href="{{ asset('favicon.ico') }}" sizes="any"><link rel="apple-touch-icon" href="{{ asset('icons/parent-icon-192.png') }}"><link rel="stylesheet" href="{{ asset('css/admin.css') }}?v=admin-finance-2">@include('shared.branding-style')@include('shared.portal-assets')<script src="{{ asset('js/enhanced-selects.js') }}" defer></script></head>
 <body><a class="skip-link" href="#portal-main">تجاوز إلى المحتوى</a><button class="menu-toggle" id="menu" aria-label="فتح القائمة">☰</button>
-<aside class="sidebar" id="sidebar"><a class="logo" href="{{ auth()->user()->isAdmin()?route('admin.dashboard'):route('finance.index') }}"><span class="brand-mark">@include('shared.brand-mark')</span><span><b>افهمها وفهمني</b><small>{{ $schoolBranding['school_name'] }}</small></span></a>
+<aside class="sidebar" id="sidebar"><a class="logo" href="{{ route('admin.dashboard') }}"><span class="brand-mark">@include('shared.brand-mark')</span><span><b>افهمها وفهمني</b><small>{{ $schoolBranding['school_name'] }}</small></span></a>
 <nav>@php($nav=['dashboard'=>'لوحة التحكم','students'=>'الطلاب','teachers'=>'المعلمون','supervisors'=>'المشرفون','parents'=>'أولياء الأمور','classes'=>'الصفوف','subjects'=>'المواد','schedules'=>'الجداول','attendance'=>'الحضور','exams'=>'الاختبارات','grades'=>'الدرجات','library'=>'المكتبة','announcements'=>'الإعلانات','reports'=>'التقارير','users'=>'المستخدمون','roles'=>'الصلاحيات','audit-logs'=>'سجل العمليات','settings'=>'الإعدادات'])
 @if(auth()->user()->isAdmin())
 @foreach($nav as $key=>$label)
@@ -10,8 +11,7 @@
 <a href="{{ $url }}" class="{{ request()->is('admin/'.$key.'*')?'active':'' }}"><i>{{ str_pad($loop->iteration,2,'0',STR_PAD_LEFT) }}</i>{{ $label }}</a>
 @endforeach
 @endif
-@if(auth()->user()->hasPermission('finance.view'))<a href="{{ route('finance.index') }}">الإدارة المالية</a>@endif
-@if(auth()->user()->isAdmin())<a href="{{ route('admin.accounts.index') }}">الترقيم والحسابات</a><a href="{{ route('admin.results.index') }}">إدارة نشر النتائج</a>@endif
+@if(auth()->user()->isAdmin())<a href="{{ route('admin.accounts.index') }}">الترقيم والحسابات</a>@endif
 </nav><div class="partner">الشريك التقني<br><b>HEXA.Tech</b></div></aside>
 <div class="page"><header class="topbar"><form class="global-search" method="get" action="{{ route('admin.students.index') }}"><input name="q" aria-label="البحث عن طالب" placeholder="ابحث عن طالب بالاسم..."><button type="submit">بحث</button></form><div class="account">@if(auth()->user()->isAdmin())<a href="{{ route('admin.module.index','notifications') }}" aria-label="الإشعارات">◉</a><a href="{{ route('admin.profile.edit') }}">{{ auth()->user()->name }}</a>@else<span>{{ auth()->user()->name }}</span>@endif<form method="post" action="{{ route('logout') }}">@csrf<button>خروج</button></form></div></header>
 <main class="content" id="portal-main" tabindex="-1">@if(session('success'))<div class="alert success">{{ session('success') }}</div>@endif

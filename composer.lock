@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1a0e584ec9eaaf08c7544ac4dbd6f019",
+    "content-hash": "f3e00c10ae51af0fbbe4f337d3c24d1c",
     "packages": [
         {
             "name": "brick/math",
@@ -2385,6 +2385,67 @@
             "time": "2023-05-03T06:19:36+00:00"
         },
         {
+            "name": "mpdf/qrcode",
+            "version": "v1.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/mpdf/qrcode.git",
+                "reference": "bfc8215c6fbb6320217d0980cecdfc85b0f98f27"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/mpdf/qrcode/zipball/bfc8215c6fbb6320217d0980cecdfc85b0f98f27",
+                "reference": "bfc8215c6fbb6320217d0980cecdfc85b0f98f27",
+                "shasum": ""
+            },
+            "require": {
+                "paragonie/random_compat": "^1.4|^2.0|9.99.99",
+                "php": "^5.6 || ^7.0 || ^8.0"
+            },
+            "require-dev": {
+                "mockery/mockery": "^0.9.5",
+                "phpunit/phpunit": "^5.0",
+                "squizlabs/php_codesniffer": "^3.4",
+                "tracy/tracy": "^2.5"
+            },
+            "suggest": {
+                "ext-gd": "To output QR codes to PNG files"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Mpdf\\QrCode\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "LGPL-2.1-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "Matěj Humpál",
+                    "role": "maintainer"
+                },
+                {
+                    "name": "Laurent Minguet",
+                    "role": "author"
+                }
+            ],
+            "description": "QR code generator for mPDF",
+            "keywords": [
+                "mpdf",
+                "pdf",
+                "php",
+                "qr",
+                "qrcode"
+            ],
+            "support": {
+                "issues": "https://github.com/mpdf/qrcode/issues",
+                "source": "https://github.com/mpdf/qrcode/tree/v1.1.0"
+            },
+            "time": "2020-11-27T20:31:03+00:00"
+        },
+        {
             "name": "myclabs/deep-copy",
             "version": "1.14.0",
             "source": {
@@ -2853,29 +2914,33 @@
         },
         {
             "name": "paragonie/random_compat",
-            "version": "v9.99.100",
+            "version": "v2.0.21",
             "source": {
                 "type": "git",
                 "url": "https://github.com/paragonie/random_compat.git",
-                "reference": "996434e5492cb4c3edcb9168db6fbb1359ef965a"
+                "reference": "96c132c7f2f7bc3230723b66e89f8f150b29d5ae"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/paragonie/random_compat/zipball/996434e5492cb4c3edcb9168db6fbb1359ef965a",
-                "reference": "996434e5492cb4c3edcb9168db6fbb1359ef965a",
+                "url": "https://api.github.com/repos/paragonie/random_compat/zipball/96c132c7f2f7bc3230723b66e89f8f150b29d5ae",
+                "reference": "96c132c7f2f7bc3230723b66e89f8f150b29d5ae",
                 "shasum": ""
             },
             "require": {
-                "php": ">= 7"
+                "php": ">=5.2.0"
             },
             "require-dev": {
-                "phpunit/phpunit": "4.*|5.*",
-                "vimeo/psalm": "^1"
+                "phpunit/phpunit": "*"
             },
             "suggest": {
                 "ext-libsodium": "Provides a modern crypto API that can be used to generate random bytes."
             },
             "type": "library",
+            "autoload": {
+                "files": [
+                    "lib/random.php"
+                ]
+            },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
@@ -2899,7 +2964,7 @@
                 "issues": "https://github.com/paragonie/random_compat/issues",
                 "source": "https://github.com/paragonie/random_compat"
             },
-            "time": "2020-10-15T08:29:30+00:00"
+            "time": "2022-02-16T17:07:03+00:00"
         },
         {
             "name": "php-http/discovery",

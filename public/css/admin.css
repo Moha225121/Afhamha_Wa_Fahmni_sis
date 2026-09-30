@@ -95,6 +95,7 @@ button {
     font-weight: 800;
     box-shadow: 0 10px 22px rgba(242, 140, 40, .28);
 }
+.brand-mark img { display:block; width:100%; height:100%; object-fit:contain; border-radius:inherit; }
 
 .sidebar nav a {
     min-height: 42px;
@@ -683,6 +684,81 @@ tbody tr:hover {
 
 .pagination {
     margin-top: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+    direction: ltr;
+}
+
+.pagination a,
+.pagination span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    min-height: 36px;
+    padding: 6px 10px;
+    border: 1px solid #dce6e9;
+    border-radius: 8px;
+    background: #fff;
+    color: #173f7a;
+    font-size: 13px;
+    line-height: 1;
+    text-decoration: none;
+}
+
+.pagination svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Laravel's default paginator does not always include a .pagination wrapper. */
+nav[role="navigation"] svg {
+    width: 16px !important;
+    height: 16px !important;
+    max-width: 16px;
+    max-height: 16px;
+}
+nav[role="navigation"] a,
+nav[role="navigation"] span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 38px;
+    min-height: 38px;
+    margin: 0 3px;
+    padding: 7px 11px;
+    border: 1px solid #dce6e9;
+    border-radius: 10px;
+    background: #fff;
+    color: #123b79;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1;
+    text-decoration: none;
+    box-shadow: 0 2px 5px rgb(18 59 121 / 8%);
+}
+nav[role="navigation"] a:hover {
+    border-color: #f7931d;
+    color: #123b79;
+    background: #fff8ef;
+}
+nav[role="navigation"] span[aria-current="page"] {
+    border-color: #123b79;
+    background: #123b79;
+    color: #fff;
+}
+nav[role="navigation"] span[aria-disabled="true"] {
+    color: #9aa8b8;
+    background: #f4f7fa;
+    box-shadow: none;
+}
+
+.pagination span[aria-current="page"] {
+    background: #123b79;
+    border-color: #123b79;
+    color: #fff;
 }
 
 .menu-toggle {

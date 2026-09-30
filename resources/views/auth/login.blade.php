@@ -1,4 +1,5 @@
 <!doctype html>
+@include('shared.pwa-head')
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="utf-8">
@@ -35,5 +36,6 @@
         <button class="btn primary" type="submit">تسجيل الدخول</button>
     </form>
 </main>
+@include('shared.pwa-install')
 </body>
 </html>

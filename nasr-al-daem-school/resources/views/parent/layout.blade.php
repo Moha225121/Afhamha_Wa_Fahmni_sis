@@ -8,7 +8,7 @@
     <meta name="theme-color" content="#0e7c86">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="ولي الأمر">
-    <title>@yield('title', 'بوابة ولي الأمر') | افهمها وفهمني</title>
+    <title>@yield('title', 'بوابة ولي الأمر') | مدرسة النصر الدائم</title>
     <link rel="manifest" href="{{ route('parent.pwa.manifest') }}">
     <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="any">
     <link rel="icon" href="{{ asset('icons/parent-icon.svg') }}" type="image/svg+xml">
@@ -23,7 +23,7 @@
         <a class="brand" href="{{ route('parent.dashboard') }}" aria-label="بوابة ولي الأمر">
             <span class="brand-mark">@include('shared.brand-mark')</span>
             <span class="brand-copy">
-                <b>افهمها وفهمني</b>
+                <b>مدرسة النصر الدائم</b>
                 <small>بوابة ولي الأمر</small>
             </span>
         </a>
@@ -144,7 +144,7 @@ const showInstallHelp = () => {
         ? ['افتح هذه الصفحة في Safari.', 'اضغط زر المشاركة.', 'اختر «إضافة إلى الشاشة الرئيسية»، ثم اضغط «إضافة».']
         : isAndroid
             ? ['افتح قائمة المتصفح ⋮.', 'اختر «تثبيت التطبيق» أو «إضافة إلى الشاشة الرئيسية».', 'أكد التثبيت.']
-            : ['افتح قائمة المتصفح.', 'اختر «تثبيت افهمها وفهمني» أو Apps ثم Install.', 'أكد التثبيت ليظهر التطبيق على سطح المكتب.'];
+            : ['افتح قائمة المتصفح.', 'اختر «تثبيت مدرسة النصر الدائم» أو Apps ثم Install.', 'أكد التثبيت ليظهر التطبيق على سطح المكتب.'];
     installSteps.replaceChildren(...steps.map(text => { const item = document.createElement('li'); item.textContent = text; return item; }));
     installDialog.showModal();
 };

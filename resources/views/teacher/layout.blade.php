@@ -1,4 +1,5 @@
 <!doctype html>
+@include('shared.pwa-head')
 <html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>@yield('title') | افهمها وفهمني</title><link rel="stylesheet" href="{{ asset('css/admin.css') }}"><link rel="stylesheet" href="{{ asset('css/teacher-overrides.css') }}">@include('shared.branding-style')@include('shared.portal-assets')</head>
 <body class="teacher-portal"><a class="skip-link" href="#teacher-main">تجاوز إلى المحتوى</a><button class="menu-toggle" id="menu" aria-label="فتح القائمة" aria-controls="sidebar" aria-expanded="false">☰</button>
 <aside class="sidebar" id="sidebar"><a class="logo" href="{{ route('teacher.dashboard') }}"><span class="brand-mark">@include('shared.brand-mark')</span><span><b>افهمها وفهمني</b><small>بوابة المعلم</small></span></a>
@@ -12,5 +13,5 @@
 @if($errors->any())<div class="alert error"><b>يرجى تصحيح الأخطاء:</b><ul>@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul></div>@endif
 <div class="page-head"><div><p class="eyebrow">بوابة المعلم</p><h1>@yield('title')</h1><p class="muted">@yield('subtitle')</p></div>@yield('actions')</div>@yield('content')</main></div>
 <script>const menu=document.getElementById('menu');const sidebar=document.getElementById('sidebar');menu.onclick=()=>{const open=sidebar.classList.toggle('open');menu.setAttribute('aria-expanded',open)};const accountTrigger=document.getElementById('teacher-account-trigger');const accountDropdown=document.getElementById('teacher-account-dropdown');accountTrigger?.addEventListener('click',()=>{const open=accountDropdown.hidden;accountDropdown.hidden=!open;accountTrigger.setAttribute('aria-expanded',String(open))});document.addEventListener('click',event=>{if(accountDropdown&&!accountDropdown.hidden&&!event.target.closest('.teacher-account-menu')){accountDropdown.hidden=true;accountTrigger.setAttribute('aria-expanded','false')}});document.addEventListener('keydown',event=>{if(event.key==='Escape'&&accountDropdown&&!accountDropdown.hidden){accountDropdown.hidden=true;accountTrigger.setAttribute('aria-expanded','false');accountTrigger.focus()}});document.querySelectorAll('[data-confirm]').forEach(x=>x.onclick=e=>{if(!confirm(x.dataset.confirm))e.preventDefault()})</script>
-@yield('scripts')
+@include('shared.pwa-install')@yield('scripts')
 </body></html>

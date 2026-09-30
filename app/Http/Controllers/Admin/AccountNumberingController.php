@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Student;
 use App\Models\Teacher;
 use App\Services\SchoolAccountService;
+use App\Services\StudentCardPdfService;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
@@ -18,7 +21,7 @@ class AccountNumberingController extends Controller
 
     private function data(Request $request, SchoolAccountService $accounts): array
     {
-        $rules = ['school_name' => 'required|string|max:255', 'school_english_name' => 'required|string|max:80', 'school_code' => 'required|string|max:20', 'student_finance_visible' => 'required|boolean'];
+        $rules = ['school_name' => 'required|string|max:255', 'school_english_name' => 'required|string|max:80', 'school_code' => 'required|string|max:20'];
         foreach (['student', 'teacher'] as $role) {
             $rules += [$role.'_number_pattern' => 'required|string|max:80', $role.'_start' => 'required|integer|min:1|max:999999999', $role.'_digits' => 'required|integer|min:1|max:12', $role.'_reset_yearly' => 'required|boolean', $role.'_email_pattern' => 'required|string|max:200', $role.'_auto_email' => 'required|boolean'];
         }
@@ -60,6 +63,28 @@ class AccountNumberingController extends Controller
 
     public function card(Student $student)
     {
-        return view('admin.accounts.card', ['student' => $student->load('user', 'classroom')]);
+        $student->load(['user', 'classroom', 'guardians.user']);
+        $student->setAttribute('verification_url', URL::temporarySignedRoute('student.card.verify', now()->addYear(), ['student' => $student->id]));
+        $data = ['student' => $student];
+        return request()->query('format') === 'pdf'
+            ? app(StudentCardPdfService::class)->download('admin.accounts.card', $data, 'student-card-'.$student->student_number.'.pdf')
+            : view('admin.accounts.card', $data);
+    }
+
+    public function cards(Request $request, StudentCardPdfService $pdf)
+    {
+        $students = Student::with(['user', 'classroom', 'guardians.user'])
+            ->when($request->integer('classroom_id'), fn ($q, $id) => $q->where('classroom_id', $id))
+            ->when($request->input('status'), fn ($q, $status) => $q->where('status', $status))
+            ->orderBy('classroom_id')->orderBy('student_number')->get();
+        abort_if($students->isEmpty(), 404, 'لا يوجد طلاب مطابقون للطباعة.');
+        $expires = now()->addYear();
+        $students->each(fn ($student) => $student->setAttribute('verification_url', URL::temporarySignedRoute('student.card.verify', $expires, ['student' => $student->id])));
+        return $pdf->downloadBulk($students, 'student-cards.pdf');
+    }
+
+    public function verify(Student $student)
+    {
+        return view('admin.accounts.verify', ['student' => $student->load(['user', 'classroom', 'guardians.user'])]);
     }
 }

@@ -21,7 +21,6 @@
 <label><input type="checkbox" name="update_{{ $role }}_emails" value="1" @checked(old('update_'.$role.'_emails'))> تحديث البريد المدرسي لجميع {{ $label }} وفق الأرقام والأنماط الجديدة</label>
 @endforeach
 <p class="muted" dir="ltr">Numbers: {YEAR} {GRADE} {BRANCH} {CLASS} {SEQ} {0001}<br>Emails: {FIRST_NAME} {LAST_NAME} {ACADEMIC_NUMBER} {TEACHER_NUMBER} {YEAR} {SCHOOL_NAME}</p>
-<label>عرض الحالة المالية للطالب<select name="student_finance_visible"><option value="0" @selected(!$settings['student_finance_visible'])>معطّل</option><option value="1" @selected($settings['student_finance_visible'])>مفعّل</option></select></label>
 <button class="btn primary">معاينة التأثير قبل الحفظ</button>
 </form>
 @endsection

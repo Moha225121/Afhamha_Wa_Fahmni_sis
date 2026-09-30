@@ -83,7 +83,11 @@ td .btn { min-height: 36px; padding: 6px 12px; }
 .analysis-report p { margin: 10px 0; }
 .analysis-error { color: #a12b36; }
 .nav-backdrop { display: none; }
-.login-page { background: radial-gradient(ellipse at top right, #daeeed, transparent 60%), var(--ui-bg); }
+.login-page {
+  background:
+    radial-gradient(ellipse at top right, rgba(239, 215, 92, .22), transparent 60%),
+    linear-gradient(135deg, #ffffff 0%, #f1f2f5 48%, #fffdf0 100%);
+}
 .login-card { border-radius: 22px; border: 1px solid var(--ui-line); box-shadow: 0 20px 70px #163c4910; }
 @media (min-width: 1000px) {
     body:not(.student-portal) > .app-shell { max-width: 1100px; box-shadow: none; }

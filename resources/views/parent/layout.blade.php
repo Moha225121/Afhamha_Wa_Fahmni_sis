@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
+@include('shared.pwa-head')
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -213,5 +214,6 @@ if ('serviceWorker' in navigator) {
 }
 </script>
 @stack('scripts')
+@include('shared.pwa-install')
 </body>
 </html>

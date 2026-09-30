@@ -1,0 +1,25 @@
+{
+    "name": "مدرسة النسيبة - افهمها وفهمني",
+    "short_name": "مدرسة النسيبة",
+    "description": "النظام المدرسي المتكامل للطلاب وأولياء الأمور والمعلمين والإدارة",
+    "id": "/",
+    "start_url": "/login?source=pwa",
+    "scope": "/",
+    "display": "standalone",
+    "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+    "orientation": "any",
+    "dir": "rtl",
+    "lang": "ar",
+    "background_color": "#ffffff",
+    "theme_color": "#0e7c86",
+    "categories": ["education", "productivity"],
+    "icons": [
+        { "src": "/icons/app-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+        { "src": "/icons/app-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+        { "src": "/icons/app-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    ],
+    "shortcuts": [
+        { "name": "تسجيل الدخول", "short_name": "الدخول", "url": "/login", "icons": [{ "src": "/icons/app-icon-192.png", "sizes": "192x192", "type": "image/png" }] }
+    ]
+}
+
