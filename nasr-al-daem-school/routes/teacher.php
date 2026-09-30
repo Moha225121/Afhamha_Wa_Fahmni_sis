@@ -8,6 +8,7 @@ use App\Http\Controllers\TeacherPortal\GradeController;
 use App\Http\Controllers\TeacherPortal\ProfileController;
 use App\Http\Controllers\TeacherPortal\StudentController;
 use App\Http\Controllers\TeacherPortal\LessonController;
+use App\Http\Controllers\LibraryCatalogController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('teacher')->name('teacher.')->middleware(['auth', 'teacher'])->group(function (): void {
@@ -16,6 +17,10 @@ Route::prefix('teacher')->name('teacher.')->middleware(['auth', 'teacher'])->gro
     Route::get('/', fn () => redirect()->route('teacher.dashboard'));
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/index', fn () => redirect()->route('teacher.dashboard'))->name('dashboard.index');
+    Route::get('/library', [LibraryCatalogController::class, 'index'])->name('library.index');
+    Route::get('/library/{resource}/read', [LibraryCatalogController::class, 'read'])->whereNumber('resource')->name('library.read');
+    Route::get('/library/{resource}/file', [LibraryCatalogController::class, 'file'])->whereNumber('resource')->name('library.file');
+    Route::get('/library/{resource}/download', [LibraryCatalogController::class, 'download'])->whereNumber('resource')->name('library.download');
 
     Route::get('/students', [StudentController::class, 'index'])->name('students.index');
     Route::get('/students/{student}', [StudentController::class, 'show'])->name('students.show');

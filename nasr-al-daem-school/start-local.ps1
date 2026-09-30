@@ -80,6 +80,8 @@ try {
     & $php `
         -d extension=fileinfo `
         -d extension=zip `
+        -d upload_max_filesize=16M `
+        -d post_max_size=20M `
         -S ${hostAddress}:$port `
         -t public `
         start-local-router.php

@@ -165,7 +165,7 @@ class StudentLibraryTest extends TestCase
         $subject = $this->createSubjectFor($student['classroom'], 'PAGES');
         $admin = $this->createAdmin();
 
-        foreach (range(1, 13) as $number) {
+        foreach (range(1, 19) as $number) {
             $this->resource('مورد صفحة '.str_pad((string) $number, 2, '0', STR_PAD_LEFT), 'كتاب', $subject->id, $student['classroom']->id, $admin->id);
         }
 
