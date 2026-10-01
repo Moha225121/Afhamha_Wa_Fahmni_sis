@@ -89,6 +89,7 @@ class ExamController extends Controller
         $choices = DB::table('exam_choices')->whereIn('exam_question_id', $questions->pluck('id'))->orderBy('order')->get()->groupBy('exam_question_id');
 
         $questions = $questions->map(function ($q) use ($choices) {
+            $q->type = $q->type === 'multiple_choice' ? 'mcq' : $q->type;
             $q->choices = ($choices[$q->id] ?? collect())->values();
 
             return $q;
@@ -178,9 +179,26 @@ class ExamController extends Controller
             }
 
             foreach ($questions as $index => $question) {
+                $isObjective = in_array($question['type'], ['mcq', 'true_false'], true);
+                $options = [];
+                $correctAnswer = null;
+                if ($isObjective) {
+                    foreach (($question['choices'] ?? []) as $choiceIndex => $choice) {
+                        if (($choice['text'] ?? '') === '') {
+                            continue;
+                        }
+                        $key = 'choice_'.$choiceIndex;
+                        $options[$key] = $choice['text'];
+                        if ((bool) ($choice['is_correct'] ?? false)) {
+                            $correctAnswer = $key;
+                        }
+                    }
+                }
                 $questionId = DB::table('exam_questions')->insertGetId([
                     'exam_id' => $examId,
-                    'type' => $question['type'],
+                    'type' => $question['type'] === 'mcq' ? 'multiple_choice' : $question['type'],
+                    'options' => $isObjective ? json_encode($options, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR) : null,
+                    'correct_answer' => $correctAnswer,
                     'question_text' => $question['text'],
                     'text' => $question['text'],
                     'score' => $question['score'],

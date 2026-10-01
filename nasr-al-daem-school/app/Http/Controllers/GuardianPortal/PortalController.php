@@ -277,13 +277,9 @@ class PortalController extends Controller
             ->where('status', 'published')
             ->where(fn ($query) => $query->whereNull('published_at')->orWhere('published_at', '<=', now()))
             ->where(fn ($query) => $query->whereNull('expires_at')->orWhere('expires_at', '>', now()))
-            ->where(function ($query) use ($classroomIds): void {
-                $query->whereIn('audience', ['all', 'parent', 'parents']);
-
-                if ($classroomIds->isNotEmpty()) {
-                    $query->orWhereIn('classroom_id', $classroomIds);
-                }
-            })
+            ->where(fn ($query) => $query->whereIn('audience', ['all', 'parent', 'parents'])
+                ->orWhere(fn ($classroom) => $classroom->where('audience', 'classroom')->whereNotNull('classroom_id')))
+            ->where(fn ($query) => $query->whereNull('classroom_id')->orWhereIn('classroom_id', $classroomIds))
             ->latest('published_at')
             ->limit($limit)
             ->get();

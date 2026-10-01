@@ -6,6 +6,7 @@ use App\Http\Middleware\EnsureUserIsParent;
 use App\Http\Middleware\EnsureUserIsStudent;
 use App\Http\Middleware\EnsureUserIsTeacher;
 use App\Http\Middleware\EnsureUserIsSupervisor;
+use App\Http\Middleware\PreventPrivateHtmlCaching;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -18,6 +19,8 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->web(append: [PreventPrivateHtmlCaching::class]);
+
         $middleware->alias([
             'admin' => EnsureUserIsAdmin::class,
             'parent' => EnsureUserIsParent::class,

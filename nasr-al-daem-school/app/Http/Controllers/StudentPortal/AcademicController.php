@@ -149,7 +149,7 @@ class AcademicController extends Controller
             $hasRemainingAttempts = $exam->attempts->count() < $this->attemptPolicy->maximumAttempts($exam);
             $exam->setAttribute('has_remaining_attempts', $hasRemainingAttempts);
             $group = match (true) {
-                $exam->starts_at->isFuture() && ! $exam->starts_at->isSameDay(now()) => 'upcoming',
+                $exam->starts_at->isFuture() => 'upcoming',
                 $attempt && $attempt->status === 'in_progress' && now()->lt($scheduledEnd) => 'available',
                 now()->lt($scheduledEnd) && $hasRemainingAttempts => 'available',
                 $attempt && $attempt->status !== 'in_progress' => 'completed',
@@ -167,9 +167,8 @@ class AcademicController extends Controller
         $this->authorizeExam($exam, $student);
         $examStart = $exam->starts_at;
         $examEnd = $examStart->copy()->addMinutes($exam->duration_minutes);
-        $isSameDayExam = $examStart->isSameDay(now());
 
-        abort_if($examStart->isFuture() && ! $isSameDayExam, 422, '�� ���� ���� �������� ���.');
+        abort_if($examStart->isFuture(), 422, '�� ���� ���� �������� ���.');
         abort_if(now()->gte($examEnd), 422, '����� ��� ��������.');
 
         $attempt = $this->attempts->start($exam, $student);

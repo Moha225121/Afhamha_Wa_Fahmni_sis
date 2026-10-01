@@ -20,7 +20,10 @@ class ParentNotificationService
 
     public function sendAnnouncement(Announcement $announcement): void
     {
-        if ($announcement->status !== 'published' || ($announcement->published_at && $announcement->published_at->isFuture())) {
+        if (! in_array($announcement->audience, ['all', 'parent', 'parents', 'classroom'], true)
+            || ($announcement->audience === 'classroom' && ! $announcement->classroom_id)
+            || $announcement->status !== 'published'
+            || ($announcement->published_at && $announcement->published_at->isFuture())) {
             return;
         }
 
