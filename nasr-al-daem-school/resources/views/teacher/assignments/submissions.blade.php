@@ -3,7 +3,7 @@
 @csrf
 <div class="table-wrap">
 <table>
-<thead><tr><th>الطالب</th><th>الرقم</th><th>تم التسليم</th><th>الدرجة / {{ rtrim(rtrim(number_format($assignment->max_score,2),'0'),'.') }}</th></tr></thead>
+<thead><tr><th>الطالب</th><th>الرقم</th><th>تم التسليم</th><th>الملف</th><th>الدرجة / {{ rtrim(rtrim(number_format($assignment->max_score,2),'0'),'.') }}</th></tr></thead>
 <tbody>
 @forelse($students as $s)
 @php($sub = $submissions[$s->id] ?? null)
@@ -11,10 +11,11 @@
 <td>{{ $s->user->name }}</td>
 <td>{{ $s->student_number }}</td>
 <td><input type="checkbox" name="submitted[{{ $s->id }}]" value="1" @checked($sub && $sub->submitted_at)></td>
+<td>@if($sub && $sub->fileAttachment?->hasValidPrivateMetadata())<a href="{{ route('teacher.submissions.file', $sub) }}">تنزيل الملف</a>@elseif($sub && $sub->submitted_at)<span class="muted-line">تم التسليم</span>@else<span class="muted-line">—</span>@endif</td>
 <td><input type="number" step="0.25" min="0" max="{{ $assignment->max_score }}" name="scores[{{ $s->id }}]" value="{{ $sub->score ?? '' }}"></td>
 </tr>
 @empty
-<tr><td colspan="4"><div class="empty">لا يوجد طلاب في هذا الصف.</div></td></tr>
+<tr><td colspan="5"><div class="empty">لا يوجد طلاب في هذا الصف.</div></td></tr>
 @endforelse
 </tbody>
 </table>

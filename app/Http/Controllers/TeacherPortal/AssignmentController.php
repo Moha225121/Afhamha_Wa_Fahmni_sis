@@ -5,6 +5,7 @@ namespace App\Http\Controllers\TeacherPortal;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\TeacherPortal\Concerns\InteractsWithTeacherScope;
 use App\Http\Requests\TeacherPortal\AssignmentRequest;
+use App\Models\AssignmentSubmission;
 use App\Models\Classroom;
 use App\Models\AssignmentAttachment;
 use App\Models\Student;
@@ -280,7 +281,7 @@ class AssignmentController extends Controller
         abort_unless($row && (int) $row->teacher_id === $teacher->id, 404);
 
         $students = Student::with('user')->where('classroom_id', $row->classroom_id)->where('status', 'active')->orderBy('student_number')->get();
-        $submissions = DB::table('assignment_submissions')->where('assignment_id', $assignment)->get()->keyBy('student_id');
+        $submissions = AssignmentSubmission::with('fileAttachment')->where('assignment_id', $assignment)->get()->keyBy('student_id');
 
         return view('teacher.assignments.submissions', ['assignment' => $row, 'students' => $students, 'submissions' => $submissions]);
     }
