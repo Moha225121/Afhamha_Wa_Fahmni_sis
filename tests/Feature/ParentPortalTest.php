@@ -174,7 +174,7 @@ class ParentPortalTest extends TestCase
             ['key' => 'school_logo', 'value' => $logoPath, 'group' => 'school', 'created_at' => now(), 'updated_at' => now()],
         ]);
 
-        $this->get('/parent-manifest.webmanifest')
+        $this->get('/parent-app.webmanifest')
             ->assertOk()
             ->assertHeader('Content-Type', 'application/manifest+json; charset=UTF-8')
             ->assertSee('مدرسة النسيبة - بوابة ولي الأمر')

@@ -15,6 +15,7 @@ use App\Models\User;
 use App\Notifications\ParentPortalNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class ParentPortalTest extends TestCase
@@ -165,21 +166,46 @@ class ParentPortalTest extends TestCase
 
     public function test_parent_pwa_assets_are_available_without_sensitive_page_caching(): void
     {
-        $this->get('/parent-manifest.webmanifest')
+        Storage::fake('public');
+        $logoPath = 'school-branding/nds-logo.svg';
+        Storage::disk('public')->put($logoPath, '<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"></svg>');
+        DB::table('settings')->insert([
+            ['key' => 'school_name', 'value' => 'مدرسة النصر الدائم', 'group' => 'school', 'created_at' => now(), 'updated_at' => now()],
+            ['key' => 'school_logo', 'value' => $logoPath, 'group' => 'school', 'created_at' => now(), 'updated_at' => now()],
+        ]);
+
+        $this->get('/parent-app.webmanifest')
             ->assertOk()
-            ->assertSee('"display": "standalone"', false)
-            ->assertSee('/parent/dashboard', false);
+            ->assertHeader('Content-Type', 'application/manifest+json; charset=UTF-8')
+            ->assertSee('مدرسة النصر الدائم - بوابة ولي الأمر')
+            ->assertSee('/school-app-icon?v=', false);
+
+        $this->get('/school-app.webmanifest')
+            ->assertOk()
+            ->assertSee('مدرسة النصر الدائم - افهمها وفهمني')
+            ->assertSee('/school-app-icon?v=', false);
+
+        $this->get('/school-app-icon')->assertOk()->assertHeader('Content-Type', 'image/svg+xml');
+
+        $this->actingAs($this->parentUser)
+            ->get('/parent/dashboard')
+            ->assertOk()
+            ->assertSee('/parent-app.webmanifest', false)
+            ->assertDontSee('/school-app.webmanifest', false)
+            ->assertDontSee('/manifest.webmanifest', false);
 
         $this->get('/parent-sw.js')
             ->assertOk()
             ->assertSee('STATIC_ASSETS', false)
             ->assertSee('/parent-offline.html', false)
+            ->assertSee('/school-app-icon', false)
             ->assertSee("addEventListener('push'", false)
             ->assertDontSee('/parent/dashboard', false);
 
         $this->get('/parent-offline.html')
             ->assertOk()
-            ->assertSeeText('أنت غير متصل');
+            ->assertSeeText('أنت غير متصل')
+            ->assertSee('src="/school-app-icon"', false);
     }
 
     public function test_parent_can_follow_linked_child_attendance_assignments_and_exams_only(): void

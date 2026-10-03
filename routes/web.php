@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/login');
-Route::get('/parent-manifest.webmanifest', [ParentPwaController::class, 'manifest'])->name('parent.pwa.manifest');
+Route::get('/parent-app.webmanifest', [ParentPwaController::class, 'manifest'])->name('parent.pwa.manifest');
 Route::get('/school-app-icon', [ParentPwaController::class, 'icon'])->name('school.pwa.icon');
 Route::get('/parent-sw.js', fn () => Response::make(File::get(public_path('parent-sw.js')), 200, ['Content-Type' => 'application/javascript']))->name('parent.pwa.service-worker');
 Route::view('/parent-offline.html', 'parent.offline')->name('parent.offline');

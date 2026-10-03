@@ -37,7 +37,10 @@ class AdminPortalTest extends TestCase
             $this->actingAs($user)->get('/admin/dashboard')->assertForbidden();
         }
         $admin = User::factory()->create(['role' => 'admin', 'status' => 'active']);
-        $this->actingAs($admin)->get('/admin/dashboard')->assertOk();
+        $this->actingAs($admin)
+            ->get('/admin/dashboard')
+            ->assertOk()
+            ->assertSee('css/portal-system.css?v=20261003-shell-1', false);
     }
 
     public function test_admin_can_create_student_with_real_user_account(): void
@@ -50,5 +53,17 @@ class AdminPortalTest extends TestCase
         $this->assertDatabaseHas('users', ['email' => 'student@example.test', 'role' => 'student']);
         $this->assertDatabaseHas('students', ['student_number' => 'S-100', 'classroom_id' => $class->id]);
         $this->assertDatabaseHas('audit_logs', ['action' => 'created', 'module' => 'students']);
+    }
+
+    public function test_teacher_assignment_options_show_class_section(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin', 'status' => 'active']);
+        $year = AcademicYear::create(['name' => '2026/2027', 'starts_at' => '2026-09-01', 'ends_at' => '2027-06-30', 'is_current' => true]);
+        Classroom::create(['name' => 'الأول', 'stage' => 'أساسي', 'section' => 'أ', 'academic_year_id' => $year->id]);
+
+        $this->actingAs($admin)
+            ->get('/admin/teachers/create')
+            ->assertOk()
+            ->assertSee('الأول — الشعبة أ (أساسي)');
     }
 }
