@@ -13,6 +13,7 @@ use App\Services\AccountPasswordService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class StudentController extends Controller
@@ -33,7 +34,9 @@ class StudentController extends Controller
     {
         $s = DB::transaction(function () use ($r, $passwords) {
             app(\App\Services\SchoolAccountService::class)->settings(true);
-            $s = app(\App\Services\SchoolAccountService::class)->create('student', $r->safe()->only(['name', 'email', 'phone', 'first_name_en', 'last_name_en']) + ['password' => $passwords->forNewAccount($r->validated('password')), 'status' => $r->status], $r->safe()->only(['student_number', 'classroom_id', 'birth_date', 'gender', 'address', 'status']));
+            $userData = $r->safe()->only(['name', 'email', 'phone', 'first_name_en', 'last_name_en']) + ['password' => $passwords->forNewAccount($r->validated('password')), 'status' => $r->status];
+            if ($r->hasFile('photo')) $userData['avatar_path'] = $r->file('photo')->store('student-photos', 'public');
+            $s = app(\App\Services\SchoolAccountService::class)->create('student', $userData, $r->safe()->only(['student_number', 'classroom_id', 'birth_date', 'gender', 'address', 'status']));
             $s->guardians()->sync($r->input('guardian_ids', []));
             AuditService::record('created', 'students', $s);
 
@@ -60,11 +63,14 @@ class StudentController extends Controller
             $oldUser = $student->user->getAttributes();
             $old = $student->getAttributes();
             $data = $r->safe()->only(['name', 'email', 'phone', 'status', 'first_name_en', 'last_name_en']);
+            $oldPhoto = $student->user->avatar_path;
+            if ($r->hasFile('photo')) $data['avatar_path'] = $r->file('photo')->store('student-photos', 'public');
             if ($r->filled('password')) {
                 $data['password'] = $r->password;
             }$student->user->update($data);
             $student->update($r->safe()->only(['student_number', 'classroom_id', 'birth_date', 'gender', 'address', 'status']));
             $student->guardians()->sync($r->input('guardian_ids', []));
+            if ($r->hasFile('photo') && $oldPhoto) Storage::disk('public')->delete($oldPhoto);
             AuditService::record('updated', 'students', $student, $old);
             AuditService::record('updated', 'student_accounts', $student->user, $oldUser);
         });
