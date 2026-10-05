@@ -60,9 +60,27 @@ class AdminOperationsTest extends TestCase
 
     public function test_library_upload_uses_storage(): void
     {
+        Storage::fake('local');
         Storage::fake('public');
         $this->actingAs($this->admin)->post('/admin/library', ['title' => 'كتاب', 'file' => UploadedFile::fake()->create('book.pdf', 100, 'application/pdf'), 'is_public' => 1])->assertSessionHasNoErrors();
         $row = DB::table('library_resources')->first();
-        Storage::disk('public')->assertExists($row->file_path);
+        Storage::disk('local')->assertExists($row->file_path);
+        Storage::disk('public')->assertDirectoryEmpty('library');
+    }
+
+    public function test_settings_form_selects_a_valid_theme_when_legacy_color_is_not_in_the_palette(): void
+    {
+        DB::table('settings')->insert([
+            'key' => 'theme_color',
+            'value' => '#0e7c86',
+            'group' => 'school',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $this->actingAs($this->admin)
+            ->get('/admin/settings')
+            ->assertOk()
+            ->assertSee('name="theme_color" value="#008C95" checked required', false);
     }
 }

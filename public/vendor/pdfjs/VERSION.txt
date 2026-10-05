@@ -1,0 +1,5 @@
+PDF.js / pdfjs-dist 6.3.289
+Source: https://www.npmjs.com/package/pdfjs-dist/v/6.3.289
+Upstream: https://github.com/mozilla/pdf.js
+License: Apache-2.0 (see LICENSE and notices in asset directories)
+Locally hosted minified display/worker builds; no external requests are required.

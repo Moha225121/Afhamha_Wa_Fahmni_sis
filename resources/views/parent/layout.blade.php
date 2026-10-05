@@ -9,9 +9,8 @@
     <meta name="apple-mobile-web-app-title" content="ولي الأمر">
     <title>@yield('title', 'بوابة ولي الأمر') | افهمها وفهمني</title>
     <link rel="manifest" href="{{ route('parent.pwa.manifest') }}">
-    <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="any">
-    <link rel="icon" href="{{ asset('icons/parent-icon.svg') }}" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="{{ asset('icons/parent-icon-192.png') }}">
+    <link rel="icon" href="{{ route('school.pwa.icon') }}" sizes="any">
+    <link rel="apple-touch-icon" href="{{ route('school.pwa.icon') }}">
     <link rel="stylesheet" href="{{ asset('css/parent.css') }}?v=portal-style-1">
     @include('shared.branding-style')@include('shared.portal-assets')
     <script src="{{ asset('js/enhanced-selects.js') }}" defer></script>
@@ -84,6 +83,7 @@
 
     <dialog class="install-dialog" id="parent-install-dialog" aria-labelledby="install-dialog-title">
         <form method="dialog"><button class="install-dialog-close" aria-label="إغلاق">×</button></form>
+        <img src="{{ route('school.pwa.icon') }}" alt="شعار {{ $schoolBranding['school_name'] }}" style="display:block;width:72px;height:72px;object-fit:contain;margin:0 auto 16px">
         <h2 id="install-dialog-title">تثبيت تطبيق ولي الأمر</h2>
         <p data-install-message>يمكن تثبيت التطبيق من قائمة المتصفح.</p>
         <ol data-install-steps></ol>
@@ -135,10 +135,10 @@ let deferredInstallPrompt = null;
 
 const isStandalone = () => window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
 const hideInstallButtons = () => installButtons.forEach(button => button.hidden = true);
-const showInstallHelp = () => {
+const showInstallHelp = (errorMessage = null) => {
     const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
     const isAndroid = /android/i.test(navigator.userAgent);
-    installMessage.textContent = isIOS ? 'لتثبيت التطبيق على iPhone أو iPad:' : 'لم يعرض المتصفح نافذة التثبيت التلقائي. يمكنك تثبيته يدويًا:';
+    installMessage.textContent = errorMessage || (isIOS ? 'لتثبيت التطبيق على iPhone أو iPad:' : 'لم يعرض المتصفح نافذة التثبيت التلقائي. يمكنك تثبيته يدويًا:');
     const steps = isIOS
         ? ['افتح هذه الصفحة في Safari.', 'اضغط زر المشاركة.', 'اختر «إضافة إلى الشاشة الرئيسية»، ثم اضغط «إضافة».']
         : isAndroid
@@ -157,9 +157,14 @@ window.addEventListener('beforeinstallprompt', event => {
 installButtons.forEach(button => button.addEventListener('click', async () => {
     if (isStandalone()) { hideInstallButtons(); return; }
     if (! deferredInstallPrompt) { showInstallHelp(); return; }
-    deferredInstallPrompt.prompt();
-    await deferredInstallPrompt.userChoice;
-    deferredInstallPrompt = null;
+    try {
+        deferredInstallPrompt.prompt();
+        await deferredInstallPrompt.userChoice;
+        deferredInstallPrompt = null;
+    } catch {
+        deferredInstallPrompt = null;
+        showInstallHelp('تعذر تثبيت التطبيق تلقائيًا. يمكنك اتباع خطوات التثبيت اليدوي:');
+    }
 }));
 
 window.addEventListener('appinstalled', () => { deferredInstallPrompt = null; hideInstallButtons(); });

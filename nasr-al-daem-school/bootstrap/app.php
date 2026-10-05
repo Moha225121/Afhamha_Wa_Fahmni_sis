@@ -7,6 +7,7 @@ use App\Http\Middleware\EnsureUserIsStudent;
 use App\Http\Middleware\EnsureUserIsTeacher;
 use App\Http\Middleware\EnsureUserIsSupervisor;
 use App\Http\Middleware\PreventPrivateHtmlCaching;
+use App\Http\Middleware\NoStoreForSensitivePages;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -28,6 +29,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'teacher' => EnsureUserIsTeacher::class,
             'supervisor' => EnsureUserIsSupervisor::class,
             'permission' => EnsureUserHasPermission::class,
+            'no-cache' => NoStoreForSensitivePages::class,
         ]);
 
         $middleware->redirectUsersTo(function (Request $request): string {

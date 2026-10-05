@@ -60,9 +60,12 @@ class AdminOperationsTest extends TestCase
 
     public function test_library_upload_uses_storage(): void
     {
+        Storage::fake('local');
         Storage::fake('public');
         $this->actingAs($this->admin)->post('/admin/library', ['title' => 'كتاب', 'file' => UploadedFile::fake()->create('book.pdf', 100, 'application/pdf'), 'is_public' => 1])->assertSessionHasNoErrors();
         $row = DB::table('library_resources')->first();
-        Storage::disk('public')->assertExists($row->file_path);
+        $this->assertSame('local', $row->disk);
+        Storage::disk('local')->assertExists($row->file_path);
+        Storage::disk('public')->assertMissing($row->file_path);
     }
 }

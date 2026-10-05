@@ -1,10 +1,10 @@
 <!doctype html>
-@include('shared.pwa-head')
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>دخول المنصة | افهمها وفهمني</title>
+    @include('shared.pwa-head')
     <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="any">
     <link rel="apple-touch-icon" href="{{ asset('icons/parent-icon-192.png') }}">
     <link rel="stylesheet" href="{{ asset('css/admin.css') }}?v=login-style-1">
@@ -36,6 +36,5 @@
         <button class="btn primary" type="submit">تسجيل الدخول</button>
     </form>
 </main>
-@include('shared.pwa-install')
 </body>
 </html>

@@ -1,9 +1,9 @@
-<meta name="theme-color" content="#0e7c86">
+<meta name="theme-color" content="{{ $schoolBranding['theme_color'] }}">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="افهمها وفهمني">
-<link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
-<link rel="icon" href="{{ asset('icons/app-icon-192.png') }}" type="image/png" sizes="192x192">
-<link rel="apple-touch-icon" href="{{ asset('icons/apple-touch-icon.png') }}">
+<meta name="apple-mobile-web-app-title" content="{{ $schoolBranding['school_name'] }}">
+<link rel="manifest" href="{{ route('school.pwa.manifest') }}">
+<link rel="icon" href="{{ route('school.pwa.icon') }}">
+<link rel="apple-touch-icon" href="{{ route('school.pwa.icon') }}">
 
