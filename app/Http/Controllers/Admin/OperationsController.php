@@ -314,13 +314,13 @@ class OperationsController extends Controller
 
         $classrooms = Classroom::orderBy('name')->get();
         $users->getCollection()->load('supervisedClassrooms');
-        return view('admin.operations.users', compact('users', 'classrooms'));
+        return view('admin.operations.users', compact('users', 'classrooms') + ['staffRoles' => \App\Models\StaffRole::where('active', true)->with('permissions')->get()]);
     }
 
     public function userUpdate(Request $r, User $user): RedirectResponse
     {
-        $d = $r->validate(['role' => ['required', Rule::in(['admin', 'supervisor', 'teacher', 'student', 'parent'])], 'status' => ['required', Rule::in(['active', 'inactive'])], 'classroom_ids'=>['nullable','array'],'classroom_ids.*'=>['integer','exists:classrooms,id']]);
-        abort_if($user->is($r->user()) && $d['status'] === 'inactive', 422, 'لا يمكنك تعطيل حسابك.');
+        $d = $r->validate(['role' => ['required', Rule::in(['admin', 'supervisor', 'teacher', 'student', 'parent', 'staff'])], 'status' => ['required', Rule::in(['active', 'inactive'])], 'classroom_ids'=>['nullable','array'],'classroom_ids.*'=>['integer','exists:classrooms,id']]);
+        abort_if($user->is($r->user()) && ($d['status'] === 'inactive' || $d['role'] !== $user->role), 422, 'لا يمكنك تعديل امتيازات حسابك.');
         $old = $user->getAttributes();
         $user->update(collect($d)->only(['role','status'])->all());
         if ($d['role'] === 'supervisor') {

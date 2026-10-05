@@ -30,6 +30,7 @@ class AuthController
             $request->user()->isStudent() => route('student.dashboard'),
             $request->user()->isTeacher() => route('teacher.dashboard'),
             $request->user()->isSupervisor() => route('supervisor.dashboard'),
+            $request->user()->hasPermission('parent-notifications.send') => route('finance.parent-notifications.create'),
             default => route('admin.dashboard'),
         };
 

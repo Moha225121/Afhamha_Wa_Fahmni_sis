@@ -61,6 +61,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::post('roles', [\App\Http\Controllers\Admin\StaffRoleController::class, 'store'])->name('roles.store');
     Route::put('roles/{staffRole}', [\App\Http\Controllers\Admin\StaffRoleController::class, 'update'])->name('roles.update');
     Route::post('users/{user}/roles', [\App\Http\Controllers\Admin\StaffRoleController::class, 'assign'])->name('users.roles.assign');
+    Route::post('users/staff', [\App\Http\Controllers\Admin\StaffRoleController::class, 'storeStaff'])->name('users.staff.store');
     Route::get('audit-logs', [OperationsController::class, 'auditLogs'])->name('audit-logs.index');
     Route::get('notifications', [OperationsController::class, 'notifications'])->name('notifications.index');
     Route::patch('notifications/read', [OperationsController::class, 'notificationsRead'])->name('notifications.read');
