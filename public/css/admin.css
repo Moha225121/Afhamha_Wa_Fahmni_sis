@@ -937,3 +937,39 @@ nav[role="navigation"] span[aria-disabled="true"] {
         min-width: 0;
     }
 }
+
+.teacher-assignment-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 22px;
+}
+
+.teacher-assignment-heading h2,
+.teacher-assignment-heading p {
+    margin-bottom: 6px;
+}
+
+.teacher-assignment-row {
+    align-items: end;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    margin-top: 12px;
+    padding: 14px;
+}
+
+.teacher-assignment-row .remove-teacher-assignment {
+    justify-self: start;
+}
+
+@media (max-width: 768px) {
+    .teacher-assignment-heading {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .teacher-assignment-heading .btn {
+        width: 100%;
+    }
+}

@@ -36,6 +36,26 @@ In VS Code, use the task named `Start Laravel local server`. You can also double
 
 Why this script exists: `start-local.ps1` starts PHP directly and uses `start-local-router.php` so static files such as CSS, icons, and service worker files are served correctly.
 
+## Primary classroom branches
+
+The migration `2026_10_05_000001_complete_primary_classroom_branches` completes
+branches A, B, and C for grades one through six in each current academic year.
+It recognizes existing Arabic and Latin section labels, preserves classroom IDs
+and student placements, and copies the source grade's subject links to its branches.
+It does not add branches to secondary or literary classrooms.
+
+When deploying the GitHub update, run the normal application migrations:
+
+```bash
+cd nasr-al-daem-school
+php artisan migrate --force
+```
+
+Pushing code to GitHub alone does not update the site's database. Administrators
+can subsequently manage primary branches from **الصفوف → إضافة تشعبات للصفوف من
+الأول إلى السادس**. Teacher assignments support selecting an individual branch
+or **جميع الشعب**, with only the subjects shared by all selected branches available.
+
 ## Demo Accounts
 
 ### Default password for new accounts
@@ -200,6 +220,24 @@ C:\php\php.exe artisan db:seed --class=LocalDemoSeeder --force
 ```
 
 Do not run `php artisan migrate:fresh` on `afhamha_sis`; it deletes all tables and data.
+
+## School library
+
+Books are stored on the private `local` disk and served through authenticated reader/download routes. Teacher guides (including English `TB` books) and student assessment manuals are restricted to teachers and administrators, even when a submitted audience value says otherwise. Search uses normalized Arabic metadata plus any extracted text supplied by the reviewed import manifest; it does not perform OCR or guarantee a complete full-text index of every PDF.
+
+The browser reader uses locally hosted PDF.js 6.3.289 (`public/vendor/pdfjs`, Apache-2.0) with page navigation, zoom and authenticated HTTP byte ranges. It does not send books to an external viewer. Preserve the vendor directory when deploying and serve `.mjs` files as JavaScript and `.wasm` files as `application/wasm`.
+
+From `nasr-al-daem-school`, import a reviewed JSON manifest with paths relative to its source folder:
+
+```powershell
+php artisan library:import "C:/Users/Lenovo LOQ/Documents/libyan_books" "tmp/library-import/manifest.json" --admin=1
+```
+
+Use the ID of an active administrator. The manifest records each book's title, subject, grades, track, book type, audience, original relative path, byte size, and SHA-256 hash. It may also include page count and extracted search text. Imports preserve source PDFs and use hashes to avoid duplicate stored books; review ambiguous books and teacher-only classifications before importing.
+
+`LIBRARY_MAX_UPLOAD_MB=0` (the default) removes the application-level whole-book size cap. Browser uploads send 8 MiB chunks. Configure PHP with `upload_max_filesize=16M` and `post_max_size=20M`, and Nginx with `client_max_body_size 10M` or larger so each chunk plus its multipart envelope is accepted. Available disk space still limits uploads; a direct, non-chunked request remains subject to the web server and PHP request limits.
+
+Temporary uploads expire after 24 hours. `php artisan library:prune-uploads` removes expired, unlocked staging uploads; the Laravel scheduler runs it daily. Keep `schedule:run` running each minute (or use the existing local `schedule:work` launcher). Completed library files and active uploads are outside this cleanup.
 
 ## PWA Files
 

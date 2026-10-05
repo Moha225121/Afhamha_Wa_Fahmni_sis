@@ -25,6 +25,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::resource('teachers', TeacherController::class);
     Route::resource('supervisors', SupervisorController::class)->only(['index','create','store','edit','update']);
     Route::resource('parents', GuardianController::class);
+    Route::get('classes/sections', [ClassroomController::class, 'sections'])->name('classes.sections');
+    Route::post('classes/sections', [ClassroomController::class, 'storeSections'])->name('classes.sections.store');
     Route::resource('classes', ClassroomController::class);
     Route::resource('subjects', SubjectController::class);
     Route::delete('users/{user}', [OperationsController::class, 'userDestroy'])->name('users.destroy');
