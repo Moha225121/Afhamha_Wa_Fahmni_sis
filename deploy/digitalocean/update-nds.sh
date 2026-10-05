@@ -15,6 +15,8 @@ test -f .env
 if [ ! -d .git ]; then
   git init
   git remote add origin "$REPO_URL"
+  git add -A
+  git -c user.name='nds-deployer' -c user.email='root@localhost' commit -m 'server baseline' >/dev/null 2>&1 || true
 fi
 git remote set-url origin "$REPO_URL"
 git fetch --quiet origin "$BRANCH"
