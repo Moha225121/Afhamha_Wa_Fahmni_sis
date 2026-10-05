@@ -1,7 +1,8 @@
-const CACHE_NAME = 'afhamha-shell-v1';
+const CACHE_NAME = 'afhamha-shell-v2';
 const OFFLINE_URL = '/offline.html';
 const APP_ASSETS = [
     OFFLINE_URL,
+    '/icons/hexa-tech-logo.png',
     '/manifest.webmanifest',
     '/icons/app-icon-192.png',
     '/icons/app-icon-512.png',

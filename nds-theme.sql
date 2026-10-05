@@ -1,0 +1,1 @@
+INSERT INTO settings (key, value, "group", created_at, updated_at) VALUES ('theme_color', '#101632', 'school', NOW(), NOW()) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = NOW();
