@@ -68,6 +68,7 @@ class GuardianController extends Controller
 
         return redirect()->route('admin.parents.show', $parent)->with('success', 'تم التحديث.');
     }
+    public function destroy(Guardian $parent): RedirectResponse { $parent->students()->detach(); $parent->delete(); $parent->user()->delete(); AuditService::record('deleted','guardians',$parent); return redirect()->route('admin.parents.index')->with('success','تم حذف ولي الأمر.'); }
 
     public function show(Guardian $parent): View
     {

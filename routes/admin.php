@@ -21,12 +21,13 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
     Route::get('/dashboard/index', fn () => redirect()->route('admin.dashboard'))->name('dashboard.index');
     Route::get('students/cards', [\App\Http\Controllers\Admin\AccountNumberingController::class, 'cards'])->name('students.cards');
-    Route::resource('students', StudentController::class)->except('destroy');
-    Route::resource('teachers', TeacherController::class)->except('destroy');
+    Route::resource('students', StudentController::class);
+    Route::resource('teachers', TeacherController::class);
     Route::resource('supervisors', SupervisorController::class)->only(['index','create','store','edit','update']);
-    Route::resource('parents', GuardianController::class)->except('destroy');
-    Route::resource('classes', ClassroomController::class)->except('destroy');
-    Route::resource('subjects', SubjectController::class)->except('destroy');
+    Route::resource('parents', GuardianController::class);
+    Route::resource('classes', ClassroomController::class);
+    Route::resource('subjects', SubjectController::class);
+    Route::delete('users/{user}', [OperationsController::class, 'userDestroy'])->name('users.destroy');
     Route::get('imports/{type}/template', [\App\Http\Controllers\Admin\ExcelImportController::class, 'template'])->name('imports.template');
     Route::get('imports/{type}', [\App\Http\Controllers\Admin\ExcelImportController::class, 'create'])->name('imports.create');
     Route::post('imports/{type}', [\App\Http\Controllers\Admin\ExcelImportController::class, 'store'])->name('imports.store');

@@ -56,4 +56,5 @@ class SubjectController extends Controller
     {
         return view('admin.subjects.show', ['subject' => $subject->load(['classrooms', 'teachers.user'])]);
     }
+    public function destroy(Subject $subject): RedirectResponse { $subject->classrooms()->detach(); $subject->delete(); AuditService::record('deleted','subjects',$subject); return redirect()->route('admin.subjects.index')->with('success','تم حذف المادة.'); }
 }

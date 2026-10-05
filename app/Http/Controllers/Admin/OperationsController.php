@@ -332,6 +332,7 @@ class OperationsController extends Controller
 
         return back()->with('success', 'تم تحديث المستخدم.');
     }
+    public function userDestroy(Request $r, User $user): RedirectResponse { abort_if($user->is($r->user()),422,'لا يمكنك حذف حسابك.'); $user->staffRoles()->detach(); $user->delete(); AuditService::record('deleted','users',$user); return back()->with('success','تم حذف المستخدم.'); }
 
     public function reports(): View
     {

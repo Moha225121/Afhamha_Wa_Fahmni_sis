@@ -56,4 +56,5 @@ class ClassroomController extends Controller
     {
         return view('admin.classes.show', ['class' => $class->load(['academicYear', 'students.user', 'subjects', 'teachers.user'])]);
     }
+    public function destroy(Classroom $class): RedirectResponse { abort_if($class->students()->exists(),422,'لا يمكن حذف صف يحتوي على طلاب.'); $class->subjects()->detach(); $class->teachers()->detach(); $class->delete(); AuditService::record('deleted','classes',$class); return redirect()->route('admin.classes.index')->with('success','تم حذف الصف.'); }
 }

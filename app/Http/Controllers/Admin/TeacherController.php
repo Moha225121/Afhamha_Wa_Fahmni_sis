@@ -73,6 +73,7 @@ class TeacherController extends Controller
 
         return redirect()->route('admin.teachers.show', $teacher)->with('success', 'تم تحديث المعلم.');
     }
+    public function destroy(Teacher $teacher): RedirectResponse { $teacher->classrooms()->detach(); $teacher->delete(); $teacher->user()->delete(); AuditService::record('deleted','teachers',$teacher); return redirect()->route('admin.teachers.index')->with('success','تم حذف المعلم.'); }
 
     private function sync(Teacher $t, array $items): void
     {

@@ -77,4 +77,5 @@ class StudentController extends Controller
 
         return redirect()->route('admin.students.show',$student)->with('success','تم تحديث بيانات الطالب.');
     }
+    public function destroy(Student $student): RedirectResponse { abort_if($student->user_id === request()->user()->id, 422, 'لا يمكنك حذف حسابك.'); $student->guardians()->detach(); $student->delete(); $student->user()->delete(); AuditService::record('deleted','students',$student); return redirect()->route('admin.students.index')->with('success','تم حذف الطالب.'); }
 }
