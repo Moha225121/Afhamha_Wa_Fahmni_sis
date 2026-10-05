@@ -8,7 +8,11 @@ use App\Models\AcademicYear;
 use App\Models\Classroom;
 use App\Models\Subject;
 use App\Services\AuditService;
+use App\Services\TeacherAssignmentGroups;
+use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class ClassroomController extends Controller
@@ -16,6 +20,69 @@ class ClassroomController extends Controller
     public function index(): View
     {
         return view('admin.classes.index', ['classes' => Classroom::with('academicYear')->withCount(['students', 'teachers', 'subjects'])->paginate(15)]);
+    }
+
+    public function sections(): View
+    {
+        $classrooms = Classroom::with('academicYear')->withCount('students')->get()
+            ->filter(fn (Classroom $classroom) => isset(TeacherAssignmentGroups::PRIMARY_GRADE_LABELS[$this->normalizedGradeName($classroom->name)])
+                && $this->normalizedGradeName((string) $classroom->section) !== 'ادبي')
+            ->sortBy(fn (Classroom $classroom) => [
+                array_search($this->normalizedGradeName($classroom->name), array_keys(TeacherAssignmentGroups::PRIMARY_GRADE_LABELS), true),
+                $classroom->academicYear?->name ?? '',
+                $this->canonicalSection($classroom->section) ?? '',
+            ])
+            ->values()
+            ->each(function (Classroom $classroom): void {
+                $classroom->setAttribute('display_grade', TeacherAssignmentGroups::PRIMARY_GRADE_LABELS[$this->normalizedGradeName($classroom->name)]);
+                $classroom->setAttribute('display_section', $this->canonicalSection($classroom->section) ?? '—');
+            });
+
+        return view('admin.classes.sections', compact('classrooms'));
+    }
+
+    public function storeSections(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'source_classroom_id' => ['required', 'integer', 'exists:classrooms,id'],
+            'sections' => ['required', 'array', 'min:1'],
+            'sections.*' => ['required', 'string', Rule::in(['A', 'B', 'C'])],
+        ]);
+
+        $source = Classroom::with('subjects')->findOrFail($data['source_classroom_id']);
+        abort_unless(isset(TeacherAssignmentGroups::PRIMARY_GRADE_LABELS[$this->normalizedGradeName($source->name)]), 422);
+        abort_if($this->normalizedGradeName((string) $source->section) === 'ادبي', 422);
+
+        $created = 0;
+        DB::transaction(function () use ($source, $data, &$created): void {
+            $existingSections = Classroom::query()
+                ->where('academic_year_id', $source->academic_year_id)
+                ->get(['name', 'section'])
+                ->filter(fn (Classroom $classroom) => $this->normalizedGradeName($classroom->name) === $this->normalizedGradeName($source->name))
+                ->map(fn (Classroom $classroom) => $this->canonicalSection($classroom->section))
+                ->all();
+
+            foreach (array_unique($data['sections']) as $section) {
+                if (in_array($section, $existingSections, true)) {
+                    continue;
+                }
+
+                $classroom = Classroom::firstOrCreate(
+                    ['name' => $source->name, 'section' => $section, 'academic_year_id' => $source->academic_year_id],
+                    ['stage' => $source->stage],
+                );
+
+                if ($classroom->wasRecentlyCreated) {
+                    $classroom->subjects()->sync($source->subjects->modelKeys());
+                    AuditService::record('created', 'classes', $classroom);
+                    $existingSections[] = $section;
+                    $created++;
+                }
+            }
+        });
+
+        return redirect()->route('admin.classes.sections')
+            ->with('success', $created ? "تم إنشاء {$created} شعبة وربطها بمواد الصف المختار." : 'الشعب المحددة موجودة مسبقًا.');
     }
 
     public function create(): View
@@ -55,5 +122,20 @@ class ClassroomController extends Controller
     public function show(Classroom $class): View
     {
         return view('admin.classes.show', ['class' => $class->load(['academicYear', 'students.user', 'subjects', 'teachers.user'])]);
+    }
+
+    private function normalizedGradeName(string $name): string
+    {
+        return TeacherAssignmentGroups::gradeKey($name);
+    }
+
+    private function canonicalSection(?string $section): ?string
+    {
+        return match (trim((string) $section)) {
+            '', 'أ', 'ا', 'A', 'a', 'علمي' => 'A',
+            'ب', 'B', 'b' => 'B',
+            'ج', 'C', 'c' => 'C',
+            default => null,
+        };
     }
 }
