@@ -31,7 +31,7 @@ if [ -d storage/app ]; then cp -a storage/app "$backup/storage-app"; fi
 
 git checkout -B "$BRANCH" "origin/$BRANCH"
 COMPOSER_ALLOW_SUPERUSER=1 composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
-if [ -f package-lock.json ]; then npm ci --ignore-scripts; npm run build; fi
+if [ -f package-lock.json ] && command -v npm >/dev/null 2>&1; then npm ci --ignore-scripts; npm run build; fi
 php artisan migrate --force --no-interaction
 php artisan storage:link --no-interaction || true
 php artisan optimize
