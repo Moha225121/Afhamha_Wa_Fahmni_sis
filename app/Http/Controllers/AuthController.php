@@ -21,10 +21,7 @@ class AuthController
             return back()->withErrors(['email' => 'بيانات الدخول غير صحيحة.'])->onlyInput('email');
         } $request->session()->regenerate();
         if ($request->user()->role === 'financial_officer') {
-            Auth::logout();
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
-            return back()->withErrors(['email' => 'هذا النوع من الحسابات لم يعد متاحًا.'])->onlyInput('email');
+            return redirect()->route('finance.parent-notifications.create');
         }
         $request->user()->update(['last_login_at' => now()]);
 

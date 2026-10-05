@@ -54,12 +54,25 @@ class User extends Authenticatable
 
     public function hasPermission(string $permission): bool
     {
+        if ($this->status !== 'active') return false;
+        if ($this->isAdmin()) return true;
+        if ($this->staffRoleAssignments()->where('active', true)->whereHas('permissions', fn ($q) => $q->where('permission', $permission))->exists()) return true;
         $p = config('permissions.roles.'.$this->role, []);
         if (empty($p)) {
             return false;
         }
 
         return in_array('*', $p, true) || in_array($permission, $p, true);
+    }
+
+    public function staffRoles(): BelongsToMany { return $this->belongsToMany(StaffRole::class, 'staff_role_assignments')->withPivot(['scope','active'])->withTimestamps(); }
+    public function staffRoleAssignments(): HasMany { return $this->hasMany(\App\Models\StaffRoleAssignment::class); }
+    public function hasScopedPermission(string $permission, ?int $classroomId = null, ?int $studentId = null): bool
+    {
+        if (!$this->hasPermission($permission)) return false;
+        if ($this->isAdmin()) return true;
+        return $this->staffRoleAssignments()->where('active', true)->whereHas('permissions', fn($q) => $q->where('permission',$permission))
+            ->get()->contains(fn($a) => $a->allows($classroomId, $studentId));
     }
 
     public function student(): HasOne

@@ -386,7 +386,7 @@ class OperationsController extends Controller
 
     public function roles(): View
     {
-        return view('admin.operations.roles', ['roles' => config('permissions.roles')]);
+        return view('admin.operations.roles', ['roles' => \App\Models\StaffRole::with('permissions')->get(), 'catalog' => config('permissions.catalog')]);
     }
 
     public function auditLogs(): View
