@@ -4,6 +4,7 @@
         <span style="font-size:8pt;font-weight:bold">{{ $schoolBranding['school_name'] }}</span>
         <span style="float:left;font-size:9pt;color:#ffad3e;font-weight:bold">بطاقة الطالب</span>
     </div>
+    @if($student->photo_image)<img src="{{ $student->photo_image }}" alt="صورة الطالب" style="float:right;width:22mm;height:25mm;object-fit:cover;margin:1.5mm 0 1mm 3mm;border-radius:2mm">@endif
     <div style="color:#123b79;font-size:10pt;font-weight:bold;margin:1.5mm 0">{{ $student->user->name }}</div>
     <div style="font-size:6.5pt;line-height:1.5">الرقم الدراسي: <b dir="ltr">{{ $student->student_number }}</b></div>
     <div style="font-size:6.5pt;line-height:1.5">البريد الإلكتروني: <b dir="ltr">{{ $student->user->email }}</b></div>

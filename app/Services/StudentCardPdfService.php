@@ -47,10 +47,28 @@ class StudentCardPdfService
         if (isset($data['student']) && $data['student']->verification_url) {
             $data['student']->setAttribute('qr_image', $this->qrImage($data['student']->verification_url));
         }
+        if (isset($data['student'])) {
+            $data['student']->setAttribute('photo_image', $this->studentPhoto($data['student']));
+        }
         if (isset($data['students'])) {
-            $data['students']->each(fn ($student) => $student->verification_url ? $student->setAttribute('qr_image', $this->qrImage($student->verification_url)) : null);
+            $data['students']->each(function ($student): void {
+                if ($student->verification_url) $student->setAttribute('qr_image', $this->qrImage($student->verification_url));
+                $student->setAttribute('photo_image', $this->studentPhoto($student));
+            });
         }
         return $data;
+    }
+
+    private function studentPhoto($student): ?string
+    {
+        $relative = $student->user?->avatar_path;
+        $root = realpath(storage_path('app/public'));
+        $path = $relative ? realpath(storage_path('app/public/'.$relative)) : false;
+        if (! $root || ! $path || ! str_starts_with($path, $root.DIRECTORY_SEPARATOR) || ! is_file($path)) return null;
+        $mime = mime_content_type($path);
+        return in_array($mime, ['image/png', 'image/jpeg', 'image/gif'], true)
+            ? 'data:'.$mime.';base64,'.base64_encode(file_get_contents($path))
+            : null;
     }
 
     private function qrImage(string $value): string
