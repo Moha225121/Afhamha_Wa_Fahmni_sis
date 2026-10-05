@@ -34,6 +34,9 @@ COMPOSER_ALLOW_SUPERUSER=1 composer install --no-dev --prefer-dist --no-interact
 if [ -f package-lock.json ] && command -v npm >/dev/null 2>&1; then npm ci --ignore-scripts; npm run build; fi
 php artisan migrate --force --no-interaction
 php artisan storage:link --no-interaction || true
+# Always rebuild Laravel caches after a checkout so newly registered routes
+# (including delete and staff-management routes) are visible immediately.
+php artisan optimize:clear
 php artisan optimize
 chown -R www-data:www-data storage bootstrap/cache
 chmod -R u+rwX,g+rwX storage bootstrap/cache
