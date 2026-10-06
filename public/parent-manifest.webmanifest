@@ -1,6 +1,6 @@
 {
-    "name": "افهمها وفهمني - ولي الأمر",
-    "short_name": "ولي الأمر",
+    "name": "مدرسة النصر الدائم - ولي الأمر",
+    "short_name": "النصر الدائم",
     "description": "بوابة ولي الأمر داخل منصة افهمها وفهمني",
     "id": "/parent/",
     "start_url": "/parent/dashboard",
@@ -14,21 +14,21 @@
     "categories": ["education", "productivity"],
     "icons": [
         {
-            "src": "/icons/parent-icon-192.png",
+            "src": "/icons/nasr-daem-logo.jpg",
             "sizes": "192x192",
-            "type": "image/png",
+            "type": "image/jpeg",
             "purpose": "any"
         },
         {
-            "src": "/icons/parent-icon-512.png",
+            "src": "/icons/nasr-daem-logo.jpg",
             "sizes": "512x512",
-            "type": "image/png",
+            "type": "image/jpeg",
             "purpose": "any"
         },
         {
-            "src": "/icons/parent-maskable-512.png",
+            "src": "/icons/nasr-daem-logo.jpg",
             "sizes": "512x512",
-            "type": "image/png",
+            "type": "image/jpeg",
             "purpose": "maskable"
         }
     ],
@@ -37,19 +37,19 @@
             "name": "الرئيسية",
             "short_name": "الرئيسية",
             "url": "/parent/dashboard",
-            "icons": [{ "src": "/icons/parent-icon-192.png", "sizes": "192x192" }]
+            "icons": [{ "src": "/icons/nasr-daem-logo.jpg", "sizes": "192x192" }]
         },
         {
             "name": "الرسائل",
             "short_name": "الرسائل",
             "url": "/parent/messages",
-            "icons": [{ "src": "/icons/parent-icon-192.png", "sizes": "192x192" }]
+            "icons": [{ "src": "/icons/nasr-daem-logo.jpg", "sizes": "192x192" }]
         },
         {
             "name": "الإشعارات",
             "short_name": "الإشعارات",
             "url": "/parent/notifications",
-            "icons": [{ "src": "/icons/parent-icon-192.png", "sizes": "192x192" }]
+            "icons": [{ "src": "/icons/nasr-daem-logo.jpg", "sizes": "192x192" }]
         }
     ]
 }
