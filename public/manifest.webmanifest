@@ -14,9 +14,9 @@
     "theme_color": "#0e7c86",
     "categories": ["education", "productivity"],
     "icons": [
-        { "src": "/icons/nasr-daem-logo.jpg", "sizes": "192x192", "type": "image/jpeg", "purpose": "any" }
+        { "src": "/icons/nasr-logo.jpg", "sizes": "192x192", "type": "image/jpeg", "purpose": "any" }
     ],
     "shortcuts": [
-        { "name": "تسجيل الدخول", "short_name": "الدخول", "url": "/login", "icons": [{ "src": "/icons/nasr-daem-logo.jpg", "sizes": "192x192", "type": "image/jpeg" }] }
+        { "name": "تسجيل الدخول", "short_name": "الدخول", "url": "/login", "icons": [{ "src": "/icons/nasr-logo.jpg", "sizes": "192x192", "type": "image/jpeg" }] }
     ]
 }

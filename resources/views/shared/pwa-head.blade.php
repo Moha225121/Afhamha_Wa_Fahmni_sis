@@ -4,6 +4,6 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="افهمها وفهمني">
 <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
-<link rel="icon" href="{{ asset('icons/nasr-daem-logo.jpg') }}" type="image/png" sizes="192x192">
+<link rel="icon" href="{{ asset('icons/nasr-logo.jpg') }}" type="image/png" sizes="192x192">
 <link rel="apple-touch-icon" href="{{ asset('icons/apple-touch-icon.png') }}">
 

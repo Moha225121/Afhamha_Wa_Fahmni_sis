@@ -14,19 +14,19 @@
     "categories": ["education", "productivity"],
     "icons": [
         {
-            "src": "/icons/nasr-daem-logo.jpg",
+            "src": "/icons/nasr-logo.jpg",
             "sizes": "192x192",
             "type": "image/jpeg",
             "purpose": "any"
         },
         {
-            "src": "/icons/nasr-daem-logo.jpg",
+            "src": "/icons/nasr-logo.jpg",
             "sizes": "512x512",
             "type": "image/jpeg",
             "purpose": "any"
         },
         {
-            "src": "/icons/nasr-daem-logo.jpg",
+            "src": "/icons/nasr-logo.jpg",
             "sizes": "512x512",
             "type": "image/jpeg",
             "purpose": "maskable"
@@ -37,19 +37,19 @@
             "name": "الرئيسية",
             "short_name": "الرئيسية",
             "url": "/parent/dashboard",
-            "icons": [{ "src": "/icons/nasr-daem-logo.jpg", "sizes": "192x192" }]
+            "icons": [{ "src": "/icons/nasr-logo.jpg", "sizes": "192x192" }]
         },
         {
             "name": "الرسائل",
             "short_name": "الرسائل",
             "url": "/parent/messages",
-            "icons": [{ "src": "/icons/nasr-daem-logo.jpg", "sizes": "192x192" }]
+            "icons": [{ "src": "/icons/nasr-logo.jpg", "sizes": "192x192" }]
         },
         {
             "name": "الإشعارات",
             "short_name": "الإشعارات",
             "url": "/parent/notifications",
-            "icons": [{ "src": "/icons/nasr-daem-logo.jpg", "sizes": "192x192" }]
+            "icons": [{ "src": "/icons/nasr-logo.jpg", "sizes": "192x192" }]
         }
     ]
 }

@@ -10,9 +10,9 @@
     <meta name="apple-mobile-web-app-title" content="ولي الأمر">
     <title>@yield('title', 'بوابة ولي الأمر') | افهمها وفهمني</title>
     <link rel="manifest" href="{{ route('parent.pwa.manifest') }}">
-    <link rel="icon" href="{{ asset('icons/nasr-daem-logo.jpg') }}" sizes="any">
-    <link rel="icon" href="{{ asset('icons/nasr-daem-logo.jpg') }}" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="{{ asset('icons/nasr-daem-logo.jpg') }}">
+    <link rel="icon" href="{{ asset('icons/nasr-logo.jpg') }}" sizes="any">
+    <link rel="icon" href="{{ asset('icons/nasr-logo.jpg') }}" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="{{ asset('icons/nasr-logo.jpg') }}">
     <link rel="stylesheet" href="{{ asset('css/parent.css') }}?v=portal-style-1">
     @include('shared.branding-style')@include('shared.portal-assets')
     <script src="{{ asset('js/enhanced-selects.js') }}" defer></script>
