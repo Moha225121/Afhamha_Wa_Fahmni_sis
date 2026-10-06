@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Mpdf\Mpdf;
 use Mpdf\Output\Destination;
 
@@ -33,6 +34,7 @@ class StudentCardPdfService
             $pageHtml = '';
             foreach ($page->values() as $index => $student) {
                 $student->setAttribute('qr_image', $this->qrImage($student->verification_url));
+                $student->setAttribute('photo_image', $this->studentPhoto($student));
                 $html = view('admin.accounts.card-fragment', ['student' => $student, 'pdfLogo' => $logo, 'schoolBranding' => view()->shared('schoolBranding')])->render();
                 $row = intdiv($index, 2); $column = $index % 2;
                 $pageHtml .= '<div style="position:absolute;left:'.(8 + ($column * 101)).'mm;top:'.(8 + ($row * 68)).'mm;width:94mm;height:62mm">'.$html.'</div>';
@@ -50,7 +52,8 @@ class StudentCardPdfService
                 $student->setAttribute('qr_image', $this->qrImage($student->verification_url));
             }
             if ($student->user?->avatar_path) {
-                $student->setAttribute('photo_image', asset('storage/'.$student->user->avatar_path));
+                $thumbnail = $this->studentPhotoThumbnail($student);
+                if ($thumbnail) $student->setAttribute('photo_image', asset('storage/'.$thumbnail));
             }
         });
     }
@@ -74,14 +77,55 @@ class StudentCardPdfService
 
     private function studentPhoto($student): ?string
     {
+        $thumbnail = $this->studentPhotoThumbnail($student);
+        if (! $thumbnail) return null;
+        return 'data:image/jpeg;base64,'.base64_encode(Storage::disk('public')->get($thumbnail));
+    }
+
+    private function studentPhotoThumbnail($student): ?string
+    {
         $relative = $student->user?->avatar_path;
-        $root = realpath(storage_path('app/public'));
-        $path = $relative ? realpath(storage_path('app/public/'.$relative)) : false;
+        $root = realpath(Storage::disk('public')->path(''));
+        $path = $relative ? realpath(Storage::disk('public')->path($relative)) : false;
         if (! $root || ! $path || ! str_starts_with($path, $root.DIRECTORY_SEPARATOR) || ! is_file($path)) return null;
-        $mime = mime_content_type($path);
-        return in_array($mime, ['image/png', 'image/jpeg', 'image/gif'], true)
-            ? 'data:'.$mime.';base64,'.base64_encode(file_get_contents($path))
-            : null;
+
+        $thumbnail = 'student-card-thumbnails/'.hash('sha256', $relative.'|'.filemtime($path).'|'.filesize($path)).'.jpg';
+        $disk = Storage::disk('public');
+        if ($disk->exists($thumbnail)) return $thumbnail;
+        if (! function_exists('imagecreatetruecolor')) return null;
+
+        $image = match (mime_content_type($path)) {
+            'image/jpeg' => @imagecreatefromjpeg($path),
+            'image/png' => @imagecreatefrompng($path),
+            'image/webp' => function_exists('imagecreatefromwebp') ? @imagecreatefromwebp($path) : false,
+            default => false,
+        };
+        if (! $image) return null;
+
+        try {
+            $width = imagesx($image);
+            $height = imagesy($image);
+            if ($width < 1 || $height < 1) return null;
+            $targetWidth = 260;
+            $targetHeight = 300;
+            $cropWidth = min($width, (int) round($height * $targetWidth / $targetHeight));
+            $cropHeight = min($height, (int) round($width * $targetHeight / $targetWidth));
+            $cardImage = imagecreatetruecolor($targetWidth, $targetHeight);
+            if (! $cardImage) return null;
+            imagefill($cardImage, 0, 0, imagecolorallocate($cardImage, 255, 255, 255));
+            imagecopyresampled(
+                $cardImage, $image, 0, 0,
+                (int) (($width - $cropWidth) / 2), (int) (($height - $cropHeight) / 2),
+                $targetWidth, $targetHeight, $cropWidth, $cropHeight,
+            );
+            ob_start();
+            imagejpeg($cardImage, null, 72);
+            $jpeg = ob_get_clean();
+            imagedestroy($cardImage);
+            return $jpeg && $disk->put($thumbnail, $jpeg) ? $thumbnail : null;
+        } finally {
+            imagedestroy($image);
+        }
     }
 
     private function qrImage(string $value): string

@@ -15,6 +15,8 @@
         .card-position { position: absolute; width: 94mm; height: 62mm; }
         .card-selection { position: absolute; top: -6mm; right: 0; padding: 1mm 2mm; background: #fff; border-radius: 2mm; font: 12px Tahoma, Arial, sans-serif; cursor: pointer; }
         .print-pages { display: none; }
+        body.printing .preview-pages { display: none; }
+        body.printing .print-pages { display: block; }
         @media print {
             body { background: #fff; }
             .toolbar, .preview-pages { display: none; }
@@ -45,7 +47,7 @@
         </div>
     @endforeach
     </div>
-    <div class="print-pages" id="print-pages" aria-hidden="true"></div>
-    <script src="{{ asset('js/admin-card-selection.js') }}?v=1" defer></script>
+    <div class="print-pages" id="print-pages"></div>
+    <script src="{{ asset('js/admin-card-selection.js') }}?v=2" defer></script>
 </body>
 </html>
