@@ -42,20 +42,8 @@
     printButton.addEventListener('click', () => {
         if (selectedCards().length === 0) return;
         buildPrintPages();
-        document.body.classList.add('printing');
-        // Make the selected pages part of the layout before Chrome snapshots
-        // the document for Print to PDF.
-        void printPages.offsetHeight;
         window.print();
     });
-    window.addEventListener('beforeprint', () => {
-        if (!document.body.classList.contains('printing')) {
-            buildPrintPages();
-            document.body.classList.add('printing');
-        }
-    });
-    window.addEventListener('afterprint', () => {
-        document.body.classList.remove('printing');
-    });
+    window.addEventListener('beforeprint', buildPrintPages);
     updateCount();
 })();
