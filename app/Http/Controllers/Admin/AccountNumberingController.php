@@ -80,7 +80,9 @@ class AccountNumberingController extends Controller
         abort_if($students->isEmpty(), 404, 'لا يوجد طلاب مطابقون للطباعة.');
         $expires = now()->addYear();
         $students->each(fn ($student) => $student->setAttribute('verification_url', URL::temporarySignedRoute('student.card.verify', $expires, ['student' => $student->id])));
-        return $pdf->downloadBulk($students, 'student-cards.pdf');
+        $pdf->preparePrintableCards($students);
+
+        return view('admin.accounts.cards-print', compact('students'));
     }
 
     public function verify(Student $student)

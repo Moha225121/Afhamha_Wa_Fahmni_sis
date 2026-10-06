@@ -42,6 +42,19 @@ class StudentCardPdfService
         return response($pdf->Output('', Destination::STRING_RETURN), 200, ['Content-Type' => 'application/pdf', 'Content-Disposition' => 'attachment; filename="'.$filename.'"', 'Cache-Control' => 'private, no-store']);
     }
 
+    public function preparePrintableCards($students): void
+    {
+        $this->registerQrCodeAutoloader();
+        $students->each(function ($student): void {
+            if ($student->verification_url) {
+                $student->setAttribute('qr_image', $this->qrImage($student->verification_url));
+            }
+            if ($student->user?->avatar_path) {
+                $student->setAttribute('photo_image', asset('storage/'.$student->user->avatar_path));
+            }
+        });
+    }
+
     private function attachQrImages(array $data): array
     {
         if (isset($data['student']) && $data['student']->verification_url) {
