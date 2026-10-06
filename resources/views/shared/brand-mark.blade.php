@@ -1,1 +1,1 @@
-@if($schoolBranding['logo'])<img src="{{ asset('storage/'.$schoolBranding['logo']) }}" alt="شعار {{ $schoolBranding['school_name'] }}">@else AWF @endif
+<img src="{{ asset('icons/nasr-logo.jpg') }}" alt="شعار مدرسة النصر الدائم">
