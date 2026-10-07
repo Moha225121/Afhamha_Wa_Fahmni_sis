@@ -6,10 +6,10 @@
     <title>طباعة بطاقات الطلاب</title>
     <style>
         @page { size: A4; margin: 0; }
-        body { margin: 0; background: #eef2f7; }
-        .toolbar { position: sticky; top: 0; z-index: 2; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 20px; background: #fff; color: #132d57; font: 14px Tahoma, Arial, sans-serif; }
+        body { margin: 0; background: #F1F2F5; }
+        .toolbar { position: sticky; top: 0; z-index: 2; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 20px; background: #fff; color: #101632; font: 14px Tahoma, Arial, sans-serif; }
         .toolbar-actions { display: flex; flex-wrap: wrap; gap: 8px; }
-        .toolbar button { padding: 9px 16px; border: 0; border-radius: 8px; background: #123b79; color: #fff; cursor: pointer; font: inherit; }
+        .toolbar button { padding: 9px 16px; border: 0; border-radius: 8px; background: #101632; color: #fff; cursor: pointer; font: inherit; }
         .toolbar button:disabled { opacity: .5; cursor: not-allowed; }
         .page { position: relative; width: 210mm; height: 297mm; margin: 12px auto; background: #fff; overflow: hidden; }
         .card-position { position: absolute; width: 94mm; height: 62mm; }
@@ -39,7 +39,7 @@
             @foreach($page->values() as $index => $student)
                 <div class="card-position" style="left:{{ 8 + (($index % 2) * 101) }}mm;top:{{ 8 + (intdiv($index, 2) * 68) }}mm">
                     <label class="card-selection"><input type="checkbox" class="card-checkbox" checked> طباعة هذه البطاقة</label>
-                    @include('admin.accounts.card-fragment', ['student' => $student, 'pdfLogo' => asset('icons/nasr-logo.jpg')])
+                    @include('admin.accounts.card-fragment', ['student' => $student, 'pdfLogo' => asset(\App\Support\SchoolBranding::LOGO)])
                 </div>
             @endforeach
         </div>

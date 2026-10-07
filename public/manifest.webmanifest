@@ -6,17 +6,46 @@
     "start_url": "/login?source=pwa",
     "scope": "/",
     "display": "standalone",
-    "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+    "display_override": [
+        "window-controls-overlay",
+        "standalone",
+        "minimal-ui"
+    ],
     "orientation": "any",
     "dir": "rtl",
     "lang": "ar",
-    "background_color": "#ffffff",
-    "theme_color": "#0e7c86",
-    "categories": ["education", "productivity"],
+    "background_color": "#FFFFFF",
+    "theme_color": "#101632",
+    "categories": [
+        "education",
+        "productivity"
+    ],
     "icons": [
-        { "src": "/icons/nasr-logo.jpg", "sizes": "192x192", "type": "image/jpeg", "purpose": "any" }
+        {
+            "src": "/school-branding/icon-192.png?v=20261007-nasr-daem",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/school-branding/icon-512.png?v=20261007-nasr-daem",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
     ],
     "shortcuts": [
-        { "name": "تسجيل الدخول", "short_name": "الدخول", "url": "/login", "icons": [{ "src": "/icons/nasr-logo.jpg", "sizes": "192x192", "type": "image/jpeg" }] }
+        {
+            "name": "تسجيل الدخول",
+            "short_name": "الدخول",
+            "url": "/login",
+            "icons": [
+                {
+                    "src": "/school-branding/icon-192.png?v=20261007-nasr-daem",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                }
+            ]
+        }
     ]
 }

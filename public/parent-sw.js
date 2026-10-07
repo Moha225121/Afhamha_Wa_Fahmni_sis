@@ -1,13 +1,11 @@
-const CACHE_NAME = 'afhamha-parent-static-v8';
+const CACHE_NAME = 'afhamha-parent-static-v9-nasr-daem';
 const OFFLINE_URL = '/parent-offline.html';
 const STATIC_ASSETS = [
     OFFLINE_URL,
-    '/icons/hexa-tech-logo.png',
-    '/favicon.ico',
-    '/icons/parent-icon.svg',
-    '/icons/parent-icon-192.png',
-    '/icons/parent-icon-512.png',
-    '/icons/parent-maskable-512.png',
+    '/icons/nasr-daem-logo.jpg',
+    '/school-branding/icon-180.png?v=20261007-nasr-daem',
+    '/school-branding/icon-192.png?v=20261007-nasr-daem',
+    '/school-branding/icon-512.png?v=20261007-nasr-daem',
     '/parent-manifest.webmanifest'
 ];
 
@@ -40,7 +38,7 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    if (STATIC_ASSETS.includes(url.pathname)) {
+    if (STATIC_ASSETS.includes(url.pathname + url.search) || STATIC_ASSETS.includes(url.pathname)) {
         event.respondWith(caches.match(request).then((cached) => cached || fetch(request)));
     }
 });
@@ -49,8 +47,8 @@ self.addEventListener('push', (event) => {
     const payload = event.data ? event.data.json() : {};
     event.waitUntil(self.registration.showNotification(payload.title || 'افهمها وفهمني', {
         body: payload.body || 'لديك إشعار جديد.',
-        icon: '/icons/parent-icon-192.png',
-        badge: '/icons/parent-maskable-512.png',
+        icon: '/school-branding/icon-192.png?v=20261007-nasr-daem',
+        badge: '/school-branding/icon-192.png?v=20261007-nasr-daem',
         data: { url: payload.url || '/parent/notifications' },
         dir: 'rtl',
         lang: 'ar',

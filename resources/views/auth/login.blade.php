@@ -1,14 +1,11 @@
 <!doctype html>
-@include('shared.pwa-head')
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="utf-8">
+    <meta charset="utf-8">@include('shared.pwa-head')
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>دخول المنصة | افهمها وفهمني</title>
-    <link rel="icon" href="{{ asset('icons/nasr-logo.jpg') }}" sizes="any">
-    <link rel="apple-touch-icon" href="{{ asset('icons/nasr-logo.jpg') }}">
     <link rel="stylesheet" href="{{ asset('css/admin.css') }}?v=login-style-1">
-    @include('shared.branding-style')@include('shared.portal-assets')
+    @include('shared.portal-assets')@include('shared.branding-style')
 </head>
 <body class="login-page">
 <main class="login-card">

@@ -348,8 +348,8 @@ class OperationsController extends Controller
     {
         $d = $r->validate([
             'school_name' => ['required','string','max:255'], 'school_phone' => ['nullable','string','max:30'], 'school_email' => ['nullable','email'], 'school_address' => ['nullable','string'],
-            'school_logo' => ['nullable','image','mimes:png,jpg,jpeg,webp,svg','max:2048'],
-            'theme_color' => ['required', Rule::in(['#1239B3','#078DB5','#008C95','#00B978','#6D4AFF','#102A43'])],
+            'school_logo' => ['prohibited'],
+            'theme_color' => ['exclude'],
             'timezone' => ['required','timezone'], 'academic_year_name' => ['required','string','max:30'], 'academic_year_starts_at' => ['required','date'], 'academic_year_ends_at' => ['required','date','after:academic_year_starts_at'],
             'periods_sunday' => ['required','integer','min:1','max:12'], 'periods_monday' => ['required','integer','min:1','max:12'], 'periods_tuesday' => ['required','integer','min:1','max:12'], 'periods_wednesday' => ['required','integer','min:1','max:12'], 'periods_thursday' => ['required','integer','min:1','max:12'],
             'break_after_period' => ['required','integer','min:1','max:11'], 'break_duration_minutes' => ['required','integer','min:5','max:120'],
@@ -363,12 +363,8 @@ class OperationsController extends Controller
             $after=(int)$d['break_after_period'];
             if(isset($periods[$after],$periods[$after+1])) { $breakEnds=Carbon::createFromFormat('H:i',$periods[$after]['ends_at'])->addMinutes((int)$d['break_duration_minutes'])->format('H:i'); if($periods[$after+1]['starts_at']<$breakEnds) return back()->withInput()->withErrors(["period_times.$day.".($after+1).'.starts_at'=>"يجب أن تبدأ الحصة التالية بعد نهاية الاستراحة عند {$breakEnds}."]); }
         }
-        $logo = $r->file('school_logo'); unset($d['school_logo']);
-        if ($logo) {
-            $oldLogo = DB::table('settings')->where('key','school_logo')->value('value');
-            $d['school_logo'] = $logo->store('school-branding','public');
-            if ($oldLogo && $oldLogo !== $d['school_logo']) Storage::disk('public')->delete($oldLogo);
-        }
+        $d['school_logo'] = \App\Support\SchoolBranding::LOGO;
+        $d['theme_color'] = \App\Support\SchoolBranding::NAVY;
         $year = ['name' => $d['academic_year_name'], 'starts_at' => $d['academic_year_starts_at'], 'ends_at' => $d['academic_year_ends_at']];
         unset($d['academic_year_name'], $d['academic_year_starts_at'], $d['academic_year_ends_at']);
         AcademicYear::query()->update(['is_current' => false]);

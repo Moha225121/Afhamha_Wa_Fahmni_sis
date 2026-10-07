@@ -723,7 +723,7 @@ textarea:focus {
     padding:14px 20px;
     border-radius:12px;
     box-shadow:0 8px 18px rgba(17,31,78,0.12);
-    background:linear-gradient(135deg,#12264f 0%,#18316e 100%) !important;
+    background:linear-gradient(135deg,var(--school-navy) 0%,var(--school-navy-light) 100%) !important;
     color:#fff !important;
     font-size:16px;
 }
@@ -1080,4 +1080,3 @@ textarea:focus {
         .teacher-portal .class-tabs { margin-inline: -2px; overflow-x: auto; }
         .teacher-portal .class-tabs a { flex: 0 0 auto; }
     }
-

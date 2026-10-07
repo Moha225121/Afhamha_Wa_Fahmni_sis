@@ -1,13 +1,12 @@
-const CACHE_NAME = 'afhamha-shell-v2';
+const CACHE_NAME = 'afhamha-shell-v3-nasr-daem';
 const OFFLINE_URL = '/offline.html';
 const APP_ASSETS = [
     OFFLINE_URL,
-    '/icons/hexa-tech-logo.png',
-    '/manifest.webmanifest',
-    '/icons/app-icon-192.png',
-    '/icons/app-icon-512.png',
-    '/icons/app-maskable-512.png',
-    '/icons/apple-touch-icon.png'
+    '/icons/nasr-daem-logo.jpg',
+    '/school-branding/icon-180.png?v=20261007-nasr-daem',
+    '/school-branding/icon-192.png?v=20261007-nasr-daem',
+    '/school-branding/icon-512.png?v=20261007-nasr-daem',
+    '/manifest.webmanifest'
 ];
 
 self.addEventListener('install', event => {
@@ -32,7 +31,7 @@ self.addEventListener('fetch', event => {
         return;
     }
 
-    if (APP_ASSETS.includes(url.pathname)) {
+    if (APP_ASSETS.includes(url.pathname + url.search) || APP_ASSETS.includes(url.pathname)) {
         event.respondWith(caches.match(request).then(cached => cached || fetch(request)));
     }
 });

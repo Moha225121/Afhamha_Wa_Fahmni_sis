@@ -1,0 +1,98 @@
+/* Fixed identity: all school artwork comes from icons/nasr-daem-logo.jpg. */
+:root {
+    --school-navy: #101632;
+    --school-navy-light: #1A2346;
+    --school-gold: #E6C52A;
+    --school-gold-light: #EFD75C;
+    --school-white: #FFFFFF;
+    --school-gray: #F1F2F5;
+}
+
+:root, body.student-portal, body.teacher-portal {
+    --theme-primary: var(--school-navy);
+    --ink: var(--school-navy);
+    --nav: var(--school-navy);
+    --nav-soft: var(--school-navy-light);
+    --primary: var(--school-navy);
+    --primary-dark: var(--school-navy-light);
+    --primary-deep: var(--school-navy-light);
+    --primary-bright: var(--school-navy-light);
+    --teacher-primary: var(--school-navy);
+    --teacher-primary-dark: var(--school-navy-light);
+    --teacher-ink: var(--school-navy);
+    --teacher-bg: var(--school-white);
+    --teacher-line: var(--school-gray);
+    --teacher-accent: var(--school-navy);
+    --teal: var(--school-navy);
+    --blue: var(--school-navy);
+    --sky: var(--school-navy-light);
+    --violet: var(--school-navy);
+    --orange: var(--school-gold);
+    --orange-deep: var(--school-gold-light);
+    --accent: var(--school-gold);
+    --accent-soft: color-mix(in srgb, var(--school-gold-light) 22%, var(--school-white));
+    --bg: var(--school-white);
+    --surface: var(--school-white);
+    --surface-soft: var(--school-gray);
+    --surface-warm: color-mix(in srgb, var(--school-gold-light) 18%, var(--school-white));
+    --line: var(--school-gray);
+    --line-strong: color-mix(in srgb, var(--school-navy) 22%, var(--school-gray));
+    --ui-ink: var(--school-navy);
+    --ui-bg: var(--school-white);
+    --ui-line: var(--school-gray);
+    --primary-glow: 0 14px 30px rgb(16 22 50 / 18%);
+    --focus: 0 0 0 4px rgb(230 197 42 / 35%);
+}
+
+html, body, body.student-portal, body.teacher-portal, .app-shell { background: var(--school-white); }
+body, body.student-portal, body.teacher-portal { color: var(--school-navy); }
+.student-portal { --focus: var(--school-gold); }
+.login-page { background: linear-gradient(135deg, var(--school-gray), var(--school-white)); }
+.login-page::before { background: linear-gradient(120deg, transparent 0 18%, rgb(16 22 50 / 6%) 18% 32%, transparent 32% 100%), linear-gradient(60deg, transparent 0 56%, rgb(230 197 42 / 12%) 56% 68%, transparent 68% 100%); }
+.login-card { background: var(--school-white); }
+.login-card h1 { color: var(--school-navy); }
+.login-card::before { background: linear-gradient(90deg, var(--school-navy), var(--school-gold)); }
+.sidebar, .teacher-portal .sidebar { background: linear-gradient(180deg, var(--school-navy), var(--school-navy-light)); }
+.sidebar nav a { color: var(--school-gray); }
+.sidebar nav a.active, .teacher-portal .sidebar nav a.active { border-inline-start-color: var(--school-gold); color: var(--school-gold-light); }
+.sidebar .nav-section { color: var(--school-gold-light); }
+.brand-mark, .sidebar .brand-mark, .app-header .brand-mark, .student-portal .brand-mark { background: var(--school-white); border: 1px solid var(--school-gold); }
+.brand-mark img { display: block; width: 100%; height: 100%; object-fit: contain; border-radius: inherit; background: var(--school-white); }
+.btn.primary, .student-portal .btn.primary, .teacher-portal .btn.primary,
+.global-search button, .install-app-button, .install-dialog-done { background: var(--school-navy); color: var(--school-white); }
+.btn.primary:hover, .install-app-button:hover { background: var(--school-navy-light); }
+.bottom-nav a.active, .student-portal .bottom-nav a.active { background: var(--surface-warm); color: var(--school-navy); border-color: var(--school-gold); }
+.hero, .student-portal .hero, .teacher-welcome { background: linear-gradient(135deg, var(--school-navy), var(--school-navy-light)); color: var(--school-white); box-shadow: 0 16px 32px rgb(16 22 50 / 15%); }
+.hero h1, .student-portal .hero h1 { color: var(--school-white); }
+.hero::after { background: var(--school-gold); }
+.hero::before { background: linear-gradient(110deg, transparent, rgb(230 197 42 / 12%), transparent); }
+.hero-visual-card { background: var(--school-gold-light); color: var(--school-navy); }
+.more-menu-toggle { background: var(--school-navy); }
+.student-focus { background: var(--school-gray); border-color: var(--school-gray); }
+.student-focus a, .section-title a, .profile-form button { background: var(--school-navy); color: var(--school-white); }
+.secondary-action { background: var(--school-gray); color: var(--school-navy); }
+body .quick-links a:nth-child(n) { background: var(--school-gray); border-color: var(--school-gray); color: var(--school-navy); }
+body .quick-links a:nth-child(n)::before, body .metric:nth-child(n)::before { background: var(--school-gold); }
+body .metric:nth-child(n)::after { background: var(--school-gold-light); }
+.student-portal .hero .hero-eyebrow { color: var(--school-gold-light); }
+.student-portal .hero .hero-eyebrow > span { background: var(--school-gold); }
+.student-portal .service-card[class] { --service-color: var(--school-navy); --service-soft: var(--surface-warm); }
+.student-portal .service-card::after { background: var(--school-gold); }
+.student-portal .service-icon { background: var(--school-gold-light); color: var(--school-navy); }
+.teacher-class-card__header,
+.teacher-class-card:nth-child(3n + 2) .teacher-class-card__header,
+.teacher-class-card:nth-child(3n + 3) .teacher-class-card__header { background: linear-gradient(135deg, var(--school-navy), var(--school-navy-light)); }
+body .admin-stat::before { background: var(--school-gold); }
+.admin-bar { background: linear-gradient(180deg, var(--school-navy), var(--school-navy-light)); }
+.finance-bar { background: var(--school-navy); }
+.finance-badge { background: var(--school-gray); }
+.teacher-portal .btn.secondary, .panel-heading a, .teacher-account-dropdown a:hover,
+.teacher-account-dropdown form button:hover { background: var(--school-gray); border-color: var(--school-gray); }
+.teacher-stat--tasks::before { background: var(--school-gold); }
+.teacher-header-avatar, .teacher-profile-avatar { background: var(--school-gray); border-color: var(--school-gold-light); color: var(--school-navy); }
+.filters, th, .empty, .analysis-metric, .analysis-report { background: var(--school-gray); }
+.analysis-metric strong, .eyebrow { color: var(--school-navy); }
+.pwa-install-button { background: var(--school-gold); color: var(--school-navy); border-color: var(--school-gold); }
+.pwa-install-button:hover { background: var(--school-gold-light); }
+input[type="checkbox"], input[type="radio"] { accent-color: var(--school-navy); }
+::selection { color: var(--school-navy); background: var(--school-gold-light); }

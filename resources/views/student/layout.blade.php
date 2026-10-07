@@ -1,16 +1,12 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
-@include('shared.pwa-head')
 <head>
-    <meta charset="utf-8">
+    <meta charset="utf-8">@include('shared.pwa-head')
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <meta name="theme-color" content="#0e7c86">
     <title>{{ strip_tags($__env->yieldContent('title', 'بوابة الطالب')) }} | افهمها وفهمني</title>
-    <link rel="icon" href="{{ asset('icons/nasr-logo.jpg') }}" sizes="any">
-    <link rel="apple-touch-icon" href="{{ asset('icons/nasr-logo.jpg') }}">
     <link rel="stylesheet" href="{{ asset('css/parent.css') }}?v=portal-style-1">
     <link rel="stylesheet" href="{{ asset('css/student.css') }}?v=20260827-1">
-    @include('shared.branding-style')@include('shared.portal-assets')
+    @include('shared.portal-assets')@include('shared.branding-style')
     <script src="{{ asset('js/student-tutor.js') }}" defer></script>
     <script src="{{ asset('js/enhanced-selects.js') }}" defer></script>
 </head>

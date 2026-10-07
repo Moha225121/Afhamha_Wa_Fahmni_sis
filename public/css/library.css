@@ -1,11 +1,11 @@
 /* Shared library surface for the administrator, teacher and student portals. */
 .library-catalog, .library-reader, .lib-upload {
-    --lib-ink: #17373c;
+    --lib-ink: var(--school-navy);
     --lib-muted: #647c80;
-    --lib-primary: #087d80;
-    --lib-deep: #07585f;
-    --lib-line: #dce8e8;
-    --lib-soft: #f0f7f6;
+    --lib-primary: var(--school-navy);
+    --lib-deep: var(--school-navy-light);
+    --lib-line: var(--school-gray);
+    --lib-soft: var(--school-gray);
     color: var(--lib-ink);
     line-height: 1.65;
     min-width: 0;
@@ -16,7 +16,7 @@
 .library-catalog > * { min-width: 0; max-width: 100%; }
 .library-catalog h1, .library-catalog h2, .library-catalog h3, .library-reader h1 { color: var(--lib-ink); line-height: 1.45; }
 .library-catalog a, .library-reader a, .lib-upload a { text-decoration: none; }
-.library-catalog :focus-visible, .library-reader :focus-visible, .lib-upload :focus-visible { outline: 3px solid #41a5a9; outline-offset: 3px; }
+.library-catalog :focus-visible, .library-reader :focus-visible, .lib-upload :focus-visible { outline: 3px solid var(--school-gold); outline-offset: 3px; }
 .lib-button {
     display: inline-flex; align-items: center; justify-content: center; gap: 8px;
     min-height: 42px; padding: 9px 17px; border: 1px solid transparent; border-radius: 11px;
@@ -25,25 +25,25 @@
     transition: background-color .16s, border-color .16s, box-shadow .16s;
 }
 .lib-button svg, .lib-search-field svg { width: 19px; height: 19px; flex-shrink: 0; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
-.lib-button--primary { color: white !important; background: #087d80; border-color: #087d80; box-shadow: 0 3px 7px #087d8012; }
-.lib-button--primary:hover { background: #075f65; border-color: #075f65; }
-.lib-button--secondary { color: #22565b !important; background: #fff; border-color: #d4e2e1; }
-.lib-button--secondary:hover { background: #eff7f6; border-color: #a8cfcd; }
+.lib-button--primary { color: white !important; background: var(--school-navy); border-color: var(--school-navy); box-shadow: 0 3px 7px #087d8012; }
+.lib-button--primary:hover { background: var(--school-navy-light); border-color: var(--school-navy-light); }
+.lib-button--secondary { color: var(--school-navy) !important; background: #fff; border-color: #d4e2e1; }
+.lib-button--secondary:hover { background: var(--school-gray); border-color: #a8cfcd; }
 .lib-button:disabled, .lib-button[aria-disabled="true"] { opacity: .45; pointer-events: none; cursor: default; box-shadow: none; }
 .lib-hero {
     display: flex; align-items: center; justify-content: space-between; gap: 30px;
     padding: 30px 34px; border: 1px solid #d1e7e4; border-radius: 21px;
-    background: radial-gradient(ellipse at 0 0, #d7efeb 0, transparent 65%), linear-gradient(115deg, #e6f4f0, #f3f9f7);
+    background: radial-gradient(ellipse at 0 0, var(--school-gray) 0, transparent 65%), linear-gradient(115deg, var(--school-gray), var(--school-white));
     overflow: hidden;
 }
-.lib-eyebrow { color: #187b76; font-size: 12px; font-weight: 800; letter-spacing: .3px; margin: 0 0 9px; }
+.lib-eyebrow { color: var(--school-navy); font-size: 12px; font-weight: 800; letter-spacing: .3px; margin: 0 0 9px; }
 .lib-eyebrow span { margin-inline-end: 5px; }
 .lib-hero h1, .lib-hero h2 { font-size: clamp(24px, 2.5vw, 34px); font-weight: 800; margin: 0 0 9px; letter-spacing: -.5px; }
 .lib-hero-copy > p:last-of-type { max-width: 550px; font-size: 14px; color: #4a7172; margin: 0; }
 .lib-hero-note { display: inline-block; margin-top: 11px; color: #37615f; font-size: 12px; }
 .lib-stats { display: flex; gap: 26px; margin: 0; flex-shrink: 0; }
 .lib-stats > div { display: flex; flex-direction: column-reverse; align-items: center; min-width: 58px; }
-.lib-stats dd { font-size: 32px; color: #096f6d; font-weight: 800; line-height: 1.25; margin: 0 0 7px; font-variant-numeric: tabular-nums; }
+.lib-stats dd { font-size: 32px; color: var(--school-navy); font-weight: 800; line-height: 1.25; margin: 0 0 7px; font-variant-numeric: tabular-nums; }
 .lib-stats dt { color: #547571; font-size: 11px; white-space: nowrap; }
 .lib-filter-panel { padding: 23px; background: #fff; border: 1px solid var(--lib-line); border-radius: 17px; box-shadow: 0 5px 20px #19434504; }
 .lib-search-label { display: block; font-size: 13px; font-weight: 800; margin-bottom: 10px; }
@@ -96,10 +96,10 @@
 .lib-teacher-badge { display: inline-flex; align-items: center; font-size: 10px; font-weight: 700; padding: 4px 8px; border: 1px solid #e4d8ba; border-radius: 6px; color: #8b682c; background: #fff9e9; }
 .lib-book-cover .lib-teacher-badge { position: absolute; inset-inline-end: 12px; bottom: 12px; z-index: 1; }
 .lib-book-body { display: flex; flex-direction: column; flex: 1; padding: 18px 18px 15px; }
-.lib-book-subject { font-size: 10px; color: #087d80; font-weight: 700; margin: 0 0 5px; }
+.lib-book-subject { font-size: 10px; color: var(--school-navy); font-weight: 700; margin: 0 0 5px; }
 .lib-book h3 { margin: 0 0 12px; font-size: 15px; font-weight: 800; line-height: 1.75; overflow-wrap: anywhere; }
 .lib-book h3 a { color: #193f45; }
-.lib-book h3 a:hover { color: #087d80; text-decoration: underline; text-underline-offset: 4px; }
+.lib-book h3 a:hover { color: var(--school-navy); text-decoration: underline; text-underline-offset: 4px; }
 .lib-badges { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
 .lib-badge { display: inline-flex; align-items: center; padding: 3px 7px; border-radius: 5px; font-size: 10px; font-weight: 500; line-height: 1.6; background: #f1f5f6; color: #6a7d82; }
 .lib-badge--grade { background: #eaf5f1; color: #3d7f70; }
@@ -164,7 +164,7 @@
 .lib-reader-header .lib-subject-icon svg { width: 35px; height: 35px; }
 .lib-reader-header h1 { font-size: clamp(20px, 2.4vw, 28px); margin: 3px 0 11px; overflow-wrap: anywhere; }
 .lib-reader-header .lib-book-subject { font-size: 12px; }
-.lib-reader-toolbar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; padding: 15px 18px; background: #fff; border: 1px solid #dce8e8; border-bottom: 0; border-radius: 13px 13px 0 0; }
+.lib-reader-toolbar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; padding: 15px 18px; background: #fff; border: 1px solid var(--school-gray); border-bottom: 0; border-radius: 13px 13px 0 0; }
 .lib-reader-toolbar .lib-file-meta { font-size: 12px; }
 .lib-reader-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 .lib-reader-canvas { display: flex; flex-direction: column; height: 80vh; min-height: 480px; min-width: 0; max-width: 100%; background: #e1e9e8; border: 1px solid #cedbd9; border-radius: 0 0 12px 12px; overflow: hidden; }

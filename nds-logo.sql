@@ -1,1 +1,1 @@
-INSERT INTO settings (key, value, "group", created_at, updated_at) VALUES ('school_logo', 'school-branding/nasr-logo.jpg', 'school', NOW(), NOW()) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = NOW();
+INSERT INTO settings (key, value, "group", created_at, updated_at) VALUES ('school_logo', 'icons/nasr-daem-logo.jpg', 'school', NOW(), NOW()) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = NOW();

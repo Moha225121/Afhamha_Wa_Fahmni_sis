@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Contracts\SmartTutorGateway;
 use App\Services\GeminiSmartTutorGateway;
+use App\Support\SchoolBranding;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -31,9 +32,9 @@ class AppServiceProvider extends ServiceProvider
             $settings = Schema::hasTable('settings') ? DB::table('settings')->pluck('value', 'key') : collect();
             $view->with('schoolBranding', [
                 'platform_name' => 'افهمها وفهمني',
-                'school_name' => $settings['school_name'] ?? 'إدارة المدرسة',
-                'logo' => $settings['school_logo'] ?? null,
-                'theme_color' => $settings['theme_color'] ?? '#008C95',
+                'school_name' => $settings['school_name'] ?? 'مدرسة النصر الدائم',
+                'logo' => SchoolBranding::LOGO,
+                'theme_color' => SchoolBranding::NAVY,
             ]);
         });
         RateLimiter::for('smart-tutor-conversations', function (Request $request): Limit {

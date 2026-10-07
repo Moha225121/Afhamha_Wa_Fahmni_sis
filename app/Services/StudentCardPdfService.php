@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\DB;
+use App\Support\SchoolBranding;
 use Mpdf\Mpdf;
 use Mpdf\Output\Destination;
 
@@ -16,7 +16,7 @@ class StudentCardPdfService
         if (! is_dir($directory)) mkdir($directory, 0700, true);
         $pdf = new Mpdf(['mode' => 'utf-8', 'format' => 'A4', 'orientation' => 'P', 'tempDir' => $directory, 'default_font' => 'dejavusans', 'autoScriptToLang' => true, 'autoLangToFont' => true, 'margin_left' => 8, 'margin_right' => 8, 'margin_top' => 8, 'margin_bottom' => 8]);
         $pdf->SetDirectionality('rtl');
-        $pdf->WriteHTML(view($view, $data + ['pdf' => true, 'pdfLogo' => $this->logo()])->render());
+        $pdf->WriteHTML(view($view, array_merge($data, ['pdf' => true, 'pdfLogo' => $this->logo()]))->render());
         return response($pdf->Output('', Destination::STRING_RETURN), 200, ['Content-Type' => 'application/pdf', 'Content-Disposition' => 'attachment; filename="'.$filename.'"', 'Cache-Control' => 'private, no-store']);
     }
 
@@ -104,12 +104,8 @@ class StudentCardPdfService
         });
     }
 
-    private function logo(): ?string
+    private function logo(): string
     {
-        $logo = DB::table('settings')->where('key', 'school_logo')->value('value');
-        $root = realpath(storage_path('app/public')); $path = $logo ? realpath(storage_path('app/public/'.$logo)) : false;
-        if (! $root || ! $path || ! str_starts_with($path, $root.DIRECTORY_SEPARATOR) || ! is_file($path)) return null;
-        $mime = mime_content_type($path);
-        return in_array($mime, ['image/png', 'image/jpeg', 'image/gif'], true) ? 'data:'.$mime.';base64,'.base64_encode(file_get_contents($path)) : null;
+        return SchoolBranding::logoDataUri();
     }
 }
