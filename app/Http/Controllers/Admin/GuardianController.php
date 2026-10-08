@@ -43,7 +43,7 @@ class GuardianController extends Controller
         $g = DB::transaction(function () use ($r, $passwords) {
             app(\App\Services\SchoolAccountService::class)->settings(true);
             $u = User::create($r->only('name', 'email', 'phone') + ['password' => $passwords->forNewAccount($r->validated('password')), 'role' => 'parent', 'status' => $r->status]);
-            $g = $u->guardian()->create($r->only('relationship', 'status'));
+            $g = $u->guardian()->create($r->only('relationship', 'status') + $r->additionalGuardianDetails());
             $g->students()->sync($r->input('student_ids', []));
             AuditService::record('created', 'parents', $g);
 
@@ -61,7 +61,7 @@ class GuardianController extends Controller
             if ($r->filled('password')) {
                 $d['password'] = $r->password;
             }$parent->user->update($d);
-            $parent->update($r->only('relationship', 'status'));
+            $parent->update($r->only('relationship', 'status') + $r->additionalGuardianDetails());
             $parent->students()->sync($r->input('student_ids', []));
             AuditService::record('updated', 'parents', $parent, $old);
         });

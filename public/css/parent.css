@@ -1,5 +1,18 @@
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap');
 
+.identity-panel { padding: 20px; border: 1px solid var(--line); border-radius: 20px; background: var(--surface); box-shadow: var(--shadow); }
+.identity-panel > p { margin: 0 0 20px; color: var(--muted); line-height: 1.9; }
+.identity-options { display: grid; gap: 14px; }
+.identity-option { display: flex; align-items: center; gap: 12px; width: 100%; padding: 18px 14px; border: 1px solid var(--line-strong); border-radius: 16px; background: var(--surface); color: var(--ink); text-align: start; }
+.identity-option:hover, .identity-option[aria-current="true"] { border-color: var(--primary); background: var(--surface-soft); }
+.identity-option:focus-visible { outline: 3px solid var(--primary); outline-offset: 3px; }
+.identity-avatar { display: grid; place-items: center; flex: 0 0 44px; height: 44px; border-radius: 50%; background: var(--primary); color: #fff; font-size: 22px; font-weight: 800; }
+.identity-copy { display: grid; gap: 4px; min-width: 0; overflow-wrap: anywhere; }
+.identity-copy small { color: var(--muted); }
+.identity-copy small[dir="ltr"] { text-align: right; }
+.identity-action { margin-inline-start: auto; color: var(--primary); font-size: 12px; flex-shrink: 0; }
+@media (max-width: 380px) { .identity-option { flex-wrap: wrap; } .identity-action { flex-basis: 100%; text-align: end; } }
+
 :root {
     --bg: #eef6f3;
     --surface: #ffffff;

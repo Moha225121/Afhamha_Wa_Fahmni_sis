@@ -60,6 +60,21 @@ class PublicLoginTest extends TestCase
         $this->assertAuthenticatedAs($studentUser);
     }
 
+    public function test_admin_permission_to_send_notifications_does_not_override_dashboard_redirect(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin', 'status' => 'active', 'password' => 'password123']);
+        $this->assertTrue($admin->hasPermission('parent-notifications.send'));
+        $this->post('/login', ['email' => $admin->email, 'password' => 'password123'])->assertRedirect('/admin/dashboard');
+        $this->assertAuthenticatedAs($admin);
+    }
+
+    public function test_financial_officer_still_lands_on_notification_page(): void
+    {
+        $officer = User::factory()->create(['role' => 'financial_officer', 'status' => 'active', 'password' => 'password123']);
+        $this->post('/login', ['email' => $officer->email, 'password' => 'password123'])->assertRedirect('/finance/parent-notifications/create');
+        $this->assertAuthenticatedAs($officer);
+    }
+
     public function test_root_and_login_show_login_even_when_a_session_exists(): void
     {
         $parentUser = User::factory()->create(['role' => 'parent', 'status' => 'active']);

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'بوابة ولي الأمر') | افهمها وفهمني</title>
-    <link rel="stylesheet" href="{{ asset('css/parent.css') }}?v=portal-style-1">
+    <link rel="stylesheet" href="{{ asset('css/parent.css') }}?v=parent-identity-1">
     @include('shared.portal-assets')@include('shared.branding-style')
     <script src="{{ asset('js/enhanced-selects.js') }}" defer></script>
 </head>
@@ -16,17 +16,21 @@
             <span class="brand-mark">@include('shared.brand-mark')</span>
             <span class="brand-copy">
                 <b>افهمها وفهمني</b>
-                <small>بوابة ولي الأمر</small>
+                <small>{{ $parentIdentity['name'] ?? 'بوابة ولي الأمر' }}</small>
             </span>
         </a>
         <div class="header-actions">
             <button type="button" class="install-app-button" data-install-app>
                 <span aria-hidden="true">⇩</span><span>تثبيت التطبيق</span>
             </button>
+            @if(!request()->routeIs('parent.identity.*'))
             <button type="button" class="more-menu-toggle" data-more-toggle aria-expanded="false" aria-controls="parent-more-menu">
                 <span class="more-menu-toggle-icon" aria-hidden="true">☰</span>
                 <span>المزيد</span>
             </button>
+            @else
+            <form method="post" action="{{ route('logout') }}">@csrf<button type="submit" class="more-menu-toggle">خروج</button></form>
+            @endif
         </div>
     </header>
 
@@ -38,6 +42,9 @@
         </div>
         <div class="more-list">
             <button type="button" data-install-app><span aria-hidden="true">⇩</span> تثبيت التطبيق</button>
+            @if(count($parentIdentityOptions ?? []) > 1)
+                <a href="{{ route('parent.identity.create') }}"><span aria-hidden="true">⇄</span> تغيير مستخدم المنصة</a>
+            @endif
             <a href="{{ route('parent.profile') }}" class="{{ request()->routeIs('parent.profile') ? 'active' : '' }}">
                 <span aria-hidden="true">◉</span>
                 الملف الشخصي
@@ -95,6 +102,7 @@
         @yield('content')
     </main>
 
+    @if(!request()->routeIs('parent.identity.*'))
     <nav class="bottom-nav" aria-label="تنقل ولي الأمر">
         <a href="{{ route('parent.dashboard') }}" class="{{ request()->routeIs('parent.dashboard') ? 'active' : '' }}">
             <span>⌂</span>
@@ -113,6 +121,7 @@
             الرسائل
         </a>
     </nav>
+    @endif
 </div>
 
 <script>

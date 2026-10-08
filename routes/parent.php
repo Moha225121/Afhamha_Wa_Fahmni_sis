@@ -1,11 +1,14 @@
 <?php
 
 use App\Http\Controllers\GuardianPortal\ConversationController;
+use App\Http\Controllers\GuardianPortal\IdentityController;
 use App\Http\Controllers\GuardianPortal\NotificationController;
 use App\Http\Controllers\GuardianPortal\PortalController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('parent')->name('parent.')->middleware(['auth', 'parent'])->group(function (): void {
+    Route::get('/who-is-using', [IdentityController::class, 'create'])->name('identity.create');
+    Route::post('/who-is-using', [IdentityController::class, 'store'])->name('identity.store');
     Route::get('/students/{student}/analysis', \App\Http\Controllers\StudentLevelAnalysisController::class)->name('students.analysis');
     Route::post('/students/{student}/analysis', \App\Http\Controllers\StudentLevelAnalysisController::class)->middleware('throttle:6,1')->name('students.analysis.generate');
     Route::get('/', fn () => redirect()->route('parent.dashboard'));

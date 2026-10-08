@@ -5,7 +5,7 @@
 @section('content')
     <section class="hero">
         <p>متابعة اليوم</p>
-        <h1>مرحباً {{ strtok(auth()->user()->name, ' ') ?: auth()->user()->name }}</h1>
+        <h1>مرحباً {{ strtok($parentIdentity['name'], ' ') ?: $parentIdentity['name'] }}</h1>
         <span>{{ now()->format('Y-m-d') }}</span>
     </section>
 

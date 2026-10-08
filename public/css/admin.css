@@ -1,5 +1,16 @@
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap');
 
+.additional-guardian-section {
+    margin: 24px 0;
+    padding: 20px;
+    border: 1px solid var(--line, #d7e5e2);
+    border-radius: 14px;
+}
+.additional-guardian-section legend { padding: 0 8px; font-weight: 800; }
+.additional-guardian-toggle { display: flex; align-items: center; gap: 10px; }
+.additional-guardian-toggle input[type="checkbox"] { width: 20px; height: 20px; margin: 0; }
+#additional-guardian-details[hidden] { display: none; }
+
 :root {
     --ink: #172033;
     --nav: #101827;

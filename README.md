@@ -58,6 +58,23 @@ or **جميع الشعب**, with only the subjects shared by all selected branch
 
 ## Demo Accounts
 
+### Two guardians sharing one account
+
+In **أولياء الأمور → إضافة / تعديل**, enable **إسناد ولي أمر آخر** and enter
+the other person's name, phone number, and relationship (for example, الأم).
+Both people share the existing login and its linked children. This works for
+existing accounts without changing their credentials or creating another user.
+
+Accounts with two names must choose **من سيستخدم المنصة؟** before opening the
+parent portal, including accounts that have logged in before and open sessions.
+The choice is remembered separately for each account in each browser, and
+**المزيد → تغيير مستخدم المنصة** lets either person switch. Changes to the
+assigned details trigger selection again; removing the assignment returns to the
+primary guardian. The greeting and personal profile use the selected person's
+details, while child access and shared account communications keep the same scope.
+
+Run `php artisan migrate` to add the optional guardian detail columns.
+
 ### Default password for new accounts
 
 New student, teacher, parent, and supervisor accounts created from administration use

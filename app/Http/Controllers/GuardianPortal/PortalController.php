@@ -7,6 +7,7 @@ use App\Models\Announcement;
 use App\Models\Assignment;
 use App\Models\Guardian;
 use App\Models\Student;
+use App\Services\ParentIdentityService;
 use App\Services\ParentPortalContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -187,12 +188,20 @@ class PortalController extends Controller
 
     public function updateProfile(Request $request): RedirectResponse
     {
+        $guardian = $this->context->guardian($request);
+        $identities = app(ParentIdentityService::class);
+        $key = $identities->selectedKey($request, $guardian);
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'phone' => ['nullable', 'string', 'max:30'],
+            'phone' => [$key === 'additional' ? 'required' : 'nullable', 'string', 'max:30'],
         ]);
 
-        $request->user()->update($validated);
+        if ($key === 'additional') {
+            $guardian->update(['additional_guardian_name' => $validated['name'], 'additional_guardian_phone' => $validated['phone']]);
+        } else {
+            $request->user()->update($validated);
+        }
+        $identities->remember($request, $guardian->fresh('user'), $key);
 
         return redirect()->route('parent.dashboard')->with('success', 'تم حفظ الملف الشخصي.');
     }
