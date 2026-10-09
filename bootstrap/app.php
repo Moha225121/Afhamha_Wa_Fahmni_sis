@@ -25,6 +25,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'teacher' => EnsureUserIsTeacher::class,
             'supervisor' => EnsureUserIsSupervisor::class,
             'permission' => EnsureUserHasPermission::class,
+            'staff' => \App\Http\Middleware\EnsureUserIsStaff::class,
         ]);
 
         $middleware->redirectUsersTo(function (Request $request): string {
@@ -35,6 +36,8 @@ return Application::configure(basePath: dirname(__DIR__))
                 $user?->isStudent() => 'student.dashboard',
                 $user?->isTeacher() => 'teacher.assignments.index',
                 $user?->isSupervisor() => 'supervisor.dashboard',
+                $user?->role === 'staff' => 'staff.dashboard',
+                $user?->role === 'financial_officer' => 'finance.parent-notifications.create',
                 default => 'admin.dashboard',
             });
         });

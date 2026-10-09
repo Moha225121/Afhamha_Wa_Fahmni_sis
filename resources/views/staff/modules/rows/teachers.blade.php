@@ -1,0 +1,1 @@
+<td>{{ $row->user->name }}</td><td>@foreach($row->classrooms as $classroom)<span>{{ $classroom->name }} {{ $classroom->section }}</span>@if(!$loop->last)، @endif @endforeach</td><td>{{ $lessons[$row->id] ?? 0 }}</td><td>{{ $assignments[$row->id] ?? 0 }}</td>

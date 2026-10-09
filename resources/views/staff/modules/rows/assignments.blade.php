@@ -1,0 +1,1 @@
+<td>{{ $row->title }}</td><td>{{ $row->subject?->name }}</td><td>{{ $row->classroom?->name }} {{ $row->classroom?->section }}</td><td>{{ $row->teacher?->user?->name }}</td><td>{{ ($row->due_at ?: $row->due_date)?->format('Y-m-d') ?: '—' }}</td>

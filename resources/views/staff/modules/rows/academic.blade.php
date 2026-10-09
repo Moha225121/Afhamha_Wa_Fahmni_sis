@@ -1,0 +1,1 @@
+<td>{{ $row->student_name }}</td><td>{{ $row->subject_name }}</td><td>{{ $row->title }}</td><td>{{ $row->score }} / {{ $row->total_score }}</td><td>{{ $row->published_at ? 'منشورة' : 'غير منشورة' }}</td>

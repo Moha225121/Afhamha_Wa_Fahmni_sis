@@ -9,7 +9,9 @@ class StudentRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->isAdmin() ?? false;
+        return ($this->user()?->isAdmin() ?? false)
+            || ($this->routeIs('staff.students.*') && $this->user()?->status === 'active' && $this->user()?->role === 'staff'
+                && $this->user()->hasPermission($this->routeIs('staff.students.store') ? 'students.create' : 'students.update'));
     }
 
     public function rules(): array

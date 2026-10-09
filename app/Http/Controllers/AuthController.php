@@ -38,6 +38,7 @@ class AuthController
             $request->user()->isTeacher() => route('teacher.dashboard'),
             $request->user()->isSupervisor() => route('supervisor.dashboard'),
             $request->user()->isAdmin() => route('admin.dashboard'),
+            $request->user()->role === 'staff' => route('staff.dashboard'),
             $request->user()->hasPermission('parent-notifications.send') => route('finance.parent-notifications.create'),
             default => route('admin.dashboard'),
         };

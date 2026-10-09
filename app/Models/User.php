@@ -56,7 +56,7 @@ class User extends Authenticatable
     {
         if ($this->status !== 'active') return false;
         if ($this->isAdmin()) return true;
-        if ($this->staffRoleAssignments()->where('active', true)->whereHas('permissions', fn ($q) => $q->where('permission', $permission))->exists()) return true;
+        if ($this->staffRoleAssignments()->where('active', true)->whereHas('role', fn ($q) => $q->where('active', true)->whereHas('permissions', fn ($p) => $p->where('permission', $permission)))->exists()) return true;
         $p = config('permissions.roles.'.$this->role, []);
         if (empty($p)) {
             return false;
@@ -69,10 +69,7 @@ class User extends Authenticatable
     public function staffRoleAssignments(): HasMany { return $this->hasMany(\App\Models\StaffRoleAssignment::class); }
     public function hasScopedPermission(string $permission, ?int $classroomId = null, ?int $studentId = null): bool
     {
-        if (!$this->hasPermission($permission)) return false;
-        if ($this->isAdmin()) return true;
-        return $this->staffRoleAssignments()->where('active', true)->whereHas('permissions', fn($q) => $q->where('permission',$permission))
-            ->get()->contains(fn($a) => $a->allows($classroomId, $studentId));
+        return app(\App\Services\StaffAccess::class)->allows($this, $permission, $classroomId, $studentId);
     }
 
     public function student(): HasOne

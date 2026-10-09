@@ -1,0 +1,1 @@
+@extends('staff.layout') @section('title','متابعة الواجبات') @section('subtitle','الواجبات المرتبطة بالصفوف المسندة.') @section('content')@php($headers=['العنوان','المادة','الصف','المعلم','الاستحقاق'])@php($rowView='staff.modules.rows.assignments')@include('staff.modules._table')@endsection

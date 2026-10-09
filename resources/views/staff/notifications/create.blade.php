@@ -1,4 +1,4 @@
-@extends('admin.layout')
+@extends('staff.layout')
 @section('title','إرسال إشعار لولي الأمر')
 @section('content')
 <div class="panel"><form method="post" action="{{ route('finance.parent-notifications.store') }}">@csrf
