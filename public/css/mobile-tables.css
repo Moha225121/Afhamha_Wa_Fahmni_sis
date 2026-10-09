@@ -46,10 +46,11 @@
 
     .table-wrap td,
     .portal-table-scroll td {
-        display: flex;
-        align-items: flex-start;
-        justify-content: space-between;
-        gap: 12px;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        align-items: start;
+        justify-content: stretch;
+        gap: 5px;
         min-width: 0;
         padding: 11px 13px;
         border: 0;
@@ -66,7 +67,7 @@
     .table-wrap td::before,
     .portal-table-scroll td::before {
         content: attr(data-label);
-        flex: 0 0 34%;
+        display: block;
         color: var(--ui-muted, #617582);
         font-size: .76rem;
         font-weight: 800;
@@ -75,13 +76,22 @@
 
     .table-wrap td > *,
     .portal-table-scroll td > * {
-        max-width: 66%;
+        max-width: none;
+        min-width: 0;
     }
 
     .table-wrap td form,
     .portal-table-scroll td form {
-        justify-content: flex-end;
-        margin-inline-start: auto;
+        justify-content: flex-start;
+        margin-inline-start: 0;
+    }
+
+    .table-wrap tbody td:first-child,
+    .portal-table-scroll tbody td:first-child {
+        background: #f8fbfc;
+        color: var(--ui-ink, #182c3b);
+        font-size: .96rem;
+        font-weight: 800;
     }
 
     .table-wrap td[colspan],

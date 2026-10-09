@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@yield('title') | بوابة الموظفين</title>
     <link rel="stylesheet" href="{{ asset('css/admin.css') }}?v=staff">
-    <link rel="stylesheet" href="{{ asset('css/staff.css') }}?v=2">
+    <link rel="stylesheet" href="{{ asset('css/staff.css') }}?v=3">
     @include('shared.portal-assets')
     @include('shared.branding-style')
     <script src="{{ asset('js/enhanced-selects.js') }}?v=2" defer></script>
