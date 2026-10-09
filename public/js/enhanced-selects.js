@@ -16,6 +16,11 @@
         active.button.setAttribute('aria-expanded', 'false');
         active.menu.classList.remove('open');
 
+        if (active.search) {
+            active.search.value = '';
+            syncMenu(active);
+        }
+
         if (restoreFocus) {
             active.button.focus();
         }
@@ -45,9 +50,20 @@
     }
 
     function syncMenu(state) {
-        state.menu.innerHTML = '';
+        const list = state.list || state.menu;
+        const query = state.search ? state.search.value.trim().toLocaleLowerCase() : '';
+        list.innerHTML = '';
+        let visibleCount = 0;
 
         Array.from(state.select.options).forEach((option, index) => {
+            if (option.hidden) {
+                return;
+            }
+
+            if (query && !option.textContent.trim().toLocaleLowerCase().includes(query)) {
+                return;
+            }
+
             const item = document.createElement('button');
             item.type = 'button';
             item.className = 'select-ui__option';
@@ -73,12 +89,20 @@
                 state.button.focus();
             });
 
-            state.menu.appendChild(item);
+            list.appendChild(item);
+            visibleCount += 1;
         });
+
+        if (state.search && visibleCount === 0) {
+            const empty = document.createElement('p');
+            empty.className = 'select-ui__empty';
+            empty.textContent = 'لا توجد نتائج مطابقة';
+            list.appendChild(empty);
+        }
     }
 
     function focusOption(menu, direction) {
-        const options = Array.from(menu.querySelectorAll('.select-ui__option:not(:disabled)'));
+        const options = Array.from(menu.querySelectorAll('.select-ui__option:not(:disabled):not([hidden])'));
         if (!options.length) {
             return;
         }
@@ -111,6 +135,12 @@
         positionMenu(state);
         active = state;
 
+        if (state.search) {
+            state.search.focus();
+            state.search.select();
+            return;
+        }
+
         const selected = state.menu.querySelector('.is-selected:not(:disabled)');
         (selected || state.menu.querySelector('.select-ui__option:not(:disabled)'))?.focus();
     }
@@ -127,7 +157,7 @@
         const button = document.createElement('button');
         const menu = document.createElement('div');
         const id = `select-ui-${counter++}`;
-        const state = { select, ui, button, menu };
+        const state = { select, ui, button, menu, searchable: select.hasAttribute('data-searchable'), search: null, list: null };
 
         ui.className = 'select-ui';
         button.type = 'button';
@@ -137,8 +167,20 @@
         button.setAttribute('aria-controls', id);
 
         menu.id = id;
-        menu.className = 'select-ui__menu';
+        menu.className = `select-ui__menu${state.searchable ? ' select-ui__menu--searchable' : ''}`;
         menu.setAttribute('role', 'listbox');
+
+        if (state.searchable) {
+            state.search = document.createElement('input');
+            state.search.type = 'search';
+            state.search.className = 'select-ui__search';
+            state.search.placeholder = 'اكتب للبحث...';
+            state.search.setAttribute('aria-label', 'البحث في الخيارات');
+            state.list = document.createElement('div');
+            state.list.className = 'select-ui__checkbox-list';
+            menu.append(state.search, state.list);
+            state.search.addEventListener('input', () => syncMenu(state));
+        }
 
         ui.appendChild(button);
         select.insertAdjacentElement('afterend', ui);

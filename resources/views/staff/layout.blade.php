@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="{{ asset('css/staff.css') }}?v=2">
     @include('shared.portal-assets')
     @include('shared.branding-style')
+    <script src="{{ asset('js/enhanced-selects.js') }}?v=2" defer></script>
 </head>
 <body>
     <a class="skip-link" href="#staff-main">تجاوز إلى المحتوى</a>
