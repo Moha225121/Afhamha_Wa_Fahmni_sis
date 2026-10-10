@@ -56,6 +56,16 @@
                 <span class="service-copy"><strong>الإشعارات</strong><small>ابقَ على اطلاع بكل جديد</small></span>
                 <span class="service-arrow" aria-hidden="true">‹</span>
             </a>
+            <a class="service-card service-card--results" href="{{ route('student.results') }}">
+                <span class="service-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 20V10M12 20V4M19 20v-7"/></svg></span>
+                <span class="service-copy"><strong>النتائج الدراسية</strong><small>راجع درجاتك وتقدّمك</small></span>
+                <span class="service-arrow" aria-hidden="true">‹</span>
+            </a>
+            <a class="service-card service-card--messages" href="{{ route('student.messages') }}">
+                <span class="service-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5h16v12H7l-3 3zM8 9h8M8 13h5"/></svg></span>
+                <span class="service-copy"><strong>الإعلانات والرسائل</strong><small>تابع أخبار المدرسة</small></span>
+                <span class="service-arrow" aria-hidden="true">‹</span>
+            </a>
         </div>
     </section>
 

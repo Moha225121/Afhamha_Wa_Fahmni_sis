@@ -14,6 +14,7 @@ Route::get('/school-branding/icon-{size}.png', fn (string $size) => response(\Ap
 ]))->where('size', '180|192|512');
 Route::get('/parent-manifest.webmanifest', fn () => Response::make(File::get(public_path('parent-manifest.webmanifest')), 200, ['Content-Type' => 'application/manifest+json']))->name('parent.pwa.manifest');
 Route::get('/parent-sw.js', fn () => Response::make(File::get(public_path('parent-sw.js')), 200, ['Content-Type' => 'application/javascript']))->name('parent.pwa.service-worker');
+Route::get('/student-manifest.webmanifest', fn () => Response::make(File::get(public_path('student-manifest.webmanifest')), 200, ['Content-Type' => 'application/manifest+json']))->name('student.pwa.manifest');
 Route::view('/parent-offline.html', 'parent.offline')->name('parent.offline');
 Route::get('/login', [AuthController::class, 'create'])->name('login');
 Route::post('/login', [AuthController::class, 'store'])->name('login.store');
