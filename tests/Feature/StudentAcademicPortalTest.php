@@ -1000,6 +1000,11 @@ class StudentAcademicPortalTest extends TestCase
         $attempt = ExamAttempt::firstOrFail();
         $this->post(route('student.exams.answers.save', [$attempt, $question]), ['answer' => '4'])->assertRedirect();
         $this->post(route('student.exams.submit', $attempt))->assertRedirect(route('student.exams.result', $attempt));
+        $this->get(route('student.exams.result', $attempt))
+            ->assertOk()
+            ->assertSeeText('تم استلام المحاولة')
+            ->assertDontSeeText('100%');
+        DB::table('exams')->where('id', $exam->id)->update(['legacy_results_published' => true]);
         $this->get(route('student.exams.result', $attempt))->assertOk()->assertSeeText('100%');
         $this->assertDatabaseHas('assignment_submissions', ['assignment_id' => $assignment->id, 'student_id' => $ctx['student']->id]);
         $this->assertDatabaseHas('exam_attempts', ['id' => $attempt->id, 'score' => 10, 'maximum_score' => 10, 'percentage' => 100]);

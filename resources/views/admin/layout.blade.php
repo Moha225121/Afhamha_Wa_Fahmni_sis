@@ -2,11 +2,11 @@
 <html lang="ar" dir="rtl"><head><meta charset="utf-8">@include('shared.pwa-head')<meta name="viewport" content="width=device-width,initial-scale=1"><title>@yield('title') | افهمها وفهمني</title><link rel="stylesheet" href="{{ asset('css/admin.css') }}?v=admin-parent-identity-1">@include('shared.portal-assets')@include('shared.branding-style')<script src="{{ asset('js/enhanced-selects.js') }}" defer></script><script src="{{ asset('js/searchable-multiselects.js') }}?v=1" defer></script></head>
 <body><a class="skip-link" href="#portal-main">تجاوز إلى المحتوى</a><button class="menu-toggle" id="menu" aria-label="فتح القائمة">☰</button>
 <aside class="sidebar" id="sidebar"><a class="logo" href="{{ route('admin.dashboard') }}"><span class="brand-mark">@include('shared.brand-mark')</span><span><b>افهمها وفهمني</b><small>{{ $schoolBranding['school_name'] }}</small></span></a>
-<nav>@php($nav=['dashboard'=>'لوحة التحكم','students'=>'الطلاب','teachers'=>'المعلمون','supervisors'=>'المشرفون','parents'=>'أولياء الأمور','classes'=>'الصفوف','subjects'=>'المواد','schedules'=>'الجداول','attendance'=>'الحضور','exams'=>'الاختبارات','grades'=>'الدرجات','library'=>'المكتبة','announcements'=>'الإعلانات','reports'=>'التقارير','users'=>'المستخدمون','roles'=>'الصلاحيات','audit-logs'=>'سجل العمليات','settings'=>'الإعدادات'])
+<nav>@php($nav=['dashboard'=>'لوحة التحكم','students'=>'الطلاب','teachers'=>'المعلمون','supervisors'=>'المشرفون','parents'=>'أولياء الأمور','classes'=>'الصفوف','subjects'=>'المواد','schedules'=>'الجداول','attendance'=>'الحضور','exams'=>'الاختبارات','grades'=>'الدرجات','results'=>'نشر النتائج','library'=>'المكتبة','announcements'=>'الإعلانات','reports'=>'التقارير','users'=>'المستخدمون','roles'=>'الصلاحيات','audit-logs'=>'سجل العمليات','settings'=>'الإعدادات'])
 @if(auth()->user()->isAdmin())
 @foreach($nav as $key=>$label)
 @if(in_array($key, ['dashboard', 'students', 'schedules', 'reports']))<p class="nav-section">{{ ['dashboard'=>'نظرة عامة', 'students'=>'المجتمع المدرسي', 'schedules'=>'التعليم والمتابعة', 'reports'=>'الإدارة والإعدادات'][$key] }}</p>@endif
-@php($url=in_array($key,['dashboard','students','teachers','supervisors','parents','classes','subjects','announcements'])?route('admin.'.$key.'.index',[],false):route('admin.module.index',$key,false))
+@php($url=in_array($key,['dashboard','students','teachers','supervisors','parents','classes','subjects','announcements','results'])?route('admin.'.$key.'.index',[],false):route('admin.module.index',$key,false))
 <a href="{{ $url }}" class="{{ request()->is('admin/'.$key.'*')?'active':'' }}"><i>{{ str_pad($loop->iteration,2,'0',STR_PAD_LEFT) }}</i>{{ $label }}</a>
 @endforeach
 @endif

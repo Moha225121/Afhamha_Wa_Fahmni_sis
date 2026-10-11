@@ -175,15 +175,18 @@ class StudentLibraryTest extends TestCase
             ->assertSeeText('التالي');
     }
 
-    public function test_library_file_verifier_restores_missing_files_from_alternate_disk(): void
+    public function test_library_file_verifier_restores_matching_files_from_trusted_originals(): void
     {
         Storage::fake('local');
         Storage::fake('public');
+        Storage::fake('originals');
         $student = $this->createStudentFixture('VERIFY');
         $subject = $this->createSubjectFor($student['classroom'], 'VERIFY');
         $admin = $this->createAdmin();
         $path = 'library/restore-test.pdf';
-        Storage::disk('public')->put($path, '%PDF-1.4 restored content');
+        $sourcePath = 'recovery/restore-test.pdf';
+        $contents = '%PDF-1.4 restored content';
+        Storage::disk('originals')->put($sourcePath, $contents);
 
         $resource = LibraryResource::create([
             'title' => 'ملف يحتاج استعادة',
@@ -192,12 +195,18 @@ class StudentLibraryTest extends TestCase
             'classroom_id' => $student['classroom']->id,
             'file_path' => $path,
             'disk' => 'local',
+            'source_path' => $sourcePath,
+            'file_size' => strlen($contents),
+            'sha256' => hash('sha256', $contents),
             'is_public' => false,
             'status' => 'active',
             'created_by' => $admin->id,
         ]);
 
-        $this->artisan('library:verify-files --fail-on-error')->assertSuccessful();
+        $this->artisan('library:verify-files', [
+            '--restore' => true,
+            '--source' => [Storage::disk('originals')->path('')],
+        ])->assertSuccessful();
         Storage::disk('local')->assertExists($path);
         $this->assertSame('%PDF-1.4 restored content', Storage::disk('local')->get($path));
         $this->assertSame('local', $resource->fresh()->disk);
