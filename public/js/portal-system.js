@@ -1,4 +1,32 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const content = document.querySelector('main');
+    const backButton = document.createElement('button');
+    backButton.type = 'button';
+    backButton.className = 'portal-back-button';
+    backButton.setAttribute('aria-label', 'الرجوع إلى الصفحة السابقة');
+    backButton.innerHTML = '<span aria-hidden="true">↩</span><span>رجوع</span>';
+    backButton.addEventListener('click', () => {
+        if (window.history.length > 1) {
+            window.history.back();
+            return;
+        }
+
+        const referrer = document.referrer;
+        if (referrer) {
+            try {
+                if (new URL(referrer).origin === window.location.origin) {
+                    window.location.assign(referrer);
+                    return;
+                }
+            } catch (_) {
+                // Fall through to the site root when the referrer is not a valid URL.
+            }
+        }
+
+        window.location.assign('/');
+    });
+    (content || document.body).prepend(backButton);
+
     const menu = document.getElementById('menu');
     const sidebar = document.getElementById('sidebar');
     if (menu && sidebar) {

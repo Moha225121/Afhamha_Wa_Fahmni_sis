@@ -16,6 +16,9 @@ button:disabled, .btn[aria-disabled="true"] { opacity: .6; cursor: wait; }
 [hidden] { display: none !important; }
 .skip-link { position: fixed; inset-block-start: -100px; inset-inline-start: 16px; z-index: 100; padding: 12px 20px; background: white; color: var(--ui-ink); border-radius: 8px; }
 .skip-link:focus { inset-block-start: 12px; }
+.portal-back-button { display: inline-flex; align-items: center; gap: 8px; min-height: 42px; margin-block-end: 18px; padding: 8px 15px; border: 1px solid var(--ui-line); border-radius: 10px; background: white; color: var(--ui-ink); box-shadow: var(--ui-shadow); cursor: pointer; font-weight: 700; line-height: 1.5; }
+.portal-back-button:hover { color: var(--theme-primary, #008c95); border-color: var(--theme-primary, #008c95); }
+.portal-back-button span:first-child { color: var(--theme-primary, #008c95); font-size: 20px; line-height: 1; }
 .sidebar { inset-inline-start: 0; inset-inline-end: auto; width: 260px; background: #132f3b; padding: 24px 14px; scrollbar-width: thin; scrollbar-color: #647e87 transparent; }
 .teacher-portal .sidebar { width: 260px; background: #132f3b; box-shadow: none; }
 .sidebar .logo { border-bottom: 1px solid #ffffff18; margin-bottom: 16px; padding-bottom: 22px; }
@@ -140,7 +143,7 @@ button, .btn, a { -webkit-tap-highlight-color: transparent; }
     input:not([type="checkbox"]):not([type="radio"]), select, textarea { font-size: 16px; }
 }
 @media print {
-    .sidebar, .topbar, .app-header, .bottom-nav, .menu-toggle, .nav-backdrop, .analysis-back, #analysis-form { display: none !important; }
+    .sidebar, .topbar, .app-header, .bottom-nav, .menu-toggle, .nav-backdrop, .portal-back-button, .analysis-back, #analysis-form { display: none !important; }
     .page, .teacher-portal .page { margin: 0; }
     .app-shell { max-width: none; box-shadow: none; }
     .analysis-report { border: 0; padding: 0; }
