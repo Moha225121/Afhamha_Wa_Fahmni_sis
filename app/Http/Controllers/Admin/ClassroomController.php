@@ -127,10 +127,27 @@ class ClassroomController extends Controller
     public function destroy(Classroom $class): RedirectResponse
     {
         abort_if($class->students()->exists(), 422, 'لا يمكن حذف صف يحتوي على طلاب.');
-        $class->subjects()->detach();
-        $class->teachers()->detach();
-        $class->delete();
+
+        $dependencyMap = [
+            'schedules' => DB::table('schedules')->where('classroom_id', $class->id)->exists(),
+            'attendance' => DB::table('attendance_records')->where('classroom_id', $class->id)->exists(),
+            'teacher_assignments' => DB::table('teacher_assignments')->where('classroom_id', $class->id)->exists(),
+            'exams' => DB::table('exams')->where('classroom_id', $class->id)->exists(),
+            'lessons' => DB::table('lessons')->where('classroom_id', $class->id)->exists(),
+            'assignments' => DB::table('assignments')->where('classroom_id', $class->id)->exists(),
+        ];
+
+        $blockingDependency = collect($dependencyMap)->first(fn (bool $hasDependency) => $hasDependency);
+        abort_if($blockingDependency, 422, 'لا يمكن حذف الصف لأنه مرتبط بسجلات تعليمية أو حضور أو إسنادات.');
+
+        DB::transaction(function () use ($class): void {
+            $class->subjects()->detach();
+            $class->teachers()->detach();
+            $class->delete();
+        });
+
         AuditService::record('deleted', 'classes', $class);
+
         return redirect()->route('admin.classes.index')->with('success', 'تم حذف الصف.');
     }
 

@@ -141,6 +141,19 @@ class TeacherController extends Controller
             $classroom->id => $classroom->subjects->pluck('id')->all(),
         ])->all();
 
+        $gradeSubjectIds = $classrooms->groupBy(fn (Classroom $classroom) => $classroom->academic_year_id.':'.$normalizeClassroomName($classroom->name))
+            ->map(fn ($rooms) => $rooms->flatMap(fn (Classroom $classroom) => $classroom->subjects->pluck('id')->all())->unique()->values()->all())
+            ->all();
+
+        foreach ($classrooms as $classroom) {
+            $gradeKey = $classroom->academic_year_id.':'.$normalizeClassroomName($classroom->name);
+            $classroomSubjects[$classroom->id] ??= [];
+            $classroomSubjects[$classroom->id] = array_values(array_unique(array_merge(
+                $classroomSubjects[$classroom->id],
+                $gradeSubjectIds[$gradeKey] ?? []
+            )));
+        }
+
         // Keep existing assignments visible when editing, including assignments
         // to subjects that are now inactive or are missing a classroom pivot.
         foreach ($assignments as $assignment) {
@@ -225,10 +238,25 @@ class TeacherController extends Controller
 
     public function destroy(Teacher $teacher): RedirectResponse
     {
-        $teacher->classrooms()->detach();
-        $teacher->delete();
-        $teacher->user()->delete();
+        try {
+            DB::transaction(function () use ($teacher): void {
+                $teacher->classrooms()->detach();
+                DB::table('teacher_assignments')->where('teacher_id', $teacher->id)->delete();
+                $teacher->loadMissing('user');
+                $teacher->delete();
+
+                if ($teacher->user) {
+                    $teacher->user()->delete();
+                }
+            });
+        } catch (\Throwable $exception) {
+            report($exception);
+
+            return redirect()->route('admin.teachers.index')->withErrors(['teacher' => 'تعذر حذف المعلم.']);
+        }
+
         AuditService::record('deleted', 'teachers', $teacher);
+
         return redirect()->route('admin.teachers.index')->with('success', 'تم حذف المعلم.');
     }
 
