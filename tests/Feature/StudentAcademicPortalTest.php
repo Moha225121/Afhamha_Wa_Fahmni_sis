@@ -85,6 +85,22 @@ class StudentAcademicPortalTest extends TestCase
         ]);
     }
 
+    public function test_student_can_submit_active_assignment(): void
+    {
+        Storage::fake('local');
+        $ctx = $this->context('A6A');
+        $assignment = $this->assignment($ctx, ['status' => 'active', 'published_at' => null]);
+
+        $this->actingAs($ctx['student']->user)
+            ->post(route('student.assignments.submit', $assignment), ['file' => $this->pdf('active.pdf')])
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('assignment_submissions', [
+            'assignment_id' => $assignment->id,
+            'student_id' => $ctx['student']->id,
+        ]);
+    }
+
     public function test_submission_is_persisted_after_refresh(): void
     {
         Storage::fake('local');

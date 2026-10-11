@@ -1,168 +1,68 @@
 /* Mobile table cards shared by the admin and school portals. */
+.table-wrap,
+.portal-table-scroll,
+.grade-grid-wrap {
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-gutter: stable;
+}
+
 @media (max-width: 640px) {
     .table-wrap,
-    .portal-table-scroll {
-        overflow: visible;
-        border: 0;
-        background: transparent;
+    .portal-table-scroll,
+    .grade-grid-wrap {
+        display: block;
+        border: 1px solid var(--ui-line, #dce6e9);
+        background: #fff;
         box-shadow: none;
     }
 
     .table-wrap > table,
-    .portal-table-scroll > table {
-        display: block;
-        width: 100% !important;
-        min-width: 0 !important;
-        border-collapse: separate;
+    .portal-table-scroll > table,
+    .grade-grid-wrap > table {
+        display: table;
+        width: max-content;
+        min-width: 100%;
+        border-collapse: collapse;
         border-spacing: 0;
     }
 
     .table-wrap thead,
-    .portal-table-scroll thead {
-        display: none;
-    }
-
+    .portal-table-scroll thead,
     .table-wrap tbody,
-    .portal-table-scroll tbody {
-        display: grid;
-        gap: 12px;
+    .portal-table-scroll tbody,
+    .table-wrap tbody tr,
+    .portal-table-scroll tbody tr,
+    .table-wrap td,
+    .portal-table-scroll td,
+    .table-wrap th,
+    .portal-table-scroll th {
+        display: table-row-group;
     }
 
     .table-wrap tbody tr,
     .portal-table-scroll tbody tr {
-        display: grid;
-        gap: 0;
-        overflow: hidden;
-        border: 1px solid var(--ui-line, #dce6e9);
-        border-radius: 14px;
-        background: #fff;
-        box-shadow: 0 3px 14px rgb(24 44 59 / 5%);
-    }
-
-    .table-wrap tbody tr:hover,
-    .portal-table-scroll tbody tr:hover {
-        background: #fff;
+        display: table-row;
     }
 
     .table-wrap td,
-    .portal-table-scroll td {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr);
-        align-items: start;
-        justify-content: stretch;
-        gap: 5px;
-        min-width: 0;
-        padding: 11px 13px;
-        border: 0;
+    .portal-table-scroll td,
+    .table-wrap th,
+    .portal-table-scroll th {
+        display: table-cell;
+        min-width: 120px;
+        padding: 11px 12px;
         border-bottom: 1px solid var(--ui-line, #dce6e9);
         text-align: start;
         overflow-wrap: anywhere;
     }
 
-    .table-wrap td:last-child,
-    .portal-table-scroll td:last-child {
-        border-bottom: 0;
-    }
-
     .table-wrap td::before,
-    .portal-table-scroll td::before {
-        content: attr(data-label);
-        display: block;
-        color: var(--ui-muted, #617582);
-        font-size: .76rem;
-        font-weight: 800;
-        line-height: 1.7;
-    }
-
-    .table-wrap td > *,
-    .portal-table-scroll td > * {
-        max-width: none;
-        min-width: 0;
-    }
-
-    .table-wrap td form,
-    .portal-table-scroll td form {
-        justify-content: flex-start;
-        margin-inline-start: 0;
-    }
-
-    .table-wrap tbody td:first-child,
-    .portal-table-scroll tbody td:first-child {
-        background: #f8fbfc;
-        color: var(--ui-ink, #182c3b);
-        font-size: .96rem;
-        font-weight: 800;
-    }
-
-    .table-wrap td[colspan],
-    .portal-table-scroll td[colspan],
-    .table-wrap td:has(.empty),
-    .portal-table-scroll td:has(.empty) {
-        display: block;
-        padding: 0;
-        border: 0;
-    }
-
-    .table-wrap td[colspan]::before,
-    .portal-table-scroll td[colspan]::before,
-    .table-wrap td:has(.empty)::before,
-    .portal-table-scroll td:has(.empty)::before {
-        content: none;
-    }
-
-    .table-wrap td[colspan] > *,
-    .portal-table-scroll td[colspan] > *,
-    .table-wrap td:has(.empty) > *,
-    .portal-table-scroll td:has(.empty) > * {
-        max-width: none;
-    }
-
-    /* Keep purpose-built print/layout tables unchanged. */
-    .table-wrap.table-scroll-only,
-    .table-wrap:has(.attendance-buttons),
-    .portal-table-scroll.table-scroll-only {
-        overflow-x: auto;
-    }
-
-    .table-wrap.table-scroll-only > table,
-    .table-wrap:has(.attendance-buttons) > table,
-    .portal-table-scroll.table-scroll-only > table {
-        display: table;
-        min-width: 560px !important;
-    }
-
-    .table-wrap.table-scroll-only thead,
-    .table-wrap:has(.attendance-buttons) thead,
-    .portal-table-scroll.table-scroll-only thead {
-        display: table-header-group;
-    }
-
-    .table-wrap.table-scroll-only tbody,
-    .table-wrap:has(.attendance-buttons) tbody,
-    .portal-table-scroll.table-scroll-only tbody {
-        display: table-row-group;
-    }
-
-    .table-wrap.table-scroll-only tbody tr,
-    .table-wrap:has(.attendance-buttons) tbody tr,
-    .portal-table-scroll.table-scroll-only tbody tr {
-        display: table-row;
-        border: 0;
-        box-shadow: none;
-    }
-
-    .table-wrap.table-scroll-only td,
-    .table-wrap:has(.attendance-buttons) td,
-    .portal-table-scroll.table-scroll-only td {
-        display: table-cell;
-        max-width: none;
-        border-bottom: 1px solid var(--ui-line, #dce6e9);
-        padding: 11px 12px;
-    }
-
-    .table-wrap.table-scroll-only td::before,
-    .table-wrap:has(.attendance-buttons) td::before,
-    .portal-table-scroll.table-scroll-only td::before {
+    .portal-table-scroll td::before,
+    .table-wrap th::before,
+    .portal-table-scroll th::before {
         content: none;
     }
 }

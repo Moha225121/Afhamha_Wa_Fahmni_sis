@@ -57,7 +57,8 @@ html {
     max-width: 760px;
     min-height: 100dvh;
     margin: 0 auto;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: visible;
     background: var(--bg);
     border: 0;
     box-shadow: 0 0 0 1px rgba(15, 23, 42, .04);
@@ -1196,6 +1197,32 @@ html {
     .student-portal .bottom-nav .nav-secondary {
         display: none;
     }
+
+    .student-portal .app-shell {
+        width: 100%;
+        max-width: none;
+        min-width: 0;
+        overflow-x: hidden;
+    }
+
+    .student-portal .app-content {
+        width: 100%;
+        min-width: 0;
+        padding: 18px 12px 112px;
+    }
+
+    .student-portal .table-wrap,
+    .student-portal .portal-table-scroll,
+    .student-portal .grade-grid-wrap,
+    .student-portal .list-section,
+    .student-portal .info-list,
+    .student-portal .profile-form,
+    .student-portal .filter-form,
+    .student-portal .resource-card,
+    .student-portal .lesson-content {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
 }
 
 @media (max-width: 430px) {
@@ -1212,7 +1239,8 @@ html {
 /* Keep the student PWA chrome aligned with the parent portal on phones. */
 @media (max-width: 1023px) {
     .student-portal .app-shell {
-        max-width: 520px;
+        width: 100%;
+        max-width: none;
     }
 
     .student-portal .app-header {
