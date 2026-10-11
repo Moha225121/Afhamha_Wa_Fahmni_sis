@@ -1074,6 +1074,14 @@ html {
 .student-portal .chat-message.from-student {
     border-bottom-right-radius: 5px;
     background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: #fff;
+}
+
+.student-portal .chat-message.from-student strong,
+.student-portal .chat-message.from-student p,
+.student-portal .chat-message.from-student span,
+.student-portal .chat-message.from-student button {
+    color: #fff;
 }
 
 .student-portal .chat-message.from-tutor {
