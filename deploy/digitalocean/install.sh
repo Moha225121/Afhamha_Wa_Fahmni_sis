@@ -47,6 +47,7 @@ COMPOSER_ALLOW_SUPERUSER=1 composer install --no-dev --prefer-dist --no-interact
 php artisan key:generate --force --no-interaction
 php artisan migrate --force --no-interaction
 php artisan storage:link --no-interaction
+php artisan library:verify-files --fail-on-error
 php artisan optimize
 chown -R root:www-data /var/www/nasbia
 chmod 640 .env
