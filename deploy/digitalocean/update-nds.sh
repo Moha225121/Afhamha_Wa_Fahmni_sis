@@ -37,6 +37,20 @@ php artisan storage:link --no-interaction || true
 # Always rebuild Laravel caches after a checkout so newly registered routes
 # (including delete and staff-management routes) are visible immediately.
 php artisan optimize:clear
+# Uploaded files belong to the server, never to a Git release. Restore any
+# missing catalog PDFs from reviewed originals and fail deployment on missing
+# or damaged files instead of silently publishing another broken library.
+recovery_args=()
+if [ "${LIBRARY_RECOVERY_HARD_LINK:-0}" = 1 ]; then
+  recovery_args+=(--hard-link)
+fi
+if [ -n "${LIBRARY_RECOVERY_SOURCE:-}" ]; then
+  recovery_args+=("--source=$LIBRARY_RECOVERY_SOURCE")
+fi
+for source in /var/lib/nds/library-originals /tmp/school-library-import-*/libyan_books; do
+  [ ! -d "$source" ] || recovery_args+=("--source=$source")
+done
+php artisan library:verify-files --restore "${recovery_args[@]}" --no-interaction
 php artisan optimize
 chown -R www-data:www-data storage bootstrap/cache
 chmod -R u+rwX,g+rwX storage bootstrap/cache
