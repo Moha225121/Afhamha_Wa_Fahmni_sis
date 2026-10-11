@@ -23,7 +23,7 @@ class ExamAttemptService
             $lockedStudent = Student::query()->lockForUpdate()->findOrFail($student->id);
             $lockedExam = Exam::query()->findOrFail($exam->id);
             $scheduledEnd = $lockedExam->starts_at->copy()->addMinutes($lockedExam->duration_minutes);
-            if ($lockedExam->status !== 'published' || $lockedExam->classroom_id !== $lockedStudent->classroom_id) {
+            if (! in_array($lockedExam->status, ['published', 'scheduled'], true) || $lockedExam->classroom_id !== $lockedStudent->classroom_id) {
                 throw ValidationException::withMessages(['exam' => 'الاختبار غير متاح لهذا الطالب.']);
             }
             $isSameDayExam = $lockedExam->starts_at->isSameDay(now());

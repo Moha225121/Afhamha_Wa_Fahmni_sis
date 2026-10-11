@@ -169,8 +169,8 @@ class AcademicController extends Controller
         $examEnd = $examStart->copy()->addMinutes($exam->duration_minutes);
         $isSameDayExam = $examStart->isSameDay(now());
 
-        abort_if($examStart->isFuture() && ! $isSameDayExam, 422, '�� ���� ���� �������� ���.');
-        abort_if(now()->gte($examEnd), 422, '����� ��� ��������.');
+        abort_if($examStart->isFuture() && ! $isSameDayExam, 422, 'لم يبدأ وقت الاختبار بعد.');
+        abort_if(now()->gte($examEnd), 422, 'انتهت مدة الاختبار.');
 
         $attempt = $this->attempts->start($exam, $student);
 
