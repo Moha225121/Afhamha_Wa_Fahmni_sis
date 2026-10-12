@@ -57,6 +57,31 @@ document.addEventListener('DOMContentLoaded', () => {
         mobile.addEventListener('change', () => toggle(false));
         toggle(false);
     }
+    document.addEventListener('click', event => {
+        const trigger = event.target instanceof Element ? event.target.closest('[data-confirm]') : null;
+        if (!trigger) return;
+        const message = trigger.dataset.confirm || 'هل تريد المتابعة؟';
+        event.stopImmediatePropagation();
+        if (!window.confirm(message)) {
+            event.preventDefault();
+            return;
+        }
+        trigger.dataset.confirmHandled = 'true';
+    }, true);
+    document.addEventListener('submit', event => {
+        const form = event.target;
+        if (!(form instanceof HTMLFormElement)) return;
+        const method = (form.querySelector('input[name="_method"]')?.value || form.method).toLowerCase();
+        const submitter = event.submitter;
+        const message = submitter?.dataset.confirm || form.dataset.confirm
+            || (method === 'delete' ? 'هذا الإجراء يحذف العنصر. هل تريد المتابعة؟' : null);
+        if (!message) return;
+        if (submitter?.dataset.confirmHandled === 'true') {
+            delete submitter.dataset.confirmHandled;
+            return;
+        }
+        if (!window.confirm(message)) event.preventDefault();
+    }, true);
     document.querySelectorAll('nav a.active').forEach(link => link.setAttribute('aria-current', 'page'));
     document.querySelectorAll('main table').forEach(table => {
         if (table.closest('.table-wrap, .portal-table-scroll') || table.closest('[style*="overflow"]')) return;
