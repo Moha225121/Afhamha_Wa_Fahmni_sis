@@ -13,6 +13,6 @@ class ClassroomRequest extends FormRequest
 
     public function rules(): array
     {
-        return ['name' => ['required', 'string', 'max:100'], 'stage' => ['required', 'string', 'max:100'], 'section' => ['nullable', 'string', 'max:50'], 'academic_year_id' => ['required', 'exists:academic_years,id'], 'subject_ids' => ['nullable', 'array'], 'subject_ids.*' => ['exists:subjects,id']];
+        return ['name' => ['required', 'string', 'max:100'], 'stage' => ['required', 'string', 'max:100'], 'section' => ['nullable', 'string', 'max:50'], 'academic_year_id' => ['required', 'exists:academic_years,id'], 'subject_ids' => ['nullable', 'array'], 'subject_ids.*' => ['exists:subjects,id'], 'student_ids' => ['nullable', 'array'], 'student_ids.*' => ['integer', 'exists:students,id']];
     }
 }
