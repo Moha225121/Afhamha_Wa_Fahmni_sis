@@ -77,5 +77,18 @@ class StudentController extends Controller
 
         return redirect()->route('admin.students.show',$student)->with('success','تم تحديث بيانات الطالب.');
     }
-    public function destroy(Student $student): RedirectResponse { abort_if($student->user_id === request()->user()->id, 422, 'لا يمكنك حذف حسابك.'); $student->guardians()->detach(); $student->delete(); $student->user()->delete(); AuditService::record('deleted','students',$student); return redirect()->route('admin.students.index')->with('success','تم حذف الطالب.'); }
+    public function destroy(Student $student): RedirectResponse
+    {
+        abort_if($student->user_id === request()->user()->id, 422, 'لا يمكنك حذف حسابك.');
+
+        DB::transaction(function () use ($student): void {
+            $student->guardians()->detach();
+            $student->update(['status' => 'inactive']);
+            $student->user()->update(['status' => 'inactive']);
+            $student->delete();
+            AuditService::record('deleted', 'students', $student);
+        });
+
+        return redirect()->route('admin.students.index')->with('success', 'تم حذف الطالب.');
+    }
 }
