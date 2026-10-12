@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['teacher_id', 'classroom_id', 'subject_id', 'unit_id', 'title', 'content', 'status', 'published_at', 'position'])]
+#[Fillable(['teacher_id', 'classroom_id', 'subject_id', 'unit_id', 'title', 'content', 'status', 'published_at', 'position', 'submission_key'])]
 class Lesson extends Model
 {
     protected function casts(): array

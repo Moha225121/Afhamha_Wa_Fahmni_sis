@@ -5,11 +5,13 @@ use App\Http\Controllers\SupervisorPortal\DashboardController;
 use App\Http\Controllers\SupervisorPortal\GuardianCallController;
 use App\Http\Controllers\SupervisorPortal\StudentController;
 use App\Http\Controllers\SupervisorPortal\StudentNoteController;
+use App\Http\Controllers\PortalAnnouncementController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('supervisor')->name('supervisor.')->middleware(['auth','supervisor'])->group(function (): void {
     Route::get('/', fn()=>redirect()->route('supervisor.dashboard'));
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
+    Route::get('/ads', [PortalAnnouncementController::class, 'index'])->name('ads.index');
     Route::get('/attendance', [AttendanceController::class,'index'])->name('attendance.index');
     Route::post('/attendance', [AttendanceController::class,'store'])->name('attendance.store');
     Route::post('/attendance/scan', [AttendanceController::class,'scan'])->name('attendance.scan');

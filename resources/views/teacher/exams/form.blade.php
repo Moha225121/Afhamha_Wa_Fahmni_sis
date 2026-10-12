@@ -391,6 +391,7 @@
   function addQuestion(data){
     container.appendChild(questionBlock(qCount, data));
     qCount++;
+    renumber();
   }
 
   document.getElementById('add-question').addEventListener('click', () => addQuestion());

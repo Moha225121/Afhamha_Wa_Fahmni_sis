@@ -43,23 +43,11 @@ class ExamController extends Controller
             ->paginate(20)
             ->withQueryString();
 
-        $examSummary = ['draft' => 0, 'scheduled' => 0, 'published' => 0, 'completed' => 0, 'cancelled' => 0];
-        DB::table('exams')->where('teacher_id', $teacher->id)->get(['status', 'starts_at'])->each(function ($exam) use (&$examSummary) {
-            if ($exam->status === 'cancelled') {
-                $examSummary['cancelled']++;
-            } elseif ($exam->status === 'draft') {
-                $examSummary['draft']++;
-            } elseif ($exam->status === 'completed') {
-                $examSummary['completed']++;
-            } elseif (\Illuminate\Support\Carbon::parse($exam->starts_at)->isPast()) {
-                $examSummary['published']++;
-            } elseif ($exam->status === 'scheduled') {
-                $examSummary['scheduled']++;
-            } else {
-                $examSummary['published']++;
-            }
-        });
-        $examSummary = collect($examSummary);
+        $examSummary = collect(['draft' => 0, 'scheduled' => 0, 'published' => 0, 'completed' => 0, 'cancelled' => 0])
+            ->merge(DB::table('exams')->where('teacher_id', $teacher->id)
+                ->selectRaw('status, count(*) as total')
+                ->groupBy('status')
+                ->pluck('total', 'status'));
 
         $classrooms = Classroom::whereIn('id', $this->assignedClassroomIds($teacher))->orderBy('name')->get();
 

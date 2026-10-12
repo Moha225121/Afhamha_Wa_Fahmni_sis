@@ -28,7 +28,10 @@ class PortalController extends Controller
 
     public function dashboard(Request $request)
     {
-        return view('staff.dashboard', ['modules' => $this->access->modules($request->user())]);
+        return view('staff.dashboard', [
+            'modules' => $this->access->modules($request->user()),
+            'announcements' => app(\App\Services\PortalAnnouncementFeed::class)->for($request, 5),
+        ]);
     }
 
     private function anyScope(Builder $query, Request $request, array $permissions, string $classroomColumn, ?string $studentColumn = null): Builder

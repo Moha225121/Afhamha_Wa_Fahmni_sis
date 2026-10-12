@@ -48,11 +48,15 @@ class AssignmentController extends Controller
                     $query->where('assignments.status', 'cancelled');
                 } elseif ($filters['status'] === 'completed') {
                     $query->where('assignments.status', '!=', 'cancelled')
-                        ->whereRaw('(select count(distinct assignment_submissions.student_id) from assignment_submissions inner join students on students.id = assignment_submissions.student_id where assignment_submissions.assignment_id = assignments.id and assignment_submissions.submitted_at is not null and students.classroom_id = assignments.classroom_id and students.status = \'active\') >= (select count(*) from students where students.classroom_id = assignments.classroom_id and students.status = \'active\')');
+                        ->whereRaw($this->assignmentCompletionExpression());
                 } elseif ($filters['status'] === 'closed') {
-                    $query->where('assignments.status', '!=', 'cancelled')->whereDate('assignments.due_date', '<=', today());
+                    $query->where('assignments.status', '!=', 'cancelled')
+                        ->whereDate('assignments.due_date', '<=', today())
+                        ->whereRaw('not '.$this->assignmentCompletionExpression());
                 } else {
-                    $query->where('assignments.status', '!=', 'cancelled')->whereDate('assignments.due_date', '>', today());
+                    $query->whereIn('assignments.status', ['active', 'published'])
+                        ->whereDate('assignments.due_date', '>', today())
+                        ->whereRaw('not '.$this->assignmentCompletionExpression());
                 }
             })
             ->select('assignments.*', 'subjects.name as subject', 'classrooms.name as classroom')
@@ -277,7 +281,7 @@ class AssignmentController extends Controller
     {
         $teacher = $this->teacher($request);
         $row = DB::table('assignments')->where('id', $assignment)->first();
-        abort_unless($row && (int) $row->teacher_id === $teacher->id, 404);
+        abort_unless($row && $this->ownsPair($teacher, (int) $row->classroom_id, (int) $row->subject_id), 404);
 
         $students = Student::with('user')->where('classroom_id', $row->classroom_id)->where('status', 'active')->orderBy('student_number')->get();
         $submissions = DB::table('assignment_submissions')->where('assignment_id', $assignment)->get()->keyBy('student_id');
@@ -289,7 +293,7 @@ class AssignmentController extends Controller
     {
         $teacher = $this->teacher($request);
         $row = DB::table('assignments')->where('id', $assignment)->first();
-        abort_unless($row && (int) $row->teacher_id === $teacher->id, 404);
+        abort_unless($row && $this->ownsPair($teacher, (int) $row->classroom_id, (int) $row->subject_id), 404);
 
         $data = $request->validate([
             'submitted' => ['nullable', 'array'],
@@ -299,7 +303,7 @@ class AssignmentController extends Controller
         ]);
 
         DB::transaction(function () use ($data, $row, $request) {
-            $studentIds = Student::where('classroom_id', $row->classroom_id)->pluck('id');
+            $studentIds = Student::where('classroom_id', $row->classroom_id)->where('status', 'active')->pluck('id');
 
             foreach ($studentIds as $studentId) {
                 $submitted = ! empty($data['submitted'][$studentId] ?? null);

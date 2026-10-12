@@ -27,6 +27,7 @@
         <nav>
             <p class="nav-section">مساحتي</p>
             <a href="{{ route('staff.dashboard') }}" class="{{ request()->routeIs('staff.dashboard') ? 'active' : '' }}">لوحة الموظف</a>
+            <a href="{{ route('staff.ads.index') }}" class="{{ request()->routeIs('staff.ads.*') ? 'active' : '' }}">إعلانات المدرسة</a>
             @foreach (app(\App\Services\StaffAccess::class)->modules(auth()->user()) as $key => $module)
                 @php($moduleUrl = $key === 'notifications' ? route('staff.notifications') : route('staff.module', $key))
                 <a href="{{ $moduleUrl }}" class="{{ request()->route('module') === $key ? 'active' : '' }}">{{ $module['label'] }}</a>

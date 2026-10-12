@@ -158,6 +158,26 @@ class StudentLevelAnalysisTest extends TestCase
             ->assertOk()->assertSeeText('تعذر إنشاء التحليل الآن')->assertSeeText('إنشاء التحليل وخطة الدعم');
     }
 
+    public function test_unexpected_analysis_failure_shows_safe_retry_message(): void
+    {
+        $fixture = $this->createStudentFixture('UNEXPECTED');
+        $this->publish($fixture);
+        $this->app->instance(SmartTutorGateway::class, new class implements SmartTutorGateway
+        {
+            public function reply(SmartTutorPrompt $prompt): SmartTutorReply
+            {
+                throw new \RuntimeException('internal provider endpoint and secret detail');
+            }
+        });
+
+        $this->actingAs($this->parentFor($fixture['student']))
+            ->post(route('parent.students.analysis.generate', $fixture['student']))
+            ->assertOk()
+            ->assertSeeText('تعذر الاتصال بخدمة التحليل')
+            ->assertSeeText('إنشاء التحليل وخطة الدعم')
+            ->assertDontSeeText('internal provider endpoint and secret detail');
+    }
+
     public function test_private_teacher_sheets_are_not_in_parent_snapshot_or_shared_reports(): void
     {
         $fixture = $this->createStudentFixture('A');

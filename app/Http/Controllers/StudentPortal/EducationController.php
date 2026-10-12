@@ -7,8 +7,10 @@ use App\Models\LibraryResource;
 use App\Models\Student;
 use App\Models\Subject;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class EducationController extends Controller
@@ -154,7 +156,7 @@ class EducationController extends Controller
         return view('student.library.index', compact('student', 'resources', 'subjects', 'categories', 'stages', 'filters'));
     }
 
-    public function downloadResource(Request $request, int $resource): StreamedResponse
+    public function downloadResource(Request $request, int $resource): BinaryFileResponse|StreamedResponse
     {
         $student = $this->student($request);
         $resource = LibraryResource::query()
@@ -165,13 +167,14 @@ class EducationController extends Controller
         return $this->download($resource->disk ?: 'public', $resource->file_path, $resource->title);
     }
 
-    public function downloadAttachment(Request $request, Subject $subject, int $lesson, int $attachment): StreamedResponse
+    public function downloadAttachment(Request $request, Subject $subject, int $lesson, int $attachment): BinaryFileResponse|StreamedResponse
     {
         $student = $this->student($request);
         $subject = $this->subjectFor($student, $subject->id);
         $lesson = $subject->lessons()
             ->published()
             ->whereKey($lesson)
+            ->where(fn ($query) => $query->where('classroom_id', $student->classroom_id)->orWhereNull('classroom_id'))
             ->where(function ($query) use ($subject): void {
                 $query
                     ->whereNull('unit_id')
@@ -215,12 +218,29 @@ class EducationController extends Controller
             ->firstOrFail();
     }
 
-    private function download(string $disk, string $path, string $name): StreamedResponse
+    private function download(string $disk, string $path, string $name): BinaryFileResponse|StreamedResponse
     {
         abort_unless(in_array($disk, ['local', 'public'], true), 404);
+        $normalizedPath = str_replace('\\', '/', $path);
+        abort_unless($normalizedPath !== ''
+            && $normalizedPath === $path
+            && ! str_starts_with($normalizedPath, '/')
+            && ! str_contains($normalizedPath, ':')
+            && ! str_contains($normalizedPath, "\0")
+            && ! preg_match('~(^|/)\.{1,2}(/|$)~', $normalizedPath), 404);
 
         $storage = Storage::disk($disk);
         abort_unless($storage->exists($path), 404);
+        $root = realpath($storage->path(''));
+        $filePath = realpath($storage->path($path));
+        abort_unless(is_string($root) && is_string($filePath) && is_file($filePath) && is_readable($filePath), 404);
+        $rootPrefix = rtrim(str_replace('\\', '/', $root), '/').'/';
+        $resolvedPath = str_replace('\\', '/', $filePath);
+        if (DIRECTORY_SEPARATOR === '\\') {
+            $rootPrefix = strtolower($rootPrefix);
+            $resolvedPath = strtolower($resolvedPath);
+        }
+        abort_unless(str_starts_with($resolvedPath, $rootPrefix), 404);
 
         $safeName = trim((string) preg_replace('/[^\pL\pN._ -]+/u', '_', $name), ' ._');
         $extension = pathinfo($path, PATHINFO_EXTENSION);
@@ -233,6 +253,12 @@ class EducationController extends Controller
             $safeName .= '.'.$extension;
         }
 
-        return $storage->download($path, $safeName, ['X-Content-Type-Options' => 'nosniff']);
+        $mimeType = File::mimeType($filePath) ?: 'application/octet-stream';
+        $headers = ['Content-Type' => $mimeType, 'X-Content-Type-Options' => 'nosniff'];
+        if (str_starts_with($mimeType, 'image/')) {
+            return response()->file($filePath, $headers);
+        }
+
+        return response()->download($filePath, $safeName, $headers);
     }
 }

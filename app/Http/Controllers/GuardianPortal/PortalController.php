@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\GuardianPortal;
 
 use App\Http\Controllers\Controller;
-use App\Models\Announcement;
 use App\Models\Assignment;
 use App\Models\Guardian;
 use App\Models\Student;
@@ -30,7 +29,7 @@ class PortalController extends Controller
             'selectedStudent' => $selectedStudent,
             'summary' => $this->summaryFor($selectedStudent),
             'recentGrades' => $this->recentGradesFor($selectedStudent, 3),
-            'announcements' => $this->announcementsFor($children, 4),
+            'announcements' => app(\App\Services\PortalAnnouncementFeed::class)->for($request, 4),
         ]);
     }
 
@@ -177,7 +176,7 @@ class PortalController extends Controller
             'guardian' => $guardian,
             'children' => $children,
             'selectedStudent' => $selectedStudent,
-            'announcements' => $this->announcementsFor($children, 12),
+            'announcements' => app(\App\Services\PortalAnnouncementFeed::class)->for($request, 12),
         ]);
     }
 
@@ -277,24 +276,4 @@ class PortalController extends Controller
         return app(\App\Services\ResultPublicationService::class)->visibleResults($student);
     }
 
-    /** @param Collection<int, Student> $children */
-    private function announcementsFor(Collection $children, int $limit): Collection
-    {
-        $classroomIds = $children->pluck('classroom_id')->filter()->unique()->values();
-
-        return Announcement::query()
-            ->where('status', 'published')
-            ->where(fn ($query) => $query->whereNull('published_at')->orWhere('published_at', '<=', now()))
-            ->where(fn ($query) => $query->whereNull('expires_at')->orWhere('expires_at', '>', now()))
-            ->where(function ($query) use ($classroomIds): void {
-                $query->whereIn('audience', ['all', 'parent', 'parents']);
-
-                if ($classroomIds->isNotEmpty()) {
-                    $query->orWhereIn('classroom_id', $classroomIds);
-                }
-            })
-            ->latest('published_at')
-            ->limit($limit)
-            ->get();
-    }
 }

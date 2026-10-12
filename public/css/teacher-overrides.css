@@ -842,6 +842,8 @@ textarea:focus {
 .grade-headline h2 { margin: 3px 0 0; color: var(--teacher-ink); font-size: 22px; }
 .grade-filter-form { min-width: 210px; }
 .grade-filter-form .mini-select { width: 100%; min-height: 44px; border-color: #cce7e3; background-color: #f3faf9; color: var(--teacher-primary-dark); font-weight: 700; }
+.grade-student-switcher { display: grid; gap: 6px; max-width: 360px; color: var(--teacher-ink); font-weight: 700; }
+.grade-student-switcher select { min-height: 44px; width: 100%; border: 1px solid #cce7e3; border-radius: 9px; padding: 8px 11px; background: #fff; color: var(--teacher-ink); }
 .grade-actions { display: flex; flex-wrap: wrap; gap: 9px; }
 .grade-actions .btn { min-height: 44px; white-space: nowrap; }
 .grade-instructions { margin: 0; border-color: #cce7e3; border-radius: 16px; background: #eaf6f4; color: #245c58; }
@@ -873,6 +875,7 @@ textarea:focus {
 .grade-empty { padding: 64px 24px; border: 1px dashed #b7d9d5; border-radius: 20px; background: rgba(255, 255, 255, .74); color: var(--teacher-muted); text-align: center; font-weight: 700; }
 
 @media (max-width: 800px) {
+    .grade-student-switcher { max-width: none; }
     .grade-top-row { align-items: stretch; flex-direction: column; padding: 20px; }
     .grade-headline { align-items: stretch; flex-direction: column; gap: 12px; }
     .grade-filter-form { min-width: 0; }

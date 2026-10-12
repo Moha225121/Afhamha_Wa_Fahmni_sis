@@ -57,7 +57,8 @@
 </label>
 <label class="wide">
     <span class="label-head">المرفقات</span>
-    <input type="file" name="attachments[]" multiple accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png">
+    <input type="file" name="attachments[]" multiple accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png,.webp,.heic,.heif">
+    <small class="muted">حتى 20 ميجابايت للملف و22 ميبيبايت لمجموع الملفات في الطلب.</small>
     @if(!empty($assignment->attachment_path))<p class="muted">يوجد مرفق حالي — رفع ملف جديد سيستبدله.</p>@endif
 </label>
 <div class="form-actions">

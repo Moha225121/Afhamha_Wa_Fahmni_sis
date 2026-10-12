@@ -9,6 +9,7 @@ use App\Models\Teacher;
 use App\Models\Unit;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Tests\Concerns\CreatesStudentEducationFixtures;
@@ -47,6 +48,8 @@ class StudentEducationTest extends TestCase
         $studentB = $this->createStudentFixture('B');
         $subjectA = $this->createSubjectFor($studentA['classroom'], 'A');
         $subjectB = $this->createSubjectFor($studentB['classroom'], 'B');
+        $sharedSubject = $this->createSubjectFor($studentA['classroom'], 'SHARED');
+        $sharedSubject->classrooms()->attach($studentB['classroom']->id);
         $unitA = Unit::create(['subject_id' => $subjectA->id, 'title' => 'وحدة أ', 'position' => 1]);
         $unitB = Unit::create(['subject_id' => $subjectB->id, 'title' => 'وحدة ب', 'position' => 1]);
         $published = Lesson::create([
@@ -54,6 +57,14 @@ class StudentEducationTest extends TestCase
             'unit_id' => $unitA->id,
             'title' => 'الدرس المنشور',
             'content' => 'محتوى آمن',
+            'status' => 'published',
+            'published_at' => now()->subMinute(),
+        ]);
+        $foreignClassLesson = Lesson::create([
+            'classroom_id' => $studentB['classroom']->id,
+            'subject_id' => $sharedSubject->id,
+            'title' => 'درس الشعبة الأخرى',
+            'content' => 'محتوى خاص بالشعبة الأخرى',
             'status' => 'published',
             'published_at' => now()->subMinute(),
         ]);
@@ -99,6 +110,24 @@ class StudentEducationTest extends TestCase
             'file_path' => 'lessons/worksheet.pdf',
             'original_name' => 'worksheet.pdf',
         ]);
+        $imageUpload = UploadedFile::fake()->image('lesson-camera.jpg');
+        $imagePath = $imageUpload->storeAs('lessons', 'lesson-camera.jpg', 'local');
+        $imageAttachment = LessonAttachment::create([
+            'lesson_id' => $published->id,
+            'title' => 'صورة الدرس',
+            'disk' => 'local',
+            'file_path' => $imagePath,
+            'original_name' => 'lesson-camera.jpg',
+            'mime_type' => 'image/jpeg',
+        ]);
+        Storage::disk('local')->put('lessons/foreign-worksheet.pdf', 'foreign worksheet');
+        $foreignAttachment = LessonAttachment::create([
+            'lesson_id' => $foreignClassLesson->id,
+            'title' => 'ورقة شعبة أخرى',
+            'disk' => 'local',
+            'file_path' => 'lessons/foreign-worksheet.pdf',
+            'original_name' => 'foreign-worksheet.pdf',
+        ]);
 
         $response = $this->actingAs($studentA['user'])->get(route('student.lessons.index', $subjectA));
 
@@ -116,7 +145,14 @@ class StudentEducationTest extends TestCase
         $this->actingAs($studentA['user'])->get(route('student.lessons.attachments.download', [$subjectA, $published, $attachment]))
             ->assertOk()
             ->assertDownload('worksheet.pdf');
+        $this->get(route('student.lessons.attachments.download', [$subjectA, $published, $imageAttachment]))
+            ->assertOk()
+            ->assertHeader('Content-Type', 'image/jpeg')
+            ->assertHeader('X-Content-Type-Options', 'nosniff');
         $this->actingAs($studentB['user'])->get(route('student.lessons.attachments.download', [$subjectA, $published, $attachment]))
+            ->assertNotFound();
+        $this->actingAs($studentA['user'])
+            ->get(route('student.lessons.attachments.download', [$sharedSubject, $foreignClassLesson, $foreignAttachment]))
             ->assertNotFound();
     }
 

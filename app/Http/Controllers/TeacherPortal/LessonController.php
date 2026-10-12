@@ -12,6 +12,8 @@ use App\Models\Unit;
 use App\Services\AuditService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
@@ -76,9 +78,33 @@ class LessonController extends Controller
         $teacher = $this->teacher($request);
         $data = $request->validated();
         $this->assertPair($teacher, $data);
-        $lesson = Lesson::create($this->lessonData($data, $teacher->id));
-        $this->storeAttachment($request, $lesson);
-        AuditService::record('created', 'lessons', $lesson);
+
+        $submissionKey = $data['submission_key'] ?? null;
+        if ($submissionKey) {
+            $existing = Lesson::where('submission_key', $submissionKey)->first();
+            if ($existing) {
+                abort_unless((int) $existing->teacher_id === (int) $teacher->id, 404);
+
+                return redirect()->route('teacher.lessons.index')->with('success', 'تم حفظ الدرس بنجاح.');
+            }
+        }
+
+        try {
+            DB::transaction(function () use ($data, $teacher, $request, $submissionKey): void {
+                $lessonData = $this->lessonData($data, $teacher->id);
+                if ($submissionKey) {
+                    $lessonData['submission_key'] = $submissionKey;
+                }
+                $lesson = Lesson::create($lessonData);
+                $this->storeAttachment($request, $lesson);
+                AuditService::record('created', 'lessons', $lesson);
+            });
+        } catch (QueryException $exception) {
+            $existing = $submissionKey ? Lesson::where('submission_key', $submissionKey)->first() : null;
+            if (! $existing || (int) $existing->teacher_id !== (int) $teacher->id) {
+                throw $exception;
+            }
+        }
 
         return redirect()->route('teacher.lessons.index')->with('success', 'تم حفظ الدرس بنجاح.');
     }
@@ -139,6 +165,44 @@ class LessonController extends Controller
             Storage::disk($attachment->disk)->delete($attachment->file_path);
         }
         $lesson->delete();
+
+        $referer = $request->headers->get('referer');
+        $refererHost = is_string($referer) ? parse_url($referer, PHP_URL_HOST) : null;
+        $refererPath = is_string($referer) ? parse_url($referer, PHP_URL_PATH) : null;
+        if ($refererHost === $request->getHost() && $refererPath === parse_url(route('teacher.lessons.index'), PHP_URL_PATH)) {
+            $query = [];
+            parse_str((string) parse_url($referer, PHP_URL_QUERY), $query);
+            $filters = [];
+            if (in_array($query['status'] ?? null, ['draft', 'scheduled', 'published', 'cancelled'], true)) {
+                $filters['status'] = $query['status'];
+            }
+            if (filter_var($query['classroom_id'] ?? null, FILTER_VALIDATE_INT)
+                && $this->assignedClassroomIds($teacher)->contains((int) $query['classroom_id'])) {
+                $filters['classroom_id'] = (int) $query['classroom_id'];
+            }
+            if (is_string($query['published_at'] ?? null) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $query['published_at'])) {
+                $filters['published_at'] = $query['published_at'];
+            }
+
+            $remaining = Lesson::where('teacher_id', $teacher->id)
+                ->when(isset($filters['classroom_id']), fn ($builder) => $builder->where('classroom_id', $filters['classroom_id']))
+                ->when(isset($filters['published_at']), fn ($builder) => $builder->whereDate('published_at', $filters['published_at']))
+                ->when(isset($filters['status']), function ($builder) use ($filters): void {
+                    if ($filters['status'] === 'draft' || $filters['status'] === 'cancelled') {
+                        $builder->where('status', $filters['status']);
+                    } elseif ($filters['status'] === 'scheduled') {
+                        $builder->where('status', 'published')->where('published_at', '>', now());
+                    } else {
+                        $builder->where('status', 'published')->where('published_at', '<=', now());
+                    }
+                })
+                ->count();
+            $lastPage = max(1, (int) ceil($remaining / 15));
+            $requestedPage = max(1, (int) ($query['page'] ?? 1));
+            $filters['page'] = min($requestedPage, $lastPage);
+
+            return redirect()->route('teacher.lessons.index', $filters)->with('success', 'تم حذف الدرس.');
+        }
 
         return back()->with('success', 'تم حذف الدرس.');
     }

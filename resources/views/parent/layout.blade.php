@@ -58,6 +58,7 @@
                 <span aria-hidden="true">✉</span>
                 الرسائل
             </a>
+            <a href="{{ route('parent.ads.index') }}" class="{{ request()->routeIs('parent.ads.*') ? 'active' : '' }}"><span aria-hidden="true">▣</span> إعلانات المدرسة</a>
             <a href="{{ route('parent.attendance') }}" class="{{ request()->routeIs('parent.attendance') ? 'active' : '' }}">
                 <span aria-hidden="true">✓</span>
                 الحضور

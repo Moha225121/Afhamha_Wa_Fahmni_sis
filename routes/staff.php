@@ -3,10 +3,12 @@
 use App\Http\Controllers\StaffPortal\PortalController;
 use App\Http\Controllers\StaffNotificationController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\PortalAnnouncementController;
 
 Route::prefix('staff')->name('staff.')->middleware(['auth', 'staff'])->group(function () {
     Route::redirect('/', '/staff/dashboard');
     Route::get('/dashboard', [PortalController::class, 'dashboard'])->name('dashboard');
+    Route::get('/ads', [PortalAnnouncementController::class, 'index'])->name('ads.index');
     Route::get('/students/create', [PortalController::class, 'studentCreate'])->middleware('permission:students.create')->name('students.create');
     Route::post('/students', [PortalController::class, 'studentStore'])->middleware('permission:students.create')->name('students.store');
     Route::get('/students/{student}/edit', [PortalController::class, 'studentEdit'])->middleware('permission:students.update')->name('students.edit');

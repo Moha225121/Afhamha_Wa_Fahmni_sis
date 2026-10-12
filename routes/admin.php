@@ -28,6 +28,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::resource('parents', GuardianController::class);
     Route::get('classes/sections', [ClassroomController::class, 'sections'])->name('classes.sections');
     Route::post('classes/sections', [ClassroomController::class, 'storeSections'])->name('classes.sections.store');
+    Route::patch('classes/{class}/restore', [ClassroomController::class, 'restore'])->whereNumber('class')->name('classes.restore');
     Route::resource('classes', ClassroomController::class);
     Route::resource('subjects', SubjectController::class);
     Route::delete('users/{user}', [OperationsController::class, 'userDestroy'])->name('users.destroy');
@@ -61,6 +62,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::get('users', [OperationsController::class, 'users'])->name('users.index');
     Route::patch('users/{user}', [OperationsController::class, 'userUpdate'])->name('users.update');
     Route::get('reports', [OperationsController::class, 'reports'])->name('reports.index');
+    Route::get('reports/pdf', [OperationsController::class, 'reportsPdf'])->name('reports.pdf');
     Route::get('account-settings', [\App\Http\Controllers\Admin\AccountNumberingController::class, 'index'])->name('accounts.index');
     Route::post('account-settings/preview', [\App\Http\Controllers\Admin\AccountNumberingController::class, 'preview'])->name('accounts.preview');
     Route::put('account-settings', [\App\Http\Controllers\Admin\AccountNumberingController::class, 'update'])->name('accounts.update');

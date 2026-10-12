@@ -12,6 +12,7 @@ use App\Models\Exam;
 use App\Models\ExamAnswer;
 use App\Models\ExamAttempt;
 use App\Models\ExamQuestion;
+use App\Models\Lesson;
 use App\Models\Student;
 use App\Models\Subject;
 use App\Models\Teacher;
@@ -1008,6 +1009,115 @@ class StudentAcademicPortalTest extends TestCase
         $this->get(route('student.exams.result', $attempt))->assertOk()->assertSeeText('100%');
         $this->assertDatabaseHas('assignment_submissions', ['assignment_id' => $assignment->id, 'student_id' => $ctx['student']->id]);
         $this->assertDatabaseHas('exam_attempts', ['id' => $attempt->id, 'score' => 10, 'maximum_score' => 10, 'percentage' => 100]);
+    }
+
+    public function test_teacher_dashboard_lesson_total_matches_all_lesson_statuses(): void
+    {
+        $ctx = $this->context('LESSON-COUNT');
+        $dashboardLesson = null;
+        foreach ([
+            ['draft', null],
+            ['published', now()->addDay()],
+            ['published', now()->subDay()],
+            ['cancelled', now()->subDays(2)],
+        ] as [$status, $publishedAt]) {
+            $lesson = Lesson::create([
+                'teacher_id' => $ctx['teacher']->id,
+                'classroom_id' => $ctx['classroom']->id,
+                'subject_id' => $ctx['subject']->id,
+                'title' => 'Lesson '.$status,
+                'status' => $status,
+                'published_at' => $publishedAt,
+            ]);
+            if ($status === 'published' && $publishedAt?->isFuture()) {
+                $dashboardLesson = $lesson;
+            }
+        }
+        $assignment = $this->assignment($ctx, ['title' => 'Dashboard Assignment', 'due_date' => now()->addDay()->toDateString()]);
+
+        $this->actingAs($ctx['teacher']->user)
+            ->get(route('teacher.dashboard'))
+            ->assertOk()
+            ->assertViewHas('stats', fn (array $stats) => $stats['lessons'] === 4)
+            ->assertSee(route('teacher.lessons.edit', $dashboardLesson), false)
+            ->assertSee(route('teacher.assignments.show', $assignment), false);
+        $this->get(route('teacher.lessons.index'))
+            ->assertOk()
+            ->assertViewHas('lessonSummary', fn ($summary) => $summary->sum() === 4);
+    }
+
+    public function test_teacher_exam_status_filter_and_summary_use_persisted_status(): void
+    {
+        $ctx = $this->context('EXAM-STATUS');
+        $scheduled = $this->exam($ctx, ['title' => 'Stored Scheduled', 'status' => 'scheduled', 'starts_at' => now()->subHour()]);
+        $published = $this->exam($ctx, ['title' => 'Stored Published', 'status' => 'published', 'starts_at' => now()->addDay()]);
+
+        $this->actingAs($ctx['teacher']->user)
+            ->get(route('teacher.exams.index', ['status' => 'scheduled']))
+            ->assertOk()
+            ->assertSeeText($scheduled->title)
+            ->assertSeeText('مجدول')
+            ->assertDontSeeText($published->title)
+            ->assertViewHas('examSummary', fn ($summary) => $summary['scheduled'] === 1 && $summary['published'] === 1);
+        $this->get(route('teacher.exams.index', ['status' => 'published']))
+            ->assertOk()
+            ->assertSeeText($published->title)
+            ->assertDontSeeText($scheduled->title);
+    }
+
+    public function test_fully_submitted_assignment_is_completed_not_active_or_upcoming(): void
+    {
+        $ctx = $this->context('ASSIGNMENT-STATUS');
+        $secondStudent = $this->studentIn($ctx, 'ASSIGNMENT-STATUS-B');
+        $completed = $this->assignment($ctx, ['title' => 'All Submitted', 'due_at' => now()->addDay(), 'due_date' => now()->addDay()->toDateString()]);
+        $active = $this->assignment($ctx, ['title' => 'Still Active', 'due_at' => now()->addDay(), 'due_date' => now()->addDay()->toDateString()]);
+        foreach ([$ctx['student'], $secondStudent] as $student) {
+            AssignmentSubmission::create([
+                'assignment_id' => $completed->id,
+                'student_id' => $student->id,
+                'status' => 'submitted',
+                'submitted_at' => now(),
+            ]);
+        }
+
+        $this->actingAs($ctx['teacher']->user)
+            ->get(route('teacher.assignments.index', ['status' => 'active']))
+            ->assertOk()
+            ->assertSeeText($active->title)
+            ->assertDontSeeText($completed->title);
+        $this->get(route('teacher.assignments.index', ['status' => 'completed']))
+            ->assertOk()
+            ->assertSeeText($completed->title)
+            ->assertDontSeeText($active->title);
+        $this->get(route('teacher.dashboard'))
+            ->assertOk()
+            ->assertSeeText($active->title)
+            ->assertDontSeeText($completed->title);
+    }
+
+    public function test_deleting_last_lesson_on_page_returns_to_last_valid_page(): void
+    {
+        $ctx = $this->context('LESSON-PAGING');
+        foreach (range(1, 16) as $number) {
+            Lesson::create([
+                'teacher_id' => $ctx['teacher']->id,
+                'classroom_id' => $ctx['classroom']->id,
+                'subject_id' => $ctx['subject']->id,
+                'title' => 'Paged Lesson '.$number,
+                'status' => 'draft',
+            ]);
+        }
+        $lastLesson = Lesson::where('teacher_id', $ctx['teacher']->id)->latest('id')->firstOrFail();
+
+        $this->actingAs($ctx['teacher']->user)
+            ->from(route('teacher.lessons.index', ['status' => 'draft', 'page' => 2]))
+            ->delete(route('teacher.lessons.destroy', $lastLesson))
+            ->assertRedirect(route('teacher.lessons.index', ['status' => 'draft', 'page' => 1]));
+
+        $this->get(route('teacher.lessons.index', ['status' => 'draft', 'page' => 1]))
+            ->assertOk()
+            ->assertSeeText('Paged Lesson 15')
+            ->assertDontSeeText('Paged Lesson 16');
     }
 
     private function context(string $suffix): array

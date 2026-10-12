@@ -15,6 +15,7 @@ use App\Models\Subject;
 use App\Models\Teacher;
 use App\Models\User;
 use App\Services\AuditService;
+use App\Services\FinancialPdfService;
 use App\Services\LibraryBookNaming;
 use App\Services\LibraryCatalogService;
 use App\Services\LibraryUploadService;
@@ -297,7 +298,7 @@ class OperationsController extends Controller
     public function libraryDestroy(int $id): RedirectResponse
     {
         $row = DB::table('library_resources')->find($id);
-        abort_unless($row, 404);
+        abort_unless($row !== null, 404);
         $disk = in_array($row->disk ?? null, ['local', 'public'], true)
             ? $row->disk
             : ($row->is_public ? 'public' : 'local');
@@ -334,9 +335,140 @@ class OperationsController extends Controller
     }
     public function userDestroy(Request $r, User $user): RedirectResponse { abort_if($user->is($r->user()),422,'لا يمكنك حذف حسابك.'); $user->staffRoles()->detach(); $user->delete(); AuditService::record('deleted','users',$user); return back()->with('success','تم حذف المستخدم.'); }
 
-    public function reports(): View
+    public function reports(Request $request): View
     {
-        return view('admin.operations.reports', ['students' => Student::selectRaw('status,count(*) total')->groupBy('status')->get(), 'teachers' => Teacher::selectRaw('status,count(*) total')->groupBy('status')->get(), 'attendance' => DB::table('attendance_records')->selectRaw('status,count(*) total')->groupBy('status')->get(), 'results' => DB::table('grades')->selectRaw('avg(score) average,max(score) highest,min(score) lowest,count(*) total')->first()]);
+        return view('admin.operations.reports', $this->reportsData($request));
+    }
+
+    public function reportsPdf(Request $request, FinancialPdfService $pdf)
+    {
+        return $pdf->download('admin.operations.reports-pdf', $this->reportsData($request), 'school-report-'.now()->format('Y-m-d').'.pdf');
+    }
+
+    private function reportsData(Request $request): array
+    {
+        $filters = $request->validate([
+            'from' => ['nullable', 'date_format:Y-m-d'],
+            'to' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:from'],
+            'classroom_id' => ['nullable', 'integer', 'exists:classrooms,id'],
+            'exam_status' => ['nullable', Rule::in(['scheduled', 'published', 'completed', 'cancelled'])],
+        ]);
+        $classroomId = isset($filters['classroom_id']) ? (int) $filters['classroom_id'] : null;
+        $examStatus = $filters['exam_status'] ?? 'scheduled';
+        $students = Student::query()
+            ->when($classroomId, fn ($query) => $query->where('classroom_id', $classroomId))
+            ->selectRaw('status, count(*) as total')
+            ->groupBy('status')
+            ->get();
+        $teachers = Teacher::query()
+            ->when($classroomId, fn ($query) => $query->whereHas('classrooms', fn ($classrooms) => $classrooms->whereKey($classroomId)))
+            ->selectRaw('status, count(*) as total')
+            ->groupBy('status')
+            ->get();
+        $attendance = DB::table('attendance_records')
+            ->when($classroomId, fn ($query) => $query->where('classroom_id', $classroomId))
+            ->when($filters['from'] ?? null, fn ($query, $date) => $query->whereDate('date', '>=', $date))
+            ->when($filters['to'] ?? null, fn ($query, $date) => $query->whereDate('date', '<=', $date))
+            ->selectRaw('status, count(*) as total')
+            ->groupBy('status')
+            ->get();
+        $exams = DB::table('exams')
+            ->join('subjects', 'subjects.id', '=', 'exams.subject_id')
+            ->join('classrooms', 'classrooms.id', '=', 'exams.classroom_id')
+            ->where('exams.status', $examStatus)
+            ->when($classroomId, fn ($query) => $query->where('exams.classroom_id', $classroomId))
+            ->when($filters['from'] ?? null, fn ($query, $date) => $query->whereDate('exams.starts_at', '>=', $date))
+            ->when($filters['to'] ?? null, fn ($query, $date) => $query->whereDate('exams.starts_at', '<=', $date))
+            ->select('exams.id', 'exams.title', 'exams.status', 'exams.starts_at', 'exams.total_score', 'subjects.name as subject', 'classrooms.name as classroom', 'classrooms.section')
+            ->selectSub(fn ($query) => $query->from('exam_questions')->selectRaw('count(*)')->whereColumn('exam_questions.exam_id', 'exams.id'), 'questions_count')
+            ->orderByDesc('exams.starts_at')
+            ->get();
+
+        $percentages = collect();
+        $publishedPeriods = DB::table('result_publications as publications')
+            ->join('exam_periods as periods', 'periods.id', '=', 'publications.exam_period_id')
+            ->join('students', 'students.id', '=', 'publications.student_id')
+            ->where('periods.status', 'published')
+            ->where('periods.published_at', '<=', now())
+            ->when($classroomId, fn ($query) => $query->where('students.classroom_id', $classroomId))
+            ->when($filters['from'] ?? null, fn ($query, $date) => $query->whereDate('periods.published_at', '>=', $date))
+            ->when($filters['to'] ?? null, fn ($query, $date) => $query->whereDate('periods.published_at', '<=', $date))
+            ->pluck('publications.payload');
+        foreach ($publishedPeriods as $payload) {
+            $result = is_string($payload) ? json_decode($payload, true) : $payload;
+            foreach (is_array($result['subjects'] ?? null) ? $result['subjects'] : [] as $mark) {
+                $maximum = (float) ($mark['maximum_score'] ?? 0);
+                $score = (float) ($mark['score'] ?? -1);
+                if ($maximum > 0 && $score >= 0 && $score <= $maximum) {
+                    $percentages->push($score * 100 / $maximum);
+                }
+            }
+        }
+
+        $legacyGrades = DB::table('grades as grades')
+            ->join('exams as exams', 'exams.id', '=', 'grades.exam_id')
+            ->join('students', 'students.id', '=', 'grades.student_id')
+            ->where('exams.legacy_results_published', true)
+            ->whereNull('exams.exam_period_id')
+            ->where('exams.status', 'published')
+            ->whereNotNull('grades.published_at')
+            ->where('grades.published_at', '<=', now())
+            ->when($classroomId, fn ($query) => $query->where('students.classroom_id', $classroomId))
+            ->when($filters['from'] ?? null, fn ($query, $date) => $query->whereDate('grades.published_at', '>=', $date))
+            ->when($filters['to'] ?? null, fn ($query, $date) => $query->whereDate('grades.published_at', '<=', $date))
+            ->select('grades.score', 'exams.total_score')
+            ->get();
+        foreach ($legacyGrades as $grade) {
+            $maximum = (float) $grade->total_score;
+            $score = (float) $grade->score;
+            if ($maximum > 0 && $score >= 0 && $score <= $maximum) {
+                $percentages->push($score * 100 / $maximum);
+            }
+        }
+
+        $latestAutomaticAttemptIds = DB::table('exam_attempts')
+            ->where('status', 'submitted')
+            ->whereNotNull('percentage')
+            ->selectRaw('max(id) as id')
+            ->groupBy('exam_id', 'student_id');
+        $automaticGrades = DB::query()
+            ->fromSub($latestAutomaticAttemptIds, 'latest_attempts')
+            ->join('exam_attempts as attempts', 'attempts.id', '=', 'latest_attempts.id')
+            ->join('exams as exams', 'exams.id', '=', 'attempts.exam_id')
+            ->join('students', 'students.id', '=', 'attempts.student_id')
+            ->where('exams.legacy_results_published', true)
+            ->whereNull('exams.exam_period_id')
+            ->where('exams.status', 'published')
+            ->whereNotExists(fn ($query) => $query->selectRaw('1')->from('grades')->whereColumn('grades.exam_id', 'exams.id')->whereColumn('grades.student_id', 'attempts.student_id')->whereNotNull('grades.published_at')->where('grades.published_at', '<=', now()))
+            ->when($classroomId, fn ($query) => $query->where('students.classroom_id', $classroomId))
+            ->when($filters['from'] ?? null, fn ($query, $date) => $query->whereDate('attempts.submitted_at', '>=', $date))
+            ->when($filters['to'] ?? null, fn ($query, $date) => $query->whereDate('attempts.submitted_at', '<=', $date))
+            ->select('attempts.score', 'attempts.maximum_score')
+            ->get();
+        foreach ($automaticGrades as $grade) {
+            $maximum = (float) $grade->maximum_score;
+            $score = (float) $grade->score;
+            if ($maximum > 0 && $score >= 0 && $score <= $maximum) {
+                $percentages->push($score * 100 / $maximum);
+            }
+        }
+
+        return [
+            'students' => $students,
+            'teachers' => $teachers,
+            'attendance' => $attendance,
+            'exams' => $exams,
+            'results' => (object) [
+                'average' => $percentages->isEmpty() ? null : round($percentages->avg(), 2),
+                'highest' => $percentages->isEmpty() ? null : round($percentages->max(), 2),
+                'lowest' => $percentages->isEmpty() ? null : round($percentages->min(), 2),
+                'total' => $percentages->count(),
+            ],
+            'classrooms' => Classroom::orderBy('name')->orderBy('section')->get(),
+            'filters' => $filters,
+            'examStatus' => $examStatus,
+            'generatedAt' => now(),
+        ];
     }
 
     public function settings(): View

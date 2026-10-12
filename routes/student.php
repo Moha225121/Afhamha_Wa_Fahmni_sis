@@ -5,6 +5,7 @@ use App\Http\Controllers\StudentPortal\EducationController;
 use App\Http\Controllers\LibraryCatalogController;
 use App\Http\Controllers\StudentPortal\PortalController;
 use App\Http\Controllers\StudentPortal\TutorController;
+use App\Http\Controllers\PortalAnnouncementController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('student')->name('student.')->middleware(['auth', 'student'])->group(function (): void {
@@ -25,6 +26,7 @@ Route::prefix('student')->name('student.')->middleware(['auth', 'student'])->gro
     Route::post('/tutor/conversations/{conversation}/messages', [TutorController::class, 'storeMessage'])->whereNumber('conversation')->middleware('throttle:smart-tutor-messages')->name('tutor.messages.store');
     Route::get('/results', [PortalController::class, 'results'])->name('results');
     Route::get('/messages', [PortalController::class, 'messages'])->name('messages');
+    Route::get('/ads', [PortalAnnouncementController::class, 'index'])->name('ads.index');
     Route::get('/profile', [PortalController::class, 'profile'])->name('profile');
     Route::get('/assignments', [AcademicController::class, 'assignments'])->name('assignments.index');
     Route::get('/assignments/{assignment}', [AcademicController::class, 'assignment'])->name('assignments.show');

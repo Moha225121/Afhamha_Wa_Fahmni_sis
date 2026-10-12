@@ -19,7 +19,10 @@ class ClassroomController extends Controller
 {
     public function index(): View
     {
-        return view('admin.classes.index', ['classes' => Classroom::with('academicYear')->withCount(['students', 'teachers', 'subjects'])->paginate(15)]);
+        return view('admin.classes.index', [
+            'classes' => Classroom::with('academicYear')->withCount(['students', 'teachers', 'subjects'])->paginate(15),
+            'deletedClasses' => Classroom::onlyTrashed()->with('academicYear')->latest('deleted_at')->limit(10)->get(),
+        ]);
     }
 
     public function sections(): View
@@ -141,14 +144,23 @@ class ClassroomController extends Controller
         abort_if($blockingDependency, 422, 'لا يمكن حذف الصف لأنه مرتبط بسجلات تعليمية أو حضور أو إسنادات.');
 
         DB::transaction(function () use ($class): void {
-            $class->subjects()->detach();
-            $class->teachers()->detach();
             $class->delete();
         });
 
         AuditService::record('deleted', 'classes', $class);
 
-        return redirect()->route('admin.classes.index')->with('success', 'تم حذف الصف.');
+        return redirect()->route('admin.classes.index')
+            ->with('success', 'تم نقل الصف إلى المحذوفات مؤقتًا.')
+            ->with('undo_class_id', $class->id);
+    }
+
+    public function restore(int $class): RedirectResponse
+    {
+        $deletedClass = Classroom::onlyTrashed()->findOrFail($class);
+        $deletedClass->restore();
+        AuditService::record('restored', 'classes', $deletedClass);
+
+        return redirect()->route('admin.classes.index')->with('success', 'تمت استعادة الصف وروابط مواده.');
     }
 
     private function normalizedGradeName(string $name): string

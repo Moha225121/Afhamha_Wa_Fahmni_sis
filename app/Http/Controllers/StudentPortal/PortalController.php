@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\StudentPortal;
 
 use App\Http\Controllers\Controller;
-use App\Models\Announcement;
 use App\Models\Student;
 use App\Models\Subject;
 use App\Models\TeacherStudentNote;
@@ -25,7 +24,7 @@ class PortalController extends Controller
             'recentGrades' => $this->recentGradesFor($student, 3),
             'subjects' => $this->subjectsFor($student),
             'todaysSchedule' => $this->todaysScheduleFor($student),
-            'announcements' => $this->announcementsFor($student, 4),
+            'announcements' => app(\App\Services\PortalAnnouncementFeed::class)->for($request, 4),
             'teacherNotes' => TeacherStudentNote::with('teacher.user')->where('student_id', $student->id)->latest()->limit(4)->get(),
         ]);
     }
@@ -49,7 +48,7 @@ class PortalController extends Controller
 
         return view('student.messages', [
             'student' => $student,
-            'announcements' => $this->announcementsFor($student, 20),
+            'announcements' => app(\App\Services\PortalAnnouncementFeed::class)->for($request, 20),
         ]);
     }
 
@@ -82,7 +81,7 @@ class PortalController extends Controller
         $student = $this->student($request);
         $notifications = $request->user()->notifications()->latest()->paginate(30);
         $unreadCount = $request->user()->unreadNotifications()->count();
-        $announcements = $this->announcementsFor($student, 20);
+        $announcements = app(\App\Services\PortalAnnouncementFeed::class)->for($request, 20);
 
         return view('student.notifications', compact('student', 'notifications', 'unreadCount', 'announcements'));
     }
@@ -172,20 +171,4 @@ class PortalController extends Controller
             ->get();
     }
 
-    private function announcementsFor(Student $student, int $limit): Collection
-    {
-        return Announcement::query()
-            ->where('status', 'published')
-            ->where(fn ($query) => $query->whereNull('published_at')->orWhere('published_at', '<=', now()))
-            ->where(fn ($query) => $query->whereNull('expires_at')->orWhere('expires_at', '>', now()))
-            ->where(function ($query) use ($student): void {
-                $query->whereIn('audience', ['all', 'students'])
-                    ->when($student->classroom_id, fn ($audience) => $audience->orWhere(
-                        fn ($classroom) => $classroom->where('audience', 'classroom')->where('classroom_id', $student->classroom_id),
-                    ));
-            })
-            ->latest('published_at')
-            ->limit($limit)
-            ->get();
-    }
 }

@@ -51,6 +51,7 @@
             <a href="{{ route('student.results') }}" class="{{ request()->routeIs('student.results') ? 'active' : '' }}"><span aria-hidden="true">◌</span> النتائج</a>
             <a href="{{ route('student.notifications') }}" class="{{ request()->routeIs('student.notifications') ? 'active' : '' }}"><span aria-hidden="true">●</span> الإشعارات</a>
             <a href="{{ route('student.messages') }}" class="{{ request()->routeIs('student.messages') ? 'active' : '' }}"><span aria-hidden="true">✉</span> الرسائل</a>
+            <a href="{{ route('student.ads.index') }}" class="{{ request()->routeIs('student.ads.*') ? 'active' : '' }}"><span aria-hidden="true">▣</span> إعلانات المدرسة</a>
             <form method="post" action="{{ route('logout') }}">
                 @csrf
                 <button type="submit"><span aria-hidden="true">↶</span> تسجيل الخروج</button>

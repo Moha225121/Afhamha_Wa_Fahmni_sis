@@ -34,6 +34,16 @@
             <button type="button" class="btn primary" id="save-grade-sheet" @disabled(! $classroom)>حفظ التغييرات</button>
         </div>
     </div>
+    @if($classroom && $students->isNotEmpty())
+        <label class="grade-student-switcher">الانتقال إلى طالب
+            <select id="grade-student-switcher" aria-label="الانتقال إلى طالب في الصف">
+                <option value="">اختر طالبًا</option>
+                @foreach($students as $student)
+                    <option value="{{ $student->id }}">{{ $student->user?->name ?? 'طالب' }} — {{ $student->student_number }}</option>
+                @endforeach
+            </select>
+        </label>
+    @endif
     <div class="form-hint grade-instructions">
         أضف أعمدة التقييم وحدد الدرجة القصوى، ثم أدخل درجات الطلاب. يتم تحديث المتوسط تلقائيًا ويمكن حفظ التغييرات للصف المحدد.
     </div>
@@ -183,6 +193,8 @@
                     input.dataset.studentId = String(student.id);
                     input.className = 'grade-input';
                     input.placeholder = '0';
+                    input.setAttribute('aria-label', `${student.name}، ${column.title}`);
+                    input.title = `${student.name} — ${column.title}`;
 
                     input.addEventListener('input', function () {
                         const columnKey = Number(this.dataset.columnIndex);
@@ -258,6 +270,13 @@
                 grades: {}
             });
             renderTable();
+        });
+
+        document.getElementById('grade-student-switcher')?.addEventListener('change', function () {
+            const row = body.querySelector(`tr[data-student-id="${CSS.escape(this.value)}"]`);
+            if (!row) return;
+            row.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+            row.querySelector('.grade-input')?.focus({ preventScroll: true });
         });
 
         document.getElementById('save-grade-sheet')?.addEventListener('click', function () {
