@@ -45,11 +45,16 @@ class ParentNotificationService
     }
 
     /** @param array{title: string, body: string, url?: string, category?: string, student_id?: int|null} $payload */
-    public function sendToGuardians(Student $student, array $payload): void
+    public function sendToGuardians(Student $student, array $payload): int
     {
-        $student->guardians()->with('user')->get()
+        $parents = $student->guardians()->with('user')->get()
             ->map(fn ($guardian) => $guardian->user)
             ->filter(fn (?User $user) => $user?->isParent())
-            ->each(fn (User $parent) => $this->send($parent, $payload + ['student_id' => $student->id]));
+            ->unique('id')
+            ->values();
+
+        $parents->each(fn (User $parent) => $this->send($parent, $payload + ['student_id' => $student->id]));
+
+        return $parents->count();
     }
 }

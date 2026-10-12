@@ -3,7 +3,7 @@
 @section('title', 'الإشعارات')
 
 @section('content')
-    <section class="page-title"><p>تنبيهات الحساب</p><h1>الإشعارات</h1></section>
+    <section class="page-title"><p>تنبيهات الحساب</p><h1>الإشعارات @if($notifications->total())<small class="notification-count">{{ $notifications->total() }}</small>@endif</h1></section>
 
     <section class="list-section">
         @if($hasPushConfiguration)
@@ -20,6 +20,9 @@
                 <span>{{ $notification->created_at->format('Y-m-d H:i') }}</span>
                 <h2>{{ $notification->data['title'] ?? 'إشعار' }}</h2>
                 <p>{{ $notification->data['body'] ?? '' }}</p>
+                @if(!empty($notification->data['url']))
+                    <a class="text-action" href="{{ $notification->data['url'] }}">عرض التفاصيل</a>
+                @endif
                 @if(! $notification->read_at)
                     <form method="post" action="{{ route('parent.notifications.read', $notification) }}">@csrf<button type="submit" class="text-action">تحديد كمقروء</button></form>
                 @endif
