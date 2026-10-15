@@ -1,6 +1,6 @@
 @extends('admin.layout')
 
-@section('title', 'تشعبات الصف الأول والثاني')
+@section('title', 'تشعبات الصفوف من الأول إلى السادس')
 
 @section('actions')
     <a class="btn secondary" href="{{ route('admin.classes.index') }}">العودة إلى الصفوف</a>
@@ -8,7 +8,7 @@
 
 @section('content')
     <section class="panel" dir="rtl">
-        <h2>إضافة شُعب للصف الأول أو الثاني</h2>
+        <h2>إضافة شُعب للصفوف من الأول إلى السادس</h2>
         <p class="muted">اختر صفًا موجودًا، ثم أضف له الشُعب A أو B أو C. تُنسخ المرحلة والسنة الدراسية والمواد من الصف المختار، ولا يُنقل أي طالب تلقائيًا. الشُعب الموجودة مسبقًا لن تتكرر.</p>
 
         <form method="post" action="{{ route('admin.classes.sections.store') }}" class="form-card">
@@ -43,12 +43,12 @@
     <section class="panel" dir="rtl" style="margin-top:1rem">
         <h2>الشُعب المسجلة حاليًا</h2>
         <div class="table-wrap"><table>
-            <thead><tr><th>الصف</th><th>الشعبة</th><th>السنة الدراسية</th><th>عدد الطلاب</th></tr></thead>
+            <thead><tr><th>الصف</th><th>الشعبة</th><th>السنة الدراسية</th><th>عدد الطلاب</th><th>إدارة</th></tr></thead>
             <tbody>
                 @forelse($classrooms as $classroom)
-                    <tr><td>{{ $classroom->display_grade }}</td><td>{{ $classroom->display_section }}</td><td>{{ $classroom->academicYear?->name }}</td><td>{{ $classroom->students()->count() }}</td></tr>
+                    <tr><td>{{ $classroom->display_grade }}</td><td>{{ $classroom->display_section }}</td><td>{{ $classroom->academicYear?->name }}</td><td>{{ $classroom->students_count }}</td><td><a class="btn secondary" href="{{ route('admin.classes.edit', $classroom) }}">تعديل وتوزيع الطلبة</a></td></tr>
                 @empty
-                    <tr><td colspan="4"><div class="empty">لا توجد صفوف أول أو ثانٍ مسجلة حتى الآن.</div></td></tr>
+                    <tr><td colspan="5"><div class="empty">لا توجد صفوف من الأول إلى السادس مسجلة حتى الآن.</div></td></tr>
                 @endforelse
             </tbody>
         </table></div>

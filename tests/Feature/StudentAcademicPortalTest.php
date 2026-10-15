@@ -453,6 +453,36 @@ class StudentAcademicPortalTest extends TestCase
         $this->actingAs($ctx['teacher']->user)->get(route('teacher.submissions.file', $submission))->assertOk()->assertDownload('download.pdf');
     }
 
+    public function test_teacher_submission_page_exposes_student_file_download_links(): void
+    {
+        Storage::fake('local');
+        $ctx = $this->context('AT3A');
+        $assignment = $this->assignment($ctx);
+        Storage::disk('local')->put('assigned/visible.pdf', 'work');
+        $submission = $this->submission($assignment, $ctx['student'], 'assigned/visible.pdf', 'visible.pdf');
+
+        $this->actingAs($ctx['teacher']->user)
+            ->get(route('teacher.assignments.submissions', $assignment))
+            ->assertOk()
+            ->assertSee(route('teacher.submissions.file', $submission));
+    }
+
+    public function test_protected_teacher_pages_disable_browser_caching(): void
+    {
+        $ctx = $this->context('AT3B');
+        $assignment = $this->assignment($ctx);
+
+        $this->actingAs($ctx['teacher']->user)
+            ->get(route('teacher.assignments.index'))
+            ->assertOk()
+            ->assertHeader('Cache-Control', 'max-age=0, must-revalidate, no-cache, no-store, private');
+
+        $this->actingAs($ctx['teacher']->user)
+            ->get(route('teacher.assignments.show', $assignment))
+            ->assertOk()
+            ->assertHeader('Cache-Control', 'max-age=0, must-revalidate, no-cache, no-store, private');
+    }
+
     public function test_unrelated_teacher_cannot_download_submission(): void
     {
         Storage::fake('local');
@@ -479,6 +509,19 @@ class StudentAcademicPortalTest extends TestCase
         $unrelated = $this->context('AT9');
         $assignment = $this->assignment($ctx);
         $this->actingAs($unrelated['teacher']->user)->get(route('teacher.assignments.show', $assignment))->assertNotFound();
+    }
+
+    public function test_teachers_can_edit_short_answer_questions_without_losing_them(): void
+    {
+        $ctx = $this->context('E0');
+        $exam = $this->exam($ctx, ['title' => 'Autograde Short Answer', 'status' => 'draft', 'starts_at' => now()->addDay()]);
+        $this->question($exam, ['type' => 'short_answer', 'question_text' => 'Describe the event.', 'text' => 'Describe the event.', 'choices' => []]);
+
+        $this->actingAs($ctx['teacher']->user)
+            ->get(route('teacher.exams.edit', $exam))
+            ->assertOk()
+            ->assertSee('short_answer')
+            ->assertSee('Describe the event.');
     }
 
     public function test_student_sees_only_published_exams_for_own_class(): void

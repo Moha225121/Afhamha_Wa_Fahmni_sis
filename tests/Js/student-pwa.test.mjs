@@ -96,6 +96,7 @@ function workerEnvironment(filename) {
     const removed = [];
     const cached = [];
     const offline = {offline: true};
+    let currentCache;
     const context = {
         URL,
         self: {
@@ -104,14 +105,16 @@ function workerEnvironment(filename) {
             skipWaiting: async () => {}, clients: {claim: async () => {}},
         },
         caches: {
-            keys: async () => ['afhamha-parent-static-v6', 'afhamha-parent-static-v7', 'afhamha-student-static-v0', 'afhamha-student-static-v1', 'other-app'],
+            keys: async () => ['afhamha-parent-static-obsolete', 'afhamha-student-static-obsolete', 'other-app', currentCache],
             delete: async key => removed.push(key),
             open: async () => ({addAll: async paths => cached.push(...paths)}),
             match: async path => path === '/student-offline.html' ? offline : undefined,
         },
         fetch: async () => ({online: true}),
     };
-    vm.runInNewContext(readFileSync(new URL(`../../public/${filename}`, import.meta.url), 'utf8'), context);
+    vm.createContext(context);
+    vm.runInContext(readFileSync(new URL(`../../public/${filename}`, import.meta.url), 'utf8'), context);
+    currentCache = vm.runInContext('CACHE_NAME', context);
     const run = async name => {
         let pending;
         events[name]({waitUntil: promise => pending = promise});
@@ -128,10 +131,10 @@ function workerEnvironment(filename) {
 test('each worker cleans up only its own old caches', async () => {
     const student = workerEnvironment('student-sw.js');
     await student.run('activate');
-    assert.deepEqual(student.removed, ['afhamha-student-static-v0']);
+    assert.deepEqual(student.removed, ['afhamha-student-static-obsolete']);
     const parent = workerEnvironment('parent-sw.js');
     await parent.run('activate');
-    assert.deepEqual(parent.removed, ['afhamha-parent-static-v6']);
+    assert.deepEqual(parent.removed, ['afhamha-parent-static-obsolete']);
 });
 
 test('student worker caches public assets and uses a generic offline screen for account pages', async () => {

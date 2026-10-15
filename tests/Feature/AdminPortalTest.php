@@ -51,4 +51,26 @@ class AdminPortalTest extends TestCase
         $this->assertDatabaseHas('students', ['student_number' => 'S-100', 'classroom_id' => $class->id]);
         $this->assertDatabaseHas('audit_logs', ['action' => 'created', 'module' => 'students']);
     }
+
+    public function test_admin_can_edit_class_section_and_see_it_when_assigning_students(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin', 'status' => 'active']);
+        $year = AcademicYear::create(['name' => '2026/2027', 'starts_at' => '2026-09-01', 'ends_at' => '2027-06-30', 'is_current' => true]);
+        $class = Classroom::create(['name' => 'الأول', 'stage' => 'أساسي', 'section' => 'أ', 'academic_year_id' => $year->id]);
+
+        $this->actingAs($admin)
+            ->get('/admin/classes/'.$class->id.'/edit')
+            ->assertOk()
+            ->assertSee('name="section" value="أ"', false);
+
+        $this->put('/admin/classes/'.$class->id, [
+            'name' => 'الأول',
+            'stage' => 'أساسي',
+            'section' => 'ب',
+            'academic_year_id' => $year->id,
+        ])->assertRedirect('/admin/classes/'.$class->id);
+
+        $this->assertDatabaseHas('classrooms', ['id' => $class->id, 'section' => 'ب']);
+        $this->get('/admin/students/create')->assertOk()->assertSee('الأول — الشعبة ب (أساسي)');
+    }
 }

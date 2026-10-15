@@ -8,6 +8,7 @@ use App\Models\AcademicYear;
 use App\Models\Classroom;
 use App\Models\Subject;
 use App\Services\AuditService;
+use App\Services\TeacherAssignmentGroups;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
@@ -23,20 +24,17 @@ class ClassroomController extends Controller
 
     public function sections(): View
     {
-        $classrooms = Classroom::with(['academicYear', 'subjects'])->get()
-            ->filter(fn (Classroom $classroom) => in_array(
-                $this->normalizedGradeName($classroom->name),
-                ['الصفالاول', 'الصفالثاني'],
-                true,
-            ) && trim((string) $classroom->section) !== 'أدبي')
+        $classrooms = Classroom::with('academicYear')->withCount('students')->get()
+            ->filter(fn (Classroom $classroom) => isset(TeacherAssignmentGroups::PRIMARY_GRADE_LABELS[$this->normalizedGradeName($classroom->name)])
+                && $this->normalizedGradeName((string) $classroom->section) !== 'ادبي')
             ->sortBy(fn (Classroom $classroom) => [
-                $this->normalizedGradeName($classroom->name) === 'الصفالاول' ? 1 : 2,
+                array_search($this->normalizedGradeName($classroom->name), array_keys(TeacherAssignmentGroups::PRIMARY_GRADE_LABELS), true),
                 $classroom->academicYear?->name ?? '',
-                $classroom->section ?? '',
+                $this->canonicalSection($classroom->section) ?? '',
             ])
             ->values()
             ->each(function (Classroom $classroom): void {
-                $classroom->setAttribute('display_grade', $this->normalizedGradeName($classroom->name) === 'الصفالاول' ? 'الصف الأول' : 'الصف الثاني');
+                $classroom->setAttribute('display_grade', TeacherAssignmentGroups::PRIMARY_GRADE_LABELS[$this->normalizedGradeName($classroom->name)]);
                 $classroom->setAttribute('display_section', $this->canonicalSection($classroom->section) ?? '—');
             });
 
@@ -52,8 +50,8 @@ class ClassroomController extends Controller
         ]);
 
         $source = Classroom::with('subjects')->findOrFail($data['source_classroom_id']);
-        abort_unless(in_array($this->normalizedGradeName($source->name), ['الصفالاول', 'الصفالثاني'], true), 422);
-        abort_if(trim((string) $source->section) === 'أدبي', 422);
+        abort_unless(isset(TeacherAssignmentGroups::PRIMARY_GRADE_LABELS[$this->normalizedGradeName($source->name)]), 422);
+        abort_if($this->normalizedGradeName((string) $source->section) === 'ادبي', 422);
 
         $created = 0;
         DB::transaction(function () use ($source, $data, &$created): void {
@@ -128,9 +126,7 @@ class ClassroomController extends Controller
 
     private function normalizedGradeName(string $name): string
     {
-        $name = preg_replace('/[\x{064B}-\x{065F}\x{0670}\x{0640}\s]+/u', '', trim($name)) ?? trim($name);
-
-        return strtr($name, ['أ' => 'ا', 'إ' => 'ا', 'آ' => 'ا', 'ى' => 'ي']);
+        return TeacherAssignmentGroups::gradeKey($name);
     }
 
     private function canonicalSection(?string $section): ?string

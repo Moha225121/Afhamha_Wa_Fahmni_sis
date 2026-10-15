@@ -1,18 +1,16 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
-@include('shared.pwa-head')
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="theme-color" content="#0e7c86">
+    <meta name="theme-color" content="{{ $schoolBranding['theme_color'] }}">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-title" content="ولي الأمر">
-    <title>@yield('title', 'بوابة ولي الأمر') | افهمها وفهمني</title>
+    <meta name="apple-mobile-web-app-title" content="{{ $schoolBranding['school_name'] }}">
+    <title>@yield('title', 'بوابة ولي الأمر') | {{ $schoolBranding['school_name'] }}</title>
     <link rel="manifest" href="{{ route('parent.pwa.manifest') }}">
-    <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="any">
-    <link rel="icon" href="{{ asset('icons/parent-icon.svg') }}" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="{{ asset('icons/parent-icon-192.png') }}">
+    <link rel="icon" href="{{ route('school.pwa.icon') }}">
+    <link rel="apple-touch-icon" href="{{ route('school.pwa.icon') }}">
     <link rel="stylesheet" href="{{ asset('css/parent.css') }}?v=portal-style-1">
     @include('shared.branding-style')@include('shared.portal-assets')
     <script src="{{ asset('js/enhanced-selects.js') }}" defer></script>
@@ -85,6 +83,7 @@
 
     <dialog class="install-dialog" id="parent-install-dialog" aria-labelledby="install-dialog-title">
         <form method="dialog"><button class="install-dialog-close" aria-label="إغلاق">×</button></form>
+        <img src="{{ route('school.pwa.icon') }}" alt="شعار {{ $schoolBranding['school_name'] }}" style="display:block;width:72px;height:72px;object-fit:contain;margin:0 auto 16px">
         <h2 id="install-dialog-title">تثبيت تطبيق ولي الأمر</h2>
         <p data-install-message>يمكن تثبيت التطبيق من قائمة المتصفح.</p>
         <ol data-install-steps></ol>

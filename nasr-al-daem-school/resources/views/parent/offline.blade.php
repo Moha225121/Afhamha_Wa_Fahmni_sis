@@ -11,7 +11,7 @@
 </head>
 <body>
 <main class="card">
-    <div class="mark">AWF</div>
+    <img class="mark" src="/school-app-icon" alt="شعار المدرسة" style="display:block;object-fit:contain;background:#fff;padding:4px">
     <h1>أنت غير متصل حالياً</h1>
     <p>يمكن العودة إلى بوابة ولي الأمر عند توفر الاتصال.</p>
 </main>

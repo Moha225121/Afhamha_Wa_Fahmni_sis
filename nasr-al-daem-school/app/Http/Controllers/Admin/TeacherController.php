@@ -119,7 +119,7 @@ class TeacherController extends Controller
                 default => null,
             };
 
-            if (in_array($normalizedName, ['الصفالاول', 'الصفالثاني'], true) && $latinSection !== null) {
+            if (isset(\App\Services\TeacherAssignmentGroups::PRIMARY_GRADE_LABELS[$normalizedName]) && $latinSection !== null) {
                 $label .= ' '.$latinSection;
             } elseif ($duplicateClassroomNames->has($normalizedName)) {
                 $label .= ' — '.($section ?: 'صف إضافي');

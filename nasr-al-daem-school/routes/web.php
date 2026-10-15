@@ -1,13 +1,16 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ParentPwaController;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AccountNumberingController;
 
 Route::redirect('/', '/login');
-Route::get('/parent-manifest.webmanifest', fn () => Response::make(File::get(public_path('parent-manifest.webmanifest')), 200, ['Content-Type' => 'application/manifest+json']))->name('parent.pwa.manifest');
+Route::get('/school-app.webmanifest', [ParentPwaController::class, 'schoolManifest'])->name('school.pwa.manifest');
+Route::get('/parent-app.webmanifest', [ParentPwaController::class, 'manifest'])->name('parent.pwa.manifest');
+Route::get('/school-app-icon', [ParentPwaController::class, 'icon'])->name('school.pwa.icon');
 Route::get('/parent-sw.js', fn () => Response::make(File::get(public_path('parent-sw.js')), 200, ['Content-Type' => 'application/javascript']))->name('parent.pwa.service-worker');
 Route::view('/parent-offline.html', 'parent.offline')->name('parent.offline');
 Route::get('/login', [AuthController::class, 'create'])->name('login');

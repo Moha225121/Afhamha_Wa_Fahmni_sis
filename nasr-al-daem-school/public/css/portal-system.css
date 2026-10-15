@@ -16,7 +16,7 @@ button:disabled, .btn[aria-disabled="true"] { opacity: .6; cursor: wait; }
 [hidden] { display: none !important; }
 .skip-link { position: fixed; inset-block-start: -100px; inset-inline-start: 16px; z-index: 100; padding: 12px 20px; background: white; color: var(--ui-ink); border-radius: 8px; }
 .skip-link:focus { inset-block-start: 12px; }
-.sidebar { inset-inline-start: 0; inset-inline-end: auto; width: 260px; background: #132f3b; padding: 24px 14px; scrollbar-width: thin; scrollbar-color: #647e87 transparent; }
+.sidebar { inset-inline-start: 0; inset-inline-end: auto; right: 0; left: auto; width: 260px; background: #132f3b; padding: 24px 14px; scrollbar-width: thin; scrollbar-color: #647e87 transparent; }
 .teacher-portal .sidebar { width: 260px; background: #132f3b; box-shadow: none; }
 .sidebar .logo { border-bottom: 1px solid #ffffff18; margin-bottom: 16px; padding-bottom: 22px; }
 .sidebar .brand-mark { flex-shrink: 0; box-shadow: none; background: var(--theme-primary, #008c95); border-radius: 12px; }
@@ -24,7 +24,7 @@ button:disabled, .btn[aria-disabled="true"] { opacity: .6; cursor: wait; }
 .sidebar nav a.active { background: #ffffff13; border: 1px solid #ffffff1f; border-inline-start: 3px solid #60d4ce; color: white; }
 .sidebar nav a:hover { transform: none; background: #ffffff10; }
 .nav-section { margin: 19px 12px 7px; font-size: 11px; font-weight: 700; color: #94b5bd; }
-.page, .teacher-portal .page { margin-inline-start: 260px; margin-inline-end: 0; }
+.page, .teacher-portal .page { width: calc(100% - 260px); min-width: 0; margin: 0 260px 0 0; }
 .topbar { min-height: 76px; height: auto; padding: 15px 32px; background: white; border-color: var(--ui-line); }
 .global-search { display: flex; align-items: center; gap: 8px; }
 .global-search input { width: min(300px, 30vw); background: var(--ui-bg); border: 1px solid var(--ui-line); border-radius: 10px; }
@@ -92,7 +92,7 @@ td .btn { min-height: 36px; padding: 6px 12px; }
     body:not(.student-portal) .app-shell .metrics-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
 @media (max-width: 768px) {
-    .page, .teacher-portal .page { margin-inline: 0; }
+    .page, .teacher-portal .page { width: 100%; margin: 0; }
     .sidebar, .teacher-portal .sidebar { width: min(290px, 85vw); transform: translateX(105%); z-index: 40; }
     .sidebar.open { transform: translateX(0); }
     .menu-toggle { z-index: 50; min-width: 42px; min-height: 42px; top: 15px; right: 12px; border-radius: 10px; }

@@ -7,6 +7,15 @@ use Illuminate\Support\Collection;
 
 class TeacherAssignmentGroups
 {
+    public const PRIMARY_GRADE_LABELS = [
+        'الصفالاول' => 'الصف الأول',
+        'الصفالثاني' => 'الصف الثاني',
+        'الصفالثالث' => 'الصف الثالث',
+        'الصفالرابع' => 'الصف الرابع',
+        'الصفالخامس' => 'الصف الخامس',
+        'الصفالسادس' => 'الصف السادس',
+    ];
+
     public static function gradeKey(string $name): string
     {
         return preg_replace('/[\s\p{Z}_\-\x{064B}-\x{065F}\x{0670}\x{0640}]+/u', '', strtr(trim($name), ['أ' => 'ا', 'إ' => 'ا', 'آ' => 'ا', 'ى' => 'ي']));

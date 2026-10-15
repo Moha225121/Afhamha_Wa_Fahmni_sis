@@ -3,9 +3,11 @@
     $pairsByClassroom = [];
     foreach ($pairs as $p) { $pairsByClassroom[$p->classroom_id][] = $p->subject_id; }
     $existingQuestions = $questions->map(function ($q) {
+        $text = $q->text ?? $q->question_text ?? '';
+
         return [
             'type' => $q->type,
-            'text' => $q->text,
+            'text' => $text,
             'score' => (float) $q->score,
             'choices' => collect($q->choices ?? [])->map(fn ($c) => ['text' => $c->text, 'is_correct' => (bool) $c->is_correct])->values(),
         ];

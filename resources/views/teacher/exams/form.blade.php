@@ -3,9 +3,11 @@
     $pairsByClassroom = [];
     foreach ($pairs as $p) { $pairsByClassroom[$p->classroom_id][] = $p->subject_id; }
     $existingQuestions = $questions->map(function ($q) {
+        $text = $q->text ?? $q->question_text ?? '';
+
         return [
             'type' => $q->type,
-            'text' => $q->text,
+            'text' => $text,
             'score' => (float) $q->score,
             'choices' => collect($q->choices ?? [])->map(fn ($c) => ['text' => $c->text, 'is_correct' => (bool) $c->is_correct])->values(),
         ];
@@ -324,14 +326,14 @@
     const choicesList = wrap.querySelector('.choices-list');
     const editor = wrap.querySelector('.rich-editor');
     const hiddenInput = wrap.querySelector('textarea[name="questions[' + qIdx + '][text]"]');
+    const addChoiceBtn = wrap.querySelector('.add-choice');
     bindRichEditor(editor, hiddenInput);
 
     const typeSelect = wrap.querySelector('.type-select');
     if (typeSelect && typeSelect.value !== 'mcq' && typeSelect.value !== 'true_false') {
-      choicesList.style.display = 'none';
-      addChoiceBtn.style.display = 'none';
+      if (choicesList) choicesList.style.display = 'none';
+      if (addChoiceBtn) addChoiceBtn.style.display = 'none';
     }
-    const addChoiceBtn = wrap.querySelector('.add-choice');
     let cCount = 0;
 
     function addChoice(text, checked){
