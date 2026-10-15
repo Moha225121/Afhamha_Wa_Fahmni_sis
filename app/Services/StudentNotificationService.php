@@ -48,7 +48,21 @@ class StudentNotificationService
             $ids[] = $this->storeAnnouncement($student->user, $announcement, $existing);
         }
 
-        return $student->user->notifications()->where(function (Builder $query) use ($ids): void {
+        // PortalEventService also delivers results here. Withdraw their old bell entries
+        // when a published period is hidden, including entries created before this bell.
+        $withdrawnResults = DB::table('exam_periods as e')
+            ->join('result_publications as p', 'p.exam_period_id', '=', 'e.id')
+            ->where('p.student_id', $student->id)
+            ->where(fn ($query) => $query->where('e.status', '!=', 'published')->orWhereNull('e.published_at')->orWhere('e.published_at', '>', now()))
+            ->get(['e.id', 'e.revision']);
+        $withdrawnIds = [];
+        foreach ($withdrawnResults as $period) {
+            for ($revision = 1; $revision <= $period->revision; $revision++) {
+                $withdrawnIds[] = Uuid::uuid5(Uuid::NAMESPACE_URL, 'awf:results:'.$period->id.':'.$revision.':'.$student->user_id)->toString();
+            }
+        }
+
+        return $student->user->notifications()->whereNotIn('id', $withdrawnIds)->where(function (Builder $query) use ($ids): void {
             $query->where('type', '!=', StudentAnnouncementNotification::class)
                 ->orWhereIn('id', $ids);
         });

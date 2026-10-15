@@ -101,4 +101,22 @@ class ClassroomSectionsTest extends TestCase
         $this->assertDatabaseHas('students', ['id' => $first->id, 'classroom_id' => $target->id]);
         $this->assertDatabaseHas('students', ['id' => $second->id, 'classroom_id' => $source->id]);
     }
+
+    public function test_branch_transfer_rejects_students_from_other_grades_or_years(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin', 'status' => 'active']);
+        $year = AcademicYear::create(['name' => '2026/2027', 'starts_at' => '2026-09-01', 'ends_at' => '2027-06-30', 'is_current' => true]);
+        $previousYear = AcademicYear::create(['name' => '2025/2026', 'starts_at' => '2025-09-01', 'ends_at' => '2026-06-30']);
+        $target = Classroom::create(['name' => 'الصف الرابع', 'stage' => 'ابتدائي', 'section' => 'B', 'academic_year_id' => $year->id]);
+
+        foreach ([['الصف الخامس', $year->id], ['الصف الرابع', $previousYear->id]] as $index => [$grade, $yearId]) {
+            $source = Classroom::create(['name' => $grade, 'stage' => 'ابتدائي', 'section' => 'A', 'academic_year_id' => $yearId]);
+            $student = Student::create(['user_id' => User::factory()->create(['role' => 'student'])->id, 'student_number' => 'TRANSFER-'.$index, 'classroom_id' => $source->id, 'status' => 'active']);
+            $this->actingAs($admin)->put(route('admin.classes.update', $target), [
+                'name' => $target->name, 'stage' => $target->stage, 'section' => $target->section,
+                'academic_year_id' => $year->id, 'student_ids' => [$student->id],
+            ])->assertStatus(422);
+            $this->assertDatabaseHas('students', ['id' => $student->id, 'classroom_id' => $source->id]);
+        }
+    }
 }

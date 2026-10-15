@@ -73,6 +73,7 @@ class ResultPublicationTest extends TestCase
         $this->assertSame(1, $this->parent->notifications()->count());
         $this->transition('hidden');
         $this->actingAs($this->student->user)->get('/student/dashboard')->assertOk()->assertDontSee('الفترة السرية');
+        $this->getJson(route('student.notifications.summary'))->assertOk()->assertJsonPath('unread_count', 0)->assertJsonCount(0, 'notifications');
         $this->get('/student/results')->assertDontSee('الفترة السرية');
         $this->actingAs($this->parent)->get('/parent/results')->assertDontSee('الفترة السرية');
         $this->assertDatabaseHas('audit_logs', ['action' => 'results_hidden']);

@@ -12,6 +12,7 @@ use App\Services\AuditService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class ClassroomController extends Controller
 {
@@ -53,7 +54,7 @@ class ClassroomController extends Controller
         $eligibleClassroomIds = Classroom::query()
             ->where('academic_year_id', $data['academic_year_id'])
             ->get(['id', 'name'])
-            ->filter(fn (Classroom $room): bool => TeacherAssignmentGroups::gradeKey($room->name) === TeacherAssignmentGroups::gradeKey($data['name']))
+            ->filter(fn (Classroom $room): bool => $this->gradeKey($room->name) === $this->gradeKey($data['name']))
             ->modelKeys();
         $studentIds = collect($r->input('student_ids', []))->map(fn ($id): int => (int) $id)->unique()->values();
         $eligibleStudentIds = Student::query()->whereIn('id', $studentIds)->whereIn('classroom_id', $eligibleClassroomIds)->pluck('id');
@@ -79,13 +80,18 @@ class ClassroomController extends Controller
         $classroomIds = Classroom::query()
             ->where('academic_year_id', $class->academic_year_id)
             ->get(['id', 'name'])
-            ->filter(fn (Classroom $room): bool => TeacherAssignmentGroups::gradeKey($room->name) === TeacherAssignmentGroups::gradeKey($class->name))
+            ->filter(fn (Classroom $room): bool => $this->gradeKey($room->name) === $this->gradeKey($class->name))
             ->modelKeys();
 
         return Student::with(['user', 'classroom'])
             ->whereIn('classroom_id', $classroomIds)
             ->orderBy('student_number')
             ->get();
+    }
+
+    private function gradeKey(string $name): string
+    {
+        return preg_replace('/[\s\p{Z}_\-\x{064B}-\x{065F}\x{0670}\x{0640}]+/u', '', strtr(trim($name), ['أ' => 'ا', 'إ' => 'ا', 'آ' => 'ا', 'ى' => 'ي']));
     }
 
     public function show(Classroom $class): View

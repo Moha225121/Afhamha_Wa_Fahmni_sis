@@ -133,6 +133,8 @@ class TeacherController extends Controller
                 if ($sameSectionAndYear) {
                     $label .= ' · '.($classroom->academicYear?->name ?? 'سنة دراسية أخرى');
                 }
+            } elseif ($section !== '' && !str_starts_with($normalizedName, 'الصف')) {
+                $label .= ' — الشعبة '.$section.' ('.$classroom->stage.')';
             }
 
             $classroomLabels[$classroom->id] = $label;
