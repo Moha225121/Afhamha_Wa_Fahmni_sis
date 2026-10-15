@@ -30,14 +30,15 @@ class StudentCardPdfService
         $logo = $this->logo();
         foreach ($students->chunk(8) as $pageIndex => $page) {
             if ($pageIndex > 0) $pdf->AddPage();
-            $pageHtml = '';
             foreach ($page->values() as $index => $student) {
                 $student->setAttribute('qr_image', $this->qrImage($student->verification_url));
                 $html = view('admin.accounts.card-fragment', ['student' => $student, 'pdfLogo' => $logo, 'schoolBranding' => view()->shared('schoolBranding')])->render();
                 $row = intdiv($index, 2); $column = $index % 2;
-                $pageHtml .= '<div style="position:absolute;left:'.(8 + ($column * 101)).'mm;top:'.(8 + ($row * 68)).'mm;width:94mm;height:62mm">'.$html.'</div>';
+                // Parse one card at a time. The embedded QR and school logo are data URIs,
+                // and concatenating a full page can exceed PCRE's backtracking limit.
+                $cardHtml = '<div style="position:absolute;left:'.(8 + ($column * 101)).'mm;top:'.(8 + ($row * 68)).'mm;width:94mm;height:62mm">'.$html.'</div>';
+                $pdf->WriteHTML($cardHtml);
             }
-            $pdf->WriteHTML($pageHtml);
         }
         return response($pdf->Output('', Destination::STRING_RETURN), 200, ['Content-Type' => 'application/pdf', 'Content-Disposition' => 'attachment; filename="'.$filename.'"', 'Cache-Control' => 'private, no-store']);
     }
@@ -53,11 +54,16 @@ class StudentCardPdfService
         return $data;
     }
 
-    private function qrImage(string $value): string
+    public function qrImage(string $value): string
     {
+        return 'data:image/png;base64,'.base64_encode($this->qrPng($value));
+    }
+
+    public function qrPng(string $value): string
+    {
+        $this->registerQrCodeAutoloader();
         $qr = new \Mpdf\QrCode\QrCode($value, 'M');
-        $png = (new \Mpdf\QrCode\Output\Png())->output($qr, 100);
-        return 'data:image/png;base64,'.base64_encode($png);
+        return (new \Mpdf\QrCode\Output\Png())->output($qr, 100);
     }
 
     private function registerQrCodeAutoloader(): void
@@ -79,6 +85,45 @@ class StudentCardPdfService
         $root = realpath(storage_path('app/public')); $path = $logo ? realpath(storage_path('app/public/'.$logo)) : false;
         if (! $root || ! $path || ! str_starts_with($path, $root.DIRECTORY_SEPARATOR) || ! is_file($path)) return null;
         $mime = mime_content_type($path);
-        return in_array($mime, ['image/png', 'image/jpeg', 'image/gif'], true) ? 'data:'.$mime.';base64,'.base64_encode(file_get_contents($path)) : null;
+        if (! in_array($mime, ['image/png', 'image/jpeg', 'image/gif'], true)) return null;
+
+        $contents = file_get_contents($path);
+        if (! function_exists('imagecreatefromstring')) return 'data:'.$mime.';base64,'.base64_encode($contents);
+
+        $source = @imagecreatefromstring($contents);
+        if (! $source) return 'data:'.$mime.';base64,'.base64_encode($contents);
+
+        $width = imagesx($source);
+        $height = imagesy($source);
+        // The logo is displayed at about 10 mm. A 128 px rendition stays crisp in print
+        // while keeping the repeated embedded image small enough for mPDF's HTML parser.
+        $side = 128;
+        $logoImage = imagecreatetruecolor($side, $side);
+        imagealphablending($logoImage, false);
+        $transparent = imagecolorallocatealpha($logoImage, 18, 59, 121, 127);
+        imagefill($logoImage, 0, 0, $transparent);
+        $white = imagecolorallocatealpha($logoImage, 255, 255, 255, 0);
+        imagefilledellipse($logoImage, (int) ($side / 2), (int) ($side / 2), $side, $side, $white);
+        imagealphablending($logoImage, true);
+
+        $scale = min($side / $width, $side / $height);
+        $drawWidth = (int) round($width * $scale);
+        $drawHeight = (int) round($height * $scale);
+        imagecopyresampled($logoImage, $source, (int) (($side - $drawWidth) / 2), (int) (($side - $drawHeight) / 2), 0, 0, $drawWidth, $drawHeight, $width, $height);
+        imagealphablending($logoImage, false);
+        $radius = $side / 2;
+        for ($y = 0; $y < $side; $y++) {
+            for ($x = 0; $x < $side; $x++) {
+                if (($x - $radius) ** 2 + ($y - $radius) ** 2 > $radius ** 2) imagesetpixel($logoImage, $x, $y, $transparent);
+            }
+        }
+
+        ob_start();
+        imagepng($logoImage);
+        $png = ob_get_clean();
+        imagedestroy($source);
+        imagedestroy($logoImage);
+
+        return $png ? 'data:image/png;base64,'.base64_encode($png) : 'data:'.$mime.';base64,'.base64_encode($contents);
     }
 }

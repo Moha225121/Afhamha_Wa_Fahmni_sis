@@ -8,6 +8,7 @@ use App\Models\Announcement;
 use App\Models\Classroom;
 use App\Services\AuditService;
 use App\Services\ParentNotificationService;
+use App\Services\StudentNotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
@@ -33,20 +34,22 @@ class AnnouncementController extends Controller
         return view('admin.announcements.form', compact('announcement') + ['classrooms' => Classroom::all()]);
     }
 
-    public function store(AnnouncementRequest $r, ParentNotificationService $notifications): RedirectResponse
+    public function store(AnnouncementRequest $r, ParentNotificationService $notifications, StudentNotificationService $studentNotifications): RedirectResponse
     {
         $a = Announcement::create($r->validated() + ['created_by' => $r->user()->id]);
         AuditService::record('created', 'announcements', $a);
+        $studentNotifications->sendAnnouncement($a);
         $notifications->sendAnnouncement($a);
 
         return redirect()->route('admin.announcements.index')->with('success', 'تم حفظ الإعلان.');
     }
 
-    public function update(AnnouncementRequest $r, Announcement $announcement, ParentNotificationService $notifications): RedirectResponse
+    public function update(AnnouncementRequest $r, Announcement $announcement, ParentNotificationService $notifications, StudentNotificationService $studentNotifications): RedirectResponse
     {
         $old = $announcement->getAttributes();
         $announcement->update($r->validated());
         AuditService::record('updated', 'announcements', $announcement, $old);
+        $studentNotifications->sendAnnouncement($announcement);
 
         if ($announcement->wasChanged(['status', 'published_at', 'content', 'title'])) {
             $notifications->sendAnnouncement($announcement);

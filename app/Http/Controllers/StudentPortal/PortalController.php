@@ -7,6 +7,9 @@ use App\Models\Announcement;
 use App\Models\Student;
 use App\Models\Subject;
 use App\Models\TeacherStudentNote;
+use App\Services\ResultPublicationService;
+use App\Services\StudentNotificationService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -39,7 +42,7 @@ class PortalController extends Controller
             'summary' => $this->summaryFor($student),
             'recentGrades' => $this->recentGradesFor($student, 10),
             'automaticResults' => $this->automaticResultsFor($student, 20),
-            'publications' => app(\App\Services\ResultPublicationService::class)->publications($student),
+            'publications' => app(ResultPublicationService::class)->publications($student),
         ]);
     }
 
@@ -77,22 +80,56 @@ class PortalController extends Controller
         return view('student.schedule', compact('student', 'schedule'));
     }
 
-    public function notifications(Request $request): View
+    public function notifications(Request $request, StudentNotificationService $service): View
     {
         $student = $this->student($request);
-        $notifications = $request->user()->notifications()->latest()->paginate(30);
-        $unreadCount = $request->user()->unreadNotifications()->count();
+        $query = $service->queryFor($student);
+        $unreadCount = (clone $query)->whereNull('read_at')->count();
+        $notifications = $query->when($request->boolean('unread'), fn ($notifications) => $notifications->whereNull('read_at'))
+            ->latest()->orderByDesc('id')->paginate(20)->withQueryString();
         $announcements = $this->announcementsFor($student, 20);
 
         return view('student.notifications', compact('student', 'notifications', 'unreadCount', 'announcements'));
     }
 
-    public function markNotificationRead(Request $request, string $notification): RedirectResponse
+    public function notificationSummary(Request $request, StudentNotificationService $service): JsonResponse
     {
-        $record = $request->user()->notifications()->whereKey($notification)->firstOrFail();
+        return response()->json($service->summary($this->student($request), $request->boolean('unread')))
+            ->header('Cache-Control', 'private, no-store');
+    }
+
+    public function markNotificationRead(Request $request, string $notification, StudentNotificationService $service): RedirectResponse|JsonResponse
+    {
+        $student = $this->student($request);
+        $query = $service->queryFor($student);
+        $record = (clone $query)->whereKey($notification)->firstOrFail();
         $record->markAsRead();
 
-        return back()->with('success', 'تم تعليم الإشعار كمقروء.');
+        if ($request->expectsJson()) {
+            return response()->json(['unread_count' => $query->whereNull('read_at')->count(), 'url' => $service->destination($record)]);
+        }
+
+        return redirect()->to($service->destination($record))->with('success', 'تم تعليم الإشعار كمقروء.');
+    }
+
+    public function markAllNotificationsRead(Request $request, StudentNotificationService $service): RedirectResponse|JsonResponse
+    {
+        $service->queryFor($this->student($request))->whereNull('read_at')->update(['read_at' => now()]);
+
+        if ($request->expectsJson()) {
+            return response()->json(['unread_count' => 0]);
+        }
+
+        return back()->with('success', 'تم تعليم جميع الإشعارات كمقروءة.');
+    }
+
+    public function announcement(Request $request, Announcement $announcement, StudentNotificationService $service): View
+    {
+        $student = $this->student($request);
+        abort_unless(Announcement::visibleToStudent($student)->whereKey($announcement->id)->exists(), 404);
+        $service->markAnnouncementRead($student, $announcement);
+
+        return view('student.announcements.show', compact('student', 'announcement'));
     }
 
     private function student(Request $request): Student
@@ -113,7 +150,7 @@ class PortalController extends Controller
             ->selectRaw("sum(case when status = 'late' then 1 else 0 end) as late")
             ->first();
 
-        $savedGradeValues = app(\App\Services\ResultPublicationService::class)->visibleResults($student)->filter(fn ($r) => $r->total_score > 0)->map(fn ($r) => $r->score * 100 / $r->total_score);
+        $savedGradeValues = app(ResultPublicationService::class)->visibleResults($student)->filter(fn ($r) => $r->total_score > 0)->map(fn ($r) => $r->score * 100 / $r->total_score);
 
         return [
             'attendance_total' => (int) ($attendance->total ?? 0),
@@ -127,7 +164,7 @@ class PortalController extends Controller
 
     private function recentGradesFor(Student $student, int $limit): Collection
     {
-        return app(\App\Services\ResultPublicationService::class)->visibleResults($student)->take($limit)->values();
+        return app(ResultPublicationService::class)->visibleResults($student)->take($limit)->values();
     }
 
     private function automaticResultsFor(Student $student, int $limit): Collection
@@ -175,15 +212,7 @@ class PortalController extends Controller
     private function announcementsFor(Student $student, int $limit): Collection
     {
         return Announcement::query()
-            ->where('status', 'published')
-            ->where(fn ($query) => $query->whereNull('published_at')->orWhere('published_at', '<=', now()))
-            ->where(fn ($query) => $query->whereNull('expires_at')->orWhere('expires_at', '>', now()))
-            ->where(function ($query) use ($student): void {
-                $query->whereIn('audience', ['all', 'students'])
-                    ->when($student->classroom_id, fn ($audience) => $audience->orWhere(
-                        fn ($classroom) => $classroom->where('audience', 'classroom')->where('classroom_id', $student->classroom_id),
-                    ));
-            })
+            ->visibleToStudent($student)
             ->latest('published_at')
             ->limit($limit)
             ->get();

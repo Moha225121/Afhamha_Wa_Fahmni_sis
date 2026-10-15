@@ -115,8 +115,10 @@
         initializing = true;
         setLoading('جارٍ فتح الكتاب…');
         try {
-            library ||= await import(`${assets}pdf.mjs`);
-            library.GlobalWorkerOptions.workerSrc = `${assets}pdf.worker.mjs`;
+            // Bust cached module responses when the server's MIME mapping is
+            // fixed; browsers may otherwise reuse the earlier invalid type.
+            library ||= await import(`${assets}pdf.mjs?v=20261001-mimefix1`);
+            library.GlobalWorkerOptions.workerSrc = `${assets}pdf.worker.mjs?v=20261001-mimefix1`;
             if (documentTask) await documentTask.destroy();
             documentTask = library.getDocument({
                 url: reader.dataset.pdfUrl,

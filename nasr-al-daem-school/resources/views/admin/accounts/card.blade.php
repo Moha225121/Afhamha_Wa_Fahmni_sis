@@ -4,7 +4,7 @@
 <body><article class="card"><div class="brand">@if($pdfLogo??null)<img src="{{ $pdfLogo }}" alt="شعار المدرسة">@elseif($schoolBranding['logo'] && !($pdf??false))<img src="{{ asset('storage/'.$schoolBranding['logo']) }}" alt="شعار المدرسة">@endif<div><h2>{{ $schoolBranding['school_name'] }}</h2><div>التعليم كما يجب أن يكون</div></div><div class="title">بطاقة الطالب</div></div><div class="body"><div><div class="photo">صورة الطالب</div>@if($student->qr_image??null)<img class="qr" src="{{ $student->qr_image }}" alt="QR">@endif</div><div><h1 class="student-name">{{ $student->user->name }}</h1>
 <div class="row"><span class="label">الرقم الدراسي</span><b class="value" dir="ltr">{{ $student->student_number }}</b></div>
 <div class="row"><span class="label">البريد الإلكتروني</span><b class="value" dir="ltr">{{ $student->user->email }}</b></div>
-<div class="row"><span class="label">الصف</span><b class="value">{{ $student->classroom?->name }} {{ $student->classroom?->section }}</b></div>
+<div class="row"><span class="label">الصف</span><b class="value">{{ $student->classroom?->name }}@if($student->classroom?->section && $student->classroom->section !== 'أ') — {{ $student->classroom->section }}@endif</b></div>
 <div class="row"><span class="label">العام الدراسي</span><b class="value">{{ $student->classroom?->academicYear?->name ?: '—' }}</b></div>
 <div class="row"><span class="label">رقم الهوية</span><b class="value" dir="ltr">NS-{{ $student->student_number }}</b></div></div></div>
 @if(!($pdf??false))<div class="actions"><button onclick="window.print()">طباعة</button><a href="{{ request()->fullUrlWithQuery(['format'=>'pdf']) }}">تنزيل PDF</a></div>@endif

@@ -12,6 +12,7 @@ Route::prefix('supervisor')->name('supervisor.')->middleware(['auth','supervisor
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
     Route::get('/attendance', [AttendanceController::class,'index'])->name('attendance.index');
     Route::post('/attendance', [AttendanceController::class,'store'])->name('attendance.store');
+    Route::post('/attendance/scan', [AttendanceController::class,'scan'])->name('attendance.scan');
     Route::get('/attendance/history', [AttendanceController::class,'history'])->name('attendance.history');
     Route::get('/reports', [AttendanceController::class,'history'])->name('reports.index');
     Route::get('/students', [StudentController::class,'index'])->name('students.index');

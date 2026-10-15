@@ -53,7 +53,7 @@
             </a>
             <a class="service-card service-card--notifications" href="{{ route('student.notifications') }}">
                 <span class="service-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg></span>
-                <span class="service-copy"><strong>الإشعارات</strong><small>ابقَ على اطلاع بكل جديد</small></span>
+                <span class="service-copy"><strong>الإشعارات <span class="student-notification-inline-badge" data-student-unread hidden></span></strong><small>إعلانات المدرسة وكل جديد</small></span>
                 <span class="service-arrow" aria-hidden="true">‹</span>
             </a>
         </div>
@@ -146,10 +146,10 @@
         <section class="list-section">
             <div class="section-title">
                 <div><span class="section-kicker">آخر التحديثات</span><h2>التنبيهات</h2></div>
-                <a href="{{ route('student.messages') }}">الكل</a>
+                <a href="{{ route('student.notifications') }}">الكل</a>
             </div>
             @forelse($announcements as $announcement)
-                <a class="message-row" href="{{ route('student.messages') }}">
+                <a class="message-row" href="{{ route('student.announcements.show', $announcement) }}">
                     <strong>{{ $announcement->title }}</strong>
                     <span>{{ $announcement->published_at?->format('Y-m-d') ?? $announcement->created_at?->format('Y-m-d') }}</span>
                 </a>

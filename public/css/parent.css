@@ -1757,3 +1757,6 @@ select.native-select-hidden {
         grid-column: span 1;
     }
 }
+
+.notification-badge { display:inline-grid; min-width:20px; height:20px; place-items:center; margin-inline-start:5px; padding:0 5px; border-radius:999px; background:#d94b58; color:#fff; font-size:11px; font-weight:800; line-height:1; }
+.notification-count { display:inline-grid; min-width:24px; height:24px; place-items:center; margin-inline-start:6px; border-radius:999px; background:#e6f3f1; color:#087f83; font-size:12px; vertical-align:middle; }

@@ -1,3 +1,4 @@
+@php($unreadNotifications = auth()->user()->unreadNotifications()->count())
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
@@ -73,7 +74,7 @@
             </a>
             <a href="{{ route('parent.notifications') }}" class="{{ request()->routeIs('parent.notifications') ? 'active' : '' }}">
                 <span aria-hidden="true">●</span>
-                الإشعارات
+                الإشعارات @if($unreadNotifications)<b class="notification-badge" aria-label="{{ $unreadNotifications }} إشعار غير مقروء">{{ $unreadNotifications }}</b>@endif
             </a>
             <form method="post" action="{{ route('logout') }}">
                 @csrf

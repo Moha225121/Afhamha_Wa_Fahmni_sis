@@ -1,0 +1,77 @@
+.attendance-bulk-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin: 14px 0;
+    padding: 16px 18px;
+    border: 1px solid #dbe5ef;
+    border-radius: 14px;
+    background: #fff;
+}
+
+.attendance-bulk-toolbar p {
+    margin: 0;
+    color: #53647a;
+    line-height: 1.7;
+}
+
+.attendance-bulk-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.attendance-bulk-toolbar button {
+    min-height: 44px;
+    white-space: nowrap;
+}
+
+.btn.primary.attendance-bulk-absent {
+    border-color: #a43d36;
+    background: #a43d36;
+}
+
+.attendance-bulk-undo {
+    border: 1px solid #cbd7e4;
+    background: #f5f8fb;
+    color: #33465c;
+}
+
+.attendance-bulk-undo[hidden],
+.attendance-bulk-absent[hidden] {
+    display: none !important;
+}
+
+.attendance-absence-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 40px;
+    color: #33465c;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.attendance-absence-toggle input {
+    width: 20px;
+    height: 20px;
+    accent-color: #a43d36;
+}
+
+@media (max-width: 700px) {
+    .attendance-bulk-toolbar {
+        align-items: stretch;
+        flex-direction: column;
+        padding: 14px;
+    }
+
+    .attendance-bulk-buttons,
+    .attendance-bulk-buttons button {
+        width: 100%;
+    }
+
+    .attendance-bulk-buttons button {
+        white-space: normal;
+    }
+}

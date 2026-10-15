@@ -239,6 +239,8 @@
     .lib-pdf-pages { gap: 5px; }
     .lib-pdf-jump { gap: 4px; }
     .lib-pdf-jump input { width: 48px; }
+    .lib-active-filters { align-items: flex-start; }
+    .lib-clear-link { margin-inline-start: 0; }
 }
 @media (max-width: 420px) {
     .lib-hero { padding: 20px; }
@@ -255,5 +257,15 @@
     .lib-upload > summary small { max-width: 205px; }
     .lib-stats { gap: 23px; }
     .lib-pagination, .student-portal .lib-pagination { gap: 10px; }
+    .lib-reader-header { gap: 10px; }
+    .lib-reader-header .lib-subject-icon { width: 42px; height: 48px; }
+    .lib-reader-toolbar { align-items: stretch; }
+    .lib-reader-actions { width: 100%; }
+    .lib-reader-actions .lib-button { flex: 1 1 auto; white-space: normal; text-align: center; }
+    .lib-reader-canvas { height: 72vh; height: min(72dvh, 680px); min-height: 360px; }
+    .lib-pdf-controls { align-items: stretch; }
+    .lib-pdf-pages, .lib-pdf-zoom { width: 100%; justify-content: space-between; }
+    .lib-pdf-jump { flex: 1 1 auto; justify-content: center; }
+    .lib-pdf-zoom select { flex: 1 1 110px; }
 }
 @media (prefers-reduced-motion: reduce) { .library-catalog *, .library-reader *, .lib-upload * { transition: none !important; scroll-behavior: auto !important; } .lib-pdf-spinner { animation: none; } }

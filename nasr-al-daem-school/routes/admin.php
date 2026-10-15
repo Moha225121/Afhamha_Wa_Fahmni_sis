@@ -21,10 +21,15 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
     Route::get('/dashboard/index', fn () => redirect()->route('admin.dashboard'))->name('dashboard.index');
     Route::get('students/cards', [\App\Http\Controllers\Admin\AccountNumberingController::class, 'cards'])->name('students.cards');
+    Route::get('students/cards/class/{classroom}', [\App\Http\Controllers\Admin\AccountNumberingController::class, 'printClass'])->name('students.cards.class');
+    Route::get('students/cards/class/{classroom}/pdf', [\App\Http\Controllers\Admin\AccountNumberingController::class, 'downloadClassPdf'])->name('students.cards.class.pdf');
+    Route::get('students/cards/{student}/qr', [\App\Http\Controllers\Admin\AccountNumberingController::class, 'classCardQr'])->name('students.cards.qr');
     Route::resource('students', StudentController::class)->except('destroy');
     Route::resource('teachers', TeacherController::class)->except('destroy');
     Route::resource('supervisors', SupervisorController::class)->only(['index','create','store','edit','update']);
     Route::resource('parents', GuardianController::class)->except('destroy');
+    Route::get('classes/sections', [ClassroomController::class, 'sections'])->name('classes.sections');
+    Route::post('classes/sections', [ClassroomController::class, 'storeSections'])->name('classes.sections.store');
     Route::resource('classes', ClassroomController::class)->except('destroy');
     Route::resource('subjects', SubjectController::class)->except('destroy');
     Route::get('imports/{type}/template', [\App\Http\Controllers\Admin\ExcelImportController::class, 'template'])->name('imports.template');

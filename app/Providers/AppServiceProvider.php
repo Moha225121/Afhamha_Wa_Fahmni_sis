@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Contracts\SmartTutorGateway;
 use App\Services\GeminiSmartTutorGateway;
+use App\Services\StudentNotificationService;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -27,6 +28,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        View::composer('student.layout', function ($view): void {
+            $student = request()->user()?->student;
+            if ($student && request()->user()->isStudent()) {
+                $view->with('studentNotificationSummary', app(StudentNotificationService::class)->summary($student));
+            }
+        });
+
         View::composer('*', function ($view): void {
             $settings = Schema::hasTable('settings') ? DB::table('settings')->pluck('value', 'key') : collect();
             $view->with('schoolBranding', [
