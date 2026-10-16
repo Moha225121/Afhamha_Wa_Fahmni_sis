@@ -7,19 +7,22 @@
     <title>{{ strip_tags($__env->yieldContent('title', 'بوابة الطالب')) }} | افهمها وفهمني</title>
     <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="any">
     <link rel="apple-touch-icon" href="{{ asset('icons/parent-icon-192.png') }}">
+    <link rel="preload" href="{{ asset('fonts/cairo-variable.ttf') }}" as="font" type="font/ttf" crossorigin>
     <link rel="stylesheet" href="{{ asset('css/parent.css') }}?v=portal-style-1">
-    <link rel="stylesheet" href="{{ asset('css/student.css') }}?v=20260825-2">
+    <link rel="stylesheet" href="{{ asset('css/student.css') }}?v=20261015-2">
+    @stack('page-styles')
+    <script src="{{ asset('js/student-portal.js') }}?v=20261015-1" defer></script>
     <script src="{{ asset('js/student-tutor.js') }}" defer></script>
     <script src="{{ asset('js/enhanced-selects.js') }}" defer></script>
 </head>
-<body class="student-portal">
+<body class="student-portal @yield('page-class')">
 <a class="skip-link" href="#student-main">تجاوز إلى المحتوى</a>
 <div class="app-shell">
     <header class="app-header">
         <a class="brand" href="{{ route('student.dashboard') }}" aria-label="بوابة الطالب">
-            <span class="brand-mark">AWF</span>
+            <img class="school-brand-logo" src="{{ asset('images/nasbia-school-logo.png') }}" alt="شعار مدرسة النسبية" width="474" height="469" fetchpriority="high">
             <span class="brand-copy">
-                <b>افهمها وفهمني</b>
+                <b>مدرسة النسبية</b>
                 <small>بوابة الطالب</small>
             </span>
         </a>
@@ -43,6 +46,48 @@
     </header>
 
     <main class="app-content" id="student-main" tabindex="-1">
+        @php
+            $isStudentDashboard = request()->routeIs('student.dashboard');
+            $studentDashboardUrl = route('student.dashboard');
+            $previousUrl = url()->previous();
+            $currentUrl = url()->current();
+            $previousParts = parse_url($previousUrl);
+            $currentParts = parse_url($currentUrl);
+            $previousPath = is_array($previousParts) ? ($previousParts['path'] ?? '') : '';
+            $currentPath = is_array($currentParts) ? ($currentParts['path'] ?? '') : '';
+            $sameOrigin = is_array($previousParts)
+                && is_array($currentParts)
+                && strtolower((string) ($previousParts['scheme'] ?? '')) === strtolower((string) ($currentParts['scheme'] ?? ''))
+                && strtolower((string) ($previousParts['host'] ?? '')) === strtolower((string) ($currentParts['host'] ?? ''))
+                && ($previousParts['port'] ?? null) === ($currentParts['port'] ?? null);
+            $previousRouteIsSafe = false;
+            if ($sameOrigin && preg_match('#^/student(?:/|$)#', $previousPath) === 1) {
+                try {
+                    $previousRoute = app('router')->getRoutes()->match(
+                        \Illuminate\Http\Request::create($previousUrl, 'GET'),
+                    );
+                    $previousRouteIsSafe = str_starts_with((string) $previousRoute->getName(), 'student.');
+                } catch (\Throwable) {
+                    $previousRouteIsSafe = false;
+                }
+            }
+            $isStudentPrevious = $previousRouteIsSafe
+                && rtrim($previousPath, '/') !== rtrim($currentPath, '/');
+            $studentBackUrl = $isStudentPrevious ? $previousUrl : $studentDashboardUrl;
+        @endphp
+        <div class="student-back-row" aria-label="التنقل السابق">
+            @if($isStudentDashboard)
+                <button class="student-back-button" type="button" disabled aria-disabled="true">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+                    <span>رجوع</span>
+                </button>
+            @else
+                <a class="student-back-button" href="{{ $studentBackUrl }}">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+                    <span>رجوع</span>
+                </a>
+            @endif
+        </div>
         @yield('content')
     </main>
 

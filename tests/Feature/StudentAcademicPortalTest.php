@@ -72,7 +72,10 @@ class StudentAcademicPortalTest extends TestCase
         Storage::fake('local');
         $ctx = $this->context('A6');
         $assignment = $this->assignment($ctx);
-        $this->actingAs($ctx['student']->user)->post(route('student.assignments.submit', $assignment), ['file' => $this->pdf('answer.pdf'), 'notes' => 'done'])->assertRedirect();
+        $this->actingAs($ctx['student']->user)
+            ->post(route('student.assignments.submit', $assignment), ['file' => $this->pdf('answer.pdf'), 'notes' => 'done'])
+            ->assertRedirect(route('student.assignments.show', $assignment))
+            ->assertSessionHas('success', 'تم تسليم الواجب بنجاح');
         $submission = AssignmentSubmission::firstOrFail();
         $this->assertSame($ctx['student']->id, $submission->student_id);
         $this->assertNotNull($submission->submitted_at);
@@ -82,6 +85,27 @@ class StudentAcademicPortalTest extends TestCase
             'assignment_submission_id' => $submission->id,
             'path' => $attachment->path,
             'original_name' => 'answer.pdf',
+        ]);
+    }
+
+    public function test_student_can_submit_assignment_with_active_team_status(): void
+    {
+        Storage::fake('local');
+        $ctx = $this->context('A6ACTIVE');
+        $assignment = $this->assignment($ctx, ['status' => 'active']);
+
+        $this->actingAs($ctx['student']->user)
+            ->get(route('student.assignments.index'))
+            ->assertOk()
+            ->assertSeeText($assignment->title);
+        $this->post(route('student.assignments.submit', $assignment), [
+            'file' => $this->pdf('active-answer.pdf'),
+        ])->assertRedirect(route('student.assignments.show', $assignment));
+
+        $this->assertDatabaseHas('assignment_submissions', [
+            'assignment_id' => $assignment->id,
+            'student_id' => $ctx['student']->id,
+            'status' => 'submitted',
         ]);
     }
 
@@ -257,7 +281,11 @@ class StudentAcademicPortalTest extends TestCase
         Storage::fake('local');
         $ctx = $this->context('A11');
         $assignment = $this->assignment($ctx);
-        $this->actingAs($ctx['student']->user)->post(route('student.assignments.submit', $assignment), ['file' => UploadedFile::fake()->create('script.php', 2, 'application/x-php')])->assertSessionHasErrors('file');
+        $this->actingAs($ctx['student']->user)
+            ->from(route('student.assignments.show', $assignment))
+            ->post(route('student.assignments.submit', $assignment), ['file' => UploadedFile::fake()->create('script.php', 2, 'application/x-php')])
+            ->assertRedirect(route('student.assignments.show', $assignment))
+            ->assertSessionHasErrors(['file' => 'نوع الملف غير مدعوم']);
         $this->assertDatabaseCount('assignment_submissions', 0);
     }
 
@@ -266,7 +294,11 @@ class StudentAcademicPortalTest extends TestCase
         Storage::fake('local');
         $ctx = $this->context('A12');
         $assignment = $this->assignment($ctx);
-        $this->actingAs($ctx['student']->user)->post(route('student.assignments.submit', $assignment), ['file' => UploadedFile::fake()->create('large.pdf', 10241, 'application/pdf')])->assertSessionHasErrors('file');
+        $this->actingAs($ctx['student']->user)
+            ->from(route('student.assignments.show', $assignment))
+            ->post(route('student.assignments.submit', $assignment), ['file' => UploadedFile::fake()->create('large.pdf', 10241, 'application/pdf')])
+            ->assertRedirect(route('student.assignments.show', $assignment))
+            ->assertSessionHasErrors(['file' => 'حجم الملف يتجاوز الحد المسموح']);
         $this->assertDatabaseCount('assignment_submissions', 0);
     }
 
@@ -495,7 +527,11 @@ class StudentAcademicPortalTest extends TestCase
     {
         $ctx = $this->context('E3');
         $exam = $this->exam($ctx, ['starts_at' => now()->addMinute()]);
-        $this->actingAs($ctx['student']->user)->post(route('student.exams.start', $exam))->assertStatus(422);
+        $this->actingAs($ctx['student']->user)
+            ->from(route('student.exams.index'))
+            ->post(route('student.exams.start', $exam))
+            ->assertRedirect(route('student.exams.index'))
+            ->assertSessionHasErrors(['exam' => 'لم يبدأ موعد الاختبار بعد.']);
         $this->assertDatabaseCount('exam_attempts', 0);
     }
 
@@ -503,8 +539,25 @@ class StudentAcademicPortalTest extends TestCase
     {
         $ctx = $this->context('E4');
         $exam = $this->exam($ctx, ['starts_at' => now()->subMinutes(31), 'duration_minutes' => 30]);
-        $this->actingAs($ctx['student']->user)->post(route('student.exams.start', $exam))->assertStatus(422);
+        $this->actingAs($ctx['student']->user)
+            ->from(route('student.exams.index'))
+            ->post(route('student.exams.start', $exam))
+            ->assertRedirect(route('student.exams.index'))
+            ->assertSessionHasErrors(['exam' => 'انتهى وقت الاختبار.']);
         $this->assertDatabaseCount('exam_attempts', 0);
+    }
+
+    public function test_future_exam_later_on_the_same_day_remains_upcoming(): void
+    {
+        $this->travelTo(Carbon::parse('2026-08-23 10:00:00'));
+        $ctx = $this->context('E4FUTURE');
+        $exam = $this->exam($ctx, ['title' => 'Same Day Future Exam', 'starts_at' => now()->addHour()]);
+
+        $this->actingAs($ctx['student']->user)
+            ->get(route('student.exams.index'))
+            ->assertOk()
+            ->assertSeeTextInOrder(['قادمة', $exam->title])
+            ->assertDontSee(route('student.exams.start', $exam));
     }
 
     public function test_student_cannot_start_exam_for_another_class(): void
@@ -523,6 +576,23 @@ class StudentAcademicPortalTest extends TestCase
         $this->actingAs($ctx['student']->user)->post(route('student.exams.start', $exam))->assertRedirect();
         $this->assertDatabaseHas('exam_attempts', ['exam_id' => $exam->id, 'student_id' => $ctx['student']->id, 'attempt_number' => 1, 'status' => 'in_progress', 'maximum_score' => 10]);
         $this->assertDatabaseCount('exam_answers', 1);
+    }
+
+    public function test_scheduled_team_exam_can_start_when_its_window_is_open(): void
+    {
+        $ctx = $this->context('E7SCHEDULED');
+        $exam = $this->exam($ctx, ['status' => 'scheduled']);
+        $this->question($exam);
+
+        $this->actingAs($ctx['student']->user)
+            ->post(route('student.exams.start', $exam))
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('exam_attempts', [
+            'exam_id' => $exam->id,
+            'student_id' => $ctx['student']->id,
+            'status' => 'in_progress',
+        ]);
     }
 
     public function test_duplicate_start_does_not_create_invalid_duplicate_attempt(): void
@@ -911,7 +981,41 @@ class StudentAcademicPortalTest extends TestCase
         $other = $this->context('P3');
         $this->schedule($ctx, 0, '08:00');
         $this->schedule($other, 1, '09:00');
-        $this->actingAs($ctx['student']->user)->get(route('student.schedule'))->assertOk()->assertSeeText($ctx['subject']->name)->assertSeeText('الأحد')->assertDontSeeText($other['subject']->name);
+        $this->actingAs($ctx['student']->user)
+            ->get(route('student.schedule'))
+            ->assertOk()
+            ->assertSeeText($ctx['subject']->name)
+            ->assertSeeText('الأحد')
+            ->assertSeeText('من 08:00 إلى 09:00')
+            ->assertSee('class="schedule-timetable"', false)
+            ->assertDontSeeText($other['subject']->name);
+    }
+
+    public function test_student_back_button_uses_safe_internal_destination_and_dashboard_is_disabled(): void
+    {
+        $ctx = $this->context('P2BACK');
+        $assignment = $this->assignment($ctx);
+
+        $this->actingAs($ctx['student']->user)
+            ->get(route('student.dashboard'))
+            ->assertOk()
+            ->assertSee('class="student-back-button" type="button" disabled aria-disabled="true"', false)
+            ->assertSeeText('رجوع');
+
+        $this->from(route('student.assignments.index'))
+            ->get(route('student.assignments.show', $assignment))
+            ->assertOk()
+            ->assertSee('href="'.route('student.assignments.index').'"', false);
+
+        $this->withHeader('referer', 'https://outside.example/path')
+            ->get(route('student.schedule'))
+            ->assertOk()
+            ->assertSee('href="'.route('student.dashboard').'"', false);
+
+        $this->withHeader('referer', route('student.assignments.submit', $assignment))
+            ->get(route('student.assignments.show', $assignment))
+            ->assertOk()
+            ->assertSee('href="'.route('student.dashboard').'"', false);
     }
 
     public function test_notifications_are_filtered_for_current_student(): void

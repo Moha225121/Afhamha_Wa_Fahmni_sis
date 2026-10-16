@@ -1,4 +1,12 @@
 /* Student portal design layer. Kept separate from parent.css to avoid cross-portal changes. */
+@font-face {
+    font-family: "Cairo Local";
+    src: url("../fonts/cairo-variable.ttf") format("truetype");
+    font-style: normal;
+    font-weight: 200 1000;
+    font-display: swap;
+}
+
 html {
     background: #eef3f7;
 }
@@ -27,7 +35,7 @@ html {
         radial-gradient(circle at 94% 88%, rgba(49, 91, 128, .09), transparent 28rem),
         #eef3f7;
     color: var(--ink);
-    font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+    font-family: "Cairo Local", Cairo, Tahoma, Arial, sans-serif;
     font-size: 16px;
     line-height: 1.65;
 }
@@ -65,8 +73,8 @@ html {
 
 /* Header */
 .student-portal .app-header {
-    height: 78px;
-    padding: 12px 18px;
+    height: 96px;
+    padding: 10px 18px;
     background: rgba(255, 255, 255, .92);
     border-color: rgba(203, 213, 225, .72);
     box-shadow: 0 4px 20px rgba(15, 23, 42, .04);
@@ -74,18 +82,17 @@ html {
 }
 
 .student-portal .brand {
-    gap: 11px;
+    gap: 12px;
     min-width: 0;
 }
 
-.student-portal .brand-mark {
-    width: 46px;
-    height: 46px;
-    flex: 0 0 46px;
-    border-radius: 15px;
-    background: linear-gradient(145deg, #13877d, #0a5d57);
-    box-shadow: 0 10px 24px rgba(15, 118, 110, .22), inset 0 1px rgba(255, 255, 255, .22);
-    font-size: 15px;
+.student-portal .school-brand-logo {
+    display: block;
+    width: 74px;
+    height: 74px;
+    flex: 0 0 74px;
+    object-fit: contain;
+    background: #fff;
 }
 
 .student-portal .brand-copy {
@@ -93,12 +100,13 @@ html {
 }
 
 .student-portal .brand-copy b {
-    overflow: hidden;
+    overflow: visible;
     color: var(--ink);
-    font-size: 15px;
+    font-size: 17px;
     font-weight: 800;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    line-height: 1.6;
+    text-overflow: clip;
+    white-space: normal;
 }
 
 .student-portal .brand-copy small {
@@ -166,6 +174,49 @@ html {
 .student-portal .app-content {
     width: 100%;
     padding: 22px 18px 112px;
+}
+
+.student-portal .student-back-row {
+    min-height: 46px;
+    display: flex;
+    align-items: center;
+    margin: 0 2px 14px;
+}
+
+.student-portal .student-back-button {
+    min-width: 96px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    border: 1px solid #c8d9e1;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, .88);
+    padding: 8px 14px;
+    color: var(--primary-dark);
+    box-shadow: var(--shadow-sm);
+    font-size: 14px;
+    font-weight: 750;
+    text-decoration: none;
+}
+
+.student-portal .student-back-button svg {
+    width: 19px;
+    height: 19px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.student-portal .student-back-button:disabled {
+    border-color: #dbe3e9;
+    background: #edf1f4;
+    color: #94a3b8;
+    box-shadow: none;
+    cursor: not-allowed;
 }
 
 .student-portal .skip-link {
@@ -718,6 +769,11 @@ html {
     color: #9d1c13;
 }
 
+.student-portal .notice.error ul {
+    margin: 6px 0 0;
+    padding-right: 20px;
+}
+
 .student-portal .info-list {
     overflow: hidden;
     padding: 4px 20px;
@@ -760,6 +816,72 @@ html {
     color: #475569;
     font-size: 13px;
     font-weight: 700;
+}
+
+.student-portal .form-field {
+    display: grid;
+    gap: 8px;
+}
+
+.student-portal .form-label {
+    color: #475569;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.student-portal .form-field small {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.student-portal .visually-hidden {
+    width: 1px !important;
+    height: 1px !important;
+    position: absolute !important;
+    overflow: hidden !important;
+    clip: rect(0 0 0 0) !important;
+    clip-path: inset(50%) !important;
+    white-space: nowrap !important;
+}
+
+.student-portal .file-upload-control {
+    min-height: 54px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border: 1px solid #cfd9e4;
+    border-radius: 13px;
+    background: #fff;
+    padding: 6px;
+}
+
+.student-portal .file-upload-button {
+    min-height: 40px;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9px;
+    background: var(--surface-soft);
+    padding: 7px 13px;
+    color: var(--primary-dark) !important;
+    cursor: pointer;
+    font-size: 13px !important;
+    font-weight: 800 !important;
+    white-space: nowrap;
+}
+
+.student-portal .file-upload-name {
+    min-width: 0;
+    overflow: hidden;
+    color: var(--muted);
+    font-size: 13px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.student-portal .visually-hidden:focus-visible + .file-upload-button {
+    outline: 3px solid color-mix(in srgb, var(--focus) 72%, white);
+    outline-offset: 3px;
 }
 
 .student-portal .profile-form input,
@@ -818,6 +940,12 @@ html {
     cursor: not-allowed;
     opacity: .62;
 }
+
+.student-portal .profile-form button:disabled {
+    cursor: wait;
+    opacity: .68;
+}
+
 
 .student-portal .secondary-link,
 .student-portal .filter-form > a {
@@ -1277,7 +1405,7 @@ html {
         min-height: calc(100vh - 40px);
         display: grid;
         grid-template-columns: 250px minmax(0, 1fr);
-        grid-template-rows: 84px minmax(calc(100vh - 124px), auto);
+        grid-template-rows: 104px minmax(calc(100vh - 144px), auto);
         overflow: clip;
         border: 1px solid rgba(203, 213, 225, .82);
         border-radius: 28px;
@@ -1290,14 +1418,20 @@ html {
         position: sticky;
         top: 20px;
         z-index: 20;
-        height: 84px;
-        padding: 14px 24px;
+        height: 104px;
+        padding: 10px 24px;
         box-shadow: none;
     }
 
     .student-portal .brand {
-        width: 226px;
-        flex: 0 0 226px;
+        width: 246px;
+        flex: 0 0 246px;
+    }
+
+    .student-portal .school-brand-logo {
+        width: 82px;
+        height: 82px;
+        flex-basis: 82px;
     }
 
     .student-portal .header-page-context {
@@ -1355,7 +1489,7 @@ html {
         grid-row: 2;
         position: sticky;
         left: auto;
-        top: 104px;
+        top: 124px;
         bottom: auto;
         transform: none;
         animation: none;
@@ -1369,7 +1503,7 @@ html {
             radial-gradient(circle at 10% 90%, rgba(91, 184, 172, .18), transparent 18rem),
             linear-gradient(180deg, #102f3c, #0c2633 58%, #0a222e);
         padding: 28px 16px;
-        height: calc(100dvh - 124px);
+        height: calc(100dvh - 144px);
         overflow-y: auto;
         box-shadow: none;
         backdrop-filter: none;
@@ -1499,6 +1633,39 @@ html {
     }
 }
 
+@media (max-width: 600px) {
+    .student-portal .app-header {
+        gap: 8px;
+        padding-inline: 12px;
+    }
+
+    .student-portal .brand {
+        gap: 8px;
+    }
+
+    .student-portal .brand-copy b {
+        font-size: 15px;
+    }
+
+    .student-portal .header-actions {
+        gap: 6px;
+    }
+
+    .student-portal .header-avatar {
+        display: none;
+    }
+}
+
+@media (max-width: 360px) {
+    .student-portal .brand-copy b {
+        font-size: 14px;
+    }
+
+    .student-portal .brand-copy small {
+        font-size: 11px;
+    }
+}
+
 @media (max-width: 430px) {
     .student-portal .app-header {
         padding-inline: 13px;
@@ -1563,7 +1730,22 @@ html {
     .student-portal .list-row b {
         max-width: 52%;
     }
+
+    .student-portal .file-upload-control {
+        align-items: stretch;
+        flex-direction: column;
+        gap: 7px;
+        padding: 8px;
+    }
+
+    .student-portal .file-upload-name {
+        padding: 2px 6px 4px;
+        text-align: center;
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
 }
+
 
 @media (hover: hover) {
     .student-portal .header-notifications:hover,
@@ -1571,6 +1753,13 @@ html {
         border-color: #b9d8d3;
         background: var(--surface-soft);
         color: var(--primary-dark);
+    }
+
+    .student-portal .student-back-button:not(:disabled):hover,
+    .student-portal .file-upload-button:hover {
+        border-color: #8fc9c1;
+        background: #dff2ee;
+        color: var(--primary-deep);
     }
 
     .student-portal .service-card:hover,

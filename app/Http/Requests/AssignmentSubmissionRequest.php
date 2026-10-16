@@ -18,7 +18,7 @@ class AssignmentSubmissionRequest extends FormRequest
             && $assignment instanceof Assignment
             && $student
             && $assignment->classroom_id === $student->classroom_id
-            && $assignment->status === 'published'
+            && in_array($assignment->status, ['published', 'active'], true)
             && (! $assignment->published_at || $assignment->published_at->lte(now()));
     }
 
@@ -38,6 +38,21 @@ class AssignmentSubmissionRequest extends FormRequest
                 'extensions:'.implode(',', $extensions),
             ],
             'notes' => ['nullable', 'string', 'max:2000'],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'file.required' => 'يرجى اختيار ملف التسليم.',
+            'file.uploaded' => 'تعذر رفع الملف، يرجى المحاولة مرة أخرى.',
+            'file.file' => 'تعذر قراءة ملف التسليم.',
+            'file.mimes' => 'نوع الملف غير مدعوم',
+            'file.mimetypes' => 'نوع الملف غير مدعوم',
+            'file.extensions' => 'نوع الملف غير مدعوم',
+            'file.max' => 'حجم الملف يتجاوز الحد المسموح',
+            'notes.string' => 'يجب أن تكون الملاحظات نصًا.',
+            'notes.max' => 'يجب ألا تتجاوز الملاحظات 2000 حرف.',
         ];
     }
 }

@@ -20,6 +20,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Throwable;
@@ -40,7 +41,7 @@ class AcademicController extends Controller
                 ->where('student_id', $student->id)
                 ->whereNotNull('submitted_at')])
             ->where('classroom_id', $student->classroom_id)
-            ->where('status', 'published')
+            ->whereIn('status', ['published', 'active'])
             ->where(fn ($query) => $query->whereNull('published_at')->orWhere('published_at', '<=', now()))
             ->latest('due_at')
             ->paginate(20);
@@ -66,12 +67,16 @@ class AcademicController extends Controller
     {
         $student = $this->student($request);
         $this->authorizeAssignment($assignment, $student);
-        abort_if($assignment->due_at && now()->gte($assignment->due_at), 422, 'انتهى موعد تسليم الواجب.');
+        if ($assignment->due_at && now()->gte($assignment->due_at)) {
+            throw ValidationException::withMessages(['file' => 'انتهى موعد تسليم الواجب.']);
+        }
 
         $validated = $request->validated();
         $this->submissions->save($assignment, $student, $request->file('file'), $validated['notes'] ?? null);
 
-        return back()->with('success', 'تم حفظ تسليم الواجب بنجاح.');
+        return redirect()
+            ->route('student.assignments.show', $assignment)
+            ->with('success', 'تم تسليم الواجب بنجاح');
     }
 
     public function assignmentAttachment(Request $request, Assignment $assignment): StreamedResponse
@@ -137,7 +142,7 @@ class AcademicController extends Controller
         $exams = Exam::query()
             ->with(['subject', 'attempts' => fn ($query) => $query->where('student_id', $student->id)->orderByDesc('attempt_number')])
             ->where('classroom_id', $student->classroom_id)
-            ->where('status', 'published')
+            ->whereIn('status', ['published', 'scheduled'])
             ->orderBy('starts_at')
             ->paginate(30);
 
@@ -164,8 +169,12 @@ class AcademicController extends Controller
     {
         $student = $this->student($request);
         $this->authorizeExam($exam, $student);
-        abort_if(now()->lt($exam->starts_at), 422, 'لم يبدأ موعد الاختبار بعد.');
-        abort_if(now()->gte($exam->starts_at->copy()->addMinutes($exam->duration_minutes)), 422, 'انتهى وقت الاختبار.');
+        if (now()->lt($exam->starts_at)) {
+            throw ValidationException::withMessages(['exam' => 'لم يبدأ موعد الاختبار بعد.']);
+        }
+        if (now()->gte($exam->starts_at->copy()->addMinutes($exam->duration_minutes))) {
+            throw ValidationException::withMessages(['exam' => 'انتهى وقت الاختبار.']);
+        }
 
         $attempt = $this->attempts->start($exam, $student);
 
@@ -245,7 +254,7 @@ class AcademicController extends Controller
     {
         abort_unless(
             $assignment->classroom_id === $student->classroom_id
-            && $assignment->status === 'published'
+            && in_array($assignment->status, ['published', 'active'], true)
             && (! $assignment->published_at || $assignment->published_at->lte(now())),
             404,
         );
@@ -253,7 +262,11 @@ class AcademicController extends Controller
 
     private function authorizeExam(Exam $exam, Student $student): void
     {
-        abort_unless($exam->classroom_id === $student->classroom_id && $exam->status === 'published', 404);
+        abort_unless(
+            $exam->classroom_id === $student->classroom_id
+            && in_array($exam->status, ['published', 'scheduled'], true),
+            404,
+        );
     }
 
     private function authorizeAttempt(ExamAttempt $attempt, Student $student): void
