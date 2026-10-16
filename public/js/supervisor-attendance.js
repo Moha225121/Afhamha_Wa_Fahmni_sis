@@ -87,7 +87,7 @@
     rows.forEach((row) => {
         const check = row.querySelector('[data-student-check]');
         const status = row.querySelector('[data-status-value]')?.value;
-        setStatus(row, status === 'absent' || status === 'excused_absence' ? 'absent' : 'present');
+        setStatus(row, status ?? 'present');
         check?.addEventListener('change', () => {
             updatePresence(row, !check.checked);
             updateSummary();
@@ -116,7 +116,7 @@
 
     markAllAbsent?.addEventListener('click', () => {
         if (!rows.length || !window.confirm(`سيتم تغيير حالة جميع الطلاب (${rows.length}) إلى غائب. لن يُحفظ التغيير حتى تضغط «حفظ حضور اليوم». هل تريد المتابعة؟`)) return;
-        previousPresence = new Map(rows.map((row) => [row.dataset.studentId, row.querySelector('[data-status-value]')?.value ?? 'present']));
+        previousPresence ??= new Map(rows.map((row) => [row.dataset.studentId, row.querySelector('[data-status-value]')?.value ?? 'present']));
         rows.forEach((row) => updatePresence(row, false));
         if (undoMarkAllAbsent) undoMarkAllAbsent.hidden = false;
         updateSummary();

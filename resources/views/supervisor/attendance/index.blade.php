@@ -10,14 +10,14 @@
             <h2>متابعة واضحة، وتسجيل أسرع</h2>
             <p>علامة الصح تعني غائب، والمربع الفارغ يعني حاضر. راجع الكشف ثم احفظ السجل.</p>
         </div>
-        <div class="attendance-date-badge"><span>تاريخ السجل</span><strong>{{ \Illuminate\Support\Carbon::parse($date)->translatedFormat('l، j F Y') }}</strong></div>
+        <div class="attendance-date-badge"><span>تاريخ السجل</span><strong>{{ \Illuminate\Support\Carbon::parse($date)->locale('ar')->translatedFormat('l، j F Y') }}</strong></div>
     </header>
 
     <form class="attendance-filters" method="get" aria-label="اختيار الفصل والتاريخ">
         <label><span>الفصل</span><select name="classroom_id" required>@foreach($classes as $classroom)<option value="{{ $classroom->id }}" @selected((int) $classId === (int) $classroom->id)>{{ $classroom->name }}{{ $classroom->section ? ' — '.$classroom->section : '' }}</option>@endforeach</select></label>
         <label><span>التاريخ</span><input type="date" name="date" value="{{ $date }}" required></label>
         <button class="attendance-button attendance-button--primary" type="submit">عرض السجل</button>
-        @if($classId)<a class="attendance-history-link" href="{{ route('supervisor.attendance.history', ['date_from' => $date, 'date_to' => $date, 'status' => 'absent']) }}">سجل الغياب لهذا اليوم</a>@endif
+        @if($classId)<a class="attendance-history-link" href="{{ route('supervisor.attendance.history', ['period' => 'daily', 'date' => $date, 'classroom_id' => $classId]) }}">تقرير الحضور والغياب لهذا اليوم</a>@endif
     </form>
 
     @if($classId)
@@ -74,7 +74,10 @@
                         @endphp
                         <article class="attendance-student" data-student-row data-student-id="{{ $student->id }}" data-student-number="{{ $student->student_number }}" data-status="{{ $status }}" data-search="{{ $searchText }}">
                             @php $isPresent = !in_array($status, ['absent', 'excused_absence'], true); @endphp
-                            <input type="hidden" name="records[{{ $student->id }}][status]" value="{{ $status }}" data-status-value>
+                            <input type="hidden" name="records[{{ $student->id }}][status]" value="{{ $storedStatus }}" data-status-value>
+                            <input type="hidden" name="records[{{ $student->id }}][arrival_time]" value="{{ old('records.'.$student->id.'.arrival_time', $record?->arrival_time ? substr($record->arrival_time, 0, 5) : '') }}">
+                            <input type="hidden" name="records[{{ $student->id }}][late_minutes]" value="{{ old('records.'.$student->id.'.late_minutes', $record?->late_minutes) }}">
+                            <input type="hidden" name="records[{{ $student->id }}][excuse_reason]" value="{{ old('records.'.$student->id.'.excuse_reason', $record?->excuse_reason) }}">
                             <header class="attendance-student-head">
                                 <label class="attendance-student-check"><input type="checkbox" value="{{ $student->id }}" data-student-check @checked(!$isPresent) aria-label="حالة غياب {{ $student->user?->name }}"><span data-presence-label>{{ $isPresent ? 'حاضر' : 'غائب' }}</span></label>
                                 <span class="attendance-student-avatar" aria-hidden="true">{{ mb_substr($student->user?->name ?? 'ط', 0, 1) }}</span>
@@ -102,6 +105,6 @@
 
 @push('scripts')
     <script src="{{ asset('js/vendor/jsQR-1.4.0.js') }}" defer></script>
-    <script src="{{ asset('js/supervisor-attendance.js') }}?v=20261012-absence-qr" defer></script>
+    <script src="{{ asset('js/supervisor-attendance.js') }}?v=20261016-attendance" defer></script>
 @endpush
 @endsection

@@ -74,15 +74,37 @@ class PortalController extends Controller
     public function attendance(Request $request): View
     {
         [, $children, $selectedStudent] = $this->parentContext($request);
-
-        $range = match ($request->query('period')) { 'week' => now()->startOfWeek(), 'semester' => now()->subMonths(4), 'custom' => $request->date('from'), default => now()->startOfMonth() };
+        $filters = $request->validate([
+            'period' => ['nullable', \Illuminate\Validation\Rule::in(['all', 'week', 'month', 'semester', 'custom'])],
+            'from' => ['nullable', 'date_format:Y-m-d'], 'to' => ['nullable', 'date_format:Y-m-d'],
+        ]);
+        $period = $filters['period'] ?? 'all';
+        [$dateFrom, $dateTo] = match ($period) {
+            'week' => [now()->startOfWeek(Carbon::SUNDAY)->toDateString(), now()->endOfWeek(Carbon::SATURDAY)->toDateString()],
+            'month' => [now()->startOfMonth()->toDateString(), now()->endOfMonth()->toDateString()],
+            'semester' => [now()->subMonths(4)->toDateString(), today()->toDateString()],
+            'custom' => [$filters['from'] ?? null, $filters['to'] ?? null],
+            default => [null, null],
+        };
+        if ($dateFrom && $dateTo && $dateFrom > $dateTo) [$dateFrom, $dateTo] = [$dateTo, $dateFrom];
+        $query = DB::table('attendance_records')->where('student_id', $selectedStudent?->id ?? 0)
+            ->when($dateFrom, fn ($items) => $items->whereDate('date', '>=', $dateFrom))
+            ->when($dateTo, fn ($items) => $items->whereDate('date', '<=', $dateTo));
+        $counts = (clone $query)->select('status')->selectRaw('COUNT(*) as total')->groupBy('status')->pluck('total', 'status');
+        $total = (int) $counts->sum();
+        $present = (int) ($counts['present'] ?? 0);
+        $late = (int) ($counts['late'] ?? 0) + (int) ($counts['excused_late'] ?? 0);
+        $summary = [
+            'attendance_total' => $total, 'present' => $present,
+            'absent' => (int) ($counts['absent'] ?? 0) + (int) ($counts['excused_absence'] ?? 0), 'late' => $late,
+            'excused' => (int) ($counts['excused_absence'] ?? 0) + (int) ($counts['excused_late'] ?? 0),
+            'attendance_percent' => $total ? round(($present + $late) / $total * 100, 1) : null,
+        ];
         return view('parent.attendance', [
             'children' => $children,
             'selectedStudent' => $selectedStudent,
-            'summary' => $this->summaryFor($selectedStudent),
-            'records' => $selectedStudent
-                ? DB::table('attendance_records')->where('student_id', $selectedStudent->id)->when($range, fn ($q) => $q->whereDate('date', '>=', $range))->when($request->date('to'), fn ($q,$v) => $q->whereDate('date','<=',$v))->latest('date')->get()
-                : collect(),
+            'summary' => $summary, 'period' => $period, 'dateFrom' => $dateFrom, 'dateTo' => $dateTo,
+            'records' => $query->orderByDesc('date')->orderByDesc('id')->paginate(30)->withQueryString(),
         ]);
     }
 

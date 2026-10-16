@@ -2,11 +2,13 @@
 namespace App\Http\Controllers\SupervisorPortal;
 
 use Carbon\Carbon;
+use App\Enums\AttendanceStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Supervisor\StoreDailyAttendanceRequest;
 use App\Models\Attendance;
 use App\Models\Student;
 use App\Services\DailyAttendanceService;
+use App\Services\ClassroomOrdering;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -14,11 +16,12 @@ class AttendanceController extends Controller
 {
     public function index(Request $r): View
     {
-        $classes = $r->user()->supervisedClassrooms()->orderBy('name')->get();
+        $classes = app(ClassroomOrdering::class)->sort($r->user()->supervisedClassrooms()->get());
         $classId = (int) ($r->query('classroom_id') ?: $classes->first()?->id);
         abort_if($classId && ! $classes->contains('id', $classId), 403);
-        $date = $r->date('date', today())?->toDateString() ?: today()->toDateString();
-        $students = Student::with('user')->where('classroom_id', $classId)->where('status', 'active')->get();
+        $date = ($this->safeDate($r->query('date')) ?? today())->toDateString();
+        $students = Student::with('user')->where('classroom_id', $classId)->where('status', 'active')->get()
+            ->sortBy(fn (Student $student) => $student->user?->name ?? '', SORT_NATURAL | SORT_FLAG_CASE)->values();
         $records = Attendance::whereDate('date', $date)->whereIn('student_id', $students->pluck('id'))->get()->keyBy('student_id');
 
         return view('supervisor.attendance.index', compact('classes', 'classId', 'date', 'students', 'records'));
@@ -32,9 +35,27 @@ class AttendanceController extends Controller
         return back()->with('success', 'تم حفظ حضور اليوم بنجاح.');
     }
 
+    public function scan(Request $request, DailyAttendanceService $service): \Illuminate\Http\JsonResponse
+    {
+        $data = $request->validate([
+            'student_id' => ['required', 'integer', 'exists:students,id'],
+            'classroom_id' => ['required', 'integer', 'exists:classrooms,id'],
+            'date' => ['required', 'date_format:Y-m-d'],
+            'status' => ['nullable', \Illuminate\Validation\Rule::enum(AttendanceStatus::class)],
+        ]);
+        $student = Student::findOrFail($data['student_id']);
+        abort_unless((int) $student->classroom_id === (int) $data['classroom_id'], 422, 'الطالب لا ينتمي إلى الفصل المحدد.');
+        $service->save($request->user(), (int) $data['classroom_id'], $data['date'], [
+            $student->id => ['status' => $data['status'] ?? 'present', 'notes' => 'تم التسجيل عبر QR'],
+        ]);
+        return response()->json(['ok' => true, 'message' => 'تم تسجيل حضور الطالب.', 'student' => [
+            'id' => $student->id, 'name' => $student->user()->value('name'), 'student_number' => $student->student_number,
+        ]]);
+    }
+
     public function history(Request $r): View
     {
-        $classes = $r->user()->supervisedClassrooms()->with('academicYear')->orderBy('name')->get();
+        $classes = app(ClassroomOrdering::class)->sort($r->user()->supervisedClassrooms()->with('academicYear')->get());
         $classroomIds = $classes->pluck('id');
         $period = in_array($r->query('period', 'daily'), ['daily', 'weekly', 'monthly', 'custom'], true)
             ? $r->query('period', 'daily')
@@ -66,7 +87,8 @@ class AttendanceController extends Controller
         $records = Attendance::with(['student.user', 'student.classroom'])
             ->whereIn('classroom_id', $selectedClassroomId ? [$selectedClassroomId] : $classroomIds)
             ->whereIn('student_id', $students->pluck('id'))
-            ->whereBetween('date', [$dateFrom->toDateString(), $dateTo->toDateString()])
+            ->whereDate('date', '>=', $dateFrom->toDateString())
+            ->whereDate('date', '<=', $dateTo->toDateString())
             ->orderByDesc('date')
             ->orderBy('student_id')
             ->get();
@@ -111,7 +133,10 @@ class AttendanceController extends Controller
     private function safeDate(?string $value): ?Carbon
     {
         if (! $value || ! preg_match('/^\d{4}-\d{2}-\d{2}$/', $value)) return null;
-        try { return Carbon::createFromFormat('Y-m-d', $value)->startOfDay(); } catch (\Throwable) { return null; }
+        try {
+            $date = Carbon::createFromFormat('!Y-m-d', $value);
+            return $date->format('Y-m-d') === $value ? $date : null;
+        } catch (\Throwable) { return null; }
     }
 
     private function customRange(Request $request, Carbon $fallback): array
