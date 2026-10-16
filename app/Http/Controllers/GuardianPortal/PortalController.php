@@ -29,7 +29,7 @@ class PortalController extends Controller
             'selectedStudent' => $selectedStudent,
             'summary' => $this->summaryFor($selectedStudent),
             'recentGrades' => $this->recentGradesFor($selectedStudent, 3),
-            'announcements' => $this->announcementsFor($children, 4),
+            'announcements' => $this->announcementsFor($guardian, 4),
         ]);
     }
 
@@ -176,7 +176,8 @@ class PortalController extends Controller
             'guardian' => $guardian,
             'children' => $children,
             'selectedStudent' => $selectedStudent,
-            'announcements' => $this->announcementsFor($children, 12),
+            'announcements' => Announcement::visibleToParent($guardian)
+                ->orderByRaw('COALESCE(published_at, created_at) DESC')->orderByDesc('id')->paginate(20)->withQueryString(),
         ]);
     }
 
@@ -268,23 +269,10 @@ class PortalController extends Controller
         return app(\App\Services\ResultPublicationService::class)->visibleResults($student);
     }
 
-    /** @param Collection<int, Student> $children */
-    private function announcementsFor(Collection $children, int $limit): Collection
+    private function announcementsFor(Guardian $guardian, int $limit): Collection
     {
-        $classroomIds = $children->pluck('classroom_id')->filter()->unique()->values();
-
-        return Announcement::query()
-            ->where('status', 'published')
-            ->where(fn ($query) => $query->whereNull('published_at')->orWhere('published_at', '<=', now()))
-            ->where(fn ($query) => $query->whereNull('expires_at')->orWhere('expires_at', '>', now()))
-            ->where(function ($query) use ($classroomIds): void {
-                $query->whereIn('audience', ['all', 'parent', 'parents']);
-
-                if ($classroomIds->isNotEmpty()) {
-                    $query->orWhereIn('classroom_id', $classroomIds);
-                }
-            })
-            ->latest('published_at')
+        return Announcement::visibleToParent($guardian)
+            ->orderByRaw('COALESCE(published_at, created_at) DESC')->orderByDesc('id')
             ->limit($limit)
             ->get();
     }

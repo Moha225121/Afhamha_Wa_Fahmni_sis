@@ -20,28 +20,7 @@ class ParentNotificationService
 
     public function sendAnnouncement(Announcement $announcement): void
     {
-        if ($announcement->status !== 'published' || ($announcement->published_at && $announcement->published_at->isFuture())) {
-            return;
-        }
-
-        $parents = User::query()
-            ->where('role', 'parent')
-            ->where('status', 'active')
-            ->whereHas('guardian', function ($query) use ($announcement): void {
-                if ($announcement->classroom_id) {
-                    $query->whereHas('students', fn ($students) => $students->where('classroom_id', $announcement->classroom_id));
-                }
-            })
-            ->get();
-
-        $payload = [
-            'title' => $announcement->title,
-            'body' => (string) str($announcement->content)->limit(140),
-            'url' => route('parent.notifications'),
-            'category' => 'announcement',
-        ];
-
-        $parents->each(fn (User $parent) => $this->send($parent, $payload));
+        app(ParentAnnouncementNotificationService::class)->sendAnnouncement($announcement);
     }
 
     /** @param array{title: string, body: string, url?: string, category?: string, student_id?: int|null} $payload */

@@ -51,9 +51,7 @@ class AnnouncementController extends Controller
         AuditService::record('updated', 'announcements', $announcement, $old);
         $studentNotifications->sendAnnouncement($announcement);
 
-        if ($announcement->wasChanged(['status', 'published_at', 'content', 'title'])) {
-            $notifications->sendAnnouncement($announcement);
-        }
+        $notifications->sendAnnouncement($announcement);
 
         return redirect()->route('admin.announcements.index')->with('success', 'تم تحديث الإعلان.');
     }

@@ -72,19 +72,20 @@
             <a href="{{ route('parent.notifications') }}">الإشعارات</a>
         </section>
 
-        <section class="list-section">
-            <div class="section-title">
-                <h2>الرسائل</h2>
-                <a href="{{ route('parent.messages', ['student' => $selectedStudent->id]) }}">الكل</a>
-            </div>
-            @forelse($announcements as $announcement)
-                <a class="message-row" href="{{ route('parent.messages') }}">
-                    <strong>{{ $announcement->title }}</strong>
-                    <span>{{ $announcement->published_at?->format('Y-m-d') ?? $announcement->created_at?->format('Y-m-d') }}</span>
-                </a>
-            @empty
-                <p class="muted-line">لا توجد رسائل منشورة حالياً.</p>
-            @endforelse
-        </section>
     @endif
+
+    <section class="list-section section-gap">
+        <div class="section-title">
+            <h2>إعلانات المدرسة</h2>
+            <a href="{{ route('parent.messages') }}">الكل</a>
+        </div>
+        @forelse($announcements as $announcement)
+            <a class="message-row" href="{{ route('parent.announcements.show', $announcement) }}">
+                <strong>{{ $announcement->title }}</strong>
+                <span>{{ $announcement->published_at?->format('Y-m-d') ?? $announcement->created_at?->format('Y-m-d') }}</span>
+            </a>
+        @empty
+            <p class="muted-line">لا توجد إعلانات منشورة حالياً.</p>
+        @endforelse
+    </section>
 @endsection

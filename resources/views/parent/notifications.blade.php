@@ -1,38 +1,54 @@
 @extends('parent.layout')
-
 @section('title', 'الإشعارات')
-
 @section('content')
-    <section class="page-title"><p>تنبيهات الحساب</p><h1>الإشعارات @if($notifications->total())<small class="notification-count">{{ $notifications->total() }}</small>@endif</h1></section>
-
+<section class="parent-notification-page-heading">
+    <div><p>كل جديد من المدرسة</p><h1>الإشعارات <span class="parent-notification-total">{{ $unreadCount }} جديدة</span></h1><span>أخبار المدرسة وتحديثات أبنائك في مكان واحد.</span></div>
+    <form method="post" action="{{ route('parent.notifications.read-all') }}">
+        @csrf @method('patch')
+        <button class="parent-notification-mark-all" @disabled(!$unreadCount)>تعليم الكل كمقروء</button>
+    </form>
+</section>
+@if(session('success'))<p class="notice success" role="status">{{ session('success') }}</p>@endif
     <section class="list-section">
         @if($hasPushConfiguration)
             <button type="button" id="enable-push" class="secondary-action">تفعيل إشعارات الهاتف</button>
             <p id="push-status" class="muted-line">ستصل التنبيهات للمتصفح أو للتطبيق المثبت بعد منح الإذن.</p>
         @else
-            <p class="muted-line">إشعارات الهاتف بانتظار إعداد مفاتيح VAPID في بيئة التشغيل. إشعارات الحساب داخل التطبيق تعمل الآن.</p>
+            <p class="muted-line">إشعارات الهاتف غير مفعلة حاليًا. يمكنك متابعة كل الإشعارات هنا.</p>
         @endif
     </section>
 
-    <section class="messages-list section-gap">
-        @forelse($notifications as $notification)
-            <article class="message-card {{ $notification->read_at ? '' : 'unread-card' }}">
-                <span>{{ $notification->created_at->format('Y-m-d H:i') }}</span>
-                <h2>{{ $notification->data['title'] ?? 'إشعار' }}</h2>
-                <p>{{ $notification->data['body'] ?? '' }}</p>
-                @if(!empty($notification->data['url']))
-                    <a class="text-action" href="{{ $notification->data['url'] }}">عرض التفاصيل</a>
-                @endif
-                @if(! $notification->read_at)
-                    <form method="post" action="{{ route('parent.notifications.read', $notification) }}">@csrf<button type="submit" class="text-action">تحديد كمقروء</button></form>
-                @endif
-            </article>
-        @empty
-            <section class="empty-state"><h2>لا توجد إشعارات</h2><p>تظهر هنا رسائل الحساب والتنبيهات الموجهة لك.</p></section>
-        @endforelse
-    </section>
-
-    {{ $notifications->links() }}
+<section class="parent-notification-feed" aria-label="قائمة الإشعارات">
+    <nav class="parent-notification-feed-tabs" aria-label="تصفية الإشعارات">
+        <a href="{{ route('parent.notifications') }}" class="{{ request()->boolean('unread') ? '' : 'is-active' }}" @unless(request()->boolean('unread')) aria-current="page" @endunless>الكل</a>
+        <a href="{{ route('parent.notifications', ['unread' => 1]) }}" class="{{ request()->boolean('unread') ? 'is-active' : '' }}" @if(request()->boolean('unread')) aria-current="page" @endif>غير المقروءة <span>{{ $unreadCount }}</span></a>
+    </nav>
+    @forelse($notifications as $notification)
+        <form method="post" action="{{ route('parent.notifications.read', $notification->id) }}">
+            @csrf @method('patch')
+            <button type="submit" class="parent-notification-row parent-notification-row--full {{ $notification->read_at ? '' : 'is-unread' }}">
+                <span class="parent-notification-icon" aria-hidden="true">@include('parent.partials.notification-icon')</span>
+                <span class="parent-notification-copy">
+                    <span class="parent-notification-source">{{ isset($notification->data['announcement_id']) ? 'إعلان من إدارة المدرسة' : 'تحديث الحساب' }}</span>
+                    <strong>{{ $notification->data['title'] ?? 'إشعار جديد' }}</strong>
+                    <span>{{ \Illuminate\Support\Str::limit($notification->data['body'] ?? $notification->data['message'] ?? '', 220) }}</span>
+                    <time datetime="{{ $notification->created_at->toIso8601String() }}">{{ $notification->created_at->locale('ar')->diffForHumans() }}</time>
+                    <span class="parent-notification-open">عرض التفاصيل</span>
+                </span>
+                @unless($notification->read_at)<span class="parent-notification-dot" aria-label="غير مقروء"></span>@endunless
+                <span class="parent-notification-row-arrow" aria-hidden="true">‹</span>
+            </button>
+        </form>
+    @empty
+        <div class="parent-notification-empty parent-notification-empty--page">
+            <span aria-hidden="true">@include('parent.partials.notification-icon')</span>
+            <h2>{{ request()->boolean('unread') ? 'أنت مطّلع على كل جديد' : 'لا توجد إشعارات بعد' }}</h2>
+            <p>{{ request()->boolean('unread') ? 'قرأت جميع إشعاراتك. سنخبرك عندما يصل إعلان جديد.' : 'عندما تنشر المدرسة إعلانًا لك أو لصفوف أبنائك، ستجده هنا.' }}</p>
+            @if(request()->boolean('unread'))<a href="{{ route('parent.notifications') }}">عرض كل الإشعارات</a>@endif
+        </div>
+    @endforelse
+</section>
+{{ $notifications->withQueryString()->links() }}
 @endsection
 
 @if($hasPushConfiguration)

@@ -28,6 +28,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        View::composer('parent.layout', function ($view): void {
+            $parent = request()->user();
+            if ($parent?->isParent()) {
+                $view->with('parentNotificationSummary', app(\App\Services\ParentAnnouncementNotificationService::class)->summary($parent));
+            }
+        });
         View::composer('student.layout', function ($view): void {
             $student = request()->user()?->student;
             if ($student && request()->user()->isStudent()) {

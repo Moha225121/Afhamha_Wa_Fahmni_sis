@@ -6,6 +6,7 @@
     <section class="page-title">
         <p>تواصل ومتابعة</p>
         <h1>الرسائل والإعلانات</h1>
+        <a class="text-action" href="{{ route('parent.notifications') }}">الإشعارات الجديدة</a>
     </section>
 
     @if($children->isNotEmpty())
@@ -29,12 +30,14 @@
                 <span>{{ $announcement->published_at?->format('Y-m-d') ?? $announcement->created_at?->format('Y-m-d') }}</span>
                 <h2>{{ $announcement->title }}</h2>
                 <p>{{ $announcement->content }}</p>
+                <a class="text-action" href="{{ route('parent.announcements.show', $announcement) }}">فتح الإعلان</a>
             </article>
         @empty
             <div class="empty-state">
-                <h2>لا توجد رسائل</h2>
+                <h2>لا توجد إعلانات</h2>
                 <p>تظهر هنا الإعلانات المنشورة لولي الأمر أو صفوف الأبناء.</p>
             </div>
         @endforelse
     </section>
+    {{ $announcements->links() }}
 @endsection

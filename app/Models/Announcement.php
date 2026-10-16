@@ -29,4 +29,17 @@ use Illuminate\Database\Eloquent\Model;
                 ));
         });
     }
+
+    public function scopeVisibleToParent(Builder $query, Guardian $guardian): void
+    {
+        $classroomIds = $guardian->students()->whereNotNull('classroom_id')->pluck('classroom_id')->unique();
+
+        $query->currentlyPublished()->where(function (Builder $audience) use ($classroomIds): void {
+            $audience->where(fn (Builder $global) => $global->whereIn('audience', ['all', 'parent', 'parents'])->whereNull('classroom_id'));
+            if ($classroomIds->isNotEmpty()) {
+                $audience->orWhere(fn (Builder $classroom) => $classroom
+                    ->whereIn('audience', ['all', 'parent', 'parents', 'classroom'])->whereIn('classroom_id', $classroomIds));
+            }
+        });
+    }
 }

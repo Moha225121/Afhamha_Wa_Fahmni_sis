@@ -1,4 +1,4 @@
-@php($unreadNotifications = auth()->user()->unreadNotifications()->count())
+@php($unreadNotifications = $parentNotificationSummary['unread_count'])
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
@@ -14,9 +14,11 @@
     <link rel="apple-touch-icon" href="{{ route('school.pwa.icon') }}">
     <link rel="stylesheet" href="{{ asset('css/parent.css') }}?v=portal-style-1">
     @include('shared.branding-style')@include('shared.portal-assets')
+    <link rel="stylesheet" href="{{ asset('css/parent-notifications.css') }}?v=20261016-1">
+    <script src="{{ asset('js/parent-notifications.js') }}?v=20261016-1" defer></script>
     <script src="{{ asset('js/enhanced-selects.js') }}" defer></script>
 </head>
-<body>
+<body class="parent-portal">
 <div class="app-shell">
     <header class="app-header">
         <a class="brand" href="{{ route('parent.dashboard') }}" aria-label="بوابة ولي الأمر">
@@ -27,6 +29,7 @@
             </span>
         </a>
         <div class="header-actions">
+            @include('parent.partials.notification-bell')
             <button type="button" class="install-app-button" data-install-app>
                 <span aria-hidden="true">⇩</span><span>تثبيت التطبيق</span>
             </button>
@@ -73,7 +76,7 @@
             </a>
             <a href="{{ route('parent.notifications') }}" class="{{ request()->routeIs('parent.notifications') ? 'active' : '' }}">
                 <span aria-hidden="true">●</span>
-                الإشعارات @if($unreadNotifications)<b class="notification-badge" aria-label="{{ $unreadNotifications }} إشعار غير مقروء">{{ $unreadNotifications }}</b>@endif
+                الإشعارات <b class="parent-notification-inline-badge" data-parent-unread @if(!$unreadNotifications) hidden @endif>{{ $unreadNotifications > 99 ? '99+' : $unreadNotifications }}</b>
             </a>
             <form method="post" action="{{ route('logout') }}">
                 @csrf

@@ -26,7 +26,10 @@ Route::prefix('parent')->name('parent.')->middleware(['auth', 'parent'])->group(
     Route::get('/conversations/{conversation}', [ConversationController::class, 'show'])->name('conversations.show');
     Route::post('/conversations/{conversation}/messages', [ConversationController::class, 'storeMessage'])->name('conversations.messages.store');
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications');
-    Route::post('/notifications/{notification}/read', [NotificationController::class, 'read'])->name('notifications.read');
+    Route::get('/notifications/summary', [NotificationController::class, 'summary'])->middleware('throttle:60,1')->name('notifications.summary');
+    Route::patch('/notifications/read-all', [NotificationController::class, 'readAll'])->middleware('throttle:60,1')->name('notifications.read-all');
+    Route::match(['post', 'patch'], '/notifications/{notification}/read', [NotificationController::class, 'read'])->whereUuid('notification')->middleware('throttle:60,1')->name('notifications.read');
+    Route::get('/announcements/{announcement}', [NotificationController::class, 'announcement'])->whereNumber('announcement')->name('announcements.show');
     Route::post('/push-subscriptions', [NotificationController::class, 'storeSubscription'])->name('push-subscriptions.store');
     Route::delete('/push-subscriptions/{subscription}', [NotificationController::class, 'destroySubscription'])->name('push-subscriptions.destroy');
     Route::get('/profile', [PortalController::class, 'profile'])->name('profile');

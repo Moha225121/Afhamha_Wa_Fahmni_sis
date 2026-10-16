@@ -76,6 +76,7 @@ class ResultPublicationTest extends TestCase
         $this->getJson(route('student.notifications.summary'))->assertOk()->assertJsonPath('unread_count', 0)->assertJsonCount(0, 'notifications');
         $this->get('/student/results')->assertDontSee('الفترة السرية');
         $this->actingAs($this->parent)->get('/parent/results')->assertDontSee('الفترة السرية');
+        $this->getJson(route('parent.notifications.summary'))->assertOk()->assertJsonPath('unread_count', 0)->assertJsonCount(0, 'notifications');
         $this->assertDatabaseHas('audit_logs', ['action' => 'results_hidden']);
     }
 
