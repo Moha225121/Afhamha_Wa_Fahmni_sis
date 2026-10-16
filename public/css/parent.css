@@ -1477,6 +1477,11 @@ select.native-select-hidden {
     transition: transform .18s var(--motion-ease), background .18s ease;
 }
 
+.bottom-nav span svg { width: 24px; height: 24px; }
+.bottom-nav a { font-size: 13px; }
+.metric .metric-empty { font-size: 19px; line-height: 1.6; }
+.metric .metric-help { color: var(--muted); font-size: 12px; line-height: 1.8; }
+
 .bottom-nav a.active {
     background:
         linear-gradient(180deg, rgba(20, 184, 166, .14), rgba(246, 166, 9, .07)),

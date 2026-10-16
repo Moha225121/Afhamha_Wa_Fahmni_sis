@@ -41,6 +41,14 @@
         if (announce && count > previous) live.textContent = `لديك ${count} إشعارات غير مقروءة`;
     }
 
+    function updateFollowupCounts() {
+        document.querySelectorAll('[data-followup-unread]').forEach(badge => {
+            const count = state.unread_by_category?.[badge.dataset.followupUnread] || 0;
+            badge.hidden = count === 0;
+            badge.textContent = count > 99 ? '99+' : String(count);
+        });
+    }
+
     function render(items, force = false) {
         const signature = JSON.stringify([filter, items]);
         if (signature === rendered || (!force && preview.contains(document.activeElement))) return;
@@ -80,7 +88,7 @@
             const symbol = element('span');
             symbol.setAttribute('aria-hidden', 'true');
             if (icon) symbol.append(icon.cloneNode(true));
-            empty.append(symbol, element('strong', '', filter === 'unread' ? 'أنت مطّلع على كل جديد' : 'لا توجد إشعارات بعد'), element('p', '', filter === 'unread' ? 'لا توجد إشعارات غير مقروءة.' : 'ستظهر هنا إعلانات المدرسة الجديدة.'));
+            empty.append(symbol, element('strong', '', filter === 'unread' ? 'أنت مطّلع على كل جديد' : 'لا توجد إشعارات بعد'), element('p', '', filter === 'unread' ? 'لا توجد إشعارات غير مقروءة.' : 'ستظهر هنا إعلانات المدرسة وملاحظات الطالب والاستدعاءات.'));
             fragment.append(empty);
         }
         preview.replaceChildren(fragment);
@@ -104,6 +112,7 @@
             if (pending !== request) return;
             updateCount(result.unread_count, true);
             state = result;
+            updateFollowupCounts();
             render(result.notifications, userInitiated);
             error.hidden = true;
         } catch (failure) {
@@ -183,6 +192,7 @@
     });
 
     updateCount(state.unread_count);
+    updateFollowupCounts();
     trigger.setAttribute('aria-expanded', String(bell.open));
     document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); });
     let interval;

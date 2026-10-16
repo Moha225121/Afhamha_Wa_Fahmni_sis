@@ -39,6 +39,7 @@ class ParentAnnouncementNotificationService
     // Sync on every parent entry also recovers previously missed and scheduled ads.
     public function queryFor(User $parent): MorphMany
     {
+        $followupIds = app(ParentFollowupNotificationService::class)->syncFor($parent);
         $guardian = $parent->guardian;
         $announcements = $guardian ? Announcement::visibleToParent($guardian)->get() : collect();
         $existing = $parent->notifications()->where('type', ParentAnnouncementNotification::class)->toBase()->pluck('data', 'id')->all();
@@ -61,6 +62,8 @@ class ParentAnnouncementNotificationService
 
         return $parent->notifications()->whereNotIn('id', $withdrawnIds)
             ->where(fn (Builder $personal) => $personal->whereNull('data->student_id')->orWhereIn('data->student_id', $studentIds))
+            ->where(fn (Builder $followup) => $followup->whereNull('data->category')
+                ->orWhereNotIn('data->category', ['student_note', 'guardian_call'])->orWhereIn('id', $followupIds))
             ->where(function (Builder $query) use ($ids): void {
                 // Old generic announcement rows may be duplicates or mistargeted.
                 $query->where(fn (Builder $personal) => $personal->where('type', '!=', ParentAnnouncementNotification::class)
@@ -76,6 +79,10 @@ class ParentAnnouncementNotificationService
 
         return [
             'unread_count' => (clone $query)->whereNull('read_at')->count(),
+            'unread_by_category' => [
+                'student_note' => (clone $query)->where('data->category', 'student_note')->whereNull('read_at')->count(),
+                'guardian_call' => (clone $query)->where('data->category', 'guardian_call')->whereNull('read_at')->count(),
+            ],
             'notifications' => (clone $query)->when($unreadOnly, fn ($items) => $items->whereNull('read_at'))
                 ->latest()->orderByDesc('id')->limit(5)->get()->map(fn (DatabaseNotification $item) => $this->serialize($item))->all(),
             'all_url' => route('parent.notifications'),

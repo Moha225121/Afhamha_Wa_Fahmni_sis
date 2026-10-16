@@ -1,5 +1,6 @@
 .parent-portal [hidden] { display: none !important; }
-.parent-notification-bell { position: relative; }
+/* Anchor the dropdown to the header so it stays inside the portal at every width. */
+.parent-notification-bell { position: static; }
 .parent-notification-bell > summary { position: relative; cursor: pointer; list-style: none; }
 .parent-notification-bell > summary::-webkit-details-marker { display: none; }
 .parent-notification-bell > summary { display: grid; place-items: center; width: 42px; height: 42px; padding: 9px; border: 1px solid #dce5eb; border-radius: 12px; background: #f4f7fa; color: #52657a; }
@@ -12,7 +13,7 @@
 .parent-notification-badge, .parent-notification-inline-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 21px; height: 21px; padding: 0 5px; border-radius: 20px; background: #df334d; color: #fff; font-size: 11px; line-height: 1; font-weight: 800; font-variant-numeric: tabular-nums; }
 .parent-notification-badge { position: absolute; inset-inline-end: -7px; top: -7px; border: 2px solid white; height: 23px; min-width: 23px; }
 .parent-notification-inline-badge { vertical-align: middle; margin-inline-start: 5px; }
-.parent-notification-panel { position: absolute; inset-inline-end: -50px; top: calc(100% + 15px); width: 386px; max-width: calc(100vw - 32px); padding: 20px 10px 0; border: 1px solid #e1e7ef; border-radius: 20px; background: white; box-shadow: 0 18px 60px #16203329, 0 3px 10px #1620330a; color: #162033; z-index: 40; }
+.parent-notification-panel { position: absolute; inset-inline-end: 16px; top: calc(100% + 8px); width: 386px; max-width: calc(100% - 32px); padding: 20px 10px 0; border: 1px solid #e1e7ef; border-radius: 20px; background: white; box-shadow: 0 18px 60px #16203329, 0 3px 10px #1620330a; color: #162033; z-index: 40; }
 .parent-notification-panel__heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 0 10px 14px; }
 .parent-notification-panel__heading h2 { margin: 0; font-size: 23px; line-height: 1.4; font-weight: 800; }
 .parent-notification-panel__heading p { margin: 5px 0 0; font-size: 12px; color: #64748b; }
@@ -83,7 +84,7 @@
 .parent-announcement footer { border-top: 1px solid #edf1f6; margin-top: 30px; padding-top: 18px; color: #64748b; font-size: 12px; }
 .parent-announcement footer span { color: #0f766e; margin-inline-end: 6px; }
 @media (max-width: 600px) {
-    .parent-notification-panel { position: fixed; inset-inline: 12px; top: 75px; width: auto; max-width: none; }
+    .parent-notification-panel { inset-inline: 12px; width: auto; max-width: none; }
     .parent-notification-preview { max-height: calc(100dvh - 310px); }
     .parent-notification-page-heading { align-items: flex-start; flex-direction: column; gap: 14px; }
     .parent-notification-page-heading h1 { font-size: 26px; }

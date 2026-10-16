@@ -29,7 +29,7 @@
             <button type="submit" class="parent-notification-row parent-notification-row--full {{ $notification->read_at ? '' : 'is-unread' }}">
                 <span class="parent-notification-icon" aria-hidden="true">@include('parent.partials.notification-icon')</span>
                 <span class="parent-notification-copy">
-                    <span class="parent-notification-source">{{ isset($notification->data['announcement_id']) ? 'إعلان من إدارة المدرسة' : 'تحديث الحساب' }}</span>
+                    <span class="parent-notification-source">{{ match($notification->data['category'] ?? '') { 'student_note' => 'ملاحظة من المشرف', 'guardian_call' => 'استدعاء ولي الأمر', 'announcement' => 'إعلان من إدارة المدرسة', default => 'تحديث الحساب' } }}</span>
                     <strong>{{ $notification->data['title'] ?? 'إشعار جديد' }}</strong>
                     <span>{{ \Illuminate\Support\Str::limit($notification->data['body'] ?? $notification->data['message'] ?? '', 220) }}</span>
                     <time datetime="{{ $notification->created_at->toIso8601String() }}">{{ $notification->created_at->locale('ar')->diffForHumans() }}</time>

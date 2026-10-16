@@ -6,6 +6,7 @@ use App\Models\Announcement;
 use App\Models\Student;
 use App\Models\User;
 use App\Notifications\ParentPortalNotification;
+use Illuminate\Support\Facades\DB;
 
 class ParentNotificationService
 {
@@ -15,7 +16,7 @@ class ParentNotificationService
     public function send(User $user, array $payload): void
     {
         $user->notify(new ParentPortalNotification($payload));
-        $this->webPush->send($user, $payload);
+        DB::afterCommit(fn () => $this->webPush->send($user, $payload));
     }
 
     public function sendAnnouncement(Announcement $announcement): void

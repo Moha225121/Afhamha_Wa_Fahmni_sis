@@ -12,6 +12,10 @@ use App\Http\Controllers\LibraryCatalogController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('teacher')->name('teacher.')->middleware(['auth', 'teacher', 'no-cache'])->group(function (): void {
+    Route::get('/conversations', [\App\Http\Controllers\SchoolChatController::class, 'index'])->name('conversations.index');
+    Route::get('/conversations/{conversation}', [\App\Http\Controllers\SchoolChatController::class, 'show'])->name('conversations.show');
+    Route::get('/conversations/{conversation}/messages', [\App\Http\Controllers\SchoolChatController::class, 'messages'])->middleware('throttle:120,1')->name('conversations.messages');
+    Route::post('/conversations/{conversation}/messages', [\App\Http\Controllers\SchoolChatController::class, 'storeMessage'])->middleware('throttle:60,1')->name('conversations.messages.store');
     Route::get('/students/{student}/analysis', \App\Http\Controllers\StudentLevelAnalysisController::class)->name('students.analysis');
     Route::post('/students/{student}/analysis', \App\Http\Controllers\StudentLevelAnalysisController::class)->middleware('throttle:6,1')->name('students.analysis.generate');
     Route::get('/', fn () => redirect()->route('teacher.dashboard'));

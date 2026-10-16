@@ -3,11 +3,12 @@
 namespace App\Http\Controllers\GuardianPortal;
 
 use App\Http\Controllers\Controller;
+use App\Models\Announcement;
 use App\Models\Conversation;
 use App\Models\Student;
 use App\Models\User;
-use App\Services\ParentNotificationService;
 use App\Services\ParentPortalContext;
+use App\Services\SchoolChatService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -18,7 +19,7 @@ class ConversationController extends Controller
 {
     public function __construct(
         private readonly ParentPortalContext $context,
-        private readonly ParentNotificationService $notifications,
+        private readonly SchoolChatService $chat,
     ) {}
 
     public function index(Request $request): View
@@ -27,13 +28,13 @@ class ConversationController extends Controller
         $children = $this->context->children($guardian);
         $selectedStudent = $this->context->selectedStudent($guardian, $children, $request->query('student'));
 
-        return view('parent.conversations.index', [
+        return view('parent.messages', [
             'children' => $children,
             'selectedStudent' => $selectedStudent,
-            'conversations' => $request->user()->conversations()
-                ->with(['student.user', 'participants', 'latestMessage.sender'])
-                ->orderByDesc('conversations.last_message_at')
-                ->get(),
+            'conversations' => $this->chat->inbox($request->user())
+                ->when($request->filled('student'), fn ($items) => $items->where('conversations.student_id', $selectedStudent->id))->get(),
+            'announcements' => Announcement::visibleToParent($guardian)->orderByRaw('COALESCE(published_at, created_at) DESC')->orderByDesc('id')->paginate(20)->withQueryString(),
+            'activeTab' => $request->query('tab') === 'announcements' ? 'announcements' : 'chats',
         ]);
     }
 
@@ -56,7 +57,7 @@ class ConversationController extends Controller
             'student_id' => ['required', 'integer', 'exists:students,id'],
             'recipient_id' => ['required', 'integer', 'exists:users,id'],
             'subject' => ['nullable', 'string', 'max:180'],
-            'body' => ['required', 'string', 'max:3000'],
+            'body' => ['nullable', 'string', 'max:3000'],
         ]);
 
         $guardian = $this->context->guardian($request);
@@ -66,79 +67,32 @@ class ConversationController extends Controller
         abort_unless($recipient, 404);
 
         $conversation = DB::transaction(function () use ($request, $student, $recipient, $validated): Conversation {
-            $conversation = Conversation::create([
-                'student_id' => $student->id,
-                'created_by' => $request->user()->id,
-                'subject' => $validated['subject'] ?: null,
-                'status' => 'open',
-                'last_message_at' => now(),
-            ]);
-
-            $conversation->participants()->attach([$request->user()->id, $recipient->id]);
-            $conversation->messages()->create(['sender_id' => $request->user()->id, 'body' => $validated['body']]);
+            User::whereKey($request->user()->id)->lockForUpdate()->first();
+            $conversation = $request->user()->conversations()->where('student_id', $student->id)->where('conversations.status', 'open')
+                ->whereHas('participants', fn ($users) => $users->whereKey($recipient->id))->has('participants', '=', 2)->latest('conversations.id')->first();
+            if (! $conversation) {
+                $conversation = Conversation::create([
+                    'student_id' => $student->id,
+                    'created_by' => $request->user()->id,
+                    'subject' => $validated['subject'] ?? null,
+                    'status' => 'open',
+                    'last_message_at' => now(),
+                ]);
+                $conversation->participants()->attach([$request->user()->id, $recipient->id]);
+            }
+            if (! empty($validated['body'])) {
+                $this->chat->send($request->user(), $conversation, $validated['body']);
+            }
 
             return $conversation;
         });
 
-        $this->notifications->send($recipient, [
-            'title' => 'رسالة جديدة من ولي أمر',
-            'body' => (string) str($validated['body'])->limit(140),
-            'url' => $recipient->isParent() ? route('parent.conversations.show', $conversation) : route('admin.dashboard'),
-            'category' => 'message',
-            'student_id' => $student->id,
-        ]);
-
-        return redirect()->route('parent.conversations.show', $conversation)->with('success', 'تم إرسال الرسالة.');
-    }
-
-    public function show(Request $request, Conversation $conversation): View
-    {
-        $this->assertParticipant($request, $conversation);
-
-        if ($conversation->student) {
-            $this->context->assertChild($this->context->guardian($request), $conversation->student);
-        }
-
-        $conversation->participants()->updateExistingPivot($request->user()->id, ['last_read_at' => now()]);
-        $conversation->load(['student.user', 'participants', 'messages.sender']);
-
-        return view('parent.conversations.show', compact('conversation'));
-    }
-
-    public function storeMessage(Request $request, Conversation $conversation): RedirectResponse
-    {
-        $this->assertParticipant($request, $conversation);
-        abort_unless($conversation->status === 'open', 403);
-
-        $validated = $request->validate(['body' => ['required', 'string', 'max:3000']]);
-        $conversation->messages()->create(['sender_id' => $request->user()->id, 'body' => $validated['body']]);
-        $conversation->update(['last_message_at' => now()]);
-
-        $conversation->participants()->where('users.id', '!=', $request->user()->id)->get()->each(function (User $recipient) use ($conversation, $validated): void {
-            $this->notifications->send($recipient, [
-                'title' => 'رسالة جديدة',
-                'body' => (string) str($validated['body'])->limit(140),
-                'url' => $recipient->isParent() ? route('parent.conversations.show', $conversation) : route('admin.dashboard'),
-                'category' => 'message',
-                'student_id' => $conversation->student_id,
-            ]);
-        });
-
-        return back()->with('success', 'تم إرسال الرسالة.');
-    }
-
-    private function assertParticipant(Request $request, Conversation $conversation): void
-    {
-        abort_unless($conversation->participants()->whereKey($request->user()->id)->exists(), 404);
+        return redirect()->route('parent.conversations.show', $conversation);
     }
 
     /** @return Collection<int, User> */
     private function recipientsFor(Student $student): Collection
     {
-        if (! $student->classroom_id) {
-            return collect();
-        }
-
         return User::query()
             ->where('status', 'active')
             ->where(function ($query) use ($student): void {

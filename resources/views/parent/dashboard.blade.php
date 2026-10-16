@@ -40,8 +40,13 @@
                 <strong>{{ $summary['published_grades'] }}</strong>
             </article>
             <article class="metric">
-                <span>المتوسط</span>
-                <strong>{{ $summary['average_percent'] === null ? '-' : $summary['average_percent'].'%' }}</strong>
+                <span>متوسط درجات الطالب</span>
+                @if($summary['average_percent'] === null)
+                    <strong class="metric-empty">لا توجد نتائج بعد</strong>
+                @else
+                    <strong>{{ $summary['average_percent'] }}%</strong>
+                @endif
+                <small class="metric-help">متوسط نسب الدرجات المنشورة في جميع المواد</small>
             </article>
         </section>
 
@@ -55,7 +60,7 @@
                 @php($total = rtrim(rtrim(number_format((float) $grade->total_score, 2, '.', ''), '0'), '.'))
                 <div class="list-row">
                     <div>
-                        <strong>{{ $grade->subject }}</strong>
+                        <strong>{{ \App\Services\SubjectDisplayName::arabic($grade->subject) }}</strong>
                         <span>{{ $grade->title }}</span>
                     </div>
                     <b>{{ $score }} / {{ $total }}</b>
@@ -77,7 +82,7 @@
     <section class="list-section section-gap">
         <div class="section-title">
             <h2>إعلانات المدرسة</h2>
-            <a href="{{ route('parent.messages') }}">الكل</a>
+            <a href="{{ route('parent.messages', ['tab' => 'announcements']) }}">الكل</a>
         </div>
         @forelse($announcements as $announcement)
             <a class="message-row" href="{{ route('parent.announcements.show', $announcement) }}">

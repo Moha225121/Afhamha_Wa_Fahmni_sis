@@ -74,7 +74,7 @@
             @php($total = rtrim(rtrim(number_format((float) $grade->total_score, 2, '.', ''), '0'), '.'))
             <div class="list-row">
                 <div>
-                    <strong>{{ $grade->subject }}</strong>
+                    <strong>{{ \App\Services\SubjectDisplayName::arabic($grade->subject) }}</strong>
                     <span>{{ $grade->title }}</span>
                 </div>
                 <b>{{ $score }} / {{ $total }}</b>

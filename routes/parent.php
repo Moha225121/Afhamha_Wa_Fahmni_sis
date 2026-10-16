@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\GuardianPortal\ConversationController;
+use App\Http\Controllers\GuardianPortal\FollowupController;
 use App\Http\Controllers\GuardianPortal\NotificationController;
 use App\Http\Controllers\GuardianPortal\PortalController;
 use Illuminate\Support\Facades\Route;
@@ -15,16 +16,19 @@ Route::prefix('parent')->name('parent.')->middleware(['auth', 'parent'])->group(
     Route::get('/children/{student}', [PortalController::class, 'child'])->name('children.show');
     Route::get('/results', [PortalController::class, 'results'])->name('results');
     Route::get('/attendance', [PortalController::class, 'attendance'])->name('attendance');
-    Route::get('/guardian-calls', [PortalController::class, 'guardianCalls'])->name('guardian-calls');
-    Route::get('/student-followup', [PortalController::class, 'studentFollowup'])->name('student-followup');
+    Route::get('/guardian-calls', [FollowupController::class, 'calls'])->name('guardian-calls');
+    Route::get('/guardian-calls/{guardianCall}', [FollowupController::class, 'call'])->whereNumber('guardianCall')->name('guardian-calls.show');
+    Route::get('/student-followup', [FollowupController::class, 'notes'])->name('student-followup');
+    Route::get('/student-followup/{note}', [FollowupController::class, 'note'])->whereNumber('note')->name('student-followup.show');
     Route::get('/assignments', [PortalController::class, 'assignments'])->name('assignments');
     Route::get('/exams', [PortalController::class, 'exams'])->name('exams');
     Route::get('/messages', [PortalController::class, 'messages'])->name('messages');
     Route::get('/conversations', [ConversationController::class, 'index'])->name('conversations.index');
     Route::get('/conversations/create', [ConversationController::class, 'create'])->name('conversations.create');
     Route::post('/conversations', [ConversationController::class, 'store'])->name('conversations.store');
-    Route::get('/conversations/{conversation}', [ConversationController::class, 'show'])->name('conversations.show');
-    Route::post('/conversations/{conversation}/messages', [ConversationController::class, 'storeMessage'])->name('conversations.messages.store');
+    Route::get('/conversations/{conversation}', [\App\Http\Controllers\SchoolChatController::class, 'show'])->name('conversations.show');
+    Route::get('/conversations/{conversation}/messages', [\App\Http\Controllers\SchoolChatController::class, 'messages'])->middleware('throttle:120,1')->name('conversations.messages');
+    Route::post('/conversations/{conversation}/messages', [\App\Http\Controllers\SchoolChatController::class, 'storeMessage'])->middleware('throttle:60,1')->name('conversations.messages.store');
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications');
     Route::get('/notifications/summary', [NotificationController::class, 'summary'])->middleware('throttle:60,1')->name('notifications.summary');
     Route::patch('/notifications/read-all', [NotificationController::class, 'readAll'])->middleware('throttle:60,1')->name('notifications.read-all');

@@ -12,11 +12,13 @@
     <link rel="manifest" href="{{ route('parent.pwa.manifest') }}">
     <link rel="icon" href="{{ route('school.pwa.icon') }}" sizes="any">
     <link rel="apple-touch-icon" href="{{ route('school.pwa.icon') }}">
-    <link rel="stylesheet" href="{{ asset('css/parent.css') }}?v=portal-style-1">
+    <link rel="stylesheet" href="{{ asset('css/parent.css') }}?v=portal-style-2">
     @include('shared.branding-style')@include('shared.portal-assets')
-    <link rel="stylesheet" href="{{ asset('css/parent-notifications.css') }}?v=20261016-1">
-    <script src="{{ asset('js/parent-notifications.js') }}?v=20261016-1" defer></script>
+    <link rel="stylesheet" href="{{ asset('css/parent-notifications.css') }}?v=20261016-2">
+    <link rel="stylesheet" href="{{ asset('css/parent-followup.css') }}?v=20261016-1">
+    <script src="{{ asset('js/parent-notifications.js') }}?v=20261016-2" defer></script>
     <script src="{{ asset('js/enhanced-selects.js') }}" defer></script>
+    @stack('styles')
 </head>
 <body class="parent-portal">
 <div class="app-shell">
@@ -64,8 +66,8 @@
                 <span aria-hidden="true">✓</span>
                 الحضور
             </a>
-            <a href="{{ route('parent.guardian-calls') }}"><span aria-hidden="true">!</span> استدعاءات ولي الأمر</a>
-            <a href="{{ route('parent.student-followup') }}"><span aria-hidden="true">◇</span> متابعة الطالب</a>
+            <a href="{{ route('parent.guardian-calls') }}"><span aria-hidden="true">!</span> استدعاءات ولي الأمر <b class="followup-menu-badge" data-followup-unread="guardian_call" @if(!$parentNotificationSummary['unread_by_category']['guardian_call']) hidden @endif>{{ $parentNotificationSummary['unread_by_category']['guardian_call'] }}</b></a>
+            <a href="{{ route('parent.student-followup') }}"><span aria-hidden="true">◇</span> متابعة الطالب <b class="followup-menu-badge" data-followup-unread="student_note" @if(!$parentNotificationSummary['unread_by_category']['student_note']) hidden @endif>{{ $parentNotificationSummary['unread_by_category']['student_note'] }}</b></a>
             <a href="{{ route('parent.assignments') }}" class="{{ request()->routeIs('parent.assignments') ? 'active' : '' }}">
                 <span aria-hidden="true">▤</span>
                 الواجبات
@@ -108,19 +110,19 @@
 
     <nav class="bottom-nav" aria-label="تنقل ولي الأمر">
         <a href="{{ route('parent.dashboard') }}" class="{{ request()->routeIs('parent.dashboard') ? 'active' : '' }}">
-            <span>⌂</span>
+            <span><x-portal-icon name="home" /></span>
             الرئيسية
         </a>
         <a href="{{ route('parent.children.index') }}" class="{{ request()->routeIs('parent.children.*') ? 'active' : '' }}">
-            <span>◱</span>
+            <span><x-portal-icon name="children" /></span>
             أبنائي
         </a>
         <a href="{{ route('parent.results') }}" class="{{ request()->routeIs('parent.results') ? 'active' : '' }}">
-            <span>◌</span>
+            <span><x-portal-icon name="results" /></span>
             النتائج
         </a>
-        <a href="{{ route('parent.messages') }}" class="{{ request()->routeIs('parent.messages') ? 'active' : '' }}">
-            <span>✉</span>
+        <a href="{{ route('parent.messages') }}" class="{{ request()->routeIs('parent.messages', 'parent.conversations.*') ? 'active' : '' }}">
+            <span><x-portal-icon name="chat" /></span>
             الرسائل
         </a>
     </nav>

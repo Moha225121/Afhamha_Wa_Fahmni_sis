@@ -30,7 +30,7 @@
                     </button>
                 </form>
             @empty
-                <div class="parent-notification-empty"><span aria-hidden="true">@include('parent.partials.notification-icon')</span><strong>لا توجد إشعارات بعد</strong><p>ستظهر هنا إعلانات المدرسة الجديدة.</p></div>
+                <div class="parent-notification-empty"><span aria-hidden="true">@include('parent.partials.notification-icon')</span><strong>لا توجد إشعارات بعد</strong><p>ستظهر هنا إعلانات المدرسة وملاحظات الطالب والاستدعاءات.</p></div>
             @endforelse
         </div>
         <p class="parent-notification-error" data-notification-error role="status" hidden></p>

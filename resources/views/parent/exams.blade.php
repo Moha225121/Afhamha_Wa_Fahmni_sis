@@ -3,18 +3,19 @@
 @section('title', 'الاختبارات')
 
 @section('content')
-    <section class="page-title"><p>متابعة فقط</p><h1>الاختبارات والنتائج</h1></section>
+    <section class="page-title"><p>مواعيد الاختبارات ودرجاتها</p><h1>الاختبارات</h1></section>
 
     @if($children->isEmpty())
         <section class="empty-state"><h2>لا يوجد أبناء مرتبطون</h2><p>لا يمكن عرض الاختبارات قبل ربط طالب بحساب ولي الأمر.</p></section>
     @else
         @include('parent.partials.child-switcher')
+        @include('parent.partials.subject-filter')
         <section class="list-section">
             <div class="section-title"><h2>الاختبارات القادمة</h2></div>
             @forelse($upcomingExams as $exam)
-                <div class="list-row"><div><strong>{{ $exam->title }}</strong><span>{{ $exam->subject }} · {{ \Illuminate\Support\Carbon::parse($exam->starts_at)->format('Y-m-d H:i') }}</span></div><b>{{ $exam->duration_minutes }} د</b></div>
+                <div class="list-row academic-record"><div><div class="academic-item-heading"><strong>{{ $exam->title }}</strong><span class="academic-subject">المادة: {{ $exam->subject_label }}</span></div><span class="academic-date">الموعد: {{ \Illuminate\Support\Carbon::parse($exam->starts_at)->format('Y-m-d H:i') }}</span></div><b>{{ $exam->duration_minutes }} دقيقة</b></div>
             @empty
-                <p class="muted-line">لا توجد اختبارات قادمة.</p>
+                <p class="muted-line academic-empty">{{ $selectedSubjectId ? 'لا توجد اختبارات قادمة لهذه المادة.' : 'لا توجد اختبارات قادمة.' }}</p>
             @endforelse
         </section>
         <section class="list-section">
@@ -32,9 +33,9 @@
                         ? $score.' / '.$total
                         : ($exam->automatic_status === 'pending_review' ? 'بانتظار المراجعة' : 'النتيجة لم تنشر');
                 @endphp
-                <div class="list-row"><div><strong>{{ $exam->title }}</strong><span>{{ $exam->subject }} · {{ \Illuminate\Support\Carbon::parse($exam->starts_at)->format('Y-m-d') }}</span></div><b>{{ $resultLabel }}</b></div>
+                <div class="list-row academic-record"><div><div class="academic-item-heading"><strong>{{ $exam->title }}</strong><span class="academic-subject">المادة: {{ $exam->subject_label }}</span></div><span class="academic-date">التاريخ: {{ \Illuminate\Support\Carbon::parse($exam->starts_at)->format('Y-m-d') }}</span></div><b @class(['academic-score' => $score !== null])>{{ $resultLabel }}</b></div>
             @empty
-                <p class="muted-line">لا توجد اختبارات سابقة.</p>
+                <p class="muted-line academic-empty">{{ $selectedSubjectId ? 'لا توجد اختبارات سابقة لهذه المادة.' : 'لا توجد اختبارات سابقة.' }}</p>
             @endforelse
         </section>
     @endif

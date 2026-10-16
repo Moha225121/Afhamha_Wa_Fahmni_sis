@@ -1,36 +1,28 @@
 @extends('parent.layout')
 
-@section('title', 'التواصل')
+@section('title', 'الرسائل')
+@include('shared.chat.assets')
 
 @section('content')
-    <section class="page-title">
-        <p>تواصل ومتابعة</p>
-        <h1>الرسائل والإعلانات</h1>
-        <a class="text-action" href="{{ route('parent.notifications') }}">الإشعارات الجديدة</a>
+<div class="school-chat chat-inbox">
+    <div class="chat-page-heading"><div><h1>الرسائل</h1><p>تواصل مع المدرسة ومعلمي أبنائك</p></div>@if($children->isNotEmpty())<a class="chat-new" href="{{ route('parent.conversations.create', ['student' => $selectedStudent?->id]) }}"><x-portal-icon name="plus"/>محادثة جديدة</a>@endif</div>
+    <nav class="chat-tabs" aria-label="نوع الرسائل">
+        <a class="{{ $activeTab === 'chats' ? 'is-active' : '' }}" href="{{ route('parent.messages', request()->only('student')) }}" @if($activeTab === 'chats') aria-current="page" @endif><x-portal-icon name="chat"/>المحادثات</a>
+        <a class="{{ $activeTab === 'announcements' ? 'is-active' : '' }}" href="{{ route('parent.messages', ['tab' => 'announcements'] + request()->only('student')) }}" @if($activeTab === 'announcements') aria-current="page" @endif><x-portal-icon name="announcement"/>إعلانات المدرسة @if($announcements->total())<b>{{ $announcements->total() }}</b>@endif</a>
+    </nav>
+    <section aria-label="المحادثات" @if($activeTab !== 'chats') hidden @endif>
+        @if($children->count() > 1)
+            <form method="get" class="chat-child-filter"><label for="chat-student">عرض محادثات</label><select id="chat-student" name="student" onchange="this.form.submit()" data-native-select><option value="">كل الأبناء</option>@foreach($children as $child)<option value="{{ $child->id }}" @selected((int) request('student') === $child->id)>{{ $child->user->name }}</option>@endforeach</select><noscript><button>عرض</button></noscript></form>
+        @endif
+        @include('shared.chat.contacts')
     </section>
-
-    @if($children->isNotEmpty())
-        @include('parent.partials.child-switcher')
-
-        <section class="list-section">
-            <div class="section-title">
-                <h2>المحادثات</h2>
-                <a href="{{ route('parent.conversations.index', ['student' => $selectedStudent?->id]) }}">فتح</a>
-            </div>
-            <p class="muted-line">راسل إدارة المدرسة أو معلمي {{ $selectedStudent?->user->name }} المسندين إلى صفه.</p>
-        </section>
-    @endif
-
-    <section class="messages-list section-gap">
-        <div class="section-title section-title-plain">
-            <h2>إعلانات المدرسة</h2>
-        </div>
+    <section class="chat-announcements" aria-label="إعلانات المدرسة" @if($activeTab !== 'announcements') hidden @endif>
         @forelse($announcements as $announcement)
-            <article class="message-card">
-                <span>{{ $announcement->published_at?->format('Y-m-d') ?? $announcement->created_at?->format('Y-m-d') }}</span>
+            <article class="chat-announcement">
+                <span class="chat-announcement-source"><x-portal-icon name="announcement"/>إدارة المدرسة</span>
                 <h2>{{ $announcement->title }}</h2>
-                <p>{{ $announcement->content }}</p>
-                <a class="text-action" href="{{ route('parent.announcements.show', $announcement) }}">فتح الإعلان</a>
+                <p>{{ \Illuminate\Support\Str::limit($announcement->content, 220) }}</p>
+                <footer><time>{{ $announcement->published_at?->format('Y-m-d') ?? $announcement->created_at?->format('Y-m-d') }}</time><a href="{{ route('parent.announcements.show', $announcement) }}">فتح الإعلان ←</a></footer>
             </article>
         @empty
             <div class="empty-state">
@@ -38,6 +30,7 @@
                 <p>تظهر هنا الإعلانات المنشورة لولي الأمر أو صفوف الأبناء.</p>
             </div>
         @endforelse
+        {{ $announcements->links() }}
     </section>
-    {{ $announcements->links() }}
+</div>
 @endsection
