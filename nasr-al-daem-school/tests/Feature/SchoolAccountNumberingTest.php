@@ -24,8 +24,8 @@ class SchoolAccountNumberingTest extends TestCase
         }
         $student = Student::firstOrFail();
         $teacher = Teacher::firstOrFail();
-        $this->assertSame('ST-'.now()->year.'-0001', $student->student_number);
-        $this->assertSame('TCH-'.now()->year.'-0001', $teacher->teacher_number);
+        $this->assertSame('st-0001', $student->student_number);
+        $this->assertSame('th-0001', $teacher->teacher_number);
         $this->assertSame('mohamed_'.strtolower($student->student_number).'@awf_alnisbiya.com', $student->user->email);
         $this->assertTrue($student->user->school_email_generated);
         auth()->logout();

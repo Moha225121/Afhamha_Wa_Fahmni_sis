@@ -1,7 +1,7 @@
 @extends('admin.layout')
 @section('title','الطلاب')
 @section('actions')
-<a class="btn secondary" href="{{ route('admin.students.cards', request()->only(['classroom_id','status'])) }}">طباعة بطاقات الصف المحدد</a>
+<a class="btn secondary" href="{{ route('admin.students.cards', request()->only(['classroom_id','status'])) }}">اختيار بطاقة طالب للطباعة</a>
 <a class="btn secondary" href="{{ route('admin.imports.create','students') }}">استيراد Excel</a>
 <a class="btn primary" href="{{ route('admin.students.create') }}">إضافة طالب</a>
 @endsection

@@ -19,6 +19,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::post('/students/{student}/analysis', \App\Http\Controllers\StudentLevelAnalysisController::class)->middleware('throttle:6,1')->name('students.analysis.generate');
     Route::get('/', fn () => redirect()->route('admin.dashboard'));
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
+    Route::get('/conversations', [\App\Http\Controllers\SchoolChatController::class, 'index'])->name('conversations.index');
+    Route::get('/conversations/{conversation}', [\App\Http\Controllers\SchoolChatController::class, 'show'])->name('conversations.show');
+    Route::get('/conversations/{conversation}/messages', [\App\Http\Controllers\SchoolChatController::class, 'messages'])->middleware('throttle:120,1')->name('conversations.messages');
+    Route::post('/conversations/{conversation}/messages', [\App\Http\Controllers\SchoolChatController::class, 'storeMessage'])->middleware('throttle:60,1')->name('conversations.messages.store');
     Route::get('/dashboard/index', fn () => redirect()->route('admin.dashboard'))->name('dashboard.index');
     Route::resource('students', StudentController::class)->except('destroy');
     Route::resource('teachers', TeacherController::class)->except('destroy');

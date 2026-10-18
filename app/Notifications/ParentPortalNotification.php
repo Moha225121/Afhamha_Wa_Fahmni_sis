@@ -25,6 +25,7 @@ class ParentPortalNotification extends Notification
             'url' => $this->payload['url'] ?? null,
             'category' => $this->payload['category'] ?? 'general',
             'student_id' => $this->payload['student_id'] ?? null,
+            ...(isset($this->payload['conversation_id']) ? ['conversation_id' => $this->payload['conversation_id']] : []),
         ];
     }
 }

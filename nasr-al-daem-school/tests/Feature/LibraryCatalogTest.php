@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Lesson;
 use App\Models\LibraryResource;
+use App\Models\Subject;
 use App\Models\Teacher;
 use App\Models\User;
 use App\Services\LibraryCatalogService;
@@ -100,19 +101,45 @@ class LibraryCatalogTest extends TestCase
         $teacher->classrooms()->attach($two['classroom']->id, ['subject_id' => $subjectTwo->id]);
         $admin = $this->createAdmin();
         $guide = $this->book($admin, ['title' => 'دليل معلم المادة الأولى', 'audience' => 'teachers', 'book_type' => 'teacher_guide', 'subject_name' => $subjectOne->name, 'is_public' => false]);
+        $articleVariantGuide = $this->book($admin, ['title' => 'دليل باسم المادة الشائع', 'audience' => 'teachers', 'book_type' => 'teacher_guide', 'subject_name' => 'ال'.$subjectOne->name, 'is_public' => true]);
         $otherSubjectGuide = $this->book($admin, ['title' => 'دليل مادة غير مسندة', 'audience' => 'teachers', 'book_type' => 'teacher_guide', 'subject_name' => 'مادة غير مسندة', 'is_public' => true]);
         $own = $this->book($admin, ['title' => 'ملف الصف الخاص', 'is_public' => false, 'subject_id' => $subjectOne->id, 'classroom_id' => $one['classroom']->id]);
         $mismatched = $this->book($admin, ['title' => 'زوج تكليف غير مسند', 'is_public' => false, 'subject_id' => $subjectOne->id, 'classroom_id' => $two['classroom']->id]);
         $unscopedPrivate = $this->book($admin, ['title' => 'ملف غير منشور', 'is_public' => false]);
 
-        $this->actingAs($teacherUser)->get(route('teacher.library.index'))->assertOk()->assertSeeText($guide->title)->assertSeeText($own->title)->assertDontSeeText($otherSubjectGuide->title)->assertDontSeeText($mismatched->title)->assertDontSeeText($unscopedPrivate->title);
+        $this->actingAs($teacherUser)->get(route('teacher.library.index'))->assertOk()->assertSeeText($guide->title)->assertSeeText($articleVariantGuide->title)->assertSeeText($own->title)->assertDontSeeText($otherSubjectGuide->title)->assertDontSeeText($mismatched->title)->assertDontSeeText($unscopedPrivate->title);
         foreach (['read', 'file', 'download'] as $action) {
             $this->get(route('teacher.library.'.$action, $guide))->assertOk();
+            $this->get(route('teacher.library.'.$action, $articleVariantGuide))->assertOk();
             $this->get(route('teacher.library.'.$action, $own))->assertOk();
             $this->get(route('teacher.library.'.$action, $otherSubjectGuide))->assertNotFound();
             $this->get(route('teacher.library.'.$action, $mismatched))->assertNotFound();
             $this->get(route('teacher.library.'.$action, $unscopedPrivate))->assertNotFound();
         }
+    }
+
+    public function test_teacher_subject_matching_supports_english_assignments_with_arabic_catalog_names(): void
+    {
+        $fixture = $this->createStudentFixture('ENGLISH');
+        $subject = Subject::create([
+            'name' => 'English',
+            'code' => 'ENG-ENGLISH',
+            'stage' => $fixture['classroom']->stage,
+            'description' => 'English',
+            'status' => 'active',
+        ]);
+        $subject->classrooms()->attach($fixture['classroom']);
+        $teacherUser = User::factory()->create(['role' => 'teacher', 'status' => 'active']);
+        $teacher = Teacher::create(['user_id' => $teacherUser->id, 'status' => 'active']);
+        $teacher->classrooms()->attach($fixture['classroom']->id, ['subject_id' => $subject->id]);
+        $admin = $this->createAdmin();
+        $englishGuide = $this->book($admin, ['title' => 'دليل اللغة الإنجليزية', 'audience' => 'teachers', 'book_type' => 'teacher_guide', 'subject_name' => 'اللغة الإنجليزية', 'is_public' => true]);
+        $physicsGuide = $this->book($admin, ['title' => 'دليل الفيزياء', 'audience' => 'teachers', 'book_type' => 'teacher_guide', 'subject_name' => 'الفيزياء', 'is_public' => true]);
+
+        $this->actingAs($teacherUser)->get(route('teacher.library.index'))
+            ->assertOk()->assertSeeText($englishGuide->title)->assertDontSeeText($physicsGuide->title);
+        $this->get(route('teacher.library.read', $englishGuide))->assertOk();
+        $this->get(route('teacher.library.read', $physicsGuide))->assertNotFound();
     }
 
     public function test_authenticated_pdf_responses_support_ranges_private_cache_and_arabic_names(): void
@@ -132,7 +159,9 @@ class LibraryCatalogTest extends TestCase
         $download = $this->get(route('student.library.download', $resource))->assertOk()->assertDownload();
         $this->assertStringContainsString(rawurlencode('كتاب اللغة العربية.pdf'), $download->headers->get('Content-Disposition'));
         $this->assertStringContainsString('resource-'.$resource->id.'.pdf', $download->headers->get('Content-Disposition'));
-        $this->get(route('student.library.read', $resource))->assertOk()->assertDontSee('/storage/library/', false);
+        $this->get(route('student.library.read', $resource))->assertOk()
+            ->assertSee('href="'.route('student.library.read', $resource).'" target="_blank"', false)
+            ->assertSeeText('فتح قارئ مستقل')->assertDontSee('/storage/library/', false);
 
         $range = $this->withHeader('Range', 'bytes=0-8')->get(route('student.library.file', $resource));
         $range->assertStatus(206)->assertHeader('Accept-Ranges', 'bytes')->assertHeader('Content-Length', '9');

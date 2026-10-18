@@ -220,6 +220,8 @@
         }
     });
 
+    document.addEventListener('enhanced-selects:init', init);
+
     window.addEventListener('resize', () => active && positionMenu(active));
     window.addEventListener('scroll', () => active && positionMenu(active), true);
 

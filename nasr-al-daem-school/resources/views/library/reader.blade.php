@@ -1,7 +1,7 @@
 @extends($layout)
 @section('title', $resource->title)
 @section('content')
-    <link rel="stylesheet" href="{{ asset('css/library.css') }}?v=20260930-reader2">
+    <link rel="stylesheet" href="{{ asset('css/library.css') }}?v=20261001-mobile1">
     @php
         $readerSubject = $resource->subject_name ?: $resource->subject?->name ?: 'المكتبة الرقمية';
         $readerPdf = $resource->mime_type === 'application/pdf' || strtolower(pathinfo($resource->original_name ?: $resource->file_path, PATHINFO_EXTENSION)) === 'pdf';
@@ -17,7 +17,7 @@
         </header>
         <div class="lib-reader-toolbar">
             <div class="lib-file-meta">@if($readerPdf)<span dir="ltr">PDF</span>@endif @if($resource->page_count)<span>{{ number_format($resource->page_count) }} صفحة</span>@endif @if($resource->file_size)<span dir="ltr">{{ number_format($resource->file_size / 1048576, 1) }} MB</span>@endif</div>
-            <div class="lib-reader-actions"><a class="lib-button lib-button--primary" href="{{ route($routePrefix.'.download', $resource) }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5"/></svg>تنزيل الكتاب</a><a class="lib-button lib-button--secondary" href="{{ route($routePrefix.'.file', $resource) }}" target="_blank" rel="noopener">فتح مستقل <span aria-hidden="true">↗</span></a>@if($readerPdf)<button type="button" class="lib-button lib-button--secondary" data-library-fullscreen hidden>ملء الشاشة</button>@endif</div>
+            <div class="lib-reader-actions"><a class="lib-button lib-button--primary" href="{{ route($routePrefix.'.download', $resource) }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5"/></svg>تنزيل الكتاب</a><a class="lib-button lib-button--secondary" href="{{ route($routePrefix.'.read', $resource) }}" target="_blank" rel="noopener">فتح قارئ مستقل <span aria-hidden="true">↗</span></a>@if($readerPdf)<button type="button" class="lib-button lib-button--secondary" data-library-fullscreen hidden>ملء الشاشة</button>@endif</div>
         </div>
         @if($readerPdf)
             <div class="lib-reader-canvas" data-library-reader-canvas data-pdf-url="{{ route($routePrefix.'.file', $resource) }}" data-pdf-assets="{{ asset('vendor/pdfjs') }}/" aria-label="قارئ {{ $resource->title }}" tabindex="0">
@@ -42,5 +42,5 @@
             <div class="lib-empty lib-reader-unavailable">@include('library.subject-icon', ['subjectName' => $readerSubject])<h2>هذا المورد متاح للتنزيل</h2><p>نزّل الملف لفتحه بالتطبيق المناسب على جهازك.</p><a class="lib-button lib-button--primary" href="{{ route($routePrefix.'.download', $resource) }}">تنزيل المورد</a></div>
         @endif
     </article>
-    <script src="{{ asset('js/library-reader.js') }}?v=20260930-reader2" defer></script>
+    <script src="{{ asset('js/library-reader.js') }}?v=20261001-mimefix1" defer></script>
 @endsection

@@ -1,15 +1,28 @@
-<div style="font-family:dejavusans,Tahoma,Arial;color:#132d57;background:#fff;border:1px solid #d4dbe5;border-radius:5mm;padding:4mm;height:56mm;box-sizing:border-box;text-align:right;direction:rtl;border-top:12mm solid #123b79;position:relative">
-    <div style="background:#123b79;color:#fff;padding:1mm;height:11mm;position:absolute;top:-12mm;right:0;left:0">
-        @if($pdfLogo)<img src="{{ $pdfLogo }}" alt="" style="width:8mm;height:8mm;vertical-align:middle;margin-left:2mm">@endif
-        <span style="font-size:8pt;font-weight:bold">{{ $schoolBranding['school_name'] }}</span>
-        <span style="float:left;font-size:9pt;color:#ffad3e;font-weight:bold">بطاقة الطالب</span>
+<div style="width:94mm;height:62mm;border:0.35mm solid #d4dfe5;border-radius:5mm;background:#fff;box-sizing:border-box;overflow:hidden;direction:rtl;color:#17324b;font-family:dejavusans,Tahoma,Arial,sans-serif">
+    <div style="height:16mm;padding:2mm 3mm;background:#123b79;border-bottom:1mm solid #f7931d;border-radius:5mm 5mm 0 0;box-sizing:border-box;color:#fff">
+        <table style="width:100%;height:12mm;border-collapse:collapse;direction:rtl">
+            <tr>
+                <td style="width:12mm;vertical-align:middle;text-align:right">
+                    @if($pdfLogo)<img src="{{ $pdfLogo }}" alt="" style="width:10mm;height:10mm;vertical-align:middle;border-radius:50%">@endif
+                </td>
+                <td style="vertical-align:middle;text-align:right;color:#fff;font-size:9pt;font-weight:bold">{{ $schoolBranding['school_name'] }}</td>
+                <td style="width:22mm;vertical-align:middle;text-align:left;color:#ffbd5a;font-size:8pt;font-weight:bold">بطاقة طالب</td>
+            </tr>
+        </table>
     </div>
-    <div style="color:#123b79;font-size:10pt;font-weight:bold;margin:1.5mm 0">{{ $student->user->name }}</div>
-    <div style="font-size:6.5pt;line-height:1.5">الرقم الدراسي: <b dir="ltr">{{ $student->student_number }}</b></div>
-    <div style="font-size:6.5pt;line-height:1.5">البريد الإلكتروني: <b dir="ltr">{{ $student->user->email }}</b></div>
-    <div style="font-size:6.5pt;line-height:1.5">الصف: {{ $student->classroom?->name }} {{ $student->classroom?->section }}</div>
-    <div style="font-size:6.5pt;line-height:1.5">ولي الأمر: {{ $student->guardians->pluck('user.name')->join('، ') ?: '—' }}</div>
-    <div style="font-size:6.5pt;line-height:1.5">هاتف ولي الأمر: <b dir="ltr">{{ $student->guardians->pluck('user.phone')->filter()->join('، ') ?: '—' }}</b></div>
-    <img src="{{ $student->qr_image }}" alt="QR" style="float:left;width:12mm;height:12mm;margin-top:1mm">
-    <div style="font-size:5pt;color:#557078;margin-top:1mm">QR صالح لمدة سنة · بيانات مدرسية رسمية</div>
+    <table style="width:100%;border-collapse:collapse;table-layout:fixed;direction:rtl;margin-top:2mm">
+        <tr style="vertical-align:top">
+            <td style="width:23mm;padding:1mm 3mm;text-align:center">
+                <img src="{{ $student->qr_image }}" alt="QR" style="width:21mm;height:21mm;vertical-align:top">
+                <div style="margin-top:1mm;color:#123b79;font-size:7pt;font-weight:bold;direction:ltr">{{ $student->student_number }}</div>
+            </td>
+            <td style="padding:1mm 2mm 1mm 3mm;text-align:right;vertical-align:top">
+                <div style="margin:0 0 1mm;color:#123b79;font-size:11pt;line-height:1.4;font-weight:bold">{{ $student->user->name }}</div>
+                <div style="padding:1mm 0;border-bottom:0.2mm solid #edf1f3;font-size:7pt"><span style="display:inline-block;width:21mm;color:#71818a">الرقم الدراسي</span><b dir="ltr">{{ $student->student_number }}</b></div>
+                <div style="padding:1mm 0;border-bottom:0.2mm solid #edf1f3;font-size:7pt"><span style="display:inline-block;width:21mm;color:#71818a">الصف</span><b>{{ $student->classroom?->name }}@if($student->classroom?->section && $student->classroom->section !== 'أ') — {{ $student->classroom->section }}@endif</b></div>
+                <div style="padding:1mm 0;border-bottom:0.2mm solid #edf1f3;font-size:7pt"><span style="display:inline-block;width:21mm;color:#71818a">العام الدراسي</span><b>{{ $student->classroom?->academicYear?->name ?: '—' }}</b></div>
+                <div style="margin-top:1mm;color:#60717e;text-align:left;font-size:6pt;direction:ltr">ID: NS-{{ $student->student_number }}</div>
+            </td>
+        </tr>
+    </table>
 </div>

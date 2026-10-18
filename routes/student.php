@@ -42,5 +42,8 @@ Route::prefix('student')->name('student.')->middleware(['auth', 'student'])->gro
     Route::get('/attendance', [PortalController::class, 'attendance'])->name('attendance');
     Route::get('/schedule', [PortalController::class, 'schedule'])->name('schedule');
     Route::get('/notifications', [PortalController::class, 'notifications'])->name('notifications');
-    Route::patch('/notifications/{notification}/read', [PortalController::class, 'markNotificationRead'])->middleware('throttle:60,1')->name('notifications.read');
+    Route::get('/notifications/summary', [PortalController::class, 'notificationSummary'])->middleware('throttle:60,1')->name('notifications.summary');
+    Route::patch('/notifications/read-all', [PortalController::class, 'markAllNotificationsRead'])->middleware('throttle:60,1')->name('notifications.read-all');
+    Route::patch('/notifications/{notification}/read', [PortalController::class, 'markNotificationRead'])->whereUuid('notification')->middleware('throttle:60,1')->name('notifications.read');
+    Route::get('/announcements/{announcement}', [PortalController::class, 'announcement'])->whereNumber('announcement')->name('announcements.show');
 });
