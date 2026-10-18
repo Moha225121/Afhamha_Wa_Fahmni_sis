@@ -31,8 +31,7 @@ class AssignmentSubmissionService
             [$submission, $oldFile] = DB::transaction(function () use ($assignment, $student, $path, $originalName, $file, $notes): array {
                 $lockedAssignment = Assignment::query()->lockForUpdate()->findOrFail($assignment->id);
                 if ($lockedAssignment->classroom_id !== $student->classroom_id
-                    || ! in_array($lockedAssignment->status, ['published', 'active'], true)
-                    || ($lockedAssignment->published_at && $lockedAssignment->published_at->gt(now()))) {
+                    || ! $lockedAssignment->isPublished()) {
                     throw ValidationException::withMessages(['file' => 'الواجب غير متاح لهذا الطالب.']);
                 }
                 if ($lockedAssignment->due_at && now()->gte($lockedAssignment->due_at)) {

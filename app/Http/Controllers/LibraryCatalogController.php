@@ -5,10 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\LibraryResource;
 use App\Services\LibraryCatalogService;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class LibraryCatalogController extends Controller
 {
@@ -19,10 +21,18 @@ class LibraryCatalogController extends Controller
         return view($request->user()->role.'.library.index', $data);
     }
 
-    public function read(Request $request, int $resource, LibraryCatalogService $catalog): View
+    public function read(Request $request, int $resource, LibraryCatalogService $catalog): View|Response
     {
         $resource = $this->resource($request, $resource, $catalog);
-        $this->localPath($resource);
+        try {
+            $this->localPath($resource);
+        } catch (NotFoundHttpException $exception) {
+            if (! $request->user()->isStudent()) {
+                throw $exception;
+            }
+
+            return response()->view('student.library.file-unavailable', compact('resource'), 404);
+        }
 
         return view('library.reader', [
             'resource' => $resource,

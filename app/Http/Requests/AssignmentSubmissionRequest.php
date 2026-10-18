@@ -18,8 +18,7 @@ class AssignmentSubmissionRequest extends FormRequest
             && $assignment instanceof Assignment
             && $student
             && $assignment->classroom_id === $student->classroom_id
-            && $assignment->status === 'published'
-            && (! $assignment->published_at || $assignment->published_at->lte(now()));
+            && $assignment->isPublished();
     }
 
     protected function failedAuthorization()

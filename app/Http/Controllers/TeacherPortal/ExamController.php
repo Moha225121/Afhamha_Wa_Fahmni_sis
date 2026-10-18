@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\TeacherPortal\Concerns\InteractsWithTeacherScope;
 use App\Http\Requests\TeacherPortal\ExamRequest;
 use App\Models\Classroom;
+use App\Models\ExamQuestion;
 use App\Models\Subject;
 use App\Services\AuditService;
+use App\Services\TeacherCreationIntent;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -109,6 +111,7 @@ class ExamController extends Controller
             'classrooms' => Classroom::whereIn('id', $classroomIds)->get(),
             'subjects' => Subject::whereIn('id', $pairs->pluck('subject_id')->unique())->get(),
             'pairs' => $pairs,
+            'creationToken' => $exam ? null : app(TeacherCreationIntent::class)->issue($teacher->id, 'exams', $request->old('creation_token')),
         ]);
     }
 
@@ -155,7 +158,7 @@ class ExamController extends Controller
         $totalScore = max($questions->sum('score'), 0.25);
         $startsAt = \Illuminate\Support\Carbon::parse($data['starts_at'])->format('Y-m-d H:i:s');
 
-        DB::transaction(function () use ($data, $teacher, $questions, $totalScore, $startsAt, &$examId, $normalizedStatus) {
+        $save = function () use ($data, $teacher, $questions, $totalScore, $startsAt, $examId, $normalizedStatus): int {
             $examAttributes = [
                 'title' => $data['title'],
                 'subject_id' => $data['subject_id'],
@@ -206,7 +209,15 @@ class ExamController extends Controller
             }
 
             AuditService::record($examId ? 'updated' : 'created', 'exams');
-        });
+
+            return $examId;
+        };
+
+        if ($examId === null) {
+            app(TeacherCreationIntent::class)->once($data['creation_token'], $teacher->id, 'exams', $save);
+        } else {
+            DB::transaction($save);
+        }
 
         return redirect()->route('teacher.exams.index')->with('success', $normalizedStatus === 'scheduled' ? 'تم جدولة الاختبار.' : 'تم حفظ الاختبار كمسودة.');
     }
@@ -235,20 +246,34 @@ class ExamController extends Controller
     public function status(Request $request, int $exam): RedirectResponse
     {
         $teacher = $this->teacher($request);
-        $examRow = DB::table('exams')->where('id', $exam)->first();
-        abort_unless($examRow && (int) $examRow->teacher_id === $teacher->id, 404);
+        DB::transaction(function () use ($request, $teacher, $exam): void {
+            $examRow = DB::table('exams')->where('id', $exam)->lockForUpdate()->first();
+            abort_unless($examRow && (int) $examRow->teacher_id === $teacher->id, 404);
+            $data = $request->validate(['status' => ['required', Rule::in(['draft', 'scheduled', 'published', 'completed'])]]);
 
-        $data = $request->validate(['status' => ['required', Rule::in(['draft', 'scheduled', 'published', 'completed'])]]);
+            if (in_array($data['status'], ['scheduled', 'published'], true)) {
+                $questions = ExamQuestion::where('exam_id', $exam)->orderBy('position')->get();
+                $choices = DB::table('exam_choices')->whereIn('exam_question_id', $questions->pluck('id'))
+                    ->orderBy('order')->get()->groupBy('exam_question_id');
+                $this->assertPublishable($questions->map(function (ExamQuestion $question) use ($choices): array {
+                    $options = collect($choices->get($question->id, []))->map(fn ($choice) => (array) $choice);
+                    if ($options->isEmpty() && $question->correct_answer !== null) {
+                        // Preserve valid historical questions stored as options/correct_answer.
+                        $options = collect($question->answerOptions())->map(fn ($text, $key) => [
+                            'text' => $text, 'is_correct' => (string) $key === (string) $question->correct_answer,
+                        ]);
+                    }
 
-        $normalizedStatus = $data['status'] === 'published' ? 'published' : $data['status'];
+                    return [
+                        'type' => $question->type === 'multiple_choice' ? 'mcq' : $question->type,
+                        'choices' => $options->all(),
+                    ];
+                }));
+            }
 
-        if (($normalizedStatus === 'scheduled' || $normalizedStatus === 'published') && in_array($examRow->status, ['draft', 'scheduled', 'published'], true)) {
-            $questions = DB::table('exam_questions')->where('exam_id', $exam)->get();
-            abort_if($questions->isEmpty(), 422, 'لا يمكن جدولة اختبار بدون أسئلة.');
-        }
-
-        DB::table('exams')->where('id', $exam)->update(['status' => $normalizedStatus, 'updated_at' => now()]);
-        AuditService::record('status_changed', 'exams');
+            DB::table('exams')->where('id', $exam)->update(['status' => $data['status'], 'updated_at' => now()]);
+            AuditService::record('status_changed', 'exams');
+        });
 
         return back()->with('success', 'تم تحديث حالة الاختبار.');
     }

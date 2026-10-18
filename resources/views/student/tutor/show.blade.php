@@ -3,6 +3,7 @@
 @section('title', $conversation->title)
 
 @section('content')
+    @inject('messageRenderer', 'App\Support\TutorMessageRenderer')
     <div class="tutor-layout">
         <aside class="conversation-sidebar" aria-label="المحادثات">
             <form method="post" action="{{ route('student.tutor.conversations.store') }}" data-tutor-form data-sending-message="يتم إنشاء المحادثة.">
@@ -29,7 +30,11 @@
                 @forelse($messages as $message)
                     <li class="chat-message {{ $message->role === 'user' ? 'from-student' : 'from-tutor' }}">
                         <strong>{{ $message->role === 'user' ? 'أنت' : 'المعلّم الذكي' }}</strong>
-                        <p data-tutor-message-content>{{ $message->content }}</p>
+                        @if($message->role === 'assistant')
+                            <div class="tutor-markdown" dir="rtl">{{ $messageRenderer->render($message->content) }}</div>
+                        @else
+                            <p class="student-message-content" dir="auto" data-tutor-message-content>{{ $message->content }}</p>
+                        @endif
                         @if($message->role === 'user' && $message->delivery_status === 'pending')
                             <span class="message-status">قيد المعالجة</span>
                             <button type="button" class="retry-message-button" data-tutor-retry data-tutor-request-id="{{ $message->client_request_id }}">متابعة الطلب نفسه</button>

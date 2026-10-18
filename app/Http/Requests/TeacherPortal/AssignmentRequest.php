@@ -3,6 +3,7 @@
 namespace App\Http\Requests\TeacherPortal;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class AssignmentRequest extends FormRequest
 {
@@ -14,6 +15,7 @@ class AssignmentRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'creation_token' => [Rule::requiredIf($this->routeIs('teacher.assignments.store')), 'nullable', 'uuid'],
             'title' => ['required', 'string', 'max:255'],
             'classroom_id' => ['required', 'integer', 'exists:classrooms,id'],
             'subject_id' => ['required', 'integer', 'exists:subjects,id'],

@@ -15,6 +15,7 @@
 @endphp
 <form class="form-card" method="post" action="{{ $exam ? route('teacher.exams.update',$exam->id) : route('teacher.exams.store') }}" id="exam-form" style="max-width:100%; width:min(1400px, 100%); margin:0 auto;">
 @csrf
+@if(!$exam)<input type="hidden" name="creation_token" value="{{ $creationToken }}">@endif
 @if($exam) @method('put') @endif
 <div class="form-hint">
     صمم الاختبار بشكل واضح: اختر الصف والمادة، ثم أضف الأسئلة مع تحديد درجة كل سؤال وتأكد من صحة الإجابات قبل النشر.
@@ -235,6 +236,14 @@
   const classroomSelect = document.getElementById('classroom-select');
   const subjectSelect = document.getElementById('subject-select');
   let qCount = 0;
+  @if(!$exam)
+  let submitting = false;
+  document.getElementById('exam-form').addEventListener('submit', event => {
+    if (submitting) { event.preventDefault(); return; }
+    submitting = true;
+  });
+  window.addEventListener('pageshow', () => { submitting = false; });
+  @endif
 
   function filterClassrooms(){
     const selectedSubject = subjectSelect.value;

@@ -1019,6 +1019,8 @@ html {
 
 /* Tutor chat */
 .student-portal .tutor-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: 18px;
 }
 
@@ -1041,6 +1043,7 @@ html {
 }
 
 .student-portal .chat-panel {
+    min-width: 0;
     border-radius: 22px;
 }
 
@@ -1051,20 +1054,141 @@ html {
 }
 
 .student-portal .chat-history {
+    display: flex;
+    flex-direction: column;
+    list-style: none;
+    margin: 0;
     gap: 14px;
-    padding: 20px;
+    padding: clamp(10px, 3vw, 20px);
 }
 
 .student-portal .chat-message {
+    min-width: 0;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    text-align: start;
     border-radius: 16px;
     padding: 13px 15px;
     box-shadow: var(--shadow-sm);
 }
 
 .student-portal .chat-message.from-student {
+    color: #fff;
     border-bottom-right-radius: 5px;
-    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    background: linear-gradient(135deg, #0f766e, #0b5f58);
 }
+
+.student-portal .from-student > strong,
+.student-portal .from-student .student-message-content,
+.student-portal .from-student .message-status {
+    color: #fff;
+}
+
+.student-portal .student-message-content {
+    white-space: pre-wrap;
+    unicode-bidi: plaintext;
+    margin-block: .6rem 0;
+}
+
+.student-portal .tutor-markdown {
+    color: var(--ink);
+    line-height: 1.9;
+    margin-block-start: .75rem;
+}
+
+.student-portal .tutor-markdown p {
+    color: inherit;
+    margin-block: 0 .9rem;
+    unicode-bidi: plaintext;
+}
+
+.student-portal .tutor-markdown :is(h1, h2, h3, h4, h5, h6) {
+    color: var(--primary-deep);
+    line-height: 1.5;
+    margin-block: 1.25rem .6rem;
+}
+
+.student-portal .tutor-markdown h1 { font-size: 1.4rem; }
+.student-portal .tutor-markdown h2 { font-size: 1.25rem; }
+.student-portal .tutor-markdown h3 { font-size: 1.125rem; }
+.student-portal .tutor-markdown :is(h4, h5, h6) { font-size: 1rem; }
+.student-portal .tutor-markdown > :first-child { margin-block-start: 0; }
+.student-portal .tutor-markdown > :last-child { margin-block-end: 0; }
+
+.student-portal .tutor-markdown :is(ul, ol) {
+    margin-block: .6rem 1rem;
+    padding-inline-start: 1.6rem;
+    padding-inline-end: 0;
+}
+
+.student-portal .tutor-markdown ul { list-style: disc outside; }
+.student-portal .tutor-markdown ol { list-style: decimal outside; }
+.student-portal .tutor-markdown li { margin-block: .35rem; }
+.student-portal .tutor-markdown li > p { margin-block: .35rem; }
+.student-portal .tutor-markdown a { color: #0b5f58; text-decoration: underline; }
+.student-portal .tutor-markdown blockquote {
+    margin-inline: 0;
+    padding-inline-start: 1rem;
+    border-inline-start: 3px solid var(--primary);
+}
+
+.student-portal .tutor-markdown code {
+    font-family: Consolas, monospace;
+    font-size: .9em;
+    direction: ltr;
+    unicode-bidi: isolate;
+    background: #e3eeec;
+    color: #162033;
+    padding: .12em .3em;
+    border-radius: 4px;
+}
+
+.student-portal .tutor-markdown pre {
+    max-width: 100%;
+    overflow-x: auto;
+    direction: ltr;
+    text-align: left;
+    white-space: pre;
+    padding: 1rem;
+    border-radius: 10px;
+    background: #162033;
+    color: #f8fafc;
+    line-height: 1.6;
+    overscroll-behavior-inline: contain;
+}
+
+.student-portal .tutor-markdown pre code {
+    padding: 0;
+    color: inherit;
+    background: transparent;
+    overflow-wrap: normal;
+}
+
+.student-portal .tutor-table-scroll {
+    max-width: 100%;
+    overflow-x: auto;
+    margin-block: 1rem;
+    overscroll-behavior-inline: contain;
+}
+
+.student-portal .tutor-markdown table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: .95rem;
+}
+
+.student-portal .tutor-markdown :is(th, td) {
+    min-width: 9rem;
+    padding: .65rem .8rem;
+    border: 1px solid var(--line);
+    text-align: start;
+    vertical-align: top;
+}
+
+.student-portal .tutor-markdown th { background: #e3eeec; font-weight: 700; }
+.student-portal .tutor-markdown [align="left"] { text-align: left; }
+.student-portal .tutor-markdown [align="right"] { text-align: right; }
+.student-portal .tutor-markdown [align="center"] { text-align: center; }
 
 .student-portal .chat-message.from-tutor {
     border: 1px solid var(--line);
@@ -1077,6 +1201,19 @@ html {
     background: rgba(255, 255, 255, .96);
     padding: 14px;
     backdrop-filter: blur(12px);
+}
+
+/* Keep reader controls usable without the shared form input's full width. */
+.student-portal .library-reader .lib-pdf-jump input {
+    width: 3.5rem;
+    min-height: 44px;
+    padding: 4px 7px;
+    text-align: center;
+}
+
+.student-portal .library-reader .lib-pdf-controls .lib-button,
+.student-portal .library-reader .lib-pdf-zoom select {
+    min-height: 44px;
 }
 
 /* Pagination, including Laravel's default pagination view */

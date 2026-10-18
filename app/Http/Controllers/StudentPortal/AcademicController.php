@@ -40,7 +40,7 @@ class AcademicController extends Controller
                 ->where('student_id', $student->id)
                 ->whereNotNull('submitted_at')])
             ->where('classroom_id', $student->classroom_id)
-            ->whereIn('status', ['published', 'active'])
+            ->whereIn('status', Assignment::PUBLISHED_STATUSES)
             ->where(fn ($query) => $query->whereNull('published_at')->orWhere('published_at', '<=', now()))
             ->latest('due_at')
             ->paginate(20);
@@ -250,8 +250,7 @@ class AcademicController extends Controller
     {
         abort_unless(
             $assignment->classroom_id === $student->classroom_id
-            && in_array($assignment->status, ['published', 'active'], true)
-            && (! $assignment->published_at || $assignment->published_at->lte(now())),
+            && $assignment->isPublished(),
             404,
         );
     }

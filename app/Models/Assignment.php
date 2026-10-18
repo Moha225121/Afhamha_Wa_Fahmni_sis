@@ -8,6 +8,15 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Assignment extends Model
 {
+    public const PUBLISHED_STATUSES = ['published', 'active'];
+
+    public function isPublished(): bool
+    {
+        // "active" is the historical Teacher Portal alias for a published assignment.
+        return in_array($this->status, self::PUBLISHED_STATUSES, true)
+            && (! $this->published_at || $this->published_at->lte(now()));
+    }
+
     protected $fillable = [
         'classroom_id', 'subject_id', 'teacher_id', 'title', 'instructions', 'description', 'due_at', 'due_date', 'attachment_path', 'status', 'published_at',
     ];

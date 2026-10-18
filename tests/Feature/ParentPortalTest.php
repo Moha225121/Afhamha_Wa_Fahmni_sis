@@ -177,8 +177,8 @@ class ParentPortalTest extends TestCase
         $this->get('/parent-app.webmanifest')
             ->assertOk()
             ->assertHeader('Content-Type', 'application/manifest+json; charset=UTF-8')
-            ->assertSee('مدرسة النسيبة - بوابة ولي الأمر')
-            ->assertSee('/school-app-icon?v=', false);
+            ->assertJsonPath('name', 'مدرسة النسيبة - بوابة ولي الأمر')
+            ->assertJsonPath('icons.0.src', '/school-app-icon?v='.substr(hash('sha256', $logoPath), 0, 12));
 
         $this->get('/school-app-icon')->assertOk()->assertHeader('Content-Type', 'image/svg+xml');
 

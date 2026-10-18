@@ -8,7 +8,7 @@
     <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="any">
     <link rel="apple-touch-icon" href="{{ asset('icons/parent-icon-192.png') }}">
     <link rel="stylesheet" href="{{ asset('css/parent.css') }}?v=portal-style-1">
-    <link rel="stylesheet" href="{{ asset('css/student.css') }}?v=20260827-1">
+    <link rel="stylesheet" href="{{ asset('css/student.css') }}?v=20261017-reader-1">
     @include('shared.branding-style')@include('shared.portal-assets')
     <script src="{{ asset('js/student-tutor.js') }}" defer></script>
     <script src="{{ asset('js/enhanced-selects.js') }}" defer></script>
