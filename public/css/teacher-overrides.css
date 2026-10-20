@@ -846,7 +846,7 @@ textarea:focus {
 .grade-actions .btn { min-height: 44px; white-space: nowrap; }
 .grade-instructions { margin: 0; border-color: #cce7e3; border-radius: 16px; background: #eaf6f4; color: #245c58; }
 .grade-panel { overflow: hidden; border: 1px solid var(--teacher-line); border-radius: 20px; background: #fff; box-shadow: 0 14px 34px rgba(15, 23, 42, .06); }
-.grade-grid-wrap { overflow: auto; max-height: min(62vh, 680px); }
+.grade-grid-wrap { overflow: auto; max-height: min(62vh, 680px); overscroll-behavior: contain; }
 .grade-grid { min-width: 820px; border-collapse: separate; border-spacing: 0; }
 .grade-grid th, .grade-grid td { border-bottom: 1px solid #e7edf3; border-inline-end: 1px solid #edf1f5; padding: 12px 14px; }
 .grade-grid thead th { position: sticky; top: 0; z-index: 2; background: #f1f8f7; color: #3d5b60; }

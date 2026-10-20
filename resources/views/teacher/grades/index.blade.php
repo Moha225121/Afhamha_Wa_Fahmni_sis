@@ -40,7 +40,7 @@
 
     @if($classroom)
         <div class="grade-panel">
-            <div class="grade-grid-wrap">
+            <div class="grade-grid-wrap" tabindex="0" aria-label="قائمة الطلاب والدرجات">
                 <table class="grade-grid" id="grade-sheet-table">
                     <thead>
                         <tr id="grade-table-head-row">
@@ -390,7 +390,7 @@
 
     .grade-grid-wrap {
         overflow-x: auto;
-        overflow-y: hidden;
+        overflow-y: auto;
         border: 1px solid #dfe7f5;
         border-radius: 16px;
         background: #fff;
@@ -403,6 +403,7 @@
     }
 
     .grade-grid-wrap::-webkit-scrollbar {
+        width: 10px;
         height: 10px;
     }
 
@@ -557,7 +558,7 @@
     .teacher-portal .grade-actions .btn:disabled { cursor: not-allowed; opacity: .5; transform: none; box-shadow: none; }
     .teacher-portal .grade-instructions { margin: 0; padding: 11px 14px; }
     .teacher-portal .grade-panel { border-color: #d7e8e5; box-shadow: 0 10px 26px rgba(15, 23, 42, .05); }
-    .teacher-portal .grade-grid-wrap { max-height: min(65vh, 680px); padding: 6px; border: 0; border-radius: 0; box-shadow: none; }
+    .teacher-portal .grade-grid-wrap { max-height: min(65vh, 680px); overflow-y: auto; padding: 6px; border: 0; border-radius: 0; box-shadow: none; }
     .teacher-portal .grade-grid { min-width: 880px; }
     .teacher-portal .grade-grid th, .teacher-portal .grade-grid td { padding: 10px 12px; }
     .teacher-portal .grade-grid thead th { background: #eff8f7; }
@@ -571,7 +572,7 @@
     @media (max-width: 600px) {
         .teacher-portal .grade-top-row { padding: 16px; }
         .teacher-portal .grade-headline h2 { font-size: 19px; }
-        .teacher-portal .grade-grid-wrap { max-height: 58vh; }
+        .teacher-portal .grade-grid-wrap { max-height: 58vh; overflow-y: auto; }
     }
 </style>
 @endsection
