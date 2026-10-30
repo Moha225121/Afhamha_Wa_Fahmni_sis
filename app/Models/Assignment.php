@@ -4,7 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Schema;
 
 class Assignment extends Model
 {
@@ -26,9 +28,27 @@ class Assignment extends Model
         return ['due_at' => 'datetime', 'due_date' => 'date', 'published_at' => 'datetime'];
     }
 
+    public function isAvailableToStudent(Student $student): bool
+    {
+        if (! $student->classroom_id
+            || ! in_array($this->status, ['published', 'active'], true)
+            || ($this->published_at && $this->published_at->gt(now()))) {
+            return false;
+        }
+
+        return (int) $this->classroom_id === (int) $student->classroom_id
+            || (Schema::hasTable('assignment_classroom')
+                && $this->classrooms()->whereKey($student->classroom_id)->exists());
+    }
+
     public function classroom(): BelongsTo
     {
         return $this->belongsTo(Classroom::class);
+    }
+
+    public function classrooms(): BelongsToMany
+    {
+        return $this->belongsToMany(Classroom::class, 'assignment_classroom');
     }
 
     public function subject(): BelongsTo

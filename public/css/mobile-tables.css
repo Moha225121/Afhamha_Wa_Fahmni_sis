@@ -1,0 +1,68 @@
+/* Mobile table cards shared by the admin and school portals. */
+.table-wrap,
+.portal-table-scroll,
+.grade-grid-wrap {
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-gutter: stable;
+}
+
+@media (max-width: 640px) {
+    .table-wrap,
+    .portal-table-scroll,
+    .grade-grid-wrap {
+        display: block;
+        border: 1px solid var(--ui-line, #dce6e9);
+        background: #fff;
+        box-shadow: none;
+    }
+
+    .table-wrap > table,
+    .portal-table-scroll > table,
+    .grade-grid-wrap > table {
+        display: table;
+        width: max-content;
+        min-width: 100%;
+        border-collapse: collapse;
+        border-spacing: 0;
+    }
+
+    .table-wrap thead,
+    .portal-table-scroll thead,
+    .table-wrap tbody,
+    .portal-table-scroll tbody,
+    .table-wrap tbody tr,
+    .portal-table-scroll tbody tr,
+    .table-wrap td,
+    .portal-table-scroll td,
+    .table-wrap th,
+    .portal-table-scroll th {
+        display: table-row-group;
+    }
+
+    .table-wrap tbody tr,
+    .portal-table-scroll tbody tr {
+        display: table-row;
+    }
+
+    .table-wrap td,
+    .portal-table-scroll td,
+    .table-wrap th,
+    .portal-table-scroll th {
+        display: table-cell;
+        min-width: 120px;
+        padding: 11px 12px;
+        border-bottom: 1px solid var(--ui-line, #dce6e9);
+        text-align: start;
+        overflow-wrap: anywhere;
+    }
+
+    .table-wrap td::before,
+    .portal-table-scroll td::before,
+    .table-wrap th::before,
+    .portal-table-scroll th::before {
+        content: none;
+    }
+}

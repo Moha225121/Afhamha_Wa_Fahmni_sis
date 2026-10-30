@@ -33,6 +33,15 @@ class SchoolChatService
         abort_unless($conversation->participants()->whereKey($user->id)->exists(), 404);
         if ($user->isParent() && $conversation->student_id) {
             app(ParentPortalContext::class)->assertChild($user->guardian, $conversation->student);
+            if (request()->filled('student')) {
+                $selected = app(ParentMessageScope::class)->selected(request());
+                abort_unless($selected && (int) $selected->id === (int) $conversation->student_id, 404);
+            }
+            foreach ($conversation->participants()->where('users.id', '!=', $user->id)->get() as $recipient) {
+                if ($recipient->role === 'teacher') {
+                    abort_unless(app(TeacherContactScope::class)->allows($conversation->student, $recipient), 403);
+                }
+            }
         } elseif ($user->isTeacher()) {
             abort_unless($conversation->student?->classroom_id && $user->teacher?->classrooms()->whereKey($conversation->student->classroom_id)->exists(), 404);
         }

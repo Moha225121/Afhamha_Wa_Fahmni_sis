@@ -1,0 +1,11 @@
+.device-push-settings { position: fixed; z-index: 80; bottom: 6rem; left: 1rem; max-width: min(23rem, calc(100vw - 2rem)); padding: .8rem; border: 1px solid #d5dbe5; border-radius: .8rem; background: #fff; color: #101632; box-shadow: 0 4px 16px #10163215; direction: rtl; font: inherit; }
+.device-push-settings button { cursor: pointer; border: 1px solid #ccd2de; border-radius: .5rem; padding: .5rem; background: #f3f5fa; color: inherit; font: inherit; }
+.device-push-settings p { margin: .5rem 0 0; font-size: .85rem; }
+.device-push-settings { box-sizing: border-box; }
+.device-push-settings .push-reminder-close { float: left; padding: .1rem .5rem; margin-inline-start: .5rem; }
+[data-push-reminder][hidden] { display: none; }
+[data-push-panel] button[hidden] { display: none; }
+/* Keep the device control available without covering the teacher's composer or result. */
+.teacher-notification-page .device-push-settings { position: static; width: fit-content; margin: 1rem auto; }
+.teacher-notification-page dl { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .8rem 1rem; align-items: start; }
+.teacher-notification-page dd { margin: 0; font-weight: 700; }

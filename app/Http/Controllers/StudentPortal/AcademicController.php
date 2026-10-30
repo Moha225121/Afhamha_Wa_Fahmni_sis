@@ -15,11 +15,14 @@ use App\Models\Student;
 use App\Services\AssignmentSubmissionService;
 use App\Services\ExamAttemptPolicy;
 use App\Services\ExamAttemptService;
+use App\Support\AssignmentDeadline;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Throwable;
@@ -35,12 +38,14 @@ class AcademicController extends Controller
     public function assignments(Request $request): View
     {
         $student = $this->student($request);
+        $hasClassroomAssignments = Schema::hasTable('assignment_classroom');
         $assignments = Assignment::query()
             ->with(['subject', 'submissions' => fn ($query) => $query
                 ->where('student_id', $student->id)
                 ->whereNotNull('submitted_at')])
-            ->where('classroom_id', $student->classroom_id)
-            ->whereIn('status', Assignment::PUBLISHED_STATUSES)
+            ->where(fn ($query) => $query->where('classroom_id', $student->classroom_id)
+                ->when($hasClassroomAssignments, fn ($query) => $query->orWhereHas('classrooms', fn ($classrooms) => $classrooms->whereKey($student->classroom_id))))
+            ->whereIn('status', ['published', 'active'])
             ->where(fn ($query) => $query->whereNull('published_at')->orWhere('published_at', '<=', now()))
             ->latest('due_at')
             ->paginate(20);
@@ -66,12 +71,16 @@ class AcademicController extends Controller
     {
         $student = $this->student($request);
         $this->authorizeAssignment($assignment, $student);
-        abort_if($assignment->due_at && now()->gte($assignment->due_at), 422, 'انتهى موعد تسليم الواجب.');
+        $deadline = AssignmentDeadline::for($assignment);
+        if ($deadline && now()->gte($deadline)) {
+            throw ValidationException::withMessages(['file' => 'انتهى موعد تسليم الواجب.'])
+                ->redirectTo(route('student.assignments.show', $assignment, false));
+        }
 
         $validated = $request->validated();
         $this->submissions->save($assignment, $student, $request->file('file'), $validated['notes'] ?? null);
 
-        return back()->with('success', 'تم حفظ تسليم الواجب بنجاح.');
+        return redirect()->route('student.assignments.show', $assignment)->with('success', 'تم حفظ تسليم الواجب بنجاح.');
     }
 
     public function assignmentAttachment(Request $request, Assignment $assignment): StreamedResponse
@@ -134,13 +143,16 @@ class AcademicController extends Controller
 
     public function exams(Request $request): View
     {
+        $request->validate(['exam' => ['nullable', 'integer', 'min:1']]);
         $student = $this->student($request);
         $exams = Exam::query()
+            ->when($request->filled('exam'), fn ($query) => $query->whereKey($request->integer('exam')))
             ->with(['subject', 'attempts' => fn ($query) => $query->where('student_id', $student->id)->orderByDesc('attempt_number')])
             ->where('classroom_id', $student->classroom_id)
             ->whereIn('status', ['published', 'scheduled'])
             ->orderBy('starts_at')
-            ->paginate(30);
+            ->paginate(30)->withQueryString();
+        abort_if($request->filled('exam') && $exams->isEmpty(), 404);
 
         $examGroups = collect(['available' => collect(), 'upcoming' => collect(), 'completed' => collect(), 'past' => collect()]);
         foreach ($exams as $exam) {
@@ -149,7 +161,7 @@ class AcademicController extends Controller
             $hasRemainingAttempts = $exam->attempts->count() < $this->attemptPolicy->maximumAttempts($exam);
             $exam->setAttribute('has_remaining_attempts', $hasRemainingAttempts);
             $group = match (true) {
-                $exam->starts_at->isFuture() && ! $exam->starts_at->isSameDay(now()) => 'upcoming',
+                $exam->starts_at->isFuture() => 'upcoming',
                 $attempt && $attempt->status === 'in_progress' && now()->lt($scheduledEnd) => 'available',
                 now()->lt($scheduledEnd) && $hasRemainingAttempts => 'available',
                 $attempt && $attempt->status !== 'in_progress' => 'completed',
@@ -167,10 +179,12 @@ class AcademicController extends Controller
         $this->authorizeExam($exam, $student);
         $examStart = $exam->starts_at;
         $examEnd = $examStart->copy()->addMinutes($exam->duration_minutes);
-        $isSameDayExam = $examStart->isSameDay(now());
-
-        abort_if($examStart->isFuture() && ! $isSameDayExam, 422, '�� ���� ���� �������� ���.');
-        abort_if(now()->gte($examEnd), 422, '����� ��� ��������.');
+        if (now()->lt($examStart)) {
+            throw ValidationException::withMessages(['exam' => 'لم يبدأ موعد الاختبار بعد.']);
+        }
+        if (now()->gte($examEnd)) {
+            throw ValidationException::withMessages(['exam' => 'انتهى وقت الاختبار.']);
+        }
 
         $attempt = $this->attempts->start($exam, $student);
 
@@ -248,11 +262,7 @@ class AcademicController extends Controller
 
     private function authorizeAssignment(Assignment $assignment, Student $student): void
     {
-        abort_unless(
-            $assignment->classroom_id === $student->classroom_id
-            && $assignment->isPublished(),
-            404,
-        );
+        abort_unless($assignment->isAvailableToStudent($student), 404);
     }
 
     private function authorizeExam(Exam $exam, Student $student): void

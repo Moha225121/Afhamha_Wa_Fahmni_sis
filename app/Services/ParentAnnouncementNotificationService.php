@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Announcement;
+use App\Models\Student;
 use App\Models\User;
 use App\Notifications\ParentAnnouncementNotification;
 use App\Notifications\ParentPortalNotification;
@@ -73,9 +74,10 @@ class ParentAnnouncementNotificationService
             });
     }
 
-    public function summary(User $parent, bool $unreadOnly = false): array
+    public function summary(User $parent, bool $unreadOnly = false, ?Student $student = null): array
     {
-        $query = $this->queryFor($parent);
+        $query = $student ? app(ParentNotificationFeed::class)->forStudent($parent, $student) : $this->queryFor($parent);
+        $parameters = $student ? ['student' => $student->id] : [];
 
         return [
             'unread_count' => (clone $query)->whereNull('read_at')->count(),
@@ -84,9 +86,14 @@ class ParentAnnouncementNotificationService
                 'guardian_call' => (clone $query)->where('data->category', 'guardian_call')->whereNull('read_at')->count(),
             ],
             'notifications' => (clone $query)->when($unreadOnly, fn ($items) => $items->whereNull('read_at'))
-                ->latest()->orderByDesc('id')->limit(5)->get()->map(fn (DatabaseNotification $item) => $this->serialize($item))->all(),
-            'all_url' => route('parent.notifications'),
-            'read_all_url' => route('parent.notifications.read-all'),
+                ->latest()->orderByDesc('id')->limit(5)->get()->map(function (DatabaseNotification $item) use ($parameters) {
+                    $row = $this->serialize($item);
+                    $row['read_url'] = route('parent.notifications.read', ['notification' => $item->id] + $parameters);
+
+                    return $row;
+                })->all(),
+            'all_url' => route('parent.notifications', $parameters),
+            'read_all_url' => route('parent.notifications.read-all', $parameters),
         ];
     }
 
@@ -110,6 +117,9 @@ class ParentAnnouncementNotificationService
         if ($notification->type === ParentAnnouncementNotification::class) {
             return route('parent.announcements.show', $notification->data['announcement_id']);
         }
+        if (in_array($notification->data['category'] ?? null, ['teacher_notification', 'teacher_report', 'conversation_message'], true)) {
+            return app(NotificationDestination::class)->for($notification->notifiable, $notification->data);
+        }
         $url = $notification->data['url'] ?? '';
         $path = is_string($url) ? parse_url($url, PHP_URL_PATH) : null;
 
@@ -118,6 +128,7 @@ class ParentAnnouncementNotificationService
         }
         $query = parse_url($url, PHP_URL_QUERY);
         $fragment = parse_url($url, PHP_URL_FRAGMENT);
+
         return $path.($query !== null ? '?'.$query : '').($fragment !== null ? '#'.$fragment : '');
     }
 

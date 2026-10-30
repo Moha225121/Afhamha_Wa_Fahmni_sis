@@ -1,5 +1,5 @@
 @php($notificationSummary = $parentNotificationSummary)
-<details class="parent-notification-bell" data-notification-bell data-summary-url="{{ route('parent.notifications.summary') }}">
+<details class="parent-notification-bell" data-notification-bell data-summary-url="{{ route('parent.notifications.summary', request()->only('student')) }}">
     <summary class="header-notifications" aria-label="الإشعارات، {{ $notificationSummary['unread_count'] }} غير مقروءة" aria-controls="parent-notification-panel">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg>
         <span class="parent-notification-badge" data-parent-unread @if(!$notificationSummary['unread_count']) hidden @endif>{{ $notificationSummary['unread_count'] > 99 ? '99+' : $notificationSummary['unread_count'] }}</span>
@@ -14,7 +14,7 @@
                 <button type="button" class="is-active" data-notification-filter="all" aria-pressed="true">الكل</button>
                 <button type="button" data-notification-filter="unread" aria-pressed="false">غير المقروءة</button>
             </div>
-            <form method="post" action="{{ route('parent.notifications.read-all') }}" data-notification-all @if(!$notificationSummary['unread_count']) hidden @endif>
+            <form method="post" action="{{ $notificationSummary['read_all_url'] }}" data-notification-all @if(!$notificationSummary['unread_count']) hidden @endif>
                 @csrf @method('patch')
                 <button type="submit" class="parent-notification-text-button">قراءة الكل</button>
             </form>

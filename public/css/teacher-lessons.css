@@ -1,0 +1,65 @@
+.lesson-status-tabs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-bottom: 16px; }
+.lesson-status-tab { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 14px; border: 1px solid #d7e8e5; border-radius: 14px; background: #fff; color: #65758a; text-decoration: none; }
+.lesson-status-tab strong { font-size: 25px; line-height: 1.2; color: #17223a; }
+.lesson-status-tab span { font-size: 13px; font-weight: 700; }
+.lesson-status-tab:hover, .lesson-status-tab.is-active { border-color: #087e86; background: #edf8f7; color: #087e86; }
+.lesson-status-tab:focus-visible, .teacher-lesson-card a:focus-visible, .teacher-lesson-card summary:focus-visible { outline: 3px solid #087e86; outline-offset: 3px; }
+.lesson-list-filters { margin-bottom: 16px; border: 1px solid #d7e8e5; border-radius: 14px; background: #fff; }
+.lesson-list-filters > summary { padding: 14px 18px; cursor: pointer; color: #496368; font-size: 14px; font-weight: 700; }
+.teacher-portal .lesson-list-filters .filters { border: 0; box-shadow: none; margin: 0; flex-wrap: wrap; }
+.teacher-portal .lesson-list-filters .filters label { flex: 1 1 160px; min-width: 0; }
+.lesson-list-heading { display: flex; align-items: center; justify-content: space-between; margin: 18px 0 12px; font-size: 13px; color: #65758a; }
+.lesson-list-heading p { margin: 0; }
+.lesson-list-heading a { color: #087e86; font-weight: 700; }
+.teacher-lesson-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr)); gap: 18px; align-items: start; }
+.teacher-lesson-card { min-width: 0; padding: 22px; border: 1px solid #d7e8e5; border-radius: 18px; background: #fff; box-shadow: 0 6px 18px rgba(15, 23, 42, .04); }
+.teacher-lesson-card__header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.teacher-lesson-subject { color: #087e86; font-size: 13px; font-weight: 800; }
+.teacher-lesson-card h2, .teacher-lesson-preview h2 { margin: 14px 0 10px; color: #17223a; font-size: 22px; line-height: 1.5; overflow-wrap: anywhere; }
+.teacher-lesson-card h2 a { color: inherit; text-decoration: none; }
+.teacher-lesson-card h2 a:hover { color: #087e86; }
+.teacher-lesson-unit { margin: 0 0 12px; color: #65758a; font-size: 13px; }
+.teacher-lesson-audience { display: flex; flex-wrap: wrap; gap: 7px; }
+.teacher-lesson-audience span { padding: 6px 10px; border-radius: 8px; background: #f4f7fb; color: #496368; font-size: 12px; font-weight: 700; overflow-wrap: anywhere; }
+.teacher-lesson-excerpt { margin: 14px 0 0; color: #65758a; font-size: 14px; line-height: 1.8; overflow-wrap: anywhere; }
+.teacher-lesson-card__meta { display: flex; flex-wrap: wrap; gap: 8px 18px; margin: 16px 0; color: #65758a; font-size: 12px; }
+.teacher-lesson-readership { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; padding: 12px 14px; margin-top: 18px; border-radius: 12px; background: #eef8f7; color: #087e86; text-decoration: none; font-size: 13px; }
+.teacher-lesson-readership strong { font-size: 22px; margin-inline-end: 5px; }
+.teacher-lesson-readership b { font-size: 12px; }
+.teacher-lesson-card__actions, .teacher-lesson-preview__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 18px; }
+.teacher-lesson-card__actions .btn { flex: 1; justify-content: center; text-align: center; min-width: 90px; }
+.teacher-lesson-more { position: relative; }
+.teacher-lesson-more > summary { padding: 10px 6px; cursor: pointer; font-size: 12px; color: #65758a; }
+.teacher-lesson-more > div { position: absolute; inset-inline-end: 0; top: calc(100% + 6px); z-index: 10; min-width: 150px; padding: 6px; border: 1px solid #d7e8e5; border-radius: 12px; background: #fff; box-shadow: 0 12px 24px rgba(15, 23, 42, .12); }
+.teacher-lesson-more button { width: 100%; padding: 10px; border: 0; border-radius: 8px; background: transparent; color: #496368; text-align: start; cursor: pointer; font: inherit; font-size: 13px; }
+.teacher-lesson-more button:hover { background: #f4f7fb; }
+.teacher-lesson-more .teacher-lesson-delete { color: #bd4242; }
+.teacher-lesson-empty { grid-column: 1 / -1; }
+.teacher-lesson-empty .btn { margin-top: 16px; }
+.teacher-lesson-preview { max-width: 960px; margin-inline: auto; border: 1px solid #d7e8e5; border-radius: 20px; background: #fff; overflow: hidden; }
+.teacher-lesson-preview__heading, .teacher-lesson-body, .teacher-lesson-files { padding: 26px; }
+.teacher-lesson-body, .teacher-lesson-files { border-top: 1px solid #e7edf3; }
+.teacher-lesson-preview h3 { font-size: 17px; margin: 0 0 16px; color: #17223a; }
+.teacher-lesson-copy { line-height: 2; font-size: 16px; color: #27364a; overflow-wrap: anywhere; }
+.teacher-lesson-file { border: 1px solid #d7e8e5; border-radius: 12px; margin-top: 12px; overflow: hidden; }
+.teacher-lesson-file summary { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 16px; cursor: pointer; }
+.teacher-lesson-file summary strong { font-size: 14px; overflow-wrap: anywhere; }
+.teacher-lesson-file summary span { flex-shrink: 0; color: #087e86; font-size: 12px; }
+.teacher-lesson-file[open] summary { border-bottom: 1px solid #e7edf3; }
+.teacher-lesson-file__body { padding: 16px; }
+.teacher-lesson-file__body .btn { margin-top: 14px; }
+.teacher-lesson-file__image, .teacher-lesson-file__video { display: block; width: 100%; max-height: 650px; object-fit: contain; border-radius: 8px; }
+.teacher-lesson-file__image { width: auto; max-width: 100%; margin-inline: auto; }
+.teacher-lesson-file__pdf { display: block; width: 100%; height: 650px; border: 1px solid #e7edf3; border-radius: 8px; background: #f4f7fb; }
+@media (max-width: 600px) {
+    .lesson-status-tabs { gap: 7px; }
+    .lesson-status-tab { flex-direction: column; gap: 3px; padding: 10px 5px; }
+    .lesson-status-tab strong { font-size: 22px; }
+    .lesson-status-tab span { font-size: 11px; }
+    .teacher-lesson-card { padding: 18px; }
+    .teacher-lesson-card h2, .teacher-lesson-preview h2 { font-size: 20px; }
+    .teacher-portal .lesson-list-filters .filters label { flex: auto; }
+    .teacher-lesson-preview__heading, .teacher-lesson-body, .teacher-lesson-files { padding: 18px; }
+    .teacher-lesson-preview__actions .btn { flex: 1; text-align: center; min-width: 130px; }
+    .teacher-lesson-file__pdf { height: 450px; }
+}

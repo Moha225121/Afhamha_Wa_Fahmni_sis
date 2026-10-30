@@ -2,7 +2,10 @@
 
 @section('title', $student->user->name)
 
-@section('content')<p><a class="btn secondary" href="{{ route('parent.students.analysis', $student) }}">تحليل مستوى الطالب وخطة الدعم بالذكاء الاصطناعي</a></p><p><a href="{{ route('parent.finance',['student'=>$student->id]) }}">الحالة المالية والإيصالات</a></p>
+@section('content')<p><a class="btn secondary" href="{{ route('parent.students.analysis', $student) }}">تحليل مستوى الطالب وخطة الدعم بالذكاء الاصطناعي</a></p>
+    @if(app(\App\Services\ParentStudentSession::class)->canOpen($student))
+        <form method="post" action="{{ route('parent.children.student-session', $student) }}" class="section-gap">@csrf<button type="submit" class="btn primary">فتح مساحة الطالب وتسليم الواجبات</button></form>
+    @endif
     <section class="student-profile">
         <span class="large-avatar">{{ mb_substr($student->user->name, 0, 1) }}</span>
         <h1>{{ $student->user->name }}</h1>

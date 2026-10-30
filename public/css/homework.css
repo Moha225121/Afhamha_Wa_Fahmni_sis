@@ -1,0 +1,23 @@
+.homework-instructions{line-height:1.95;white-space:pre-wrap;overflow-wrap:anywhere;text-align:start;min-width:0;color:inherit}
+.homework-instructions p,.homework-instructions div{margin-block:0 .7em}
+.homework-instructions p:last-child,.homework-instructions div:last-child{margin-bottom:0}
+.homework-instructions ul,.homework-instructions ol{padding-inline-start:1.6em;white-space:normal}
+.homework-instructions li{white-space:pre-wrap;margin-block:.25em}
+.homework-instructions pre{white-space:pre-wrap;overflow-wrap:anywhere}
+.homework-details .info-list{margin-top:22px}
+.homework-details .info-list>div{gap:14px;align-items:flex-start}
+.homework-details .info-list strong{min-width:0;overflow-wrap:anywhere;text-align:end}
+.homework-details time{display:inline-block;direction:ltr;unicode-bidi:isolate}
+.homework-details h2,.homework-upload h2{font-size:1.1rem;margin:0 0 16px}
+.homework-upload label{display:grid;gap:9px;min-width:0}
+.homework-upload input[type=file]{width:100%;min-width:0;max-width:100%;box-sizing:border-box;font:inherit;padding:12px;border:1px solid var(--line,#dfe7ef);border-radius:12px;background:#fff}
+.homework-upload input[type=file]::file-selector-button{font:inherit;border:0;border-radius:8px;padding:9px 13px;margin-inline-end:10px;background:#eaf6f4;color:#115e59;cursor:pointer}
+.homework-upload textarea{font:inherit;resize:vertical;min-height:95px;max-width:100%;box-sizing:border-box;line-height:1.7}
+.homework-upload-help{font-size:.85rem;color:var(--muted,#64748b);line-height:1.9;margin:0}
+.homework-upload input:focus-visible,.homework-upload textarea:focus-visible{outline:3px solid #0f766e55;outline-offset:2px}
+.homework-notice{padding:17px 20px;border:1px solid var(--line,#dfe7ef);border-radius:14px;background:var(--surface,#fff);line-height:1.9;margin-block:18px;overflow-wrap:anywhere}
+.homework-notice strong{display:block;margin-bottom:5px}
+.homework-notice p{margin:0}
+.homework-notice.is-closed{background:#fff9ef;border-color:#ead6b3;color:#78521b}
+.homework-notice.is-graded{background:#edf8f3;border-color:#b7ddcc;color:#166044}
+@media(max-width:480px){.homework-details .info-list>div{flex-direction:column;align-items:stretch;gap:7px}.homework-details .info-list strong{text-align:start}.homework-upload input[type=file]{font-size:13px}.homework-upload input[type=file]::file-selector-button{padding:8px;margin-inline-end:5px}.homework-details h2,.homework-upload h2{font-size:1rem}}

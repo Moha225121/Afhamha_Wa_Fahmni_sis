@@ -11,14 +11,12 @@
 
     <section class="metrics-grid">
         <article class="metric wide">
-            <span>المتوسط</span>
-            <strong>{{ $summary['average_percent'] === null ? '-' : $summary['average_percent'].'%' }}</strong>
-        </article>
-        <article class="metric">
             <span>منشورة</span>
             <strong>{{ $summary['published_grades'] }}</strong>
         </article>
     </section>
+
+    @include('shared.teacher-sheet-grades')
 
     <section class="list-section">
         <div class="section-title"><h2>نتائج الاختبارات الإلكترونية</h2></div>

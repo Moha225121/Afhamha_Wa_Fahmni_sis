@@ -9,9 +9,11 @@ use App\Models\Classroom;
 use App\Models\ExamQuestion;
 use App\Models\Subject;
 use App\Services\AuditService;
+use App\Services\ParentNotificationService;
 use App\Services\TeacherCreationIntent;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -45,23 +47,11 @@ class ExamController extends Controller
             ->paginate(20)
             ->withQueryString();
 
-        $examSummary = ['draft' => 0, 'scheduled' => 0, 'published' => 0, 'completed' => 0, 'cancelled' => 0];
-        DB::table('exams')->where('teacher_id', $teacher->id)->get(['status', 'starts_at'])->each(function ($exam) use (&$examSummary) {
-            if ($exam->status === 'cancelled') {
-                $examSummary['cancelled']++;
-            } elseif ($exam->status === 'draft') {
-                $examSummary['draft']++;
-            } elseif ($exam->status === 'completed') {
-                $examSummary['completed']++;
-            } elseif (\Illuminate\Support\Carbon::parse($exam->starts_at)->isPast()) {
-                $examSummary['published']++;
-            } elseif ($exam->status === 'scheduled') {
-                $examSummary['scheduled']++;
-            } else {
-                $examSummary['published']++;
-            }
-        });
-        $examSummary = collect($examSummary);
+        $examSummary = collect(['draft' => 0, 'scheduled' => 0, 'published' => 0, 'completed' => 0, 'cancelled' => 0])
+            ->merge(DB::table('exams')->where('teacher_id', $teacher->id)
+                ->selectRaw('status, count(*) as total')
+                ->groupBy('status')
+                ->pluck('total', 'status'));
 
         $classrooms = Classroom::whereIn('id', $this->assignedClassroomIds($teacher))->orderBy('name')->get();
 
@@ -82,7 +72,7 @@ class ExamController extends Controller
         $canEditBeforeSchedule = in_array($examRow->status, ['draft', 'scheduled'], true)
             && (
                 $examRow->status === 'draft'
-                || \Illuminate\Support\Carbon::parse($examRow->starts_at)->isFuture()
+                || Carbon::parse($examRow->starts_at)->isFuture()
             );
 
         abort_unless($canEditBeforeSchedule, 403, 'لا يمكن تعديل اختبار بعد بدء اليوم المحدد له.');
@@ -131,7 +121,7 @@ class ExamController extends Controller
         $canEditBeforeSchedule = in_array($examRow->status, ['draft', 'scheduled'], true)
             && (
                 $examRow->status === 'draft'
-                || \Illuminate\Support\Carbon::parse($examRow->starts_at)->isFuture()
+                || Carbon::parse($examRow->starts_at)->isFuture()
             );
 
         abort_unless($canEditBeforeSchedule, 403, 'لا يمكن تعديل اختبار بعد بدء اليوم المحدد له.');
@@ -142,6 +132,7 @@ class ExamController extends Controller
     private function saveExam(ExamRequest $request, $teacher, ?int $examId): RedirectResponse
     {
         $data = $request->validated();
+        $previousStatus = $examId ? DB::table('exams')->where('id', $examId)->value('status') : null;
 
         abort_unless($this->ownsPair($teacher, (int) $data['classroom_id'], (int) $data['subject_id']), 403, 'أنت غير مكلف بهذا الصف/المادة.');
 
@@ -156,7 +147,7 @@ class ExamController extends Controller
         }
 
         $totalScore = max($questions->sum('score'), 0.25);
-        $startsAt = \Illuminate\Support\Carbon::parse($data['starts_at'])->format('Y-m-d H:i:s');
+        $startsAt = Carbon::parse($data['starts_at'])->format('Y-m-d H:i:s');
 
         $save = function () use ($data, $teacher, $questions, $totalScore, $startsAt, $examId, $normalizedStatus): int {
             $examAttributes = [
@@ -214,9 +205,15 @@ class ExamController extends Controller
         };
 
         if ($examId === null) {
-            app(TeacherCreationIntent::class)->once($data['creation_token'], $teacher->id, 'exams', $save);
+            $savedExamId = app(TeacherCreationIntent::class)->once($data['creation_token'], $teacher->id, 'exams', $save);
         } else {
-            DB::transaction($save);
+            $savedExamId = DB::transaction($save);
+        }
+
+        if (in_array($normalizedStatus, ['scheduled', 'published'], true)
+            && ! in_array($previousStatus, ['scheduled', 'published'], true)
+            && $savedExamId !== null) {
+            $this->notifyExamAvailability($savedExamId, (int) $data['classroom_id'], $data['title']);
         }
 
         return redirect()->route('teacher.exams.index')->with('success', $normalizedStatus === 'scheduled' ? 'تم جدولة الاختبار.' : 'تم حفظ الاختبار كمسودة.');
@@ -246,7 +243,8 @@ class ExamController extends Controller
     public function status(Request $request, int $exam): RedirectResponse
     {
         $teacher = $this->teacher($request);
-        DB::transaction(function () use ($request, $teacher, $exam): void {
+        $publication = null;
+        DB::transaction(function () use ($request, $teacher, $exam, &$publication): void {
             $examRow = DB::table('exams')->where('id', $exam)->lockForUpdate()->first();
             abort_unless($examRow && (int) $examRow->teacher_id === $teacher->id, 404);
             $data = $request->validate(['status' => ['required', Rule::in(['draft', 'scheduled', 'published', 'completed'])]]);
@@ -272,10 +270,36 @@ class ExamController extends Controller
             }
 
             DB::table('exams')->where('id', $exam)->update(['status' => $data['status'], 'updated_at' => now()]);
+            if (in_array($data['status'], ['scheduled', 'published'], true)
+                && ! in_array($examRow->status, ['scheduled', 'published'], true)) {
+                $publication = $examRow;
+            }
             AuditService::record('status_changed', 'exams');
         });
+        if ($publication) {
+            $this->notifyExamAvailability($exam, (int) $publication->classroom_id, $publication->title);
+        }
 
         return back()->with('success', 'تم تحديث حالة الاختبار.');
+    }
+
+    private function notifyExamAvailability(int $examId, int $classroomId, string $title): void
+    {
+        $service = app(ParentNotificationService::class);
+        $eventKey = 'exam:'.$examId.':available';
+        $service->sendToClassrooms([$classroomId], [
+            'title' => 'اختبار جديد',
+            'body' => 'تمت إتاحة اختبار جديد: '.$title,
+            'url' => route('parent.exams'),
+            'category' => 'exam',
+            'exam_id' => $examId,
+        ], $eventKey);
+        $service->sendToStudents([$classroomId], [
+            'title' => 'اختبار جديد',
+            'body' => 'تمت إتاحة اختبار جديد: '.$title,
+            'category' => 'exam',
+            'exam_id' => $examId,
+        ], $eventKey, route('student.exams.index'));
     }
 
     public function cancel(Request $request, int $exam): RedirectResponse
@@ -283,7 +307,7 @@ class ExamController extends Controller
         $teacher = $this->teacher($request);
         $examRow = DB::table('exams')->where('id', $exam)->first();
         abort_unless($examRow && (int) $examRow->teacher_id === $teacher->id, 404);
-        abort_unless(\Illuminate\Support\Carbon::parse($examRow->starts_at)->isPast(), 422, 'لا يمكن إلغاء اختبار قبل موعده.');
+        abort_unless(Carbon::parse($examRow->starts_at)->isPast(), 422, 'لا يمكن إلغاء اختبار قبل موعده.');
         DB::table('exams')->where('id', $exam)->update(['status' => 'cancelled', 'updated_at' => now()]);
         AuditService::record('cancelled', 'exams');
 

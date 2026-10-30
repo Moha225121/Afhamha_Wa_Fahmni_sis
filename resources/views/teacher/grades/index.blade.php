@@ -5,6 +5,10 @@
 
 @section('content')
 @php
+    $notifiesGradeSheet = config('nasbia.teacher_sheet_notifications', false);
+    $gradeSavedMessage = $notifiesGradeSheet
+        ? 'تم حفظ الدرجات وإشعار الطالب وأولياء أمره بالدرجات الجديدة أو المعدلة.'
+        : 'تم حفظ الدرجات في سجل المعلم وفق سياسة النشر المعتمدة.';
     $studentsPayload = $students->map(function ($student) {
         return [
             'id' => $student->id,
@@ -31,11 +35,26 @@
 
         <div class="grade-actions">
             <button type="button" class="btn secondary" id="add-grade-column" @disabled(! $classroom)>إضافة عمود</button>
-            <button type="button" class="btn primary" id="save-grade-sheet" @disabled(! $classroom)>حفظ التغييرات</button>
+            <button type="button" class="btn primary" id="save-grade-sheet" @disabled(! $classroom)>{{ $notifiesGradeSheet ? 'حفظ وإرسال الدرجات' : 'حفظ الدرجات' }}</button>
         </div>
     </div>
+    @if($classroom && $students->isNotEmpty())
+        <label class="grade-student-switcher">الانتقال إلى طالب
+            <select id="grade-student-switcher" aria-label="الانتقال إلى طالب في الصف">
+                <option value="">اختر طالبًا</option>
+                @foreach($students as $student)
+                    <option value="{{ $student->id }}">{{ $student->user?->name ?? 'طالب' }} — {{ $student->student_number }}</option>
+                @endforeach
+            </select>
+        </label>
+    @endif
     <div class="form-hint grade-instructions">
-        أضف أعمدة التقييم وحدد الدرجة القصوى، ثم أدخل درجات الطلاب. يتم تحديث المتوسط تلقائيًا ويمكن حفظ التغييرات للصف المحدد.
+        أضف أعمدة التقييم وحدد الدرجة القصوى، ثم أدخل درجات الطلاب.
+        @if($notifiesGradeSheet)
+            عند الحفظ تصل الدرجات الجديدة أو المعدلة إلى الطالب وأولياء أمره المرتبطين مع إشعار لكل منهم، بالدرجة الفعلية من الدرجة القصوى دون إرسال المتوسط أو النسبة المئوية.
+        @else
+            تُحفظ الدرجات في سجل المعلم. عرضها للطالب وولي الأمر يبقى وفق سياسة النشر المعتمدة في المدرسة.
+        @endif
     </div>
 
     @if($classroom)
@@ -161,11 +180,13 @@
 
                 const studentCell = document.createElement('td');
                 studentCell.className = 'student-name';
+                studentCell.dataset.label = 'الطالب';
                 studentCell.textContent = student.name;
                 row.appendChild(studentCell);
 
                 const averageCell = document.createElement('td');
                 averageCell.className = 'avg-cell';
+                averageCell.dataset.label = 'المتوسط';
                 // If server has saved overall score, show it; otherwise compute from columns
                 const serverVal = serverScores[String(student.id)];
                 averageCell.textContent = formatAverageForDisplay(typeof serverVal !== 'undefined' && serverVal !== null ? Number(serverVal) : calculateAverageForStudent(student.id));
@@ -173,6 +194,7 @@
 
                 state.columns.forEach((column, columnIndex) => {
                     const cell = document.createElement('td');
+                    cell.dataset.label = column.title;
                     const input = document.createElement('input');
                     input.type = 'number';
                     input.min = '0';
@@ -183,6 +205,8 @@
                     input.dataset.studentId = String(student.id);
                     input.className = 'grade-input';
                     input.placeholder = '0';
+                    input.setAttribute('aria-label', `${student.name}، ${column.title}`);
+                    input.title = `${student.name} — ${column.title}`;
 
                     input.addEventListener('input', function () {
                         const columnKey = Number(this.dataset.columnIndex);
@@ -207,6 +231,9 @@
                 input.addEventListener('input', function () {
                     const index = Number(this.dataset.columnIndex);
                     state.columns[index].title = this.value || 'عمود جديد';
+                    body.querySelectorAll(`tr td:nth-child(${index + 3})`).forEach((cell) => {
+                        cell.dataset.label = state.columns[index].title;
+                    });
                 });
             });
 
@@ -260,7 +287,16 @@
             renderTable();
         });
 
+        document.getElementById('grade-student-switcher')?.addEventListener('change', function () {
+            const row = body.querySelector(`tr[data-student-id="${CSS.escape(this.value)}"]`);
+            if (!row) return;
+            row.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+            row.querySelector('.grade-input')?.focus({ preventScroll: true });
+        });
+
         document.getElementById('save-grade-sheet')?.addEventListener('click', function () {
+            const saveButton = this;
+            if (saveButton.disabled) return;
             const payload = {
                 classroom_id: Number(classroomId),
                 sheet_columns: state.columns.map(c => ({ key: c.key, title: c.title, max_score: c.max_score })),
@@ -296,6 +332,7 @@
             });
 
             const token = '{{ csrf_token() }}';
+            saveButton.disabled = true;
 
             fetch('{{ route('teacher.grades.store') }}', {
                 method: 'POST',
@@ -314,7 +351,7 @@
                     const row = document.querySelector(`#grade-table-body tr[data-student-id="${id}"]`);
                     if (row) row.querySelector('.avg-cell').textContent = formatAverageForDisplay(saved[id]);
                 });
-                saveStatus.textContent = 'تم حفظ الدرجات بنجاح.';
+                saveStatus.textContent = @json($gradeSavedMessage);
                 saveStatus.classList.add('show');
                 setTimeout(() => saveStatus.classList.remove('show'), 3000);
             }).catch(async (err) => {
@@ -328,7 +365,7 @@
                 saveStatus.textContent = msg;
                 saveStatus.classList.add('show');
                 setTimeout(() => saveStatus.classList.remove('show'), 3000);
-            });
+            }).finally(() => { saveButton.disabled = false; });
         });
 
         renderTable();
@@ -570,9 +607,27 @@
     .teacher-portal .grade-empty { padding: 44px 20px; }
 
     @media (max-width: 600px) {
-        .teacher-portal .grade-top-row { padding: 16px; }
+        .teacher-portal .grade-top-row { align-items: stretch; flex-direction: column; gap: 14px; padding: 14px; }
+        .teacher-portal .grade-headline { align-items: stretch; flex-direction: column; gap: 12px; }
         .teacher-portal .grade-headline h2 { font-size: 19px; }
-        .teacher-portal .grade-grid-wrap { max-height: 58vh; overflow-y: auto; }
+        .teacher-portal .grade-filter-form, .teacher-portal .grade-filter-form select { width: 100%; }
+        .teacher-portal .grade-actions { display: grid; grid-template-columns: 1fr 1fr; }
+        .teacher-portal .grade-actions .btn { min-width: 0; padding-inline: 10px; font-size: 13px; }
+        .teacher-portal .grade-student-switcher { display: grid; gap: 6px; margin-block: 12px; }
+        .teacher-portal .grade-student-switcher select { width: 100%; min-height: 44px; }
+        .teacher-portal .grade-instructions { line-height: 1.8; }
+        .teacher-portal .grade-grid-wrap { max-height: none; overflow: visible; padding: 0; }
+        .teacher-portal .grade-grid { display: block; width: 100%; min-width: 0; }
+        .teacher-portal .grade-grid thead { display: block; overflow-x: auto; }
+        .teacher-portal .grade-grid thead tr { display: table; width: max-content; min-width: 100%; }
+        .teacher-portal .grade-grid tbody { display: grid; gap: 12px; padding: 10px; }
+        .teacher-portal .grade-grid tbody tr { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border: 1px solid #d7e8e5; border-radius: 12px; overflow: hidden; }
+        .teacher-portal .grade-grid tbody td { display: flex; min-width: 0; align-items: center; justify-content: space-between; gap: 8px; padding: 10px; text-align: start; }
+        .teacher-portal .grade-grid tbody td::before { content: attr(data-label); color: #64748b; font-size: 12px; font-weight: 700; overflow-wrap: anywhere; }
+        .teacher-portal .grade-grid tbody .student-name, .teacher-portal .grade-grid tbody .avg-cell { grid-column: 1 / -1; justify-content: flex-start; }
+        .teacher-portal .grade-grid tbody .student-name { font-size: 15px; }
+        .teacher-portal .grade-grid tbody .avg-cell { justify-content: space-between; }
+        .teacher-portal .grade-grid tbody .grade-input { width: 64px; min-width: 56px; min-height: 44px; flex: 0 1 72px; font-size: 16px; }
     }
 </style>
 @endsection

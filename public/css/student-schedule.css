@@ -1,0 +1,284 @@
+/* School timetable presentation; branding and Cairo live in student.css. */
+.student-schedule-page .app-content {
+    background: #f5f8f7;
+    padding-bottom: 170px;
+}
+
+.student-schedule-page .schedule-page-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    margin: 8px 0 26px;
+    padding: 0;
+}
+
+.student-schedule-page .schedule-page-title::before {
+    content: none;
+}
+
+.student-schedule-page .schedule-page-title h1 {
+    margin: 0 0 8px;
+    color: #213c40;
+    font-size: clamp(1.65rem, 3vw, 2rem);
+    font-weight: 800;
+    line-height: 1.65;
+    letter-spacing: 0;
+}
+
+.student-schedule-page .schedule-page-title p {
+    width: auto;
+    margin: 0;
+    background: transparent;
+    padding: 0;
+    color: #5b6d71;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1.9;
+}
+
+.student-schedule-page .classroom-badge {
+    width: fit-content;
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    border: 1px solid #d7e7e2;
+    border-radius: 999px;
+    background: #edf5f1;
+    padding: 6px 16px;
+    color: #335d52;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.student-schedule-page .schedule-content {
+    display: block;
+}
+
+.student-schedule-page .schedule-scroll-hint {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 12px;
+    color: #526b61;
+    font-size: 14px;
+    line-height: 1.8;
+}
+
+.student-schedule-page .schedule-scroll-hint svg {
+    width: 20px;
+    height: 20px;
+    flex: 0 0 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.student-schedule-page .schedule-table-scroll {
+    max-width: 100%;
+    overflow-x: auto;
+    border: 1px solid #dbe7e0;
+    border-radius: 20px;
+    background: #fff;
+    box-shadow: 0 5px 24px rgba(33, 60, 64, .045);
+    overscroll-behavior-inline: contain;
+    scrollbar-color: #b2cac0 #f0f5f2;
+    scrollbar-width: thin;
+}
+
+.student-schedule-page .schedule-timetable {
+    width: 100%;
+    min-width: calc(110px + var(--period-count) * 156px);
+    border-collapse: separate;
+    border-spacing: 0;
+    table-layout: fixed;
+    color: #244339;
+    text-align: center;
+}
+
+.student-schedule-page .schedule-timetable th,
+.student-schedule-page .schedule-timetable td {
+    border: 0;
+    border-inline-end: 1px solid #e3ebe6;
+    border-bottom: 1px solid #e3ebe6;
+    padding: 16px 12px;
+    vertical-align: middle;
+    overflow-wrap: anywhere;
+}
+
+.student-schedule-page .schedule-timetable tr > :last-child {
+    border-inline-end: 0;
+}
+
+.student-schedule-page .schedule-timetable tbody tr:last-child > * {
+    border-bottom: 0;
+}
+
+.student-schedule-page .schedule-timetable thead th {
+    background: #edf5f0;
+    padding-block: 20px;
+    color: #2d5547;
+    font-weight: 700;
+}
+
+.student-schedule-page .timetable-period-name {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.7;
+}
+
+.student-schedule-page .timetable-period-time {
+    display: inline-flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 4px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, .78);
+    padding: 4px 7px;
+    color: #5d7067;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.8;
+}
+
+.student-schedule-page .timetable-period-time bdi {
+    direction: ltr;
+    unicode-bidi: isolate;
+    font-variant-numeric: tabular-nums;
+}
+
+.student-schedule-page .schedule-timetable .timetable-day-column {
+    width: 110px;
+    position: sticky;
+    inset-inline-start: 0;
+    z-index: 1;
+    border-inline-end-color: #d7e4dc;
+    background: #f0f6f2;
+    color: #315946;
+    font-size: 17px;
+    font-weight: 800;
+    line-height: 1.8;
+}
+
+.student-schedule-page .schedule-timetable thead .timetable-day-column {
+    z-index: 2;
+    background: #e4efe8;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.student-schedule-page .schedule-timetable tbody td {
+    height: 126px;
+    background: #fff;
+}
+
+.student-schedule-page .schedule-timetable tbody tr:nth-child(even) td {
+    background: #fcfdfb;
+}
+
+.student-schedule-page .timetable-lesson {
+    display: grid;
+    gap: 5px;
+    border: 1px solid #e4ece5;
+    border-radius: 12px;
+    background: #f6faf5;
+    padding: 12px 8px;
+}
+
+.student-schedule-page .timetable-lesson + .timetable-lesson {
+    margin-top: 10px;
+}
+
+.student-schedule-page .timetable-subject {
+    color: #244b3a;
+    font-size: 17px;
+    font-weight: 800;
+    line-height: 1.8;
+}
+
+.student-schedule-page .timetable-teacher {
+    color: #536b5c;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.8;
+}
+
+.student-schedule-page .timetable-room {
+    color: #6b796d;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.8;
+}
+
+.student-schedule-page .timetable-room > span {
+    margin-inline-end: 4px;
+}
+
+.student-schedule-page .timetable-empty-cell {
+    color: #76847b;
+    font-size: 13px;
+    font-weight: 400;
+}
+
+.student-schedule-page .schedule-time-note {
+    margin: 14px 2px 0;
+    color: #63756a;
+    font-size: 13px;
+    line-height: 1.8;
+}
+
+.student-schedule-page .schedule-empty {
+    border: 1px solid #e2eae6;
+    border-radius: 20px;
+    background: #fff;
+    padding: 48px 24px;
+    color: #566c64;
+    font-size: 16px;
+    text-align: center;
+}
+
+.student-schedule-page .schedule-empty p {
+    margin: 0;
+}
+
+@media (min-width: 1024px) {
+    .student-schedule-page .app-content {
+        padding-bottom: 54px;
+    }
+}
+
+@media (max-width: 700px) {
+    .student-schedule-page .schedule-page-title {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 22px;
+    }
+
+    .student-schedule-page .schedule-scroll-hint {
+        display: flex;
+    }
+
+    .student-schedule-page .schedule-table-scroll {
+        border-radius: 16px;
+    }
+
+    .student-schedule-page .schedule-timetable {
+        min-width: calc(90px + var(--period-count) * 156px);
+    }
+
+    .student-schedule-page .schedule-timetable .timetable-day-column {
+        width: 90px;
+        padding-inline: 8px;
+        font-size: 15px;
+    }
+
+    .student-schedule-page .schedule-timetable th,
+    .student-schedule-page .schedule-timetable td {
+        padding: 12px 10px;
+    }
+}

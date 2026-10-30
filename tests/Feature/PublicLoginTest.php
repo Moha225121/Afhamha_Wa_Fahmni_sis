@@ -11,8 +11,8 @@ use App\Models\Teacher;
 use App\Models\User;
 use Database\Seeders\LocalDemoSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 class PublicLoginTest extends TestCase
@@ -58,6 +58,21 @@ class PublicLoginTest extends TestCase
             ->assertRedirect('/student/dashboard');
 
         $this->assertAuthenticatedAs($studentUser);
+    }
+
+    public function test_admin_permission_to_send_notifications_does_not_override_dashboard_redirect(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin', 'status' => 'active', 'password' => 'password123']);
+        $this->assertTrue($admin->hasPermission('parent-notifications.send'));
+        $this->post('/login', ['email' => $admin->email, 'password' => 'password123'])->assertRedirect('/admin/dashboard');
+        $this->assertAuthenticatedAs($admin);
+    }
+
+    public function test_financial_officer_keeps_the_existing_finance_landing_page(): void
+    {
+        $officer = User::factory()->create(['role' => 'financial_officer', 'status' => 'active', 'password' => 'password123']);
+        $this->post('/login', ['email' => $officer->email, 'password' => 'password123'])->assertRedirect('/finance');
+        $this->assertAuthenticatedAs($officer);
     }
 
     public function test_root_and_login_show_login_even_when_a_session_exists(): void

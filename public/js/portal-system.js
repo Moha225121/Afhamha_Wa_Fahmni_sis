@@ -1,4 +1,34 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const content = document.querySelector('main');
+    const backButton = document.createElement('button');
+    backButton.type = 'button';
+    backButton.className = 'portal-back-button';
+    backButton.setAttribute('aria-label', 'الرجوع إلى الصفحة السابقة');
+    backButton.innerHTML = '<span aria-hidden="true">↩</span><span>رجوع</span>';
+    backButton.addEventListener('click', () => {
+        if (window.history.length > 1) {
+            window.history.back();
+            return;
+        }
+
+        const referrer = document.referrer;
+        if (referrer) {
+            try {
+                if (new URL(referrer).origin === window.location.origin) {
+                    window.location.assign(referrer);
+                    return;
+                }
+            } catch (_) {
+                // Fall through to the site root when the referrer is not a valid URL.
+            }
+        }
+
+        window.location.assign('/');
+    });
+    if (!document.querySelector('.student-back-row')) {
+        (content || document.body).prepend(backButton);
+    }
+
     const menu = document.getElementById('menu');
     const sidebar = document.getElementById('sidebar');
     if (menu && sidebar) {
@@ -29,6 +59,31 @@ document.addEventListener('DOMContentLoaded', () => {
         mobile.addEventListener('change', () => toggle(false));
         toggle(false);
     }
+    document.addEventListener('click', event => {
+        const trigger = event.target instanceof Element ? event.target.closest('[data-confirm]') : null;
+        if (!trigger) return;
+        const message = trigger.dataset.confirm || 'هل تريد المتابعة؟';
+        event.stopImmediatePropagation();
+        if (!window.confirm(message)) {
+            event.preventDefault();
+            return;
+        }
+        trigger.dataset.confirmHandled = 'true';
+    }, true);
+    document.addEventListener('submit', event => {
+        const form = event.target;
+        if (!(form instanceof HTMLFormElement)) return;
+        const method = (form.querySelector('input[name="_method"]')?.value || form.method).toLowerCase();
+        const submitter = event.submitter;
+        const message = submitter?.dataset.confirm || form.dataset.confirm
+            || (method === 'delete' ? 'هذا الإجراء يحذف العنصر. هل تريد المتابعة؟' : null);
+        if (!message) return;
+        if (submitter?.dataset.confirmHandled === 'true') {
+            delete submitter.dataset.confirmHandled;
+            return;
+        }
+        if (!window.confirm(message)) event.preventDefault();
+    }, true);
     document.querySelectorAll('nav a.active').forEach(link => link.setAttribute('aria-current', 'page'));
     document.querySelectorAll('main table').forEach(table => {
         if (table.closest('.table-wrap, .portal-table-scroll') || table.closest('[style*="overflow"]')) return;

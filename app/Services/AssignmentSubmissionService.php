@@ -6,21 +6,28 @@ use App\Models\Assignment;
 use App\Models\AssignmentSubmission;
 use App\Models\AssignmentSubmissionAttachment;
 use App\Models\Student;
+use App\Support\AssignmentDeadline;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
-use RuntimeException;
 use Throwable;
 
 class AssignmentSubmissionService
 {
     public function save(Assignment $assignment, Student $student, UploadedFile $file, ?string $notes): AssignmentSubmission
     {
-        $path = $file->store("assignment-submissions/{$assignment->id}/{$student->id}", 'local');
+        try {
+            $path = $file->store("assignment-submissions/{$assignment->id}/{$student->id}", 'local');
+        } catch (Throwable $exception) {
+            report($exception);
+            throw ValidationException::withMessages(['file' => 'تعذر حفظ ملف التسليم. يرجى المحاولة مرة أخرى.'])
+                ->redirectTo(route('student.assignments.show', $assignment, false));
+        }
         if (! is_string($path) || $path === '') {
-            throw new RuntimeException('تعذر حفظ ملف التسليم.');
+            throw ValidationException::withMessages(['file' => 'تعذر حفظ ملف التسليم. يرجى المحاولة مرة أخرى.'])
+                ->redirectTo(route('student.assignments.show', $assignment, false));
         }
 
         $originalName = basename(str_replace('\\', '/', $file->getClientOriginalName()));
@@ -30,12 +37,14 @@ class AssignmentSubmissionService
         try {
             [$submission, $oldFile] = DB::transaction(function () use ($assignment, $student, $path, $originalName, $file, $notes): array {
                 $lockedAssignment = Assignment::query()->lockForUpdate()->findOrFail($assignment->id);
-                if ($lockedAssignment->classroom_id !== $student->classroom_id
-                    || ! $lockedAssignment->isPublished()) {
-                    throw ValidationException::withMessages(['file' => 'الواجب غير متاح لهذا الطالب.']);
+                if (! $lockedAssignment->isAvailableToStudent($student)) {
+                    throw ValidationException::withMessages(['file' => 'الواجب غير متاح لهذا الطالب.'])
+                        ->redirectTo(route('student.assignments.show', $assignment, false));
                 }
-                if ($lockedAssignment->due_at && now()->gte($lockedAssignment->due_at)) {
-                    throw ValidationException::withMessages(['file' => 'انتهى موعد تسليم الواجب.']);
+                $deadline = AssignmentDeadline::for($lockedAssignment);
+                if ($deadline && now()->gte($deadline)) {
+                    throw ValidationException::withMessages(['file' => 'انتهى موعد تسليم الواجب.'])
+                        ->redirectTo(route('student.assignments.show', $assignment, false));
                 }
 
                 $submission = AssignmentSubmission::query()
@@ -46,7 +55,7 @@ class AssignmentSubmissionService
                 if ($submission && ($submission->graded_at || $submission->score !== null || $submission->status === 'graded')) {
                     throw ValidationException::withMessages([
                         'file' => 'لا يمكن استبدال التسليم بعد تصحيحه.',
-                    ]);
+                    ])->redirectTo(route('student.assignments.show', $assignment, false));
                 }
                 $submissionValues = [
                     'file_path' => $path,
@@ -93,7 +102,7 @@ class AssignmentSubmissionService
                 return [$submission->load('fileAttachment'), $oldFile];
             });
         } catch (Throwable $exception) {
-            Storage::disk('local')->delete($path);
+            $this->deleteFileWithoutAffectingSubmission('local', $path);
             throw $exception;
         }
 
@@ -103,10 +112,19 @@ class AssignmentSubmissionService
             $assignment,
             $student,
         )) {
-            Storage::disk($oldFile['disk'])->delete($oldFile['path']);
+            $this->deleteFileWithoutAffectingSubmission($oldFile['disk'], $oldFile['path']);
         }
 
         return $submission;
+    }
+
+    private function deleteFileWithoutAffectingSubmission(string $disk, string $path): void
+    {
+        try {
+            Storage::disk($disk)->delete($path);
+        } catch (Throwable $exception) {
+            report($exception);
+        }
     }
 
     private function canDeleteSubmissionFile(

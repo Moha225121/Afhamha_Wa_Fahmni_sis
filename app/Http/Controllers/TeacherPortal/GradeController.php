@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\TeacherPortal\Concerns\InteractsWithTeacherScope;
 use App\Models\Student;
 use App\Services\AuditService;
-use Illuminate\Http\RedirectResponse;
+use App\Services\GradeSheetNotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -16,7 +16,7 @@ class GradeController extends Controller
 {
     use InteractsWithTeacherScope;
 
-    private function normalizedSheetColumns(?array $sheetColumns): array
+    private function normalizedSheetColumns(mixed $sheetColumns): array
     {
         if (! is_array($sheetColumns) || empty($sheetColumns)) {
             return [
@@ -83,7 +83,7 @@ class GradeController extends Controller
             // Load server-saved sheet and per-student scores (not tied to exams)
             $record = DB::table('grade_sheets')->where('teacher_id', $teacher->id)->where('classroom_id', $classroom->id)->first();
             $grades = collect();
-            if ($record && !empty($record->scores)) {
+            if ($record && ! empty($record->scores)) {
                 $decoded = json_decode($record->scores, true);
                 if (is_array($decoded)) {
                     $grades = collect($decoded)->map(function ($score, $studentId) {
@@ -91,7 +91,7 @@ class GradeController extends Controller
                     })->keyBy('student_id');
                 }
             }
-            if ($record && !empty($record->column_scores)) {
+            if ($record && ! empty($record->column_scores)) {
                 $decodedColumnScores = json_decode($record->column_scores, true);
                 if (is_array($decodedColumnScores)) {
                     $columnScores = $decodedColumnScores;
@@ -167,10 +167,16 @@ class GradeController extends Controller
 
             abort_unless($classroomStudentIds->contains((int) $studentId), 403, 'الطالب ليس ضمن هذا الصف.');
             // The client submits percentages out of 100, including values below 1.
-            $scoresToSave[(int)$studentId] = round((float) $score, 2);
+            $scoresToSave[(int) $studentId] = round((float) $score, 2);
         }
 
         foreach ($data['column_scores'] ?? [] as $columnKey => $studentScores) {
+            if (! $columnLimits->has((string) $columnKey)) {
+                throw ValidationException::withMessages(['column_scores' => 'أحد أعمدة الدرجات غير موجود في الكشف.']);
+            }
+            if (! is_array($studentScores)) {
+                continue;
+            }
             foreach ($studentScores as $studentId => $score) {
                 if ($score === null || $score === '') {
                     continue;
@@ -192,6 +198,8 @@ class GradeController extends Controller
         }
 
         DB::transaction(function () use ($teacher, $data, $normalizedColumns, $scoresToSave, $columnScoresToSave) {
+            // Serialize first saves too, when there is no grade_sheets row to lock yet.
+            DB::table('teachers')->where('id', $teacher->id)->lockForUpdate()->first();
             $existing = DB::table('grade_sheets')
                 ->where('teacher_id', $teacher->id)
                 ->where('classroom_id', $data['classroom_id'])
@@ -200,23 +208,41 @@ class GradeController extends Controller
             $existingColumnScores = json_decode($existing?->column_scores ?? '{}', true);
             $existingScores = is_array($existingScores) ? $existingScores : [];
             $existingColumnScores = is_array($existingColumnScores) ? $existingColumnScores : [];
+            $existingColumnScores = array_filter($existingColumnScores, 'is_array');
+            $previousColumns = $this->normalizedSheetColumns(json_decode($existing?->sheet_data ?? 'null', true));
+            $mergedColumnScores = array_replace_recursive($existingColumnScores, $columnScoresToSave);
+
+            // A changed maximum must also remain valid for retained, previously saved marks.
+            foreach ($normalizedColumns as $column) {
+                foreach ($mergedColumnScores[$column['key']] ?? [] as $score) {
+                    if (is_numeric($score) && (float) $score > (float) $column['max_score']) {
+                        throw ValidationException::withMessages(['column_scores' => 'توجد درجة محفوظة تتجاوز الدرجة القصوى للعمود '.$column['title'].'.']);
+                    }
+                }
+            }
 
             DB::table('grade_sheets')->updateOrInsert(
                 ['teacher_id' => $teacher->id, 'classroom_id' => $data['classroom_id']],
                 [
                     'sheet_data' => json_encode($normalizedColumns),
                     'scores' => json_encode(array_replace($existingScores, $scoresToSave)),
-                    'column_scores' => json_encode(array_replace_recursive($existingColumnScores, $columnScoresToSave)),
+                    'column_scores' => json_encode($mergedColumnScores),
                     'updated_at' => now(),
                 ]
             );
             AuditService::record('updated', 'grades');
+            app(GradeSheetNotificationService::class)->publish(
+                $teacher, (int) $data['classroom_id'], $normalizedColumns, $mergedColumnScores,
+                $previousColumns, $existingColumnScores,
+            );
         });
 
         if ($request->expectsJson()) {
             return response()->json(['scores' => $scoresToSave]);
         }
 
-        return back()->with('success', 'تم حفظ درجات الصف.');
+        return back()->with('success', config('nasbia.teacher_sheet_notifications', false)
+            ? 'تم حفظ درجات الصف وإشعار الطالب وأولياء أمره بالدرجات الجديدة أو المعدلة.'
+            : 'تم حفظ درجات الصف وفق سياسة النشر المعتمدة.');
     }
 }

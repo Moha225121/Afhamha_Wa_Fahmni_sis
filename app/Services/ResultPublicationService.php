@@ -157,7 +157,105 @@ class ResultPublicationService
         $manual = DB::table('grades as g')->join('exams as e', 'e.id', '=', 'g.exam_id')->join('subjects as s', 's.id', '=', 'e.subject_id')->where('g.student_id', $student->id)->where('e.legacy_results_published', true)->whereNull('e.exam_period_id')->where('e.status', 'published')->where('g.published_at', '<=', now())->select('e.id as exam_id', 'e.subject_id', 'g.score', 'e.total_score', 'e.title', 's.name as subject', 'g.published_at')->get();
         $automatic = DB::table('exam_attempts as a')->join('exams as e', 'e.id', '=', 'a.exam_id')->join('subjects as s', 's.id', '=', 'e.subject_id')->where('a.student_id', $student->id)->where('a.status', 'submitted')->whereNotNull('a.percentage')->where('e.legacy_results_published', true)->whereNull('e.exam_period_id')->where('e.status', 'published')->whereNotIn('e.id', $manual->pluck('exam_id'))->select('e.id as exam_id', 'e.subject_id', 'a.score', 'a.maximum_score as total_score', 'e.title', 's.name as subject', 'a.submitted_at as published_at')->orderByDesc('a.id')->get()->unique('exam_id');
 
-        return $published->concat($manual)->concat($automatic)->sortByDesc('published_at')->values();
+        if (! config('nasbia.teacher_sheet_visibility', false)) {
+            return $published->concat($manual)->concat($automatic)->sortByDesc('published_at')->values();
+        }
+
+        $teacherSheets = DB::table('grade_sheets as gs')
+            ->join('teacher_assignments as ta', function ($join): void {
+                $join->on('ta.teacher_id', '=', 'gs.teacher_id')->on('ta.classroom_id', '=', 'gs.classroom_id');
+            })
+            ->join('subjects as s', 's.id', '=', 'ta.subject_id')
+            ->where('gs.classroom_id', $student->classroom_id)
+            ->whereNotNull('gs.scores')
+            ->select('gs.id', 'gs.scores', 's.id as subject_id', 's.name as subject', 'gs.updated_at')
+            ->orderByDesc('gs.updated_at')
+            ->get()
+            ->groupBy('id')
+            ->map(fn ($rows) => $rows->first())
+            ->values();
+        $sheetResults = $teacherSheets->flatMap(function ($sheet) use ($student) {
+            $scores = json_decode($sheet->scores ?? '{}', true);
+            $score = is_array($scores) ? ($scores[(string) $student->id] ?? null) : null;
+            if (! is_numeric($score)) {
+                return [];
+            }
+
+            return [(object) [
+                'subject_id' => $sheet->subject_id,
+                'score' => (float) $score,
+                'total_score' => 100,
+                'title' => 'سجل درجات المعلم',
+                'subject' => $sheet->subject,
+                'published_at' => $sheet->updated_at,
+            ]];
+        });
+
+        return $published->concat($manual)->concat($automatic)->concat($sheetResults)->sortByDesc('published_at')->values();
+    }
+
+    /** Individual assessments stay separate from the aggregate results used in summaries. */
+    public function teacherSheetDetails(?Student $student): Collection
+    {
+        if (! config('nasbia.teacher_sheet_visibility', false) || ! $student || ! $student->classroom_id) {
+            return collect();
+        }
+
+        $sheets = DB::table('grade_sheets as gs')
+            ->join('teacher_assignments as ta', function ($join): void {
+                $join->on('ta.teacher_id', '=', 'gs.teacher_id')->on('ta.classroom_id', '=', 'gs.classroom_id');
+            })
+            ->join('subjects as s', 's.id', '=', 'ta.subject_id')
+            ->join('teachers as t', 't.id', '=', 'gs.teacher_id')
+            ->join('users as u', 'u.id', '=', 't.user_id')
+            ->where('gs.classroom_id', $student->classroom_id)
+            ->whereNotNull('gs.column_scores')
+            ->select('gs.id', 'gs.sheet_data', 'gs.column_scores', 'gs.updated_at', 's.name as subject', 'u.name as teacher')
+            ->orderByDesc('gs.updated_at')->orderBy('gs.id')->orderBy('s.name')
+            ->get()->groupBy('id');
+
+        return $sheets->flatMap(function ($assignments) use ($student): array {
+            $sheet = $assignments->first();
+            $columns = json_decode($sheet->sheet_data ?? '[]', true);
+            $scores = json_decode($sheet->column_scores ?? '{}', true);
+            if (! is_array($columns) || ! is_array($scores)) {
+                return [];
+            }
+
+            $subject = $assignments->pluck('subject')->unique()->implode('، ');
+            $rows = [];
+            $seen = [];
+            foreach ($columns as $column) {
+                if (! is_array($column) || ! is_string($column['key'] ?? null) || $column['key'] === '') {
+                    continue;
+                }
+                $key = $column['key'];
+                if (isset($seen[$key])) {
+                    continue;
+                }
+                $seen[$key] = true;
+                $studentScores = $scores[$key] ?? null;
+                $score = is_array($studentScores) ? ($studentScores[(string) $student->id] ?? null) : null;
+                $maximum = $column['max_score'] ?? 100;
+                if (! is_numeric($score) || ! is_numeric($maximum)
+                    || ! is_finite((float) $score) || ! is_finite((float) $maximum)
+                    || $maximum <= 0 || $maximum > 100 || $score < 0 || $score > $maximum) {
+                    continue;
+                }
+
+                $title = is_string($column['title'] ?? null) ? trim($column['title']) : '';
+                $rows[] = (object) [
+                    'title' => $title !== '' ? $title : 'اختبار',
+                    'score' => (float) $score,
+                    'total_score' => (float) $maximum,
+                    'subject' => $subject,
+                    'teacher' => $sheet->teacher,
+                    'published_at' => $sheet->updated_at,
+                ];
+            }
+
+            return $rows;
+        })->values();
     }
 
     public function legacyAttemptVisible(object $exam): bool

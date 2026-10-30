@@ -14,7 +14,15 @@
         @if($children->count() > 1)
             <form method="get" class="chat-child-filter"><label for="chat-student">عرض محادثات</label><select id="chat-student" name="student" onchange="this.form.submit()" data-native-select><option value="">كل الأبناء</option>@foreach($children as $child)<option value="{{ $child->id }}" @selected((int) request('student') === $child->id)>{{ $child->user->name }}</option>@endforeach</select><noscript><button>عرض</button></noscript></form>
         @endif
-        @include('shared.chat.contacts')
+        <link rel="stylesheet" href="{{ asset('css/portal-messenger.css') }}">
+        <meta name="messenger-csrf" content="{{ csrf_token() }}">
+        @include('shared.messenger-content', ['inbox' => $inbox ?? app(\App\Services\PortalMessengerService::class)->inbox(request())])
+        <script type="module" src="{{ asset('js/portal-messenger.js') }}"></script>
+        @php($administrativeConversations = $conversations->filter(fn ($conversation) => $conversation->participants->contains(fn ($participant) => in_array($participant->role, ['admin', 'supervisor'], true))))
+        @if($administrativeConversations->isNotEmpty())
+            <h2>محادثات المدرسة</h2>
+            @include('shared.chat.contacts', ['conversations' => $administrativeConversations])
+        @endif
     </section>
     <section class="chat-announcements" aria-label="إعلانات المدرسة" @if($activeTab !== 'announcements') hidden @endif>
         @forelse($announcements as $announcement)

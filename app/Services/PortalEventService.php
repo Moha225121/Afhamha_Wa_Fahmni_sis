@@ -19,12 +19,12 @@ class PortalEventService
         foreach ($users->unique('id') as $user) {
             $data = $payload + ['student_id' => $student->id];
             if ($user->role === 'student') {
-                $data['url'] = route('student.results');
+                $data['url'] = app(NotificationDestination::class)->for($user, $data);
             }
             $id = Uuid::uuid5(Uuid::NAMESPACE_URL, 'awf:'.$event.':'.$user->id)->toString();
             $inserted = DB::table('notifications')->insertOrIgnore(['id' => $id, 'type' => ParentPortalNotification::class, 'notifiable_type' => User::class, 'notifiable_id' => $user->id, 'data' => json_encode($data, JSON_UNESCAPED_UNICODE), 'created_at' => now(), 'updated_at' => now()]);
             if ($inserted) {
-                DB::afterCommit(fn () => app(WebPushService::class)->send($user, $data));
+                DB::afterCommit(fn () => app(PushNotificationService::class)->send($user, $data + ['notification_id' => $id]));
             }
         }
     }

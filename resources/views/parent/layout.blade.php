@@ -2,12 +2,9 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="utf-8">
+    <meta charset="utf-8">@include('shared.pwa-head', ['manifestUrl' => route('parent.pwa.manifest').'?v=20261029-nasbia'])
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="theme-color" content="#0e7c86">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-title" content="ولي الأمر">
     <title>@yield('title', 'بوابة ولي الأمر') | افهمها وفهمني</title>
     <link rel="manifest" href="{{ route('parent.pwa.manifest') }}">
     <link rel="icon" href="{{ route('school.pwa.icon') }}" sizes="any">
@@ -23,11 +20,11 @@
 <body class="parent-portal">
 <div class="app-shell">
     <header class="app-header">
-        <a class="brand" href="{{ route('parent.dashboard') }}" aria-label="بوابة ولي الأمر">
+        <a class="brand" href="{{ route('parent.dashboard', $parentChildQuery ?? []) }}" aria-label="بوابة ولي الأمر">
             <span class="brand-mark">@include('shared.brand-mark')</span>
             <span class="brand-copy">
                 <b>افهمها وفهمني</b>
-                <small>بوابة ولي الأمر</small>
+                <small>{{ $parentIdentity['name'] ?? 'بوابة ولي الأمر' }}</small>
             </span>
         </a>
         <div class="header-actions">
@@ -35,10 +32,14 @@
             <button type="button" class="install-app-button" data-install-app>
                 <span aria-hidden="true">⇩</span><span>تثبيت التطبيق</span>
             </button>
+            @if(!request()->routeIs('parent.identity.*'))
             <button type="button" class="more-menu-toggle" data-more-toggle aria-expanded="false" aria-controls="parent-more-menu">
                 <span class="more-menu-toggle-icon" aria-hidden="true">☰</span>
                 <span>المزيد</span>
             </button>
+            @else
+            <form method="post" action="{{ route('logout') }}">@csrf<button type="submit" class="more-menu-toggle">خروج</button></form>
+            @endif
         </div>
     </header>
 
@@ -50,19 +51,24 @@
         </div>
         <div class="more-list">
             <button type="button" data-install-app><span aria-hidden="true">⇩</span> تثبيت التطبيق</button>
+            @if(count($parentIdentityOptions ?? []) > 1)
+                <a href="{{ route('parent.identity.create') }}"><span aria-hidden="true">⇄</span> تغيير مستخدم المنصة</a>
+            @endif
             <a href="{{ route('parent.profile') }}" class="{{ request()->routeIs('parent.profile') ? 'active' : '' }}">
                 <span aria-hidden="true">◉</span>
                 الملف الشخصي
             </a>
-            <a href="{{ route('parent.children.index') }}" class="{{ request()->routeIs('parent.children.*') ? 'active' : '' }}">
+            <a href="{{ route('parent.children.index', $parentChildQuery ?? []) }}" class="{{ request()->routeIs('parent.children.*') ? 'active' : '' }}">
                 <span aria-hidden="true">◱</span>
                 أبنائي
             </a>
-            <a href="{{ route('parent.messages') }}" class="{{ request()->routeIs('parent.messages') ? 'active' : '' }}">
+            <a href="{{ route('parent.messages', $parentChildQuery ?? []) }}" class="{{ request()->routeIs('parent.messages') ? 'active' : '' }}">
                 <span aria-hidden="true">✉</span>
                 الرسائل
             </a>
-            <a href="{{ route('parent.attendance') }}" class="{{ request()->routeIs('parent.attendance') ? 'active' : '' }}">
+            <a href="{{ route('parent.ads.index', $parentChildQuery ?? []) }}" class="{{ request()->routeIs('parent.ads.*') ? 'active' : '' }}"><span aria-hidden="true">▣</span> إعلانات المدرسة</a>
+            <a href="{{ route('received-reports.index', $parentChildQuery ?? []) }}" class="{{ request()->routeIs('received-reports.*') ? 'active' : '' }}"><span aria-hidden="true">▤</span> تقارير المعلمين</a>
+            <a href="{{ route('parent.attendance', $parentChildQuery ?? []) }}" class="{{ request()->routeIs('parent.attendance') ? 'active' : '' }}">
                 <span aria-hidden="true">✓</span>
                 الحضور
             </a>
@@ -72,11 +78,11 @@
                 <span aria-hidden="true">▤</span>
                 الواجبات
             </a>
-            <a href="{{ route('parent.exams') }}" class="{{ request()->routeIs('parent.exams') ? 'active' : '' }}">
+            <a href="{{ route('parent.exams', $parentChildQuery ?? []) }}" class="{{ request()->routeIs('parent.exams') ? 'active' : '' }}">
                 <span aria-hidden="true">○</span>
                 الاختبارات والنتائج
             </a>
-            <a href="{{ route('parent.notifications') }}" class="{{ request()->routeIs('parent.notifications') ? 'active' : '' }}">
+            <a href="{{ route('parent.notifications', $parentChildQuery ?? []) }}" class="{{ request()->routeIs('parent.notifications') ? 'active' : '' }}">
                 <span aria-hidden="true">●</span>
                 الإشعارات <b class="parent-notification-inline-badge" data-parent-unread @if(!$unreadNotifications) hidden @endif>{{ $unreadNotifications > 99 ? '99+' : $unreadNotifications }}</b>
             </a>
@@ -108,6 +114,7 @@
         @yield('content')
     </main>
 
+    @if(!request()->routeIs('parent.identity.*'))
     <nav class="bottom-nav" aria-label="تنقل ولي الأمر">
         <a href="{{ route('parent.dashboard') }}" class="{{ request()->routeIs('parent.dashboard') ? 'active' : '' }}">
             <span><x-portal-icon name="home" /></span>
@@ -126,6 +133,7 @@
             الرسائل
         </a>
     </nav>
+    @endif
 </div>
 
 <script>
@@ -219,10 +227,11 @@ if (moreToggle && moreMenu && moreBackdrop) {
 
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('{{ asset('parent-sw.js') }}', { scope: '/parent/' }).catch(() => {});
+        navigator.serviceWorker.register('{{ asset('parent-sw.js') }}', { scope: '/parent/', updateViaCache: 'none' }).catch(() => {});
     });
 }
 </script>
 @stack('scripts')
+@include('shared.pwa-install')
 </body>
 </html>

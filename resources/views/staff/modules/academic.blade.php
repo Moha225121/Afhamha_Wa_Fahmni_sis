@@ -1,0 +1,1 @@
+@extends('staff.layout') @section('title','المتابعة الأكاديمية') @section('subtitle','الدرجات المنشورة للطلاب المسموح لك بمتابعتهم.') @section('content')@php($headers=['الطالب','المادة','الاختبار','الدرجة','الحالة'])@php($rowView='staff.modules.rows.academic')@include('staff.modules._table')@endsection

@@ -4,8 +4,6 @@ namespace App\Http\Controllers\TeacherPortal;
 
 use App\Http\Controllers\Controller;
 use App\Models\Classroom;
-use App\Models\Student;
-use App\Models\Subject;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
@@ -21,7 +19,12 @@ class ClassroomController extends Controller
             ->whereIn('id', $this->assignedClassroomIds($teacher))
             ->select('classrooms.*')
             ->withCount('students')
-            ->selectSub(fn ($query) => $query->from('lessons')->selectRaw('count(*)')->whereColumn('lessons.classroom_id', 'classrooms.id')->where('lessons.teacher_id', $teacher->id), 'lessons_count')
+            ->selectSub(fn ($query) => $query->from('lessons')->selectRaw('count(*)')->where('lessons.teacher_id', $teacher->id)->where(fn ($query) => $query
+                ->whereColumn('lessons.classroom_id', 'classrooms.id')
+                ->orWhereExists(fn ($classrooms) => $classrooms->selectRaw('1')
+                    ->from('lesson_classroom')
+                    ->whereColumn('lesson_classroom.lesson_id', 'lessons.id')
+                    ->whereColumn('lesson_classroom.classroom_id', 'classrooms.id'))), 'lessons_count')
             ->selectSub(fn ($query) => $query->from('assignments')->selectRaw('count(*)')->whereColumn('assignments.classroom_id', 'classrooms.id')->where('assignments.teacher_id', $teacher->id), 'assignments_count')
             ->selectSub(fn ($query) => $query->from('teacher_assignments')->selectRaw('count(distinct subject_id)')->whereColumn('teacher_assignments.classroom_id', 'classrooms.id')->where('teacher_assignments.teacher_id', $teacher->id), 'subjects_count')
             ->selectSub(fn ($query) => $query->from('grades')->join('students', 'grades.student_id', '=', 'students.id')->selectRaw('avg(grades.score)')->whereColumn('students.classroom_id', 'classrooms.id'), 'average_grade')

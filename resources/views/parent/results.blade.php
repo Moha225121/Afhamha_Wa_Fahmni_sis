@@ -30,6 +30,7 @@
         </section>
 
         @include('parent.partials.published-results')
+        @include('shared.teacher-sheet-grades')
 
         @if($recentGrades->isNotEmpty() || $publications->isEmpty())
         <section class="list-section">

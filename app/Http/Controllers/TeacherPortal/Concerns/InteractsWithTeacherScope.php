@@ -50,6 +50,14 @@ trait InteractsWithTeacherScope
             ->contains(fn ($pair) => (int) $pair->classroom_id === $classroomId && (int) $pair->subject_id === $subjectId);
     }
 
+    private function assignmentCompletionExpression(string $assignmentAlias = 'assignments'): string
+    {
+        $activeStudents = "(select count(*) from students as completion_students where completion_students.status = 'active' and (completion_students.classroom_id = {$assignmentAlias}.classroom_id or exists (select 1 from assignment_classroom ac where ac.assignment_id = {$assignmentAlias}.id and ac.classroom_id = completion_students.classroom_id)))";
+        $submittedStudents = "(select count(distinct assignment_submissions.student_id) from assignment_submissions inner join students as submitted_students on submitted_students.id = assignment_submissions.student_id where assignment_submissions.assignment_id = {$assignmentAlias}.id and assignment_submissions.submitted_at is not null and submitted_students.status = 'active' and (submitted_students.classroom_id = {$assignmentAlias}.classroom_id or exists (select 1 from assignment_classroom ac where ac.assignment_id = {$assignmentAlias}.id and ac.classroom_id = submitted_students.classroom_id)))";
+
+        return "({$activeStudents} > 0 and {$submittedStudents} >= {$activeStudents})";
+    }
+
     /**
      * Whether the given student belongs to one of the teacher's assigned classrooms.
      */

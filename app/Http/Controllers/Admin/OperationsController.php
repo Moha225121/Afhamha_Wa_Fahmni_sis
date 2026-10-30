@@ -10,11 +10,13 @@ use App\Models\AcademicYear;
 use App\Models\AuditLog;
 use App\Models\Classroom;
 use App\Models\LibraryResource;
+use App\Models\StaffRole;
 use App\Models\Student;
 use App\Models\Subject;
 use App\Models\Teacher;
 use App\Models\User;
 use App\Services\AuditService;
+use App\Services\FinancialPdfService;
 use App\Services\LibraryBookNaming;
 use App\Services\LibraryCatalogService;
 use App\Services\LibraryUploadService;
@@ -33,8 +35,9 @@ class OperationsController extends Controller
     {
         $rows = DB::table('schedules')->join('classrooms', 'schedules.classroom_id', '=', 'classrooms.id')->join('teachers', 'schedules.teacher_id', '=', 'teachers.id')->join('users', 'teachers.user_id', '=', 'users.id')->join('subjects', 'schedules.subject_id', '=', 'subjects.id')->select('schedules.*', 'classrooms.name as classroom', 'users.name as teacher', 'subjects.name as subject')->when($r->classroom_id, fn ($q, $v) => $q->where('schedules.classroom_id', $v))->orderBy('day_of_week')->orderBy('starts_at')->paginate(20)->withQueryString();
 
-        $breakSettings = DB::table('settings')->whereIn('key',['break_after_period','break_duration_minutes'])->pluck('value','key');
-        return view('admin.operations.schedules', compact('rows') + ['classrooms' => Classroom::all(), 'breakAfterPeriod'=>(int)($breakSettings['break_after_period']??3), 'breakDuration'=>(int)($breakSettings['break_duration_minutes']??30)]);
+        $breakSettings = DB::table('settings')->whereIn('key', ['break_after_period', 'break_duration_minutes'])->pluck('value', 'key');
+
+        return view('admin.operations.schedules', compact('rows') + ['classrooms' => Classroom::all(), 'breakAfterPeriod' => (int) ($breakSettings['break_after_period'] ?? 3), 'breakDuration' => (int) ($breakSettings['break_duration_minutes'] ?? 30)]);
     }
 
     public function scheduleCreate(): View
@@ -53,13 +56,22 @@ class OperationsController extends Controller
     {
         $d = $r->validated();
         $limit = $this->periodLimits()[(int) $d['day_of_week']] ?? 7;
-        if ((int)$d['period_number'] > $limit) return back()->withInput()->withErrors(['period_number'=>'رقم الحصة يتجاوز عدد الحصص المحدد لهذا اليوم.']);
-        $period = DB::table('school_period_times')->where('day_of_week',$d['day_of_week'])->where('period_number',$d['period_number'])->first();
-        if (! $period) return back()->withInput()->withErrors(['period_number'=>'وقت هذه الحصة غير معرّف في إعدادات المدرسة.']);
-        $d['starts_at'] = $period->starts_at; $d['ends_at'] = $period->ends_at;
-        $scheduled = DB::table('schedules')->where('classroom_id',$d['classroom_id'])->where('day_of_week',$d['day_of_week'])->count();
-        if ($scheduled >= $limit) return back()->withInput()->withErrors(['day_of_week' => "بلغ هذا الصف الحد المحدد لليوم ({$limit} حصص)."]);
-        if (DB::table('schedules')->where('classroom_id',$d['classroom_id'])->where('day_of_week',$d['day_of_week'])->where('period_number',$d['period_number'])->exists()) return back()->withInput()->withErrors(['period_number'=>'هذه الحصة مسجلة بالفعل لهذا الصف في اليوم المحدد.']);
+        if ((int) $d['period_number'] > $limit) {
+            return back()->withInput()->withErrors(['period_number' => 'رقم الحصة يتجاوز عدد الحصص المحدد لهذا اليوم.']);
+        }
+        $period = DB::table('school_period_times')->where('day_of_week', $d['day_of_week'])->where('period_number', $d['period_number'])->first();
+        if (! $period) {
+            return back()->withInput()->withErrors(['period_number' => 'وقت هذه الحصة غير معرّف في إعدادات المدرسة.']);
+        }
+        $d['starts_at'] = $period->starts_at;
+        $d['ends_at'] = $period->ends_at;
+        $scheduled = DB::table('schedules')->where('classroom_id', $d['classroom_id'])->where('day_of_week', $d['day_of_week'])->count();
+        if ($scheduled >= $limit) {
+            return back()->withInput()->withErrors(['day_of_week' => "بلغ هذا الصف الحد المحدد لليوم ({$limit} حصص)."]);
+        }
+        if (DB::table('schedules')->where('classroom_id', $d['classroom_id'])->where('day_of_week', $d['day_of_week'])->where('period_number', $d['period_number'])->exists()) {
+            return back()->withInput()->withErrors(['period_number' => 'هذه الحصة مسجلة بالفعل لهذا الصف في اليوم المحدد.']);
+        }
         $conflict = DB::table('schedules')->where('day_of_week', $d['day_of_week'])->where(fn ($q) => $q->where('teacher_id', $d['teacher_id'])->orWhere('classroom_id', $d['classroom_id']))->where('starts_at', '<', $d['ends_at'])->where('ends_at', '>', $d['starts_at'])->exists();
         if ($conflict) {
             return back()->withInput()->withErrors(['starts_at' => 'يوجد تعارض زمني للمعلم أو الصف.']);
@@ -71,8 +83,9 @@ class OperationsController extends Controller
 
     private function periodLimits(): array
     {
-        $settings = DB::table('settings')->whereIn('key',['periods_sunday','periods_monday','periods_tuesday','periods_wednesday','periods_thursday'])->pluck('value','key');
-        return [0=>(int)($settings['periods_sunday']??7),1=>(int)($settings['periods_monday']??7),2=>(int)($settings['periods_tuesday']??7),3=>(int)($settings['periods_wednesday']??7),4=>(int)($settings['periods_thursday']??6)];
+        $settings = DB::table('settings')->whereIn('key', ['periods_sunday', 'periods_monday', 'periods_tuesday', 'periods_wednesday', 'periods_thursday'])->pluck('value', 'key');
+
+        return [0 => (int) ($settings['periods_sunday'] ?? 7), 1 => (int) ($settings['periods_monday'] ?? 7), 2 => (int) ($settings['periods_tuesday'] ?? 7), 3 => (int) ($settings['periods_wednesday'] ?? 7), 4 => (int) ($settings['periods_thursday'] ?? 6)];
     }
 
     public function scheduleDestroy(int $id): RedirectResponse
@@ -232,7 +245,9 @@ class OperationsController extends Controller
             ->first();
         DB::transaction(function () use ($d, $exam): void {
             foreach ($d['scores'] as $id => $score) {
-                if ($score === null) continue;
+                if ($score === null) {
+                    continue;
+                }
                 abort_unless(Student::whereKey($id)->where('classroom_id', $exam->classroom_id)->exists(), 422, 'الطالب خارج صف الاختبار.');
                 abort_if((float) $score > (float) $exam->total_score, 422, 'الدرجة تتجاوز الدرجة الكلية.');
                 DB::table('grades')->updateOrInsert(['exam_id' => $exam->id, 'student_id' => $id], ['score' => $score, 'published_at' => null, 'created_at' => now(), 'updated_at' => now()]);
@@ -297,7 +312,7 @@ class OperationsController extends Controller
     public function libraryDestroy(int $id): RedirectResponse
     {
         $row = DB::table('library_resources')->find($id);
-        abort_unless($row, 404);
+        abort_unless($row !== null, 404);
         $disk = in_array($row->disk ?? null, ['local', 'public'], true)
             ? $row->disk
             : ($row->is_public ? 'public' : 'local');
@@ -314,15 +329,16 @@ class OperationsController extends Controller
 
         $classrooms = Classroom::orderBy('name')->get();
         $users->getCollection()->load('supervisedClassrooms');
-        return view('admin.operations.users', compact('users', 'classrooms'));
+
+        return view('admin.operations.users', compact('users', 'classrooms') + ['staffRoles' => StaffRole::where('active', true)->with('permissions')->get()]);
     }
 
     public function userUpdate(Request $r, User $user): RedirectResponse
     {
-        $d = $r->validate(['role' => ['required', Rule::in(['admin', 'supervisor', 'teacher', 'student', 'parent', 'financial_officer'])], 'status' => ['required', Rule::in(['active', 'inactive'])], 'financial_permissions'=>['nullable','array'], 'financial_permissions.*'=>[Rule::in(['finance.view','finance.pay','finance.reports'])], 'classroom_ids'=>['nullable','array'],'classroom_ids.*'=>['integer','exists:classrooms,id']]);
-        abort_if($user->is($r->user()) && $d['status'] === 'inactive', 422, 'لا يمكنك تعطيل حسابك.');
+        $d = $r->validate(['role' => ['required', Rule::in(['admin', 'supervisor', 'teacher', 'student', 'parent', 'financial_officer', 'staff'])], 'status' => ['required', Rule::in(['active', 'inactive'])], 'financial_permissions' => ['nullable', 'array'], 'financial_permissions.*' => [Rule::in(['finance.view', 'finance.pay', 'finance.reports'])], 'classroom_ids' => ['nullable', 'array'], 'classroom_ids.*' => ['integer', 'exists:classrooms,id']]);
+        abort_if($user->is($r->user()) && ($d['status'] === 'inactive' || $d['role'] !== $user->role), 422, 'لا يمكنك تعديل امتيازات حسابك.');
         $old = $user->getAttributes();
-        $user->update(collect($d)->only(['role','status'])->all() + ['financial_permissions' => $d['role'] === 'supervisor' ? ($d['financial_permissions'] ?? []) : null]);
+        $user->update(collect($d)->only(['role', 'status'])->all() + ['financial_permissions' => $d['role'] === 'supervisor' ? ($d['financial_permissions'] ?? []) : null]);
         if ($d['role'] === 'supervisor') {
             $user->supervisedClassrooms()->sync($d['classroom_ids'] ?? []);
         } else {
@@ -333,40 +349,188 @@ class OperationsController extends Controller
         return back()->with('success', 'تم تحديث المستخدم.');
     }
 
-    public function reports(): View
+    public function reports(Request $request): View
     {
-        return view('admin.operations.reports', ['students' => Student::selectRaw('status,count(*) total')->groupBy('status')->get(), 'teachers' => Teacher::selectRaw('status,count(*) total')->groupBy('status')->get(), 'attendance' => DB::table('attendance_records')->selectRaw('status,count(*) total')->groupBy('status')->get(), 'results' => DB::table('grades')->selectRaw('avg(score) average,max(score) highest,min(score) lowest,count(*) total')->first()]);
+        return view('admin.operations.reports', $this->reportsData($request));
+    }
+
+    public function reportsPdf(Request $request, FinancialPdfService $pdf)
+    {
+        return $pdf->download('admin.operations.reports-pdf', $this->reportsData($request), 'school-report-'.now()->format('Y-m-d').'.pdf');
+    }
+
+    private function reportsData(Request $request): array
+    {
+        $filters = $request->validate([
+            'from' => ['nullable', 'date_format:Y-m-d'],
+            'to' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:from'],
+            'classroom_id' => ['nullable', 'integer', 'exists:classrooms,id'],
+            'exam_status' => ['nullable', Rule::in(['scheduled', 'published', 'completed', 'cancelled'])],
+        ]);
+        $classroomId = isset($filters['classroom_id']) ? (int) $filters['classroom_id'] : null;
+        $examStatus = $filters['exam_status'] ?? 'scheduled';
+        $students = Student::query()
+            ->when($classroomId, fn ($query) => $query->where('classroom_id', $classroomId))
+            ->selectRaw('status, count(*) as total')
+            ->groupBy('status')
+            ->get();
+        $teachers = Teacher::query()
+            ->when($classroomId, fn ($query) => $query->whereHas('classrooms', fn ($classrooms) => $classrooms->whereKey($classroomId)))
+            ->selectRaw('status, count(*) as total')
+            ->groupBy('status')
+            ->get();
+        $attendance = DB::table('attendance_records')
+            ->when($classroomId, fn ($query) => $query->where('classroom_id', $classroomId))
+            ->when($filters['from'] ?? null, fn ($query, $date) => $query->whereDate('date', '>=', $date))
+            ->when($filters['to'] ?? null, fn ($query, $date) => $query->whereDate('date', '<=', $date))
+            ->selectRaw('status, count(*) as total')
+            ->groupBy('status')
+            ->get();
+        $exams = DB::table('exams')
+            ->join('subjects', 'subjects.id', '=', 'exams.subject_id')
+            ->join('classrooms', 'classrooms.id', '=', 'exams.classroom_id')
+            ->where('exams.status', $examStatus)
+            ->when($classroomId, fn ($query) => $query->where('exams.classroom_id', $classroomId))
+            ->when($filters['from'] ?? null, fn ($query, $date) => $query->whereDate('exams.starts_at', '>=', $date))
+            ->when($filters['to'] ?? null, fn ($query, $date) => $query->whereDate('exams.starts_at', '<=', $date))
+            ->select('exams.id', 'exams.title', 'exams.status', 'exams.starts_at', 'exams.total_score', 'subjects.name as subject', 'classrooms.name as classroom', 'classrooms.section')
+            ->selectSub(fn ($query) => $query->from('exam_questions')->selectRaw('count(*)')->whereColumn('exam_questions.exam_id', 'exams.id'), 'questions_count')
+            ->orderByDesc('exams.starts_at')
+            ->get();
+
+        $percentages = collect();
+        $publishedPeriods = DB::table('result_publications as publications')
+            ->join('exam_periods as periods', 'periods.id', '=', 'publications.exam_period_id')
+            ->join('students', 'students.id', '=', 'publications.student_id')
+            ->where('periods.status', 'published')
+            ->where('periods.published_at', '<=', now())
+            ->when($classroomId, fn ($query) => $query->where('students.classroom_id', $classroomId))
+            ->when($filters['from'] ?? null, fn ($query, $date) => $query->whereDate('periods.published_at', '>=', $date))
+            ->when($filters['to'] ?? null, fn ($query, $date) => $query->whereDate('periods.published_at', '<=', $date))
+            ->pluck('publications.payload');
+        foreach ($publishedPeriods as $payload) {
+            $result = is_string($payload) ? json_decode($payload, true) : $payload;
+            foreach (is_array($result['subjects'] ?? null) ? $result['subjects'] : [] as $mark) {
+                $maximum = (float) ($mark['maximum_score'] ?? 0);
+                $score = (float) ($mark['score'] ?? -1);
+                if ($maximum > 0 && $score >= 0 && $score <= $maximum) {
+                    $percentages->push($score * 100 / $maximum);
+                }
+            }
+        }
+
+        $legacyGrades = DB::table('grades as grades')
+            ->join('exams as exams', 'exams.id', '=', 'grades.exam_id')
+            ->join('students', 'students.id', '=', 'grades.student_id')
+            ->where('exams.legacy_results_published', true)
+            ->whereNull('exams.exam_period_id')
+            ->where('exams.status', 'published')
+            ->whereNotNull('grades.published_at')
+            ->where('grades.published_at', '<=', now())
+            ->when($classroomId, fn ($query) => $query->where('students.classroom_id', $classroomId))
+            ->when($filters['from'] ?? null, fn ($query, $date) => $query->whereDate('grades.published_at', '>=', $date))
+            ->when($filters['to'] ?? null, fn ($query, $date) => $query->whereDate('grades.published_at', '<=', $date))
+            ->select('grades.score', 'exams.total_score')
+            ->get();
+        foreach ($legacyGrades as $grade) {
+            $maximum = (float) $grade->total_score;
+            $score = (float) $grade->score;
+            if ($maximum > 0 && $score >= 0 && $score <= $maximum) {
+                $percentages->push($score * 100 / $maximum);
+            }
+        }
+
+        $latestAutomaticAttemptIds = DB::table('exam_attempts')
+            ->where('status', 'submitted')
+            ->whereNotNull('percentage')
+            ->selectRaw('max(id) as id')
+            ->groupBy('exam_id', 'student_id');
+        $automaticGrades = DB::query()
+            ->fromSub($latestAutomaticAttemptIds, 'latest_attempts')
+            ->join('exam_attempts as attempts', 'attempts.id', '=', 'latest_attempts.id')
+            ->join('exams as exams', 'exams.id', '=', 'attempts.exam_id')
+            ->join('students', 'students.id', '=', 'attempts.student_id')
+            ->where('exams.legacy_results_published', true)
+            ->whereNull('exams.exam_period_id')
+            ->where('exams.status', 'published')
+            ->whereNotExists(fn ($query) => $query->selectRaw('1')->from('grades')->whereColumn('grades.exam_id', 'exams.id')->whereColumn('grades.student_id', 'attempts.student_id')->whereNotNull('grades.published_at')->where('grades.published_at', '<=', now()))
+            ->when($classroomId, fn ($query) => $query->where('students.classroom_id', $classroomId))
+            ->when($filters['from'] ?? null, fn ($query, $date) => $query->whereDate('attempts.submitted_at', '>=', $date))
+            ->when($filters['to'] ?? null, fn ($query, $date) => $query->whereDate('attempts.submitted_at', '<=', $date))
+            ->select('attempts.score', 'attempts.maximum_score')
+            ->get();
+        foreach ($automaticGrades as $grade) {
+            $maximum = (float) $grade->maximum_score;
+            $score = (float) $grade->score;
+            if ($maximum > 0 && $score >= 0 && $score <= $maximum) {
+                $percentages->push($score * 100 / $maximum);
+            }
+        }
+
+        return [
+            'students' => $students,
+            'teachers' => $teachers,
+            'attendance' => $attendance,
+            'exams' => $exams,
+            'results' => (object) [
+                'average' => $percentages->isEmpty() ? null : round($percentages->avg(), 2),
+                'highest' => $percentages->isEmpty() ? null : round($percentages->max(), 2),
+                'lowest' => $percentages->isEmpty() ? null : round($percentages->min(), 2),
+                'total' => $percentages->count(),
+            ],
+            'classrooms' => Classroom::orderBy('name')->orderBy('section')->get(),
+            'filters' => $filters,
+            'examStatus' => $examStatus,
+            'generatedAt' => now(),
+        ];
     }
 
     public function settings(): View
     {
-        return view('admin.operations.settings', ['settings' => DB::table('settings')->pluck('value', 'key'), 'currentYear' => AcademicYear::where('is_current', true)->first(), 'periodTimes' => DB::table('school_period_times')->get()->keyBy(fn($row)=>$row->day_of_week.'-'.$row->period_number)]);
+        return view('admin.operations.settings', ['settings' => DB::table('settings')->pluck('value', 'key'), 'currentYear' => AcademicYear::where('is_current', true)->first(), 'periodTimes' => DB::table('school_period_times')->get()->keyBy(fn ($row) => $row->day_of_week.'-'.$row->period_number)]);
     }
 
     public function settingsUpdate(Request $r): RedirectResponse
     {
         $d = $r->validate([
-            'school_name' => ['required','string','max:255'], 'school_phone' => ['nullable','string','max:30'], 'school_email' => ['nullable','email'], 'school_address' => ['nullable','string'],
-            'school_logo' => ['nullable','image','mimes:png,jpg,jpeg,webp,svg','max:2048'],
-            'theme_color' => ['required', Rule::in(['#1239B3','#078DB5','#008C95','#00B978','#6D4AFF','#102A43'])],
-            'timezone' => ['required','timezone'], 'academic_year_name' => ['required','string','max:30'], 'academic_year_starts_at' => ['required','date'], 'academic_year_ends_at' => ['required','date','after:academic_year_starts_at'],
-            'periods_sunday' => ['required','integer','min:1','max:12'], 'periods_monday' => ['required','integer','min:1','max:12'], 'periods_tuesday' => ['required','integer','min:1','max:12'], 'periods_wednesday' => ['required','integer','min:1','max:12'], 'periods_thursday' => ['required','integer','min:1','max:12'],
-            'break_after_period' => ['required','integer','min:1','max:11'], 'break_duration_minutes' => ['required','integer','min:5','max:120'],
-            'period_times' => ['required','array'], 'period_times.*' => ['required','array'], 'period_times.*.*.starts_at' => ['required','date_format:H:i'], 'period_times.*.*.ends_at' => ['required','date_format:H:i'],
+            'school_name' => ['required', 'string', 'max:255'], 'school_phone' => ['nullable', 'string', 'max:30'], 'school_email' => ['nullable', 'email'], 'school_address' => ['nullable', 'string'],
+            'school_logo' => ['nullable', 'image', 'mimes:png,jpg,jpeg,webp,svg', 'max:2048'],
+            'theme_color' => ['required', Rule::in(['#1239B3', '#078DB5', '#008C95', '#00B978', '#6D4AFF', '#102A43'])],
+            'timezone' => ['required', 'timezone'], 'academic_year_name' => ['required', 'string', 'max:30'], 'academic_year_starts_at' => ['required', 'date'], 'academic_year_ends_at' => ['required', 'date', 'after:academic_year_starts_at'],
+            'periods_sunday' => ['required', 'integer', 'min:1', 'max:12'], 'periods_monday' => ['required', 'integer', 'min:1', 'max:12'], 'periods_tuesday' => ['required', 'integer', 'min:1', 'max:12'], 'periods_wednesday' => ['required', 'integer', 'min:1', 'max:12'], 'periods_thursday' => ['required', 'integer', 'min:1', 'max:12'],
+            'break_after_period' => ['required', 'integer', 'min:1', 'max:11'], 'break_duration_minutes' => ['required', 'integer', 'min:5', 'max:120'],
+            'period_times' => ['required', 'array'], 'period_times.*' => ['required', 'array'], 'period_times.*.*.starts_at' => ['required', 'date_format:H:i'], 'period_times.*.*.ends_at' => ['required', 'date_format:H:i'],
         ]);
-        $periodTimes = $d['period_times']; unset($d['period_times']);
-        $minimumDailyPeriods = min((int)$d['periods_sunday'],(int)$d['periods_monday'],(int)$d['periods_tuesday'],(int)$d['periods_wednesday'],(int)$d['periods_thursday']);
-        if ((int)$d['break_after_period'] >= $minimumDailyPeriods) return back()->withInput()->withErrors(['break_after_period'=>"يجب أن تكون الاستراحة قبل الحصة الأخيرة في كل يوم (الحد الحالي قبل الحصة {$minimumDailyPeriods})."]);
-        foreach ($periodTimes as $day => $periods) foreach ($periods as $number => $times) if ($times['ends_at'] <= $times['starts_at']) return back()->withInput()->withErrors(["period_times.$day.$number.ends_at"=>'نهاية الحصة يجب أن تكون بعد بدايتها.']);
-        foreach ($periodTimes as $day => $periods) {
-            $after=(int)$d['break_after_period'];
-            if(isset($periods[$after],$periods[$after+1])) { $breakEnds=Carbon::createFromFormat('H:i',$periods[$after]['ends_at'])->addMinutes((int)$d['break_duration_minutes'])->format('H:i'); if($periods[$after+1]['starts_at']<$breakEnds) return back()->withInput()->withErrors(["period_times.$day.".($after+1).'.starts_at'=>"يجب أن تبدأ الحصة التالية بعد نهاية الاستراحة عند {$breakEnds}."]); }
+        $periodTimes = $d['period_times'];
+        unset($d['period_times']);
+        $minimumDailyPeriods = min((int) $d['periods_sunday'], (int) $d['periods_monday'], (int) $d['periods_tuesday'], (int) $d['periods_wednesday'], (int) $d['periods_thursday']);
+        if ((int) $d['break_after_period'] >= $minimumDailyPeriods) {
+            return back()->withInput()->withErrors(['break_after_period' => "يجب أن تكون الاستراحة قبل الحصة الأخيرة في كل يوم (الحد الحالي قبل الحصة {$minimumDailyPeriods})."]);
         }
-        $logo = $r->file('school_logo'); unset($d['school_logo']);
+        foreach ($periodTimes as $day => $periods) {
+            foreach ($periods as $number => $times) {
+                if ($times['ends_at'] <= $times['starts_at']) {
+                    return back()->withInput()->withErrors(["period_times.$day.$number.ends_at" => 'نهاية الحصة يجب أن تكون بعد بدايتها.']);
+                }
+            }
+        }
+        foreach ($periodTimes as $day => $periods) {
+            $after = (int) $d['break_after_period'];
+            if (isset($periods[$after],$periods[$after + 1])) {
+                $breakEnds = Carbon::createFromFormat('H:i', $periods[$after]['ends_at'])->addMinutes((int) $d['break_duration_minutes'])->format('H:i');
+                if ($periods[$after + 1]['starts_at'] < $breakEnds) {
+                    return back()->withInput()->withErrors(["period_times.$day.".($after + 1).'.starts_at' => "يجب أن تبدأ الحصة التالية بعد نهاية الاستراحة عند {$breakEnds}."]);
+                }
+            }
+        }
+        $logo = $r->file('school_logo');
+        unset($d['school_logo']);
         if ($logo) {
-            $oldLogo = DB::table('settings')->where('key','school_logo')->value('value');
-            $d['school_logo'] = $logo->store('school-branding','public');
-            if ($oldLogo && $oldLogo !== $d['school_logo']) Storage::disk('public')->delete($oldLogo);
+            $oldLogo = DB::table('settings')->where('key', 'school_logo')->value('value');
+            $d['school_logo'] = $logo->store('school-branding', 'public');
+            if ($oldLogo && $oldLogo !== $d['school_logo']) {
+                Storage::disk('public')->delete($oldLogo);
+            }
         }
         $year = ['name' => $d['academic_year_name'], 'starts_at' => $d['academic_year_starts_at'], 'ends_at' => $d['academic_year_ends_at']];
         unset($d['academic_year_name'], $d['academic_year_starts_at'], $d['academic_year_ends_at']);
@@ -377,7 +541,11 @@ class OperationsController extends Controller
         }
         DB::transaction(function () use ($periodTimes): void {
             DB::table('school_period_times')->delete();
-            foreach ($periodTimes as $day => $periods) foreach ($periods as $number => $times) DB::table('school_period_times')->insert(['day_of_week'=>$day,'period_number'=>$number,'starts_at'=>$times['starts_at'],'ends_at'=>$times['ends_at'],'created_at'=>now(),'updated_at'=>now()]);
+            foreach ($periodTimes as $day => $periods) {
+                foreach ($periods as $number => $times) {
+                    DB::table('school_period_times')->insert(['day_of_week' => $day, 'period_number' => $number, 'starts_at' => $times['starts_at'], 'ends_at' => $times['ends_at'], 'created_at' => now(), 'updated_at' => now()]);
+                }
+            }
         });
         AuditService::record('updated', 'settings');
 
@@ -386,7 +554,7 @@ class OperationsController extends Controller
 
     public function roles(): View
     {
-        return view('admin.operations.roles', ['roles' => config('permissions.roles')]);
+        return view('admin.operations.roles', ['roles' => StaffRole::with('permissions')->get(), 'catalog' => config('permissions.catalog')]);
     }
 
     public function auditLogs(): View

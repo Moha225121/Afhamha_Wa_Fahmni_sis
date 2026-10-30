@@ -17,8 +17,7 @@ class AssignmentSubmissionRequest extends FormRequest
         return ($this->user()?->isStudent() ?? false)
             && $assignment instanceof Assignment
             && $student
-            && $assignment->classroom_id === $student->classroom_id
-            && $assignment->isPublished();
+            && $assignment->isAvailableToStudent($student);
     }
 
     protected function failedAuthorization()

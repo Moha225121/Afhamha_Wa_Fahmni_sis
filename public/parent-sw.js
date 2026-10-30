@@ -1,4 +1,6 @@
-const CACHE_NAME = 'afhamha-parent-static-v8';
+importScripts('/js/push-notification-display.js');
+try { importScripts('/push/firebase-worker.js'); } catch (_) {}
+const CACHE_NAME = 'afhamha-parent-static-v11-nasbia';
 const OFFLINE_URL = '/parent-offline.html';
 const STATIC_ASSETS = [
     OFFLINE_URL,
@@ -17,7 +19,6 @@ self.addEventListener('install', (event) => {
             .then(() => self.skipWaiting())
     );
 });
-
 self.addEventListener('activate', (event) => {
     event.waitUntil(
         caches.keys()
@@ -50,21 +51,4 @@ self.addEventListener('fetch', (event) => {
     if (STATIC_ASSETS.includes(url.pathname)) {
         event.respondWith(caches.match(request).then((cached) => cached || fetch(request)));
     }
-});
-
-self.addEventListener('push', (event) => {
-    const payload = event.data ? event.data.json() : {};
-    event.waitUntil(self.registration.showNotification(payload.title || 'افهمها وفهمني', {
-        body: payload.body || 'لديك إشعار جديد.',
-        icon: '/school-app-icon',
-        badge: '/icons/parent-maskable-512.png',
-        data: { url: payload.url || '/parent/notifications' },
-        dir: 'rtl',
-        lang: 'ar',
-    }));
-});
-
-self.addEventListener('notificationclick', (event) => {
-    event.notification.close();
-    event.waitUntil(clients.openWindow(event.notification.data.url));
 });

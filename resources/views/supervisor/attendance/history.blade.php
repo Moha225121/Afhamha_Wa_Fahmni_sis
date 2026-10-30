@@ -88,7 +88,7 @@
                 <tbody>
                 @forelse($records as $record)
                     @php $absent = in_array($record->status->value, ['absent', 'excused_absence'], true); @endphp
-                    <tr><td>{{ $record->date->format('Y-m-d') }}</td><td>{{ $record->student->user?->name }}</td><td>{{ $record->student->classroom?->name }} {{ $record->student->classroom?->section }}</td><td class="{{ $absent ? 'absent-number' : 'present-number' }}">{{ $absent ? 'غائب' : 'حاضر' }}</td><td>{{ $record->notes ?: '—' }}</td></tr>
+                    <tr><td>{{ $record->date->format('Y-m-d') }}</td><td>{{ $record->student?->user?->name ?? 'طالب غير متاح' }}</td><td>{{ $record->student?->classroom?->name }} {{ $record->student?->classroom?->section }}</td><td class="{{ $absent ? 'absent-number' : 'present-number' }}">{{ $absent ? 'غائب' : 'حاضر' }}</td><td>{{ $record->notes ?: '—' }}</td></tr>
                 @empty
                     <tr><td colspan="5" class="report-empty">لا توجد سجلات مطابقة لهذه الخيارات.</td></tr>
                 @endforelse

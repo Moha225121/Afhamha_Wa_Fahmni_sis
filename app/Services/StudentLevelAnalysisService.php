@@ -8,6 +8,7 @@ use App\Data\SmartTutorTurn;
 use App\Models\Student;
 use App\Models\Teacher;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class StudentLevelAnalysisService
 {
@@ -37,7 +38,14 @@ class StudentLevelAnalysisService
 
         $assignments = DB::table('assignments as a')->leftJoin('assignment_submissions as s', function ($join) use ($student) {
             $join->on('s.assignment_id', '=', 'a.id')->where('s.student_id', $student->id);
-        })->where('a.classroom_id', $student->classroom_id)->where('a.status', 'published')
+        })->where(function ($targets) use ($student): void {
+            $targets->where('a.classroom_id', $student->classroom_id)
+                ->when(Schema::hasTable('assignment_classroom'), fn ($shared) => $shared->orWhereExists(function ($pivot) use ($student): void {
+                    $pivot->selectRaw('1')->from('assignment_classroom')
+                        ->whereColumn('assignment_classroom.assignment_id', 'a.id')
+                        ->where('assignment_classroom.classroom_id', $student->classroom_id);
+                }));
+        })->where('a.status', 'published')
             ->where('a.published_at', '<=', now())->whereBetween('a.due_at', [$from, now()])
             ->when($teacher, fn ($q) => $q->where('a.teacher_id', $teacher->id)->whereIn('a.subject_id', $subjectIds))
             ->selectRaw('count(*) as total, sum(case when s.submitted_at is not null then 1 else 0 end) as submitted')->first();

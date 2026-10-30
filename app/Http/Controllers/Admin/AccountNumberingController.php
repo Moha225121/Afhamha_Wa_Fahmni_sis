@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Student;
 use App\Models\Teacher;
 use App\Services\SchoolAccountService;
+use App\Services\StudentCardPdfService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Validation\ValidationException;
 
 class AccountNumberingController extends Controller
@@ -58,8 +60,62 @@ class AccountNumberingController extends Controller
         return redirect()->route('admin.accounts.index')->with('success', 'تم حفظ الإعدادات وتنفيذ التغييرات المراجعة بأمان.');
     }
 
-    public function card(Student $student)
+    public function card(Student $student, StudentCardPdfService $pdf)
     {
-        return view('admin.accounts.card', ['student' => $student->load('user', 'classroom')]);
+        $student->load(['user', 'classroom', 'guardians.user']);
+        $student->setAttribute('verification_url', URL::temporarySignedRoute('student.card.verify', now()->addYear(), ['student' => $student->id]));
+        $data = ['student' => $student];
+        if (request()->query('format') === 'pdf') {
+            return $pdf->download($data, 'student-card-'.$student->student_number.'.pdf');
+        }
+
+        $pdf->preparePrintableCards(collect([$student]));
+
+        return view(request()->query('format') === 'print' ? 'admin.accounts.card-print' : 'admin.accounts.card', $data);
+    }
+
+    public function cards(Request $request, StudentCardPdfService $pdf)
+    {
+        $selectedIds = null;
+        if ($request->query('format') === 'pdf') {
+            $validated = $request->validate([
+                'student_ids' => ['required', 'array', 'min:1', 'max:10000'],
+                'student_ids.*' => ['required', 'integer', 'distinct', 'min:1'],
+            ]);
+            $selectedIds = array_map('intval', $validated['student_ids']);
+        }
+
+        $query = Student::with(['user', 'classroom.academicYear', 'guardians.user'])
+            ->when($request->integer('classroom_id'), fn ($q, $id) => $q->where('classroom_id', $id))
+            ->when($request->input('status'), fn ($q, $status) => $q->where('status', $status));
+        if ($selectedIds !== null) {
+            $query->whereIn('id', $selectedIds);
+        }
+        $students = $query->orderBy('classroom_id')->orderBy('student_number')->get();
+
+        abort_if($students->isEmpty(), 404, 'لا يوجد طلاب مطابقون للطباعة.');
+        abort_if($selectedIds !== null && $students->count() !== count($selectedIds), 404);
+        $expires = now()->addYear();
+        $students->each(fn ($student) => $student->setAttribute('verification_url', URL::temporarySignedRoute('student.card.verify', $expires, ['student' => $student->id])));
+
+        if ($selectedIds !== null) {
+            return $pdf->downloadBulk($students, 'student-cards.pdf');
+        }
+
+        $pdf->preparePrintableCards($students);
+
+        return view('admin.accounts.cards-print', compact('students'));
+    }
+
+    public function verify(Student $student)
+    {
+        $user = request()->user();
+        abort_unless(config('nasbia.public_student_card_verification', false)
+            || ($user?->isAdmin() && $user->status === 'active'), 404);
+        $student->load(['user', 'classroom']);
+        abort_unless($student->status === 'active' && $student->user?->status === 'active', 404);
+
+        return response()->view('admin.accounts.verify', compact('student'))
+            ->header('Cache-Control', 'private, no-store')->header('X-Robots-Tag', 'noindex, nofollow');
     }
 }

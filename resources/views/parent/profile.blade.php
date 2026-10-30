@@ -13,11 +13,11 @@
         @method('put')
         <label>
             الاسم
-            <input name="name" value="{{ old('name', $guardian->user->name) }}" required maxlength="255">
+            <input name="name" value="{{ old('name', $parentIdentity['name']) }}" required maxlength="255">
         </label>
         <label>
             رقم الهاتف
-            <input name="phone" value="{{ old('phone', $guardian->user->phone) }}" maxlength="30" inputmode="tel">
+            <input name="phone" value="{{ old('phone', $parentIdentity['phone']) }}" maxlength="30" inputmode="tel">
         </label>
         <label>
             البريد الإلكتروني
@@ -25,7 +25,7 @@
         </label>
         <label>
             صلة القرابة
-            <input value="{{ $guardian->relationship ?? '-' }}" disabled>
+            <input value="{{ $parentIdentity['relationship'] ?? '-' }}" disabled>
         </label>
         <button type="submit">حفظ</button>
     </form>

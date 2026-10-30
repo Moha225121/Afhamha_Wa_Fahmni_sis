@@ -1,14 +1,19 @@
 <?php
 
+use App\Http\Controllers\FinanceController;
+use App\Http\Controllers\GuardianPortal\StudentSessionController;
+use App\Http\Controllers\LibraryCatalogController;
+use App\Http\Controllers\PortalAnnouncementController;
+use App\Http\Controllers\PortalMessengerController;
 use App\Http\Controllers\StudentPortal\AcademicController;
 use App\Http\Controllers\StudentPortal\EducationController;
-use App\Http\Controllers\LibraryCatalogController;
 use App\Http\Controllers\StudentPortal\PortalController;
 use App\Http\Controllers\StudentPortal\TutorController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('student')->name('student.')->middleware(['auth', 'student'])->group(function (): void {
-    Route::get('/finance', [\App\Http\Controllers\FinanceController::class, 'student'])->name('finance');
+    Route::post('/return-to-parent', [StudentSessionController::class, 'returnToParent'])->name('return-to-parent');
+    Route::get('/finance', [FinanceController::class, 'student'])->name('finance');
     Route::get('/', fn () => redirect()->route('student.dashboard'));
     Route::get('/dashboard', [PortalController::class, 'dashboard'])->name('dashboard');
     Route::get('/subjects', [EducationController::class, 'subjects'])->name('subjects.index');
@@ -25,7 +30,10 @@ Route::prefix('student')->name('student.')->middleware(['auth', 'student'])->gro
     Route::get('/tutor/conversations/{conversation}', [TutorController::class, 'show'])->whereNumber('conversation')->name('tutor.show');
     Route::post('/tutor/conversations/{conversation}/messages', [TutorController::class, 'storeMessage'])->whereNumber('conversation')->middleware('throttle:smart-tutor-messages')->name('tutor.messages.store');
     Route::get('/results', [PortalController::class, 'results'])->name('results');
-    Route::get('/messages', [PortalController::class, 'messages'])->name('messages');
+    Route::get('/messages', [PortalMessengerController::class, 'index'])->name('messages');
+    Route::post('/messages', [PortalMessengerController::class, 'store'])->middleware('throttle:30,1')->name('messages.store');
+    Route::post('/messages/read', [PortalMessengerController::class, 'read'])->middleware('throttle:60,1')->name('messages.read');
+    Route::get('/ads', [PortalAnnouncementController::class, 'index'])->name('ads.index');
     Route::get('/profile', [PortalController::class, 'profile'])->name('profile');
     Route::get('/assignments', [AcademicController::class, 'assignments'])->name('assignments.index');
     Route::get('/assignments/{assignment}', [AcademicController::class, 'assignment'])->name('assignments.show');

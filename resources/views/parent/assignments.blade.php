@@ -3,6 +3,7 @@
 @section('title', 'الواجبات')
 
 @section('content')
+    <link rel="stylesheet" href="{{ asset('css/homework.css') }}?v=20261025-1">
     <section class="page-title">
         <p>متابعة فقط</p>
         <h1>الواجبات</h1>
@@ -16,13 +17,11 @@
         <section class="messages-list section-gap">
             @forelse($assignments as $assignment)
                 @php($submission = $assignment->submissions->first())
+                @php($deadline = \App\Support\AssignmentDeadline::for($assignment))
                 <article class="message-card">
-                    <div class="academic-item-heading">
-                        <h2>{{ $assignment->title }}</h2>
-                        <span class="academic-subject">المادة: {{ $assignment->subject_label }}</span>
-                    </div>
-                    <span>موعد التسليم: {{ $assignment->due_at?->format('Y-m-d H:i') ?? 'بدون موعد' }}</span>
-                    @if($assignment->instructions || $assignment->description)<x-assignment-content :content="$assignment->instructions ?: $assignment->description" />@endif
+                    <span>المادة: {{ $assignment->subject_label }} · {{ $deadline?->setTimezone(\App\Services\LessonPublicationTime::timezone())->format('Y-m-d H:i') ?? 'بدون موعد' }}</span>
+                    <h2>{{ $assignment->title }}</h2>
+                    @include('shared.homework-instructions', ['assignment' => $assignment])
                     <div class="status-line">
                         <b>{{ $submission?->submitted_at ? 'تم التسليم' : 'لم يتم التسليم' }}</b>
                         @if($assignment->attachments->isNotEmpty())<small>{{ $assignment->attachments->count() }} مرفق/مرفقات</small>@endif

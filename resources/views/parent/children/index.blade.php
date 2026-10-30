@@ -18,6 +18,12 @@
                 </div>
                 <i>›</i>
             </a>
+            @if(app(\App\Services\ParentStudentSession::class)->canOpen($child))
+                <form method="post" action="{{ route('parent.children.student-session', $child) }}" class="section-gap">
+                    @csrf
+                    <button type="submit" class="btn primary">فتح مساحة الطالب</button>
+                </form>
+            @endif
         @empty
             <div class="empty-state">
                 <h2>لا يوجد أبناء مرتبطون</h2>

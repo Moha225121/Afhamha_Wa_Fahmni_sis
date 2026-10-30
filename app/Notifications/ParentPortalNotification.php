@@ -25,7 +25,8 @@ class ParentPortalNotification extends Notification
             'url' => $this->payload['url'] ?? null,
             'category' => $this->payload['category'] ?? 'general',
             'student_id' => $this->payload['student_id'] ?? null,
-            ...(isset($this->payload['conversation_id']) ? ['conversation_id' => $this->payload['conversation_id']] : []),
-        ];
+        ] + array_intersect_key($this->payload, array_flip(['lesson_id', 'assignment_id', 'exam_id', 'announcement_id', 'conversation_id', 'exam_period_id']))
+            + (($this->payload['category'] ?? null) === 'teacher_notification'
+                ? array_intersect_key($this->payload, ['teacher_message_id' => true, 'student_ids' => true]) : []);
     }
 }

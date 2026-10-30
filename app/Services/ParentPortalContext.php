@@ -26,16 +26,27 @@ class ParentPortalContext
     /** @param Collection<int, Student> $children */
     public function selectedStudent(Guardian $guardian, Collection $children, mixed $studentId): ?Student
     {
-        if ($studentId === null || $studentId === '') {
-            return $children->first();
+        $request = request();
+        $sessionKey = 'parent_selected_student.'.$guardian->id;
+        $explicit = $studentId !== null && $studentId !== '';
+        if ($explicit) {
+            abort_unless((is_int($studentId) || is_string($studentId)) && filter_var($studentId, FILTER_VALIDATE_INT) > 0, 404);
+            $student = $children->firstWhere('id', (int) $studentId);
+            abort_unless($student, 404);
+        } else {
+            $saved = $request->hasSession() ? $request->session()->get($sessionKey) : null;
+            $student = $children->firstWhere('id', $saved) ?? $children->first();
         }
 
-        $student = $guardian->students()
-            ->with(['user', 'classroom.academicYear'])
-            ->whereKey((int) $studentId)
-            ->first();
-
-        abort_unless($student, 404);
+        // An explicit URL belongs to its tab. Background refreshes and POSTs must
+        // never change the child selected by ordinary navigation in another tab.
+        if ($request->hasSession() && $request->isMethod('GET') && ! $request->headers->has('X-Messenger-Refresh')) {
+            if ($student) {
+                $request->session()->put($sessionKey, $student->id);
+            } else {
+                $request->session()->forget($sessionKey);
+            }
+        }
 
         return $student;
     }

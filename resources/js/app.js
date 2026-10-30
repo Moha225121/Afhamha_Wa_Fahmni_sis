@@ -1,1 +1,1 @@
-//
+import './push-notifications.js';

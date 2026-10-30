@@ -1,0 +1,283 @@
+[
+  {
+    "id": "B01",
+    "feature": "Student login and dashboard",
+    "status": "PASS",
+    "actual": "Synthetic student logged in; Nisbiya logo, RTL dashboard and academic navigation rendered."
+  },
+  {
+    "id": "B02",
+    "feature": "Assignment upload",
+    "status": "PASS",
+    "steps": "Open assignment; choose synthetic PDF; add note; submit.",
+    "actual": "Browser returned saved submission confirmation and the uploaded attachment."
+  },
+  {
+    "id": "B03",
+    "feature": "Upcoming exams",
+    "status": "PASS",
+    "steps": "Open exams list.",
+    "actual": "Upcoming test is listed as upcoming and has no start button; the available test has one."
+  },
+  {
+    "id": "B04",
+    "feature": "Exam attempt/save/submit/publication gate",
+    "status": "PASS",
+    "steps": "Start available exam; answer 4; save; reload; submit; reopen result.",
+    "actual": "Answer survived reload; attempt submitted and graded. Result page preserves administrative publication gate. Read-only PostgreSQL cross-check: score 10/10, percentage 100."
+  },
+  {
+    "id": "B05",
+    "feature": "Preserved school timetable",
+    "status": "PASS",
+    "steps": "Open schedule with synthetic five-day/six-period fixture.",
+    "actual": "Arabic RTL weekly table shows all five school days, six time slots and original break gap."
+  },
+  {
+    "id": "B06",
+    "feature": "Student direct messaging",
+    "status": "PASS",
+    "steps": "Select assigned teacher; send synthetic Arabic message.",
+    "actual": "Message rendered with sent status; dedicated database queue worker processed delivery successfully."
+  },
+  {
+    "id": "B07",
+    "feature": "Teacher submission integration",
+    "status": "PASS",
+    "steps": "Login as Teacher A; open submissions; download Student A PDF; enter 8/10; save.",
+    "actual": "Student upload was visible; downloaded PDF SHA256 matched original; grade 8/10 persisted without clearing submitted_at."
+  },
+  {
+    "id": "B08",
+    "feature": "Resumable lesson upload and multi-class publication",
+    "status": "PASS",
+    "steps": "Create lesson for two assigned branches; upload valid 10MiB MP4; wait for verification; publish.",
+    "actual": "Upload reached 100% and server verification completed; one published lesson appears for both branches."
+  },
+  {
+    "id": "B09",
+    "feature": "Teacher report editor",
+    "status": "PASS",
+    "steps": "Open assigned class report; enter activity/note; save.",
+    "actual": "Report saved as /teacher/reports/1 with persisted state and no console errors."
+  },
+  {
+    "id": "B10",
+    "feature": "Report recipients and administrative delivery",
+    "status": "PASS",
+    "steps": "Open report send dialog; verify only administration is offered; preview and send.",
+    "actual": "Preview showed 0 students, 0 parents, 1 administrator; UI confirmed delivery. External report policy remains off."
+  },
+  {
+    "id": "B11",
+    "feature": "Gradebook save without automatic publication",
+    "status": "PASS",
+    "steps": "Enter 70 in first assessment column; save; reload.",
+    "actual": "Grade persisted. PostgreSQL cross-check: one grade sheet and zero automatic grade notifications. UI accurately describes school publication policy."
+  },
+  {
+    "id": "B12",
+    "feature": "Teacher profile picture",
+    "status": "PASS",
+    "steps": "Upload synthetic 96×96 PNG through profile form.",
+    "actual": "Saved image rendered at natural width 96 with no image load error."
+  },
+  {
+    "id": "B13",
+    "feature": "Teacher direct reply",
+    "status": "PASS",
+    "steps": "Open student thread and send reply.",
+    "actual": "Both original and reply messages rendered with correct student context."
+  },
+  {
+    "id": "B14",
+    "feature": "Scoped teacher broadcast",
+    "status": "PASS",
+    "steps": "Select branch A only; review recipients; confirm.",
+    "actual": "Preview named exactly Student A and Parent with Student A context; sent tracking showed two accounts. Other branch/secondary child excluded."
+  },
+  {
+    "id": "B15",
+    "feature": "Teacher report IDOR",
+    "status": "PASS",
+    "steps": "Teacher A requests report builder for isolated Teacher B secondary literary class.",
+    "actual": "Permission denied page rendered without foreign student/report content."
+  },
+  {
+    "id": "B16",
+    "feature": "Parent authentication and publication regression",
+    "status": "PASS",
+    "steps": "Login as linked parent after teacher saves gradebook.",
+    "actual": "Only two linked synthetic children shown; zero published results; no automatic 70 grade exposed."
+  },
+  {
+    "id": "B17",
+    "feature": "Parent child-scoped messaging",
+    "status": "PASS",
+    "steps": "Open branch A broadcast; switch to linked secondary child C.",
+    "actual": "A showed Teacher A broadcast; C URL retained student=3 and showed only Teacher B, with no A message or teacher preview."
+  },
+  {
+    "id": "B18",
+    "feature": "Parent lesson notification destination",
+    "status": "PASS",
+    "steps": "Open Student A notification feed; follow published lesson notification.",
+    "actual": "Opened authorized lesson title and content under the linked child. Gradebook marks remained absent."
+  },
+  {
+    "id": "B19",
+    "feature": "Parent lesson IDOR",
+    "status": "PASS",
+    "steps": "Request same lesson under an unlinked synthetic student ID.",
+    "actual": "404 response page showed no student or lesson content."
+  },
+  {
+    "id": "B20",
+    "feature": "Admin dashboard",
+    "status": "PASS",
+    "steps": "Login as synthetic admin.",
+    "actual": "Dashboard loaded with 3 students, 2 teachers, 4 classrooms and only preparatory/secondary stage groups."
+  },
+  {
+    "id": "B21",
+    "feature": "Admin publications monitor",
+    "status": "PASS",
+    "steps": "Open publications; filter by class A; open saved grade-sheet publication.",
+    "actual": "Counts and multi-branch lessons rendered; admin saw actual saved 70 mark and teacher/class context. Student/parent publication remains unchanged."
+  },
+  {
+    "id": "B22",
+    "feature": "Safe admin CSV import",
+    "status": "PASS",
+    "steps": "Import one preparatory subject CSV; upload exactly the same file again.",
+    "actual": "First upload created one subject; second created zero. Existing subject rows remained visible and unchanged."
+  },
+  {
+    "id": "B23",
+    "feature": "Bulk card preview and selection",
+    "status": "PASS",
+    "steps": "Open card preview for 3 synthetic students; deselect Student B.",
+    "actual": "Nisbiya logo, existing IDs, preparatory/secondary tracks and QR images rendered; counter changed to 2 of 3. PDF button request executed but browser download event capture timed out; backend PDF export is separately tested."
+  },
+  {
+    "id": "B24",
+    "feature": "Original account card plus optional PDF",
+    "status": "PASS",
+    "steps": "Open original account card; follow optional illustrated-card link; download PDF with browser-supported download API; render with Poppler.",
+    "actual": "Original card remains available. PDF downloaded, has one A4 page, and rendered readable Arabic text with Nisbiya logo, teal palette, existing ID and QR."
+  },
+  {
+    "id": "B25",
+    "feature": "Supervisor dashboard and responsive menu",
+    "status": "PASS",
+    "steps": "Login as supervisor; open collapsed navigation.",
+    "actual": "Dashboard counted exactly one supervised student; responsive menu opened with correct aria-expanded state and supervisor-only attendance links."
+  },
+  {
+    "id": "B26",
+    "feature": "Supervisor attendance and report regression",
+    "status": "PASS",
+    "steps": "Mark absence; use student number to mark present; mark absence again; save; open daily report.",
+    "actual": "Lookup resolved only supervised Student A. Saved report showed exactly one absence with the synthetic note and 0% attendance."
+  },
+  {
+    "id": "B27",
+    "feature": "Supervisor IDOR",
+    "status": "PASS",
+    "steps": "Request synthetic Student C outside supervised class.",
+    "actual": "Permission denied; no foreign student details rendered."
+  },
+  {
+    "id": "B28",
+    "feature": "Finance role landing and school tracks",
+    "status": "PASS",
+    "steps": "Login as financial officer.",
+    "actual": "Landed on /finance; preparatory/scientific/literary filters and zero-balance synthetic accounts rendered. No finance transaction executed."
+  },
+  {
+    "id": "B29",
+    "feature": "Finance statement and PDF regression",
+    "status": "PASS",
+    "steps": "Open synthetic student financial statement; download PDF.",
+    "actual": "Nisbiya school name and zero-balance statement rendered; PDF download succeeded. No payment, discount or financial transaction was created."
+  },
+  {
+    "id": "B30",
+    "feature": "Finance permission preservation",
+    "status": "PASS",
+    "steps": "Request parent-notification composer with unchanged finance role.",
+    "actual": "Permission denied; finance role did not silently gain source-school notification privileges."
+  },
+  {
+    "id": "B31",
+    "feature": "Scoped staff dashboard and student list",
+    "status": "PASS",
+    "steps": "Login as scoped staff; open student affairs.",
+    "actual": "Only Student A and class A were listed; Student B and secondary Student C were absent."
+  },
+  {
+    "id": "B32",
+    "feature": "Scoped staff activity creation",
+    "steps": "Open activities, verify no global option, create synthetic activity for assigned class.",
+    "expected": "Only assigned class; saved activity listed.",
+    "actual": "Success message and QA activity listed for class A.",
+    "status": "PASS"
+  },
+  {
+    "id": "B33",
+    "feature": "Staff student IDOR protection",
+    "steps": "While scoped to class A open student C edit URL.",
+    "expected": "Denied; no edit form.",
+    "actual": "Access denied page; student outside assigned classes.",
+    "status": "PASS"
+  },
+  {
+    "id": "B34",
+    "feature": "Staff academic, attendance, homework, teacher monitoring, calls and announcements reads",
+    "steps": "Open six assigned modules with scoped staff account.",
+    "expected": "Render without server errors; only allowed class/student/teacher data.",
+    "actual": "Six pages rendered; A absence and shared homework visible, teacher A counts 2 lessons/1 homework; no foreign class labels.",
+    "status": "PASS"
+  },
+  {
+    "id": "B35",
+    "feature": "Mobile student dashboard, timetable and live conversation",
+    "steps": "Set viewport 390×844, open dashboard, schedule, messages and actual teacher reply.",
+    "expected": "Arabic RTL, Cairo, readable controls; table scrolls internally; no body horizontal overflow; reply rendered.",
+    "actual": "Cairo/RTL verified, body375=client375; timetable1026 inside329px auto-scroll; teacher reply and read receipt rendered.",
+    "status": "PASS"
+  },
+  {
+    "id": "B36",
+    "feature": "Student access to published multiclass video attachment",
+    "steps": "Open subject→published lesson→download protected10MiB attachment.",
+    "expected": "Assigned student can open lesson and retrieve the actual file.",
+    "actual": "Authorized lesson rendered with download link; downloadMedia saved10MiB video. Student view, like source, provides download rather than inline playback.",
+    "status": "PASS"
+  },
+  {
+    "id": "B37",
+    "feature": "Bulk student-card browser download capture",
+    "steps": "Select two synthetic cards and click combined PDF export.",
+    "expected": "Capture and inspect combined PDF through the browser automation download event.",
+    "actual": "Preview/selection worked; browser download event timed out and produced no captured file. Individual card PDF downloaded and rendered successfully; automated bulk PDF export tests executed separately.",
+    "status": "BLOCKED",
+    "reproduction": "Admin→Students→Cards; select two cards→PDF export; automation download event is not received."
+  },
+  {
+    "id": "B38",
+    "feature": "Real phone/Web Push delivery",
+    "steps": "Inspect current CLI/build/readiness without enabling external sending.",
+    "expected": "Real phone delivery requires school Firebase project credentials, matching public config/VAPID, HTTPS and an authorized test device.",
+    "actual": "Those external prerequisites are absent from isolated QA; provider/device delivery was not attempted. Local inbox, queue, registration/transport safety tests and worker build were tested.",
+    "status": "BLOCKED"
+  },
+  {
+    "id": "B39",
+    "feature": "Desktop student dashboard breakpoint",
+    "steps": "Set viewport1280×900; open dashboard; inspect visible Arabic layout and dimensions; restore override.",
+    "expected": "Desktop navigation and content without horizontal body overflow.",
+    "actual": "Desktop side navigation rendered; body1265=client1265; original Nisbiya logo/Cairo/colors visible.",
+    "status": "PASS"
+  }
+]

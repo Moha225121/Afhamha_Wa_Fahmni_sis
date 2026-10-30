@@ -1,13 +1,11 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="utf-8">
+    <meta charset="utf-8">@include('shared.pwa-head')
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>دخول المنصة | افهمها وفهمني</title>
-    <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="any">
-    <link rel="apple-touch-icon" href="{{ asset('icons/parent-icon-192.png') }}">
     <link rel="stylesheet" href="{{ asset('css/admin.css') }}?v=login-style-1">
-    @include('shared.branding-style')@include('shared.portal-assets')
+    @include('shared.portal-assets')@include('shared.branding-style')
 </head>
 <body class="login-page">
 <main class="login-card">
@@ -19,14 +17,14 @@
         @csrf
         <label>
             البريد الإلكتروني
-            <input name="email" type="text" inputmode="email" value="{{ old('email') }}" required autofocus autocomplete="email">
+            <input name="email" type="text" inputmode="email" dir="ltr" value="{{ old('email', request()->query('email')) }}" required autofocus autocomplete="email">
         </label>
         <label>
             كلمة المرور
             <input name="password" type="password" required autocomplete="current-password">
         </label>
         <label class="check">
-            <input type="checkbox" name="remember">
+            <input type="checkbox" name="remember" value="1" @checked(old('remember'))>
             تذكرني
         </label>
         @if($errors->any())
@@ -35,5 +33,6 @@
         <button class="btn primary" type="submit">تسجيل الدخول</button>
     </form>
 </main>
+@include('shared.pwa-install')
 </body>
 </html>

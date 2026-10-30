@@ -1,0 +1,1053 @@
+{
+  "status": "FINAL_LOCAL_AUDIT_PASSED_WITH_DOCUMENTED_LIMITATIONS",
+  "generated_at_africa_tripoli": "2026-10-30T03:42:07+02:00",
+  "branch": "integration/nasbia-nasr-upgrade",
+  "tested_base_head": "fdeb4df6d0ef461429b79239df4a14ceb857aa4a",
+  "source_read_only_commit": "8e1ce7a8b2eecf48198f3a47f425a18d4eb66324",
+  "preserved_local_student_commit": "120e6668a8c8270870637c17ffb96cca613843f5",
+  "remote_main_read_only_check": {
+    "method": "git ls-remote origin refs/heads/main",
+    "client_date": "2026-10-30",
+    "hash": "fdeb4df6d0ef461429b79239df4a14ceb857aa4a",
+    "matches_tested_base": true,
+    "remote_write_performed": false
+  },
+  "post_php_suite_change": "Only the unintended trailing blank line in public/app-sw.js was removed during the staged whitespace check; JavaScript tests and the complete build were rerun after it. No PHP/application behavior changed after the full suite.",
+  "tested_tree_state": "Integration working tree before the user-authorized local commit; exact resulting hash is reported after commit to avoid report self-reference",
+  "full_suite": {
+    "tests": 1017,
+    "assertions": 11131,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 1,
+    "passed": 1016,
+    "duration_seconds": 938.839856
+  },
+  "skipped": [
+    {
+      "class": "Tests\\Feature\\TeacherLessonPreviewTest",
+      "test": "test_symlink_to_a_file_outside_the_attachment_disk_is_rejected",
+      "reason": "Windows cannot create the filesystem symlink required by this test; Linux/eligible filesystem execution still required"
+    }
+  ],
+  "javascript": {
+    "tests": 211,
+    "pass": 211,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0,
+    "source_deployment_checks_not_adopted": 14,
+    "source_deployment_test_file_removed": true
+  },
+  "php_lint": {
+    "failures": 0,
+    "details": [],
+    "files": 424
+  },
+  "compiled_blade_lint": {
+    "failures": 0,
+    "files": 234,
+    "details": []
+  },
+  "pint": {
+    "result": "PASS",
+    "files": 254
+  },
+  "build": "PASS",
+  "dependency_audits": {
+    "composer_advisories": 0,
+    "composer_abandoned": 0,
+    "npm_vulnerabilities": 0
+  },
+  "populated_baseline_upgrade": {
+    "status": "PASS",
+    "database_isolated": true,
+    "baseline_migrations": 33,
+    "upgraded_migrations": 51,
+    "new_migrations_applied": 18,
+    "baseline_tables_verified": 65,
+    "populated_baseline_tables": 48,
+    "baseline_rows_verified": 140,
+    "assertions": 799,
+    "existing_ids_preserved": true,
+    "password_hashes_preserved": true,
+    "old_columns_and_values_preserved": true,
+    "existing_relationships_preserved": true,
+    "private_attachment_files_verified": 4,
+    "private_bytes_sha256_equal": true,
+    "lesson_and_assignment_pivots_backfilled": true,
+    "global_lesson_scope_preserved": true,
+    "preparatory_secondary_and_tracks_preserved": true,
+    "primary_stage_created": false,
+    "school_branding_settings_and_logo_bytes_preserved": true,
+    "automatic_staff_permission_assignments": 0,
+    "repeat_migrate_is_noop": true,
+    "production_accessed": false,
+    "environment_files_changed": false,
+    "production_readiness_proven": false,
+    "allowed_transformations": [
+      "Map the grade-sheet teacher foreign key to the existing teacher profile; retain sheet identity/content",
+      "Convert notification metadata to JSONB without changing semantic values",
+      "Add nullable metadata columns without rewriting existing values"
+    ]
+  },
+  "cross_process_claim_race": {
+    "status": "PASS",
+    "separate_disposable_postgresql": true,
+    "waited_for_claim_lock": true,
+    "concurrent_complete_http": 409,
+    "single_attachment": true,
+    "original_lesson_retained": true,
+    "file_unchanged": true
+  },
+  "authenticated_bulk_pdf": {
+    "status": "PASS",
+    "method": "Authenticated live HTTP with normal login/CSRF; no authorization bypass",
+    "http": 200,
+    "mime": "application/pdf",
+    "bytes": 294299,
+    "pdf_pages": 1,
+    "selected_card_count": 2,
+    "unselected_card_excluded": true,
+    "browser_selection": "PASS",
+    "browser_download_event_capture": "BLOCKED",
+    "pdf_inspected": true,
+    "production_accessed": false
+  },
+  "historical_browser_cases": {
+    "total": 39,
+    "statuses": {
+      "PASS": 37,
+      "BLOCKED": 2
+    },
+    "file": "browser-cases.json"
+  },
+  "final_seven_role_browser": [
+    {
+      "role": "admin",
+      "path": "/admin/dashboard",
+      "status": "PASS"
+    },
+    {
+      "role": "teacher",
+      "path": "/teacher/dashboard",
+      "status": "PASS"
+    },
+    {
+      "role": "parent",
+      "path": "/parent/dashboard",
+      "status": "PASS"
+    },
+    {
+      "role": "supervisor",
+      "path": "/supervisor/dashboard",
+      "status": "PASS"
+    },
+    {
+      "role": "financial_officer",
+      "path": "/finance",
+      "status": "PASS"
+    },
+    {
+      "role": "staff",
+      "path": "/staff/dashboard",
+      "status": "PASS"
+    },
+    {
+      "role": "student",
+      "path": "/student/dashboard",
+      "status": "PASS"
+    }
+  ],
+  "runtime": {
+    "database_isolated": true,
+    "migrations": 51,
+    "routes": 355,
+    "named_routes": 352,
+    "duplicate_names": [],
+    "stages": [
+      "ثانوي",
+      "إعدادي"
+    ],
+    "pending_jobs": 0,
+    "failed_jobs": 0,
+    "production_checked": false
+  },
+  "policy_defaults": {
+    "teacher_sheet_visibility": false,
+    "teacher_sheet_notifications": false,
+    "parent_student_session": false,
+    "external_teacher_reports": false,
+    "shared_assignment_grading": false,
+    "public_student_card_verification": false
+  },
+  "preservation_fixes": [
+    {
+      "feature": "متوسط درجات ولي الأمر",
+      "preserved_behavior": "التوفيق بين average وaverage_percentage دون إظهار درجات غير منشورة أو تغيير حساب المتوسط.",
+      "executed_test_classes": "ParentPortalTest / ResultPublicationTest"
+    },
+    {
+      "feature": "خيار student_finance_visible",
+      "preserved_behavior": "إعادته إلى نموذج إعدادات الحسابات وحفظ قيمته عند إرسال نموذج قديم؛ لا استبدال معرفات الحسابات.",
+      "executed_test_classes": "NisbiyaUpgradePreservationTest"
+    },
+    {
+      "feature": "الشعب العلمية والأدبية",
+      "preserved_behavior": "تكليف معلم للشعبة الثانوية المناسبة دون خلطها مع العلمي أو مراحل أخرى.",
+      "executed_test_classes": "NisbiyaUpgradePreservationTest / NisbiyaCompatibilityPolicyTest"
+    },
+    {
+      "feature": "تحليل واجبات متعددة الفصول",
+      "preserved_behavior": "احتساب الواجب المنشور والمنتهي والموجّه للطالب وتسليمه الخاص فقط، مع حفظ الدرس العام.",
+      "executed_test_classes": "StudentLevelAnalysisTest / NisbiyaMigrationBackfillTest"
+    },
+    {
+      "feature": "منع cascade عند حذف مادة مستخدمة",
+      "preserved_behavior": "رفض الحذف الذي قد يزيل اختبارات ودرجات أو روابط منهج قائمة؛ لا إزالة تلقائية للروابط.",
+      "executed_test_classes": "NisbiyaUpgradePreservationTest"
+    },
+    {
+      "feature": "حذف الحساب العام الجديد",
+      "preserved_behavior": "عدم اعتماد DELETE users العام من المصدر؛ إبقاء تعديل/تعطيل الحساب. طلبات حذف الطالب والمعلم وولي الأمر والموظف مرفوضة وروابطهم محفوظة.",
+      "executed_test_classes": "NisbiyaAccountDeletionSafetyTest"
+    },
+    {
+      "feature": "التخزين المؤقت للصفحات الحساسة",
+      "preserved_behavior": "إضافة no-cache إلى مجموعات الموظف والمالية والتقارير المستلمة؛ تحقق فعلي من no-store/private/Pragma/Expires.",
+      "executed_test_classes": "NisbiyaAccountDeletionSafetyTest"
+    }
+  ],
+  "migrations_reviewed": [
+    {
+      "path": "database/migrations/2026_09_26_000001_create_stages_table.php",
+      "up_review": "جدول مراحل جديد؛ لا تعبئة تلقائية ولا إنشاء ابتدائي.",
+      "down_qualification": "down يسقط الجدول؛ يفقد إعداداته إذا استُخدم."
+    },
+    {
+      "path": "database/migrations/2026_10_05_000001_create_configurable_staff_roles.php",
+      "up_review": "جداول وقوالب أدوار جديدة؛ لا إسناد تلقائي لحسابات المدرسة.",
+      "down_qualification": "down يسقط الصلاحيات والإسنادات والقوالب؛ لا rollback آلي."
+    },
+    {
+      "path": "database/migrations/2026_10_08_000001_add_additional_guardian_details.php",
+      "up_review": "حقول ولي أمر إضافية nullable؛ لا تعديل المعرفات أو القيم القديمة.",
+      "down_qualification": "down يحذف بيانات الأعمدة الإضافية."
+    },
+    {
+      "path": "database/migrations/2026_10_09_000001_create_school_activities_table.php",
+      "up_review": "جدول أنشطة جديد وعلاقات مقيدة؛ لا حذف أثناء up.",
+      "down_qualification": "down يسقط الأنشطة."
+    },
+    {
+      "path": "database/migrations/2026_10_11_000001_repoint_grade_sheets_to_teachers.php",
+      "up_review": "تدقيق كل المراجع قبل تعديل FK؛ يتوقف عند الغموض/المفقود/التكرار. تحويل مرجع المعلم فقط، لا معرف الحساب أو الورقة.",
+      "down_qualification": "down يعيد FK إلى users ويحوّل المرجع؛ ليس downgrade عامًا مضمونًا لكل بيانات ما بعد الترقية."
+    },
+    {
+      "path": "database/migrations/2026_10_11_000002_add_submission_key_to_lessons.php",
+      "up_review": "مفتاح nullable فريد للدروس؛ لا إعادة توليد معرفات الدروس.",
+      "down_qualification": "down يحذف مفتاح منع تكرار الطلب وقيده."
+    },
+    {
+      "path": "database/migrations/2026_10_11_000003_add_soft_deletes_to_classrooms.php",
+      "up_review": "إضافة deleted_at فقط إن كان غائبًا؛ لا تغيير بيانات الفصول.",
+      "down_qualification": "down يحذف deleted_at وقد يفقد دلالة الأرشفة؛ لا تشغيل تلقائي."
+    },
+    {
+      "path": "database/migrations/2026_10_12_000001_ensure_classroom_soft_deletes.php",
+      "up_review": "إصلاح مشروط لعمود الأرشفة؛ لا إعادة إنشاء فصول.",
+      "down_qualification": "down يبقي العمود عمدًا."
+    },
+    {
+      "path": "database/migrations/2026_10_12_000003_add_multiple_classrooms_to_lessons.php",
+      "up_review": "جدول pivot وتعبئة من classroom_id غير الفارغ؛ حفظ الدرس العام ذي الفصل الفارغ.",
+      "down_qualification": "down يسقط علاقات الفصول المتعددة المضافة."
+    },
+    {
+      "path": "database/migrations/2026_10_13_000001_create_lesson_views.php",
+      "up_review": "جدول تتبع جديد؛ لا تغيير بيانات الطالب أو الدرس الأصلية.",
+      "down_qualification": "down يسقط سجل المشاهدات."
+    },
+    {
+      "path": "database/migrations/2026_10_18_000001_add_multiple_classrooms_to_assignments.php",
+      "up_review": "pivot وتعبئة الفصل القديم دون تغيير معرف الواجب/التسليم؛ تحقق مسبق من المراجع التاريخية.",
+      "down_qualification": "down يسقط علاقات الاستهداف المتعدد."
+    },
+    {
+      "path": "database/migrations/2026_10_18_000002_create_fcm_tokens.php",
+      "up_review": "توكنات جديدة وdevice_id اختياري للاشتراكات القديمة؛ لا تبديل حسابات.",
+      "down_qualification": "down يسقط التوكنات ومعرف الجهاز الإضافي."
+    },
+    {
+      "path": "database/migrations/2026_10_23_000001_create_teacher_message_receipts_table.php",
+      "up_review": "إيصالات جديدة؛ التوسيع النصي خاص MySQL ولا يقص بيانات PostgreSQL.",
+      "down_qualification": "down يسقط الإيصالات ويحافظ على اتساع النص."
+    },
+    {
+      "path": "database/migrations/2026_10_23_000002_add_portal_messenger_receipts.php",
+      "up_review": "معرف طلب اختياري وإيصالات فريدة؛ الرسائل التاريخية محفوظة.",
+      "down_qualification": "down يسقط الإيصالات/معرف الطلب؛ لا يقص محتوى الرسائل."
+    },
+    {
+      "path": "database/migrations/2026_10_24_000001_create_lesson_uploads_table.php",
+      "up_review": "بيانات رفع جديدة؛ لا نقل أو حذف مرفقات المدرسة أثناء up.",
+      "down_qualification": "down يرفض حذف الجدول عند وجود أي سجلات رفع؛ لا تعميم هذه الحماية على بقية down."
+    },
+    {
+      "path": "database/migrations/2026_10_24_000001_use_jsonb_for_pg_notification_metadata.php",
+      "up_review": "تحويل JSONB بمعاملة PostgreSQL؛ JSON تاريخي غير صالح يوقف العملية دون حذف السجل.",
+      "down_qualification": "down يبقي JSONB لضمان سلامة المحددات."
+    },
+    {
+      "path": "database/migrations/2026_10_28_000001_create_teacher_reports_tables.php",
+      "up_review": "جداول تقارير/مصادر جديدة ومفاتيح تربط الحسابات القائمة.",
+      "down_qualification": "down يسقط تقارير ومصادر محفوظة."
+    },
+    {
+      "path": "database/migrations/2026_10_28_000002_create_teacher_report_delivery_tables.php",
+      "up_review": "جداول إرسال ونسخ ثابتة جديدة؛ لا حذف إشعارات أو تقارير قائمة أثناء up.",
+      "down_qualification": "down يسقط الإرسال والنسخ الثابتة."
+    }
+  ],
+  "migration_safety": "Forward upgrade passed on populated synthetic baseline with allowed FK/JSON transformations. Several down methods delete tables/columns; destructive rollback is NOT approved or production-tested.",
+  "encryption_scope": "Queued jobs and FCM token values are encrypted. Existing Message.body and notifications.data are not encrypted-at-rest fields; no report claim of inbox encryption.",
+  "source_exclusions": {
+    "primary_stage_migration_not_adopted": true,
+    "source_deployment_checks_not_adopted": 14,
+    "untracked_broken_source_deployment_test_removed": true,
+    "existing_nested_source_copy": {
+      "tracked_files": 653,
+      "introduced_by_this_upgrade": false,
+      "modified_by_this_upgrade": false,
+      "not_a_deployment_target": true
+    }
+  },
+  "limitations": [
+    {
+      "id": "L01",
+      "feature": "Filesystem symlink security test",
+      "status": "BLOCKED",
+      "requirement": "Run the unchanged test on Linux or a Windows environment allowed to create real symlinks; do not weaken the security assertion."
+    },
+    {
+      "id": "L02",
+      "feature": "Bulk PDF browser download capture",
+      "status": "BLOCKED",
+      "requirement": "A browser automation/download surface that captures the submitted export response. Selection and authenticated live HTTP generation/rendering have passed independently."
+    },
+    {
+      "id": "L03",
+      "feature": "Real phone Firebase/Web Push receipt",
+      "status": "BLOCKED",
+      "requirement": "Authorized test Firebase credentials/project/public config/VAPID, HTTPS/service-worker scope and an authorized real phone/device. Provider acceptance is not device receipt."
+    },
+    {
+      "id": "L04",
+      "feature": "Production runtime and school-data migration",
+      "status": "NOT APPROVED / NOT TESTED",
+      "requirement": "Server PHP-FPM identity/runtime, private storage backup/restore, production snapshot preflight and reviewed migration/rollback plan, authorized deployment, persistent queue/scheduler verification."
+    },
+    {
+      "id": "L05",
+      "feature": "Source-school deployment recovery scripts",
+      "status": "NOT ADOPTED",
+      "requirement": "14 source-specific checks do not validate Nisbiya deployment. Source scripts/test module were deliberately omitted, not silently counted as passing."
+    },
+    {
+      "id": "L06",
+      "feature": "Every possible UI combination and inline video playback",
+      "status": "NOT TESTED EXHAUSTIVELY",
+      "requirement": "Browser evidence covers recorded workflows and seven role dashboards, not every CRUD combination/device/browser. Upload/FFmpeg/download passed; inline playback was not executed."
+    }
+  ],
+  "production_prerequisites": [
+    "Preserve existing APP_KEY and secrets; do not run baseline composer setup/key:generate against an existing school deployment.",
+    "Private persistent storage, ownership under actual PHP-FPM user, backups/restoration and disk/resource limits. Attached lesson-uploads/.../body.part files are referenced content, not disposable staging.",
+    "FFmpeg and proc_open under PHP-FPM; run full decode/storage receipt check in authorized staging. CLI success alone does not establish FPM/nginx/proxy upload readiness.",
+    "Persistent database notifications worker; application/jobs/batching databases aligned, retry_after greater than 60-second job timeout, Linux pcntl signals/timeouts, failure monitoring and worker restart procedure.",
+    "Scheduler for existing approved result releases and exam expiry plus scoped temporary-upload cleanup; no production scheduler or cleanup was executed during audit.",
+    "Firebase/legacy VAPID configuration, external credentials kept outside checkout, HTTPS, matching worker scope/build and a real authorized device before asserting phone delivery.",
+    "Review migrations and data anomalies/locking/disk/maintenance plan against a protected staging copy of the school database. Do not execute destructive rollback; up safety does not make down safe.",
+    "Deploy only the Laravel public document root. Existing nested source copy is unchanged history, not an additional running application or newly adopted deployment."
+  ],
+  "evidence": [
+    {
+      "file": "nisbia-audit-final-full.xml",
+      "sha256": "1a93a8b8cec1153a864f889079e8e9e77eed94d9e2551f39a5c3b5e356fee619",
+      "packaged_in_repository": false
+    },
+    {
+      "file": "nisbia-audit-final-js.log",
+      "sha256": "f605a3d559bb1881a6353db72cd2ddcddcd1ce33f51bdb62edbc8e8a83632995",
+      "packaged_in_repository": false
+    },
+    {
+      "file": "nisbia-audit-final-pint.log",
+      "sha256": "acbf5da6385237b6f4cd342c4454d93f6c4df8bfcf1687838edb3b651981c4e1",
+      "packaged_in_repository": false
+    },
+    {
+      "file": "nisbia-audit-final-build.log",
+      "sha256": "7ced5503e34c54f420e2d448b47cf2fd260315add088cf420d62bb808a39d70d",
+      "packaged_in_repository": false
+    },
+    {
+      "file": "nisbia-audit-final-php-lint.json",
+      "sha256": "c019a2090c50b76af09c60c7445b51608fb4ed68cdaf4f67d017a67d0ed09b1d",
+      "packaged_in_repository": false
+    },
+    {
+      "file": "nisbia-audit-final-blade-lint.json",
+      "sha256": "637ddc6e1dd55dc75dad758ee461e97e57c6f7fce5fef52edd73600c60c2151e",
+      "packaged_in_repository": false
+    },
+    {
+      "file": "nisbia-audit-final-runtime.json",
+      "sha256": "2a6ca676503a21a760c32816bd9f7f3917154e8c91cc122c83373985e68cd650",
+      "packaged_in_repository": false
+    },
+    {
+      "file": "nisbia-final-populated-upgrade.json",
+      "sha256": "c10b06cbbb89eb3fcdbf87b7c3c5408445ed82e5f6e786b5f0a9e103767fe8d4",
+      "packaged_in_repository": false
+    },
+    {
+      "file": "nisbia-final-claim-race.log",
+      "sha256": "faeaa7b2cbe685011c231d720d5427e807f4f8d08966c50b47a376c49d73377d",
+      "packaged_in_repository": false
+    },
+    {
+      "file": "nisbia-final-bulk-http.json",
+      "sha256": "a5cfc356a55405c258a51b88ab0f9fc86b68ad4f265235f4ccc7f2b173bd9710",
+      "packaged_in_repository": false
+    },
+    {
+      "file": "nisbia-final-audit-browser.json",
+      "sha256": "efc44043f2598d9f5629bb1a1e3c2ebfb014a79270023024a6a0f1f49fcf3dbb",
+      "packaged_in_repository": false
+    },
+    {
+      "file": "nisbia-audit-final-composer.json",
+      "sha256": "da0388a7d3f7c633e1e211de7777244aacd958f7637bf7089ce1b98f1042ef72",
+      "packaged_in_repository": false
+    },
+    {
+      "file": "nisbia-audit-final-npm.json",
+      "sha256": "083954ec514fabab790e49028e86f3897217db8aef02d8483e2c12c38716123f",
+      "packaged_in_repository": false
+    }
+  ],
+  "github_pr_review_readiness": "READY FOR REVIEW WITH DISCLOSED LIMITATIONS; no PR creation or push authorized by this report",
+  "staging_readiness": "CONDITIONAL: after operator authorization, isolated staging database/storage, server-runtime/worker/scheduler/build verification and migration preflight; disabled policy/provider features remain disabled",
+  "production_readiness": "NOT APPROVED; external delivery, Linux symlink coverage, production runtime/data snapshot preflight and explicit authorization remain outstanding",
+  "local_commit": "User authorized a local commit after audit; its actual hash and final Git status must be provided by the root agent after creation",
+  "push_performed": false,
+  "main_modified": false,
+  "production_database_modified": false,
+  "deployment_performed": false,
+  "phpunit_classes": {
+    "Tests\\Unit\\ExampleTest": {
+      "tests": 1,
+      "passed": 1,
+      "skipped": 0,
+      "assertions": 1
+    },
+    "Tests\\Unit\\LessonVideoTimeoutConfigTest": {
+      "tests": 10,
+      "passed": 10,
+      "skipped": 0,
+      "assertions": 10
+    },
+    "Tests\\Unit\\RichTextTest": {
+      "tests": 22,
+      "passed": 22,
+      "skipped": 0,
+      "assertions": 292
+    },
+    "Tests\\Unit\\SafeWebPushClientTest": {
+      "tests": 23,
+      "passed": 23,
+      "skipped": 0,
+      "assertions": 67
+    },
+    "Tests\\Feature\\AdminNotificationTest": {
+      "tests": 13,
+      "passed": 13,
+      "skipped": 0,
+      "assertions": 139
+    },
+    "Tests\\Feature\\AdminOperationsTest": {
+      "tests": 4,
+      "passed": 4,
+      "skipped": 0,
+      "assertions": 14
+    },
+    "Tests\\Feature\\AdminPortalTest": {
+      "tests": 5,
+      "passed": 5,
+      "skipped": 0,
+      "assertions": 22
+    },
+    "Tests\\Feature\\AdminPublicationTest": {
+      "tests": 26,
+      "passed": 26,
+      "skipped": 0,
+      "assertions": 276
+    },
+    "Tests\\Feature\\AdminReportsTest": {
+      "tests": 1,
+      "passed": 1,
+      "skipped": 0,
+      "assertions": 15
+    },
+    "Tests\\Feature\\ApplicationRouteSecurityTest": {
+      "tests": 5,
+      "passed": 5,
+      "skipped": 0,
+      "assertions": 2011
+    },
+    "Tests\\Feature\\AssignmentContentTest": {
+      "tests": 7,
+      "passed": 7,
+      "skipped": 0,
+      "assertions": 42
+    },
+    "Tests\\Feature\\AssignmentDeadlineTest": {
+      "tests": 17,
+      "passed": 17,
+      "skipped": 0,
+      "assertions": 71
+    },
+    "Tests\\Feature\\AutomaticStudentNotificationTest": {
+      "tests": 5,
+      "passed": 5,
+      "skipped": 0,
+      "assertions": 35
+    },
+    "Tests\\Feature\\ClassroomDeletionTest": {
+      "tests": 3,
+      "passed": 3,
+      "skipped": 0,
+      "assertions": 16
+    },
+    "Tests\\Feature\\ClassroomSectionTest": {
+      "tests": 1,
+      "passed": 1,
+      "skipped": 0,
+      "assertions": 8
+    },
+    "Tests\\Feature\\ClassroomSectionsTest": {
+      "tests": 3,
+      "passed": 3,
+      "skipped": 0,
+      "assertions": 13
+    },
+    "Tests\\Feature\\DefaultAccountPasswordTest": {
+      "tests": 6,
+      "passed": 6,
+      "skipped": 0,
+      "assertions": 103
+    },
+    "Tests\\Feature\\DemoPortalSmokeTest": {
+      "tests": 1,
+      "passed": 1,
+      "skipped": 0,
+      "assertions": 174
+    },
+    "Tests\\Feature\\FcmDeliveryTest": {
+      "tests": 9,
+      "passed": 9,
+      "skipped": 0,
+      "assertions": 27
+    },
+    "Tests\\Feature\\FcmMigrationTest": {
+      "tests": 3,
+      "passed": 3,
+      "skipped": 0,
+      "assertions": 22
+    },
+    "Tests\\Feature\\FcmPostgresGrammarTest": {
+      "tests": 1,
+      "passed": 1,
+      "skipped": 0,
+      "assertions": 12
+    },
+    "Tests\\Feature\\FcmReadinessTest": {
+      "tests": 13,
+      "passed": 13,
+      "skipped": 0,
+      "assertions": 99
+    },
+    "Tests\\Feature\\FcmTokenTest": {
+      "tests": 12,
+      "passed": 12,
+      "skipped": 0,
+      "assertions": 106
+    },
+    "Tests\\Feature\\GeminiSmartTutorGatewayTest": {
+      "tests": 11,
+      "passed": 11,
+      "skipped": 0,
+      "assertions": 23
+    },
+    "Tests\\Feature\\GradeSheetTeacherMigrationTest": {
+      "tests": 3,
+      "passed": 3,
+      "skipped": 0,
+      "assertions": 7
+    },
+    "Tests\\Feature\\HomeworkInstructionsTest": {
+      "tests": 6,
+      "passed": 6,
+      "skipped": 0,
+      "assertions": 37
+    },
+    "Tests\\Feature\\LessonResumableUploadTest": {
+      "tests": 11,
+      "passed": 11,
+      "skipped": 0,
+      "assertions": 266
+    },
+    "Tests\\Feature\\LessonUploadDeploymentRecoveryTest": {
+      "tests": 1,
+      "passed": 1,
+      "skipped": 0,
+      "assertions": 17
+    },
+    "Tests\\Feature\\LessonUploadFailureResponseTest": {
+      "tests": 10,
+      "passed": 10,
+      "skipped": 0,
+      "assertions": 76
+    },
+    "Tests\\Feature\\LessonUploadSafetyTest": {
+      "tests": 35,
+      "passed": 35,
+      "skipped": 0,
+      "assertions": 174
+    },
+    "Tests\\Feature\\LessonVideoRuntimeTest": {
+      "tests": 12,
+      "passed": 12,
+      "skipped": 0,
+      "assertions": 53
+    },
+    "Tests\\Feature\\LessonViewsTest": {
+      "tests": 10,
+      "passed": 10,
+      "skipped": 0,
+      "assertions": 84
+    },
+    "Tests\\Feature\\LibraryCatalogTest": {
+      "tests": 7,
+      "passed": 7,
+      "skipped": 0,
+      "assertions": 101
+    },
+    "Tests\\Feature\\LibraryFileRecoveryTest": {
+      "tests": 7,
+      "passed": 7,
+      "skipped": 0,
+      "assertions": 51
+    },
+    "Tests\\Feature\\LibraryImportTest": {
+      "tests": 8,
+      "passed": 8,
+      "skipped": 0,
+      "assertions": 56
+    },
+    "Tests\\Feature\\LibraryUploadTest": {
+      "tests": 17,
+      "passed": 17,
+      "skipped": 0,
+      "assertions": 204
+    },
+    "Tests\\Feature\\MessageQueueReadinessTest": {
+      "tests": 11,
+      "passed": 11,
+      "skipped": 0,
+      "assertions": 68
+    },
+    "Tests\\Feature\\NisbiyaAccountDeletionSafetyTest": {
+      "tests": 3,
+      "passed": 3,
+      "skipped": 0,
+      "assertions": 42
+    },
+    "Tests\\Feature\\NisbiyaAuditTimezoneTest": {
+      "tests": 1,
+      "passed": 1,
+      "skipped": 0,
+      "assertions": 2
+    },
+    "Tests\\Feature\\NisbiyaCompatibilityPolicyTest": {
+      "tests": 3,
+      "passed": 3,
+      "skipped": 0,
+      "assertions": 14
+    },
+    "Tests\\Feature\\NisbiyaMigrationBackfillTest": {
+      "tests": 4,
+      "passed": 4,
+      "skipped": 0,
+      "assertions": 39
+    },
+    "Tests\\Feature\\NisbiyaMigrationSafetyTest": {
+      "tests": 2,
+      "passed": 2,
+      "skipped": 0,
+      "assertions": 8
+    },
+    "Tests\\Feature\\NisbiyaSafeImportTest": {
+      "tests": 8,
+      "passed": 8,
+      "skipped": 0,
+      "assertions": 38
+    },
+    "Tests\\Feature\\NisbiyaStaffScopeTest": {
+      "tests": 10,
+      "passed": 10,
+      "skipped": 0,
+      "assertions": 72
+    },
+    "Tests\\Feature\\NisbiyaStudentCardPrivacyTest": {
+      "tests": 2,
+      "passed": 2,
+      "skipped": 0,
+      "assertions": 14
+    },
+    "Tests\\Feature\\NisbiyaUpgradePreservationTest": {
+      "tests": 4,
+      "passed": 4,
+      "skipped": 0,
+      "assertions": 42
+    },
+    "Tests\\Feature\\NotificationNavigationTest": {
+      "tests": 27,
+      "passed": 27,
+      "skipped": 0,
+      "assertions": 142
+    },
+    "Tests\\Feature\\NotificationPostgresMetadataTest": {
+      "tests": 4,
+      "passed": 4,
+      "skipped": 0,
+      "assertions": 14
+    },
+    "Tests\\Feature\\NotificationReleaseSecurityTest": {
+      "tests": 9,
+      "passed": 9,
+      "skipped": 0,
+      "assertions": 71
+    },
+    "Tests\\Feature\\ParentAnnouncementNotificationTest": {
+      "tests": 11,
+      "passed": 11,
+      "skipped": 0,
+      "assertions": 91
+    },
+    "Tests\\Feature\\ParentFollowupNotificationTest": {
+      "tests": 10,
+      "passed": 10,
+      "skipped": 0,
+      "assertions": 92
+    },
+    "Tests\\Feature\\ParentIdentityTest": {
+      "tests": 9,
+      "passed": 9,
+      "skipped": 0,
+      "assertions": 100
+    },
+    "Tests\\Feature\\ParentMessageChildScopeTest": {
+      "tests": 11,
+      "passed": 11,
+      "skipped": 0,
+      "assertions": 257
+    },
+    "Tests\\Feature\\ParentPortalTest": {
+      "tests": 13,
+      "passed": 13,
+      "skipped": 0,
+      "assertions": 75
+    },
+    "Tests\\Feature\\ParentPushTransactionTest": {
+      "tests": 2,
+      "passed": 2,
+      "skipped": 0,
+      "assertions": 8
+    },
+    "Tests\\Feature\\ParentSubjectFilterTest": {
+      "tests": 10,
+      "passed": 10,
+      "skipped": 0,
+      "assertions": 96
+    },
+    "Tests\\Feature\\PortalAnnouncementFeedTest": {
+      "tests": 3,
+      "passed": 3,
+      "skipped": 0,
+      "assertions": 33
+    },
+    "Tests\\Feature\\PortalMessengerTest": {
+      "tests": 31,
+      "passed": 31,
+      "skipped": 0,
+      "assertions": 492
+    },
+    "Tests\\Feature\\PublicLoginTest": {
+      "tests": 12,
+      "passed": 12,
+      "skipped": 0,
+      "assertions": 67
+    },
+    "Tests\\Feature\\PushEndpointAuditTest": {
+      "tests": 2,
+      "passed": 2,
+      "skipped": 0,
+      "assertions": 46
+    },
+    "Tests\\Feature\\PushLoginReminderTest": {
+      "tests": 4,
+      "passed": 4,
+      "skipped": 0,
+      "assertions": 24
+    },
+    "Tests\\Feature\\QueuedMessageStorageTest": {
+      "tests": 11,
+      "passed": 11,
+      "skipped": 0,
+      "assertions": 60
+    },
+    "Tests\\Feature\\ResultPublicationTest": {
+      "tests": 5,
+      "passed": 5,
+      "skipped": 0,
+      "assertions": 80
+    },
+    "Tests\\Feature\\SchoolAccountNumberingTest": {
+      "tests": 6,
+      "passed": 6,
+      "skipped": 0,
+      "assertions": 36
+    },
+    "Tests\\Feature\\SchoolBrandingTest": {
+      "tests": 6,
+      "passed": 6,
+      "skipped": 0,
+      "assertions": 37
+    },
+    "Tests\\Feature\\SchoolChatTest": {
+      "tests": 8,
+      "passed": 8,
+      "skipped": 0,
+      "assertions": 77
+    },
+    "Tests\\Feature\\StudentAcademicPortalTest": {
+      "tests": 86,
+      "passed": 86,
+      "skipped": 0,
+      "assertions": 287
+    },
+    "Tests\\Feature\\StudentAnnouncementNotificationTest": {
+      "tests": 11,
+      "passed": 11,
+      "skipped": 0,
+      "assertions": 79
+    },
+    "Tests\\Feature\\StudentCardPrintLayoutTest": {
+      "tests": 11,
+      "passed": 11,
+      "skipped": 0,
+      "assertions": 75
+    },
+    "Tests\\Feature\\StudentEducationTest": {
+      "tests": 7,
+      "passed": 7,
+      "skipped": 0,
+      "assertions": 88
+    },
+    "Tests\\Feature\\StudentFinanceTest": {
+      "tests": 6,
+      "passed": 6,
+      "skipped": 0,
+      "assertions": 74
+    },
+    "Tests\\Feature\\StudentHomeworkSubmissionTest": {
+      "tests": 13,
+      "passed": 13,
+      "skipped": 0,
+      "assertions": 119
+    },
+    "Tests\\Feature\\StudentLevelAnalysisTest": {
+      "tests": 9,
+      "passed": 9,
+      "skipped": 0,
+      "assertions": 54
+    },
+    "Tests\\Feature\\StudentLibraryReaderTest": {
+      "tests": 2,
+      "passed": 2,
+      "skipped": 0,
+      "assertions": 48
+    },
+    "Tests\\Feature\\StudentLibraryTest": {
+      "tests": 6,
+      "passed": 6,
+      "skipped": 0,
+      "assertions": 58
+    },
+    "Tests\\Feature\\StudentPwaTest": {
+      "tests": 2,
+      "passed": 2,
+      "skipped": 0,
+      "assertions": 25
+    },
+    "Tests\\Feature\\StudentSmartTutorReliabilityTest": {
+      "tests": 29,
+      "passed": 29,
+      "skipped": 0,
+      "assertions": 285
+    },
+    "Tests\\Feature\\StudentSmartTutorTest": {
+      "tests": 4,
+      "passed": 4,
+      "skipped": 0,
+      "assertions": 30
+    },
+    "Tests\\Feature\\StudentTutorRenderingTest": {
+      "tests": 3,
+      "passed": 3,
+      "skipped": 0,
+      "assertions": 68
+    },
+    "Tests\\Feature\\SupervisorAttendanceFlowTest": {
+      "tests": 8,
+      "passed": 8,
+      "skipped": 0,
+      "assertions": 77
+    },
+    "Tests\\Feature\\SupervisorAttendanceTest": {
+      "tests": 11,
+      "passed": 11,
+      "skipped": 0,
+      "assertions": 46
+    },
+    "Tests\\Feature\\SupervisorGuardianCallNotificationTest": {
+      "tests": 1,
+      "passed": 1,
+      "skipped": 0,
+      "assertions": 11
+    },
+    "Tests\\Feature\\TeacherAssignmentFormTest": {
+      "tests": 2,
+      "passed": 2,
+      "skipped": 0,
+      "assertions": 11
+    },
+    "Tests\\Feature\\TeacherGradeDeliveryTest": {
+      "tests": 21,
+      "passed": 21,
+      "skipped": 0,
+      "assertions": 155
+    },
+    "Tests\\Feature\\TeacherGradeSheetPercentageTest": {
+      "tests": 1,
+      "passed": 1,
+      "skipped": 0,
+      "assertions": 44
+    },
+    "Tests\\Feature\\TeacherHighSeverityFixTest": {
+      "tests": 31,
+      "passed": 31,
+      "skipped": 0,
+      "assertions": 171
+    },
+    "Tests\\Feature\\TeacherLessonFormTest": {
+      "tests": 11,
+      "passed": 11,
+      "skipped": 0,
+      "assertions": 60
+    },
+    "Tests\\Feature\\TeacherLessonPreviewTest": {
+      "tests": 10,
+      "passed": 9,
+      "skipped": 1,
+      "assertions": 116
+    },
+    "Tests\\Feature\\TeacherMessageInboxPerformanceTest": {
+      "tests": 3,
+      "passed": 3,
+      "skipped": 0,
+      "assertions": 256
+    },
+    "Tests\\Feature\\TeacherMessageReceiptTest": {
+      "tests": 13,
+      "passed": 13,
+      "skipped": 0,
+      "assertions": 365
+    },
+    "Tests\\Feature\\TeacherMessageRecoveryTest": {
+      "tests": 10,
+      "passed": 10,
+      "skipped": 0,
+      "assertions": 72
+    },
+    "Tests\\Feature\\TeacherMessagingDeliveryTest": {
+      "tests": 6,
+      "passed": 6,
+      "skipped": 0,
+      "assertions": 206
+    },
+    "Tests\\Feature\\TeacherMessagingTest": {
+      "tests": 30,
+      "passed": 30,
+      "skipped": 0,
+      "assertions": 321
+    },
+    "Tests\\Feature\\TeacherNotificationTest": {
+      "tests": 31,
+      "passed": 31,
+      "skipped": 0,
+      "assertions": 268
+    },
+    "Tests\\Feature\\TeacherPortalWorkflowTest": {
+      "tests": 7,
+      "passed": 7,
+      "skipped": 0,
+      "assertions": 62
+    },
+    "Tests\\Feature\\TeacherReportDeliveryTest": {
+      "tests": 24,
+      "passed": 24,
+      "skipped": 0,
+      "assertions": 296
+    },
+    "Tests\\Feature\\TeacherReportTest": {
+      "tests": 23,
+      "passed": 23,
+      "skipped": 0,
+      "assertions": 269
+    },
+    "Tests\\Feature\\TeacherSheetDetailsTest": {
+      "tests": 4,
+      "passed": 4,
+      "skipped": 0,
+      "assertions": 25
+    },
+    "Tests\\Feature\\TutorDeliveryMetadataMigrationTest": {
+      "tests": 3,
+      "passed": 3,
+      "skipped": 0,
+      "assertions": 18
+    },
+    "Tests\\Feature\\WebPushTransportSecurityTest": {
+      "tests": 7,
+      "passed": 7,
+      "skipped": 0,
+      "assertions": 31
+    }
+  },
+  "historical_browser_case_file": "browser-cases.json"
+}

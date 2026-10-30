@@ -1,0 +1,92 @@
+.teacher-portal .teacher-lesson-form { max-width: 1060px; margin-inline: auto; padding: 0; overflow: hidden; }
+.teacher-lesson-form [hidden] { display: none !important; }
+.teacher-lesson-form .lesson-form-section { padding: 26px 30px; border-bottom: 1px solid #e5ebf0; }
+.teacher-lesson-form .lesson-section-heading { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 22px; }
+.teacher-lesson-form .lesson-step { display: grid; flex: 0 0 34px; width: 34px; height: 34px; place-items: center; border-radius: 11px; background: #e8f5f2; color: #0a5d57; font-weight: 800; }
+.teacher-lesson-form h2 { margin: 2px 0 5px; color: #172b3a; font-size: 19px; line-height: 1.5; }
+.teacher-lesson-form .lesson-section-heading p { margin: 0; color: #687888; font-size: 13px; line-height: 1.7; }
+.teacher-lesson-form .lesson-fields-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.teacher-lesson-form .lesson-field { display: grid; min-width: 0; gap: 8px; color: #324657; font-size: 14px; }
+.teacher-lesson-form .lesson-field input:not([type="radio"]):not([type="checkbox"]), .teacher-lesson-form .lesson-field select { width: 100%; min-height: 48px; box-sizing: border-box; }
+.teacher-lesson-form .lesson-field select { background-color: #fff; }
+.teacher-lesson-form .label-head { color: #324657; }
+.teacher-lesson-form .label-head small { color: #758595; font-size: 12px; font-weight: 400; }
+.teacher-lesson-form fieldset { min-width: 0; padding: 0; border: 0; }
+.teacher-lesson-form .lesson-branches-fieldset { margin: 30px 0 0; }
+.teacher-lesson-form legend { margin-bottom: 12px; color: #324657; font-size: 14px; font-weight: 700; }
+.teacher-lesson-form .lesson-all-branches { display: inline-flex; align-items: center; gap: 10px; margin: 0; color: #183749; font-size: 14px; cursor: pointer; }
+.teacher-lesson-form .lesson-all-branches input { margin-top: 0; }
+.teacher-lesson-form .lesson-all-branches:has(input:disabled) { opacity: .58; cursor: default; }
+.teacher-lesson-form .lesson-choice-grid { display: flex; flex-wrap: wrap; gap: 12px; }
+.teacher-lesson-form .lesson-choice { display: flex; flex: 1 1 220px; align-items: flex-start; gap: 10px; min-width: 0; margin: 0; padding: 16px; border: 1px solid #dce5ed; border-radius: 12px; background: #fff; cursor: pointer; transition: border-color .15s, background .15s; }
+.teacher-lesson-form .lesson-choice:has(input:checked) { border-color: #149086; background: #f0faf7; box-shadow: 0 0 0 1px #149086; }
+.teacher-lesson-form .lesson-choice:has(input:disabled) { opacity: .58; cursor: default; }
+.teacher-lesson-form input[type="radio"], .teacher-lesson-form input[type="checkbox"] { flex: 0 0 18px; width: 18px; height: 18px; margin: 3px 0 0; accent-color: #0f766e; cursor: pointer; }
+.teacher-lesson-form .lesson-choice strong, .teacher-lesson-form .lesson-branch-card strong { display: block; color: #183749; font-size: 14px; line-height: 1.6; }
+.teacher-lesson-form .lesson-choice small, .teacher-lesson-form .lesson-branch-card small { display: block; margin-top: 3px; color: #687888; font-size: 12px; font-weight: 400; line-height: 1.7; }
+.teacher-lesson-form .lesson-branch-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 16px; }
+.teacher-lesson-form .lesson-branch-card { display: flex; align-items: flex-start; gap: 10px; min-width: 0; padding: 14px 16px; border: 1px solid #dce5ed; border-radius: 11px; background: #fafcfd; cursor: pointer; }
+.teacher-lesson-form .lesson-branch-card:has(input:checked) { background: #eaf7f3; border-color: #83bfb4; }
+.teacher-lesson-form .lesson-branch-card:focus-within { outline: 3px solid #c5e3df; outline-offset: 2px; }
+.teacher-lesson-form .lesson-inline-note { margin: 12px 0 0; color: #697b8b; font-size: 13px; line-height: 1.8; }
+.teacher-lesson-form .lesson-inline-error { padding: 11px 13px; border-radius: 9px; background: #fff0f0; color: #a63434; font-size: 13px; }
+.teacher-lesson-form .lesson-empty-state { padding: 15px; border-radius: 10px; background: #fff7e7; color: #815a1c; line-height: 1.8; }
+.teacher-lesson-form .lesson-editor-field { margin-top: 20px; }
+.teacher-lesson-form .rich-toolbar { margin-top: 10px; margin-bottom: 8px; }
+.teacher-lesson-form .rich-editor { min-height: 160px; overflow-wrap: anywhere; }
+.teacher-lesson-form .rich-editor:focus-visible { outline: 3px solid #c5e3df; outline-offset: 2px; }
+.teacher-lesson-form .lesson-attachments { margin-top: 20px; }
+.teacher-lesson-form input[type="file"] { padding: 14px; border: 1px dashed #b9cec9; border-radius: 12px; background: #f7fbfa; }
+.teacher-lesson-form input[type="file"]::file-selector-button { margin-inline-end: 12px; padding: 9px 14px; border: 0; border-radius: 8px; background: #e5f2ee; color: #0b5a53; font-weight: 700; cursor: pointer; }
+.teacher-lesson-form .lesson-existing-files { margin-top: 16px; padding: 14px 16px; border: 1px solid #e2e9ef; border-radius: 10px; font-size: 13px; }
+.teacher-lesson-form .lesson-existing-files ul { margin: 7px 0 10px; padding-inline-start: 22px; color: #697b8b; overflow-wrap: anywhere; }
+.teacher-lesson-form .lesson-upload-card { position: relative; display: grid; grid-template-columns: 86px minmax(0,1fr); gap: 12px; align-items: center; margin-top: 10px; padding: 10px; border: 1px solid #dce5ed; border-radius: 10px; background: #fff; overflow: hidden; }
+.teacher-lesson-form .lesson-upload-preview { width: 86px; height: 64px; display: grid; place-items: center; border-radius: 7px; background: #f0f5f7; color: #6b7c87; overflow: hidden; font-size: 11px; }
+.teacher-lesson-form .lesson-upload-preview img, .teacher-lesson-form .lesson-upload-preview video { width: 100%; height: 100%; object-fit: cover; }
+.teacher-lesson-form .lesson-upload-name { display: block; overflow: hidden; color: #263f50; font-size: 13px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+.teacher-lesson-form .lesson-upload-status { display: flex; justify-content: space-between; gap: 8px; margin-top: 4px; color: #738390; font-size: 11px; }
+.teacher-lesson-form .lesson-upload-progress { height: 7px; margin-top: 7px; border-radius: 99px; background: #e7eef1; overflow: hidden; }
+.teacher-lesson-form .lesson-upload-progress i { display: block; width: 0; height: 100%; border-radius: inherit; background: #149086; transition: width .15s linear; }
+.teacher-lesson-form .lesson-upload-card.is-error .lesson-upload-progress i { background: #c94b4b; }
+.teacher-lesson-form .lesson-upload-remove { margin-top: 5px; padding: 0; border: 0; background: transparent; color: #a13e3e; font: inherit; font-size: 11px; cursor: pointer; }
+.teacher-lesson-form .lesson-upload-action { margin: 8px 0 0 8px; padding: 5px 10px; border: 1px solid #c6dcd8; border-radius: 6px; background: #f0f7f5; color: #16675e; font: inherit; font-size: 12px; cursor: pointer; }
+.teacher-lesson-form .lesson-upload-action:disabled { opacity: .55; cursor: default; }
+.teacher-lesson-form .lesson-optional { margin-top: 18px; border: 1px solid #e1e9ee; border-radius: 10px; }
+.teacher-lesson-form .lesson-optional summary { padding: 13px 16px; color: #506a7b; font-size: 13px; cursor: pointer; }
+.teacher-lesson-form .lesson-optional summary span { margin-inline-start: 8px; color: #8795a1; font-size: 12px; }
+.teacher-lesson-form .lesson-optional .lesson-field { padding: 0 16px 16px; }
+.teacher-lesson-form .lesson-publication-fieldset { margin: 0; }
+.teacher-lesson-form .lesson-schedule { max-width: 420px; margin-top: 18px; padding: 16px; border-radius: 12px; background: #f5f8fa; }
+.teacher-lesson-form .lesson-schedule input { direction: ltr; }
+.teacher-lesson-form .lesson-submit-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 18px; padding: 22px 30px 16px; background: #fafcfd; }
+.teacher-lesson-form .lesson-submit-bar p { flex: 1 1 220px; margin: 0; color: #607582; font-size: 13px; line-height: 1.8; }
+.teacher-lesson-form .lesson-submit-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.teacher-lesson-form .lesson-submit-actions .btn { min-height: 45px; }
+.teacher-lesson-form .lesson-back-link { display: inline-block; margin: 0 30px 22px; color: #607582; font-size: 13px; }
+.teacher-lesson-form .lesson-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+.teacher-lesson-form select.native-select-hidden { position: absolute !important; width: 1px !important; height: 1px !important; min-width: 0 !important; min-height: 0 !important; margin: 0 !important; padding: 0 !important; border: 0 !important; opacity: 0 !important; pointer-events: none !important; }
+.teacher-lesson-form .select-ui { position: relative; display: block; width: 100%; min-width: 0; }
+.teacher-lesson-form .select-ui__button { position: relative; width: 100%; min-height: 48px; padding: 12px 15px 12px 40px; border: 1px solid #dce5ed; border-radius: 11px; background: #fff; color: #172b3a; font: inherit; text-align: right; cursor: pointer; }
+.teacher-lesson-form .select-ui__button::after { content: ''; position: absolute; top: 50%; left: 17px; width: 7px; height: 7px; border-right: 2px solid #687888; border-bottom: 2px solid #687888; transform: translateY(-65%) rotate(45deg); }
+.teacher-lesson-form .select-ui__button:focus-visible, .teacher-lesson-form .select-ui--open .select-ui__button { outline: 3px solid #c5e3df; outline-offset: 2px; border-color: #149086; }
+.teacher-lesson-form .select-ui--open .select-ui__button::after { transform: translateY(-35%) rotate(225deg); }
+.teacher-lesson-form .select-ui__button:disabled { background: #f5f8fa; color: #758595; cursor: default; }
+.teacher-lesson-form .select-ui__button.is-placeholder { color: #758595; }
+body:has(.teacher-lesson-form) .select-ui__menu { position: fixed; z-index: 1000; display: none; box-sizing: border-box; max-height: 280px; overflow-y: auto; padding: 6px; border: 1px solid #dce5ed; border-radius: 12px; background: #fff; box-shadow: 0 12px 32px rgba(23, 43, 58, .18); direction: rtl; }
+body:has(.teacher-lesson-form) .select-ui__menu.open { display: grid; gap: 3px; }
+body:has(.teacher-lesson-form) .select-ui__option { width: 100%; min-height: 42px; padding: 10px 12px; border: 0; border-radius: 8px; background: transparent; color: #172b3a; font: inherit; text-align: right; cursor: pointer; }
+body:has(.teacher-lesson-form) .select-ui__option:hover, body:has(.teacher-lesson-form) .select-ui__option:focus-visible { outline: 0; background: #f0f7f5; }
+body:has(.teacher-lesson-form) .select-ui__option.is-selected { background: #e8f5f2; color: #0a5d57; font-weight: 700; }
+body:has(.teacher-lesson-form) .select-ui__option:disabled { color: #9aa4b2; cursor: default; }
+@media (max-width: 640px) {
+    .teacher-lesson-form .lesson-form-section { padding: 22px 18px; }
+    .teacher-lesson-form .lesson-fields-grid { grid-template-columns: 1fr; gap: 16px; }
+    .teacher-lesson-form .lesson-branch-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .teacher-lesson-form .lesson-choice { flex-basis: 100%; padding: 14px; }
+    .teacher-lesson-form .lesson-branch-card { padding: 12px; }
+    .teacher-lesson-form .lesson-submit-bar { padding: 20px 18px 16px; }
+    .teacher-lesson-form .lesson-submit-actions { width: 100%; flex-direction: column-reverse; }
+    .teacher-lesson-form .lesson-submit-actions .btn { width: 100%; }
+    .teacher-lesson-form .lesson-back-link { margin-inline: 18px; }
+}
+@media (prefers-reduced-motion: reduce) { .teacher-lesson-form .lesson-choice { transition: none; } }

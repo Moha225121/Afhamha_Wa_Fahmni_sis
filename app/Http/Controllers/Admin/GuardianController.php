@@ -7,8 +7,9 @@ use App\Http\Requests\GuardianRequest;
 use App\Models\Guardian;
 use App\Models\Student;
 use App\Models\User;
-use App\Services\AuditService;
 use App\Services\AccountPasswordService;
+use App\Services\AuditService;
+use App\Services\SchoolAccountService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -41,9 +42,9 @@ class GuardianController extends Controller
     public function store(GuardianRequest $r, AccountPasswordService $passwords): RedirectResponse
     {
         $g = DB::transaction(function () use ($r, $passwords) {
-            app(\App\Services\SchoolAccountService::class)->settings(true);
+            app(SchoolAccountService::class)->settings(true);
             $u = User::create($r->only('name', 'email', 'phone') + ['password' => $passwords->forNewAccount($r->validated('password')), 'role' => 'parent', 'status' => $r->status]);
-            $g = $u->guardian()->create($r->only('relationship', 'status'));
+            $g = $u->guardian()->create($r->only('relationship', 'status') + $r->additionalGuardianDetails());
             $g->students()->sync($r->input('student_ids', []));
             AuditService::record('created', 'parents', $g);
 
@@ -61,7 +62,7 @@ class GuardianController extends Controller
             if ($r->filled('password')) {
                 $d['password'] = $r->password;
             }$parent->user->update($d);
-            $parent->update($r->only('relationship', 'status'));
+            $parent->update($r->only('relationship', 'status') + $r->additionalGuardianDetails());
             $parent->students()->sync($r->input('student_ids', []));
             AuditService::record('updated', 'parents', $parent, $old);
         });
@@ -69,8 +70,18 @@ class GuardianController extends Controller
         return redirect()->route('admin.parents.show', $parent)->with('success', 'تم التحديث.');
     }
 
+    public function destroy(Guardian $parent): RedirectResponse
+    {
+        $parent->students()->detach();
+        $parent->delete();
+        $parent->user()->delete();
+        AuditService::record('deleted', 'guardians', $parent);
+
+        return redirect()->route('admin.parents.index')->with('success', 'تم حذف ولي الأمر.');
+    }
+
     public function show(Guardian $parent): View
     {
-        return view('admin.parents.show',['parent' => $parent->load(['user', 'students.user'])]);
+        return view('admin.parents.show', ['parent' => $parent->load(['user', 'students.user'])]);
     }
 }

@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Announcement;
 use App\Models\Student;
 use App\Models\User;
+use App\Notifications\ParentPortalNotification;
 use App\Notifications\StudentAnnouncementNotification;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
@@ -25,10 +26,10 @@ class StudentNotificationService
 
         Student::query()->where('status', 'active')
             ->whereHas('user', fn (Builder $users) => $users->where('role', 'student')->where('status', 'active'))
-            ->when($announcement->audience === 'classroom', fn (Builder $students) => $students->where('classroom_id', $announcement->classroom_id))
+            ->when($announcement->classroom_id, fn (Builder $students) => $students->where('classroom_id', $announcement->classroom_id))
             ->with('user')->chunkById(200, function ($students) use ($announcement): void {
                 foreach ($students as $student) {
-                    $this->storeAnnouncement($student->user, $announcement);
+                    $this->storeAnnouncement($student->user, $announcement, null, true);
                 }
             });
     }
@@ -62,8 +63,11 @@ class StudentNotificationService
             }
         }
 
-        return $student->user->notifications()->whereNotIn('id', $withdrawnIds)->where(function (Builder $query) use ($ids): void {
-            $query->where('type', '!=', StudentAnnouncementNotification::class)
+        $legacyAnnouncementIds = $this->legacyAnnouncementIds($student->user);
+
+        return $student->user->notifications()->whereNotIn('id', $withdrawnIds)->where(function (Builder $query) use ($ids, $legacyAnnouncementIds): void {
+            $query->where(fn (Builder $personal) => $personal->where('type', '!=', StudentAnnouncementNotification::class)
+                ->whereNotIn('id', $legacyAnnouncementIds))
                 ->orWhereIn('id', $ids);
         });
     }
@@ -98,17 +102,12 @@ class StudentNotificationService
 
     public function destination(DatabaseNotification $notification): string
     {
-        if ($notification->type === StudentAnnouncementNotification::class) {
-            return route('student.announcements.show', $notification->data['announcement_id']);
-        }
+        $url = $notification->data['url'] ?? null;
+        // Keep the existing summary API's relative links for legacy/manual records.
+        $absolute = $notification->type === StudentAnnouncementNotification::class
+            || ! is_string($url) || ! str_starts_with($url, '/');
 
-        $url = $notification->data['url'] ?? '';
-        $path = is_string($url) ? parse_url($url, PHP_URL_PATH) : null;
-        if (is_string($path) && str_starts_with($path, '/student/')) {
-            return $path;
-        }
-
-        return route('student.notifications');
+        return app(NotificationDestination::class)->for($notification->notifiable, $notification->data, $absolute);
     }
 
     public function markAnnouncementRead(Student $student, Announcement $announcement): void
@@ -117,36 +116,63 @@ class StudentNotificationService
         $student->user->notifications()->whereKey($id)->whereNull('read_at')->update(['read_at' => now()]);
     }
 
-    private function storeAnnouncement(User $user, Announcement $announcement, ?array $existingById = null): string
+    private function storeAnnouncement(User $user, Announcement $announcement, ?array $existingById = null, bool $push = false): string
     {
         $id = Uuid::uuid5(Uuid::NAMESPACE_URL, 'awf:student-announcement:'.$announcement->id.':'.$user->id)->toString();
-        $data = json_encode([
+        $payload = [
             'title' => $announcement->title,
             'body' => Str::limit(strip_tags($announcement->content), 220),
             'category' => 'announcement',
             'announcement_id' => $announcement->id,
             'url' => route('student.announcements.show', $announcement->id, false),
-        ], JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
+        ];
+        $data = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
 
         $existingData = $existingById === null
             ? DB::table('notifications')->where('id', $id)->value('data')
             : ($existingById[$id] ?? null);
         if ($existingData === null) {
+            // Older Nasr announcements used generic notifications without an announcement id.
+            // Preserve their read state while the bell replaces those duplicate feed entries.
+            $legacy = $user->notifications()->where('type', ParentPortalNotification::class)
+                ->get()->first(fn (DatabaseNotification $record) => ($record->data['category'] ?? null) === 'announcement'
+                    && ($record->data['title'] ?? null) === $announcement->title
+                    && ($record->data['body'] ?? '') === Str::limit($announcement->content, 140));
             // The deterministic primary key also makes overlapping polls/publications safe.
-            DB::table('notifications')->insertOrIgnore([
+            $inserted = DB::table('notifications')->insertOrIgnore([
                 'id' => $id,
                 'type' => StudentAnnouncementNotification::class,
                 'notifiable_type' => $user->getMorphClass(),
                 'notifiable_id' => $user->id,
                 'data' => $data,
-                'read_at' => null,
+                'read_at' => $legacy?->read_at,
                 'created_at' => $announcement->published_at ?? $announcement->updated_at ?? now(),
                 'updated_at' => now(),
             ]);
+            if ($inserted && $push && ! $legacy) {
+                app(PushNotificationService::class)->send($user, json_decode($data, true) + ['title' => $announcement->title, 'notification_id' => $id]);
+            }
         } elseif ($existingData !== $data) {
-            DB::table('notifications')->where('id', $id)->update(['data' => $data, 'updated_at' => now()]);
+            // JSONB changes object key order and whitespace; these flat payloads
+            // should only be rewritten when a value actually changes.
+            $existingPayload = is_string($existingData) ? json_decode($existingData, true) : null;
+            if (is_array($existingPayload)) {
+                ksort($existingPayload);
+            }
+            ksort($payload);
+            if ($existingPayload !== $payload) {
+                DB::table('notifications')->where('id', $id)->update(['data' => $data, 'updated_at' => now()]);
+            }
         }
 
         return $id;
+    }
+
+    /** @return array<int, string> */
+    private function legacyAnnouncementIds(User $user): array
+    {
+        return $user->notifications()->where('type', ParentPortalNotification::class)->get()
+            ->filter(fn (DatabaseNotification $notification) => ($notification->data['category'] ?? null) === 'announcement')
+            ->pluck('id')->all();
     }
 }

@@ -7,6 +7,7 @@ use App\Models\Announcement;
 use App\Models\Student;
 use App\Models\Subject;
 use App\Models\TeacherStudentNote;
+use App\Services\PortalAnnouncementFeed;
 use App\Services\ResultPublicationService;
 use App\Services\StudentNotificationService;
 use Illuminate\Http\JsonResponse;
@@ -28,7 +29,7 @@ class PortalController extends Controller
             'recentGrades' => $this->recentGradesFor($student, 3),
             'subjects' => $this->subjectsFor($student),
             'todaysSchedule' => $this->todaysScheduleFor($student),
-            'announcements' => $this->announcementsFor($student, 4),
+            'announcements' => app(PortalAnnouncementFeed::class)->for($request, 4),
             'teacherNotes' => TeacherStudentNote::with('teacher.user')->where('student_id', $student->id)->latest()->limit(4)->get(),
         ]);
     }
@@ -42,6 +43,7 @@ class PortalController extends Controller
             'summary' => $this->summaryFor($student),
             'recentGrades' => $this->recentGradesFor($student, 10),
             'automaticResults' => $this->automaticResultsFor($student, 20),
+            'teacherSheetGrades' => app(ResultPublicationService::class)->teacherSheetDetails($student),
             'publications' => app(ResultPublicationService::class)->publications($student),
         ]);
     }
@@ -52,7 +54,7 @@ class PortalController extends Controller
 
         return view('student.messages', [
             'student' => $student,
-            'announcements' => $this->announcementsFor($student, 20),
+            'announcements' => app(PortalAnnouncementFeed::class)->for($request, 20),
         ]);
     }
 
@@ -87,9 +89,8 @@ class PortalController extends Controller
         $unreadCount = (clone $query)->whereNull('read_at')->count();
         $notifications = $query->when($request->boolean('unread'), fn ($notifications) => $notifications->whereNull('read_at'))
             ->latest()->orderByDesc('id')->paginate(20)->withQueryString();
-        $announcements = $this->announcementsFor($student, 20);
 
-        return view('student.notifications', compact('student', 'notifications', 'unreadCount', 'announcements'));
+        return view('student.notifications', compact('student', 'notifications', 'unreadCount'));
     }
 
     public function notificationSummary(Request $request, StudentNotificationService $service): JsonResponse
@@ -115,7 +116,6 @@ class PortalController extends Controller
     public function markAllNotificationsRead(Request $request, StudentNotificationService $service): RedirectResponse|JsonResponse
     {
         $service->queryFor($this->student($request))->whereNull('read_at')->update(['read_at' => now()]);
-
         if ($request->expectsJson()) {
             return response()->json(['unread_count' => 0]);
         }
@@ -206,15 +206,6 @@ class PortalController extends Controller
                 'users.name as teacher',
             ])
             ->orderBy('schedules.starts_at')
-            ->get();
-    }
-
-    private function announcementsFor(Student $student, int $limit): Collection
-    {
-        return Announcement::query()
-            ->visibleToStudent($student)
-            ->latest('published_at')
-            ->limit($limit)
             ->get();
     }
 }

@@ -187,8 +187,10 @@ class ParentPortalTest extends TestCase
             ->assertSee('STATIC_ASSETS', false)
             ->assertSee('/parent-offline.html', false)
             ->assertSee('/school-app-icon', false)
-            ->assertSee("addEventListener('push'", false)
+            ->assertSee("importScripts('/js/push-notification-display.js')", false)
             ->assertDontSee('/parent/dashboard', false);
+
+        $this->assertFileExists(public_path('js/push-notification-display.js'));
 
         $this->get('/parent-offline.html')
             ->assertOk()
@@ -318,9 +320,10 @@ class ParentPortalTest extends TestCase
         $this->get('/parent/results?student='.$this->unlinkedStudent->id)->assertNotFound();
     }
 
-    public function test_parent_can_message_only_admin_or_teacher_assigned_to_the_child_classroom(): void
+    public function test_parent_can_message_only_an_active_teacher_assigned_to_the_child_classroom_and_subject(): void
     {
         $subject = Subject::create(['name' => 'Science', 'code' => 'SCI-1', 'stage' => 'Primary', 'status' => 'active']);
+        $subject->classrooms()->attach($this->classroom);
         $teacher = $this->teacherForClassroom($this->classroom, $subject);
         $unassignedTeacherUser = User::factory()->create(['role' => 'teacher', 'status' => 'active']);
         Teacher::create(['user_id' => $unassignedTeacherUser->id, 'status' => 'active']);
@@ -356,7 +359,7 @@ class ParentPortalTest extends TestCase
 
         $this->actingAs($this->parentUser)->get('/parent/notifications')
             ->assertOk()->assertSeeText('New grade');
-        $this->actingAs($this->parentUser)->postJson('/parent/push-subscriptions', [
+        $this->actingAs($this->parentUser)->postJson(route('push-subscriptions.store'), [
             'endpoint' => 'https://push.example.test/parent-device',
             'keys' => ['p256dh' => 'public-key', 'auth' => 'auth-token'],
         ])->assertOk()->assertJsonPath('ok', true);
@@ -378,7 +381,7 @@ class ParentPortalTest extends TestCase
         ]);
 
         $this->actingAs($this->parentUser)->get('/parent/conversations/'.$conversation->id)->assertNotFound();
-        $this->actingAs($this->parentUser)->delete('/parent/push-subscriptions/'.$subscription->id)->assertNotFound();
+        $this->actingAs($this->parentUser)->delete(route('push-subscriptions.destroy', $subscription))->assertNotFound();
     }
 
     private function student(string $name, string $number): Student

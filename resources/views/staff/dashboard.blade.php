@@ -1,0 +1,4 @@
+@extends('staff.layout')
+@section('title','لوحة الموظف')
+@section('subtitle','الشاشات المتاحة حسب الأدوار والصلاحيات المسندة إلى حسابك.')
+@section('content')<section class="list-section"><div class="section-title"><h2>إعلانات المدرسة</h2><a href="{{ route('staff.ads.index') }}">عرض الكل</a></div>@forelse($announcements as $announcement)<article class="message-card"><h3>{{ $announcement->title }}</h3><p>{{ $announcement->content }}</p></article>@empty<p class="muted-line">لا توجد إعلانات حاليًا.</p>@endforelse</section><div class="staff-dashboard-grid">@forelse($modules as $key=>$module)@php($moduleUrl=$key==='notifications'?route('staff.notifications'):route('staff.module',$key))<a class="staff-module-card" href="{{ $moduleUrl }}"><h2>{{ $module['label'] }}</h2><p>{{ $module['description'] }}</p><span>فتح البوابة ←</span></a>@empty<div class="panel staff-empty">لا توجد صلاحيات مسندة إلى حسابك حاليًا.</div>@endforelse</div>@endsection

@@ -2,14 +2,23 @@
 @php
     $pairsByClassroom = [];
     foreach ($pairs as $p) { $pairsByClassroom[$p->classroom_id][] = $p->subject_id; }
-    $existingQuestions = $questions->map(function ($q) {
-        $text = $q->text ?? $q->question_text ?? '';
-
+    $oldQuestions = old('questions');
+    $existingQuestions = collect(is_array($oldQuestions) ? $oldQuestions : $questions)
+        ->filter(fn ($q) => is_array($q) || is_object($q))->map(function ($q) {
+        $type = data_get($q, 'type');
+        $type = $type === 'multiple_choice' ? 'mcq' : $type;
+        $choices = data_get($q, 'choices', []);
+        if (collect($choices)->isEmpty() && is_array(data_get($q, 'options'))) {
+            $choices = collect(data_get($q, 'options'))->map(fn ($text, $key) => [
+                'text' => $text, 'is_correct' => (string) $key === (string) data_get($q, 'correct_answer'),
+            ])->values();
+        }
         return [
-            'type' => $q->type,
-            'text' => $text,
-            'score' => (float) $q->score,
-            'choices' => collect($q->choices ?? [])->map(fn ($c) => ['text' => $c->text, 'is_correct' => (bool) $c->is_correct])->values(),
+            'type' => in_array($type, ['mcq', 'true_false', 'short_answer'], true) ? $type : 'mcq',
+            'text' => app(\App\Support\RichText::class)->sanitize(data_get($q, 'text') ?: data_get($q, 'question_text')),
+            'score' => is_numeric(data_get($q, 'score')) ? (float) data_get($q, 'score') : 1,
+            'choices' => collect(is_iterable($choices) ? $choices : [])->filter(fn ($c) => is_array($c) || is_object($c))
+                ->map(fn ($c) => ['text' => is_string(data_get($c, 'text')) ? data_get($c, 'text') : '', 'is_correct' => filter_var(data_get($c, 'is_correct'), FILTER_VALIDATE_BOOLEAN)])->values(),
         ];
     })->values();
 @endphp
@@ -66,7 +75,7 @@
 </div>
 </form>
 
-<script id="existing-questions-data" type="application/json">{!! json_encode($existingQuestions) !!}</script>
+<script id="existing-questions-data" type="application/json">{!! json_encode($existingQuestions, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_THROW_ON_ERROR) !!}</script>
 
 @section('scripts')
 <style>
@@ -236,14 +245,15 @@
   const classroomSelect = document.getElementById('classroom-select');
   const subjectSelect = document.getElementById('subject-select');
   let qCount = 0;
-  @if(!$exam)
+  const examForm = document.getElementById('exam-form');
+  if (examForm && examForm.querySelector('input[name="creation_token"]')) {
   let submitting = false;
   document.getElementById('exam-form').addEventListener('submit', event => {
     if (submitting) { event.preventDefault(); return; }
     submitting = true;
   });
   window.addEventListener('pageshow', () => { submitting = false; });
-  @endif
+  }
 
   function filterClassrooms(){
     const selectedSubject = subjectSelect.value;
@@ -272,7 +282,7 @@
     ];
 
     return '<div class="rich-toolbar">' + items.map(item => {
-      return '<button type="button" data-command="' + item.cmd + '" data-value="' + (item.value || '') + '" title="' + item.title + '">' + item.label + '</button>';
+      return '<button type="button" data-command="' + item.cmd + '" data-value="' + (item.value || '') + '" title="' + item.title + '" aria-label="' + item.title + '">' + item.label + '</button>';
     }).join('') + '</div>';
   }
 
@@ -298,7 +308,7 @@
 
   function choiceRow(qIdx, cIdx, text, checked){
     text = text || '';
-    const safeText = text.replace(/"/g, '&quot;');
+    const safeText = text.replace(/[&<>"']/g, character => ({'&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'}[character]));
     return `<div class="choice-row">
       <input type="checkbox" class="correct-toggle" data-group="q${qIdx}" name="questions[${qIdx}][choices][${cIdx}][is_correct]" value="1" ${checked?'checked':''} title="إجابة صحيحة">
       <input type="text" name="questions[${qIdx}][choices][${cIdx}][text]" value="${safeText}" placeholder="نص الخيار">
@@ -325,17 +335,17 @@
       </div>
       <div>
         ${buildRichToolbar('question-' + qIdx, false)}
-        <div class="rich-editor" contenteditable="true" data-placeholder="اكتب نص السؤال هنا...">${data.text || ''}</div>
-        <textarea hidden name="questions[${qIdx}][text]">${(data.text || '').replace(/"/g, '&quot;')}</textarea>
+        <div class="rich-editor" contenteditable="true" role="textbox" aria-multiline="true" aria-label="نص السؤال ${qIdx+1}" data-placeholder="اكتب نص السؤال هنا...">${data.text || ''}</div>
+        <textarea hidden name="questions[${qIdx}][text]"></textarea>
       </div>
       <div class="choices-list"></div>
       <button type="button" class="btn secondary small add-choice">إضافة خيار</button>
     `;
 
     const choicesList = wrap.querySelector('.choices-list');
+    const addChoiceBtn = wrap.querySelector('.add-choice');
     const editor = wrap.querySelector('.rich-editor');
     const hiddenInput = wrap.querySelector('textarea[name="questions[' + qIdx + '][text]"]');
-    const addChoiceBtn = wrap.querySelector('.add-choice');
     bindRichEditor(editor, hiddenInput);
 
     const typeSelect = wrap.querySelector('.type-select');
@@ -402,6 +412,7 @@
   function addQuestion(data){
     container.appendChild(questionBlock(qCount, data));
     qCount++;
+    renumber();
   }
 
   document.getElementById('add-question').addEventListener('click', () => addQuestion());

@@ -74,7 +74,7 @@ MD;
                 ->assertSee('<pre><code>', false)
                 ->assertSee("<br />\n", false)
                 ->assertSee(e($question), false)
-                ->assertDontSee('<img ', false);
+                ->assertDontSee('<img src=x onerror=alert(1)>', false);
             $this->get(route('student.tutor.index'))->assertOk()->assertSeeText($conversation->fresh()->title);
         }
 

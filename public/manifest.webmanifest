@@ -1,0 +1,17 @@
+{
+  "id": "/",
+  "name": "مدرسة النسبية",
+  "short_name": "النسبية",
+  "description": "منصة مدرسة النسبية",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "/login",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#008c95",
+  "icons": [
+    {"src": "/school-branding/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
+    {"src": "/school-branding/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+  ]
+}

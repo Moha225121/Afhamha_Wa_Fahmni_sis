@@ -1,0 +1,779 @@
+{
+  "target_base": "fdeb4df6d0ef461429b79239df4a14ceb857aa4a",
+  "local_preservation_commit": "120e6668a8c8270870637c17ffb96cca613843f5",
+  "source": "8e1ce7a8b2eecf48198f3a47f425a18d4eb66324",
+  "source_read_only": true,
+  "branch": "integration/nasbia-nasr-upgrade",
+  "production_access": false,
+  "push": false,
+  "baseline": {
+    "database": "isolated PostgreSQL 16.15 on 127.0.0.1:55439",
+    "migrations_passed": 33,
+    "tests": 346,
+    "passed": 280,
+    "failures": 56,
+    "errors": 10
+  },
+  "phase1": {
+    "status": "passed",
+    "scope": "PostgreSQL notification JSONB compatibility and safe teacher foreign-key correction",
+    "tests": 355,
+    "passed": 355,
+    "assertions": 2737,
+    "failures": 0,
+    "errors": 0,
+    "javascript_tests_passed": 8,
+    "frontend_build": "passed",
+    "evidence": "C:/dev/nisbia-phase1-verified.xml",
+    "test_portability": "Replaced fixed sequence IDs in chat/finance tests with actual created IDs"
+  },
+  "phase2": {
+    "status": "passed",
+    "scope": "Academic compatibility, lessons, resumable uploads, student portal preservation",
+    "tests": 150,
+    "passed": 150,
+    "assertions": 834,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "evidence": "C:/dev/nisbia-phase2-media-academic.xml",
+    "ffmpeg": "9.0.2 isolated Windows executable, archive SHA256 verified",
+    "actual_mp4_upload_sizes_mib": [
+      10,
+      120,
+      250,
+      264
+    ],
+    "frontend_build": "passed",
+    "remaining": "Completed in final acceptance; deployment prerequisites remain unverified"
+  },
+  "phase3": {
+    "status": "local_integration_verified_with_documented_limits",
+    "first_full_run": {
+      "tests": 975,
+      "assertions": 8681,
+      "failures": 118,
+      "errors": 71,
+      "skipped": 1,
+      "evidence": "C:/dev/nisbia-phase3-full.xml"
+    },
+    "shared_rerun": {
+      "tests": 89,
+      "assertions": 791,
+      "failures": 17,
+      "errors": 4
+    },
+    "root_fixes": [
+      "Restore existing parent notification, announcement, finance and subject-filter routes",
+      "Reconcile parent templates and retain existing private follow-up protection",
+      "Use PostgreSQL queue connection in source tests instead of hardcoded SQLite",
+      "Preserve teacher creation intents in source business-flow tests",
+      "Keep existing finance permissions and student finance route"
+    ],
+    "javascript": {
+      "tests": 211,
+      "passed": 211,
+      "failed": 0,
+      "evidence": "C:/dev/nisbia-final-js.log"
+    },
+    "full_verified_run": {
+      "tests": 996,
+      "passed": 995,
+      "assertions": 10929,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1,
+      "evidence": "C:/dev/nisbia-final-full.xml",
+      "skip_reason": "Windows cannot create the filesystem symlink required by one security test"
+    },
+    "latest_teacher_compatibility": {
+      "tests": 80,
+      "assertions": 517,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "evidence": "C:/dev/nisbia-final-teacher-compat.xml"
+    },
+    "scope_messaging_policies": {
+      "tests": 89,
+      "assertions": 1272,
+      "failures": 0,
+      "errors": 0,
+      "evidence": "C:/dev/nisbia-phase3-scope-messaging.xml"
+    },
+    "security_audits": {
+      "composer_advisories": 0,
+      "npm_vulnerabilities": 0,
+      "vite": "patched 8.2 release",
+      "grpc": "patched 1.x override"
+    },
+    "source_deployment_tests_not_run": 14,
+    "source_deployment_reason": "Source school deployment scripts use its repository, server paths and production migrations; not adopted or executed",
+    "safe_import": "Create-only importer verified: all 8 preservation/XLSX safety tests passed",
+    "browser": {
+      "executed_cases": 39,
+      "passed": 37,
+      "blocked": 2,
+      "case_file": "browser-cases.json"
+    },
+    "browser_preview": "http://localhost:8033",
+    "application_commit_created_at_that_historical_phase": false
+  },
+  "policies": {
+    "primary_school_creation": false,
+    "early_exam_start": false,
+    "automatic_grade_visibility_changes": false,
+    "parent_student_login_switch": false,
+    "existing_ids_and_credentials": "preserve"
+  },
+  "final_acceptance": {
+    "status": "FINAL_LOCAL_AUDIT_PASSED_WITH_DOCUMENTED_LIMITATIONS",
+    "generated_at_africa_tripoli": "2026-10-30T03:42:09+02:00",
+    "branch": "integration/nasbia-nasr-upgrade",
+    "tested_base_head": "fdeb4df6d0ef461429b79239df4a14ceb857aa4a",
+    "source_read_only_commit": "8e1ce7a8b2eecf48198f3a47f425a18d4eb66324",
+    "preserved_local_student_commit": "120e6668a8c8270870637c17ffb96cca613843f5",
+    "remote_main_read_only_check": {
+      "method": "git ls-remote origin refs/heads/main",
+      "client_date": "2026-10-30",
+      "hash": "fdeb4df6d0ef461429b79239df4a14ceb857aa4a",
+      "matches_tested_base": true,
+      "remote_write_performed": false
+    },
+    "post_php_suite_change": "Only the unintended trailing blank line in public/app-sw.js was removed during the staged whitespace check; JavaScript tests and the complete build were rerun after it. No PHP/application behavior changed after the full suite.",
+    "tested_tree_state": "Integration working tree before the user-authorized local commit; exact resulting hash is reported after commit to avoid report self-reference",
+    "full_suite": {
+      "tests": 1017,
+      "assertions": 11131,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1,
+      "passed": 1016,
+      "duration_seconds": 938.839856
+    },
+    "skipped": [
+      {
+        "class": "Tests\\Feature\\TeacherLessonPreviewTest",
+        "test": "test_symlink_to_a_file_outside_the_attachment_disk_is_rejected",
+        "reason": "Windows cannot create the filesystem symlink required by this test; Linux/eligible filesystem execution still required"
+      }
+    ],
+    "javascript": {
+      "tests": 211,
+      "pass": 211,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "source_deployment_checks_not_adopted": 14,
+      "source_deployment_test_file_removed": true
+    },
+    "php_lint": {
+      "failures": 0,
+      "details": [],
+      "files": 424
+    },
+    "compiled_blade_lint": {
+      "failures": 0,
+      "files": 234,
+      "details": []
+    },
+    "pint": {
+      "result": "PASS",
+      "files": 254
+    },
+    "build": "PASS",
+    "dependency_audits": {
+      "composer_advisories": 0,
+      "composer_abandoned": 0,
+      "npm_vulnerabilities": 0
+    },
+    "populated_baseline_upgrade": {
+      "status": "PASS",
+      "database_isolated": true,
+      "baseline_migrations": 33,
+      "upgraded_migrations": 51,
+      "new_migrations_applied": 18,
+      "baseline_tables_verified": 65,
+      "populated_baseline_tables": 48,
+      "baseline_rows_verified": 140,
+      "assertions": 799,
+      "existing_ids_preserved": true,
+      "password_hashes_preserved": true,
+      "old_columns_and_values_preserved": true,
+      "existing_relationships_preserved": true,
+      "private_attachment_files_verified": 4,
+      "private_bytes_sha256_equal": true,
+      "lesson_and_assignment_pivots_backfilled": true,
+      "global_lesson_scope_preserved": true,
+      "preparatory_secondary_and_tracks_preserved": true,
+      "primary_stage_created": false,
+      "school_branding_settings_and_logo_bytes_preserved": true,
+      "automatic_staff_permission_assignments": 0,
+      "repeat_migrate_is_noop": true,
+      "production_accessed": false,
+      "environment_files_changed": false,
+      "production_readiness_proven": false,
+      "allowed_transformations": [
+        "Map the grade-sheet teacher foreign key to the existing teacher profile; retain sheet identity/content",
+        "Convert notification metadata to JSONB without changing semantic values",
+        "Add nullable metadata columns without rewriting existing values"
+      ]
+    },
+    "cross_process_claim_race": {
+      "status": "PASS",
+      "separate_disposable_postgresql": true,
+      "waited_for_claim_lock": true,
+      "concurrent_complete_http": 409,
+      "single_attachment": true,
+      "original_lesson_retained": true,
+      "file_unchanged": true
+    },
+    "authenticated_bulk_pdf": {
+      "status": "PASS",
+      "method": "Authenticated live HTTP with normal login/CSRF; no authorization bypass",
+      "http": 200,
+      "mime": "application/pdf",
+      "bytes": 294299,
+      "pdf_pages": 1,
+      "selected_card_count": 2,
+      "unselected_card_excluded": true,
+      "browser_selection": "PASS",
+      "browser_download_event_capture": "BLOCKED",
+      "pdf_inspected": true,
+      "production_accessed": false
+    },
+    "historical_browser_cases": {
+      "total": 39,
+      "statuses": {
+        "PASS": 37,
+        "BLOCKED": 2
+      },
+      "file": "browser-cases.json"
+    },
+    "final_seven_role_browser": [
+      {
+        "role": "admin",
+        "path": "/admin/dashboard",
+        "status": "PASS"
+      },
+      {
+        "role": "teacher",
+        "path": "/teacher/dashboard",
+        "status": "PASS"
+      },
+      {
+        "role": "parent",
+        "path": "/parent/dashboard",
+        "status": "PASS"
+      },
+      {
+        "role": "supervisor",
+        "path": "/supervisor/dashboard",
+        "status": "PASS"
+      },
+      {
+        "role": "financial_officer",
+        "path": "/finance",
+        "status": "PASS"
+      },
+      {
+        "role": "staff",
+        "path": "/staff/dashboard",
+        "status": "PASS"
+      },
+      {
+        "role": "student",
+        "path": "/student/dashboard",
+        "status": "PASS"
+      }
+    ],
+    "runtime": {
+      "database_isolated": true,
+      "migrations": 51,
+      "routes": 355,
+      "named_routes": 352,
+      "duplicate_names": [],
+      "stages": [
+        "ثانوي",
+        "إعدادي"
+      ],
+      "pending_jobs": 0,
+      "failed_jobs": 0,
+      "production_checked": false
+    },
+    "policy_defaults": {
+      "teacher_sheet_visibility": false,
+      "teacher_sheet_notifications": false,
+      "parent_student_session": false,
+      "external_teacher_reports": false,
+      "shared_assignment_grading": false,
+      "public_student_card_verification": false
+    },
+    "preservation_fixes": [
+      {
+        "feature": "متوسط درجات ولي الأمر",
+        "preserved_behavior": "التوفيق بين average وaverage_percentage دون إظهار درجات غير منشورة أو تغيير حساب المتوسط.",
+        "executed_test_classes": "ParentPortalTest / ResultPublicationTest"
+      },
+      {
+        "feature": "خيار student_finance_visible",
+        "preserved_behavior": "إعادته إلى نموذج إعدادات الحسابات وحفظ قيمته عند إرسال نموذج قديم؛ لا استبدال معرفات الحسابات.",
+        "executed_test_classes": "NisbiyaUpgradePreservationTest"
+      },
+      {
+        "feature": "الشعب العلمية والأدبية",
+        "preserved_behavior": "تكليف معلم للشعبة الثانوية المناسبة دون خلطها مع العلمي أو مراحل أخرى.",
+        "executed_test_classes": "NisbiyaUpgradePreservationTest / NisbiyaCompatibilityPolicyTest"
+      },
+      {
+        "feature": "تحليل واجبات متعددة الفصول",
+        "preserved_behavior": "احتساب الواجب المنشور والمنتهي والموجّه للطالب وتسليمه الخاص فقط، مع حفظ الدرس العام.",
+        "executed_test_classes": "StudentLevelAnalysisTest / NisbiyaMigrationBackfillTest"
+      },
+      {
+        "feature": "منع cascade عند حذف مادة مستخدمة",
+        "preserved_behavior": "رفض الحذف الذي قد يزيل اختبارات ودرجات أو روابط منهج قائمة؛ لا إزالة تلقائية للروابط.",
+        "executed_test_classes": "NisbiyaUpgradePreservationTest"
+      },
+      {
+        "feature": "حذف الحساب العام الجديد",
+        "preserved_behavior": "عدم اعتماد DELETE users العام من المصدر؛ إبقاء تعديل/تعطيل الحساب. طلبات حذف الطالب والمعلم وولي الأمر والموظف مرفوضة وروابطهم محفوظة.",
+        "executed_test_classes": "NisbiyaAccountDeletionSafetyTest"
+      },
+      {
+        "feature": "التخزين المؤقت للصفحات الحساسة",
+        "preserved_behavior": "إضافة no-cache إلى مجموعات الموظف والمالية والتقارير المستلمة؛ تحقق فعلي من no-store/private/Pragma/Expires.",
+        "executed_test_classes": "NisbiyaAccountDeletionSafetyTest"
+      }
+    ],
+    "migrations_reviewed": [
+      {
+        "path": "database/migrations/2026_09_26_000001_create_stages_table.php",
+        "up_review": "جدول مراحل جديد؛ لا تعبئة تلقائية ولا إنشاء ابتدائي.",
+        "down_qualification": "down يسقط الجدول؛ يفقد إعداداته إذا استُخدم."
+      },
+      {
+        "path": "database/migrations/2026_10_05_000001_create_configurable_staff_roles.php",
+        "up_review": "جداول وقوالب أدوار جديدة؛ لا إسناد تلقائي لحسابات المدرسة.",
+        "down_qualification": "down يسقط الصلاحيات والإسنادات والقوالب؛ لا rollback آلي."
+      },
+      {
+        "path": "database/migrations/2026_10_08_000001_add_additional_guardian_details.php",
+        "up_review": "حقول ولي أمر إضافية nullable؛ لا تعديل المعرفات أو القيم القديمة.",
+        "down_qualification": "down يحذف بيانات الأعمدة الإضافية."
+      },
+      {
+        "path": "database/migrations/2026_10_09_000001_create_school_activities_table.php",
+        "up_review": "جدول أنشطة جديد وعلاقات مقيدة؛ لا حذف أثناء up.",
+        "down_qualification": "down يسقط الأنشطة."
+      },
+      {
+        "path": "database/migrations/2026_10_11_000001_repoint_grade_sheets_to_teachers.php",
+        "up_review": "تدقيق كل المراجع قبل تعديل FK؛ يتوقف عند الغموض/المفقود/التكرار. تحويل مرجع المعلم فقط، لا معرف الحساب أو الورقة.",
+        "down_qualification": "down يعيد FK إلى users ويحوّل المرجع؛ ليس downgrade عامًا مضمونًا لكل بيانات ما بعد الترقية."
+      },
+      {
+        "path": "database/migrations/2026_10_11_000002_add_submission_key_to_lessons.php",
+        "up_review": "مفتاح nullable فريد للدروس؛ لا إعادة توليد معرفات الدروس.",
+        "down_qualification": "down يحذف مفتاح منع تكرار الطلب وقيده."
+      },
+      {
+        "path": "database/migrations/2026_10_11_000003_add_soft_deletes_to_classrooms.php",
+        "up_review": "إضافة deleted_at فقط إن كان غائبًا؛ لا تغيير بيانات الفصول.",
+        "down_qualification": "down يحذف deleted_at وقد يفقد دلالة الأرشفة؛ لا تشغيل تلقائي."
+      },
+      {
+        "path": "database/migrations/2026_10_12_000001_ensure_classroom_soft_deletes.php",
+        "up_review": "إصلاح مشروط لعمود الأرشفة؛ لا إعادة إنشاء فصول.",
+        "down_qualification": "down يبقي العمود عمدًا."
+      },
+      {
+        "path": "database/migrations/2026_10_12_000003_add_multiple_classrooms_to_lessons.php",
+        "up_review": "جدول pivot وتعبئة من classroom_id غير الفارغ؛ حفظ الدرس العام ذي الفصل الفارغ.",
+        "down_qualification": "down يسقط علاقات الفصول المتعددة المضافة."
+      },
+      {
+        "path": "database/migrations/2026_10_13_000001_create_lesson_views.php",
+        "up_review": "جدول تتبع جديد؛ لا تغيير بيانات الطالب أو الدرس الأصلية.",
+        "down_qualification": "down يسقط سجل المشاهدات."
+      },
+      {
+        "path": "database/migrations/2026_10_18_000001_add_multiple_classrooms_to_assignments.php",
+        "up_review": "pivot وتعبئة الفصل القديم دون تغيير معرف الواجب/التسليم؛ تحقق مسبق من المراجع التاريخية.",
+        "down_qualification": "down يسقط علاقات الاستهداف المتعدد."
+      },
+      {
+        "path": "database/migrations/2026_10_18_000002_create_fcm_tokens.php",
+        "up_review": "توكنات جديدة وdevice_id اختياري للاشتراكات القديمة؛ لا تبديل حسابات.",
+        "down_qualification": "down يسقط التوكنات ومعرف الجهاز الإضافي."
+      },
+      {
+        "path": "database/migrations/2026_10_23_000001_create_teacher_message_receipts_table.php",
+        "up_review": "إيصالات جديدة؛ التوسيع النصي خاص MySQL ولا يقص بيانات PostgreSQL.",
+        "down_qualification": "down يسقط الإيصالات ويحافظ على اتساع النص."
+      },
+      {
+        "path": "database/migrations/2026_10_23_000002_add_portal_messenger_receipts.php",
+        "up_review": "معرف طلب اختياري وإيصالات فريدة؛ الرسائل التاريخية محفوظة.",
+        "down_qualification": "down يسقط الإيصالات/معرف الطلب؛ لا يقص محتوى الرسائل."
+      },
+      {
+        "path": "database/migrations/2026_10_24_000001_create_lesson_uploads_table.php",
+        "up_review": "بيانات رفع جديدة؛ لا نقل أو حذف مرفقات المدرسة أثناء up.",
+        "down_qualification": "down يرفض حذف الجدول عند وجود أي سجلات رفع؛ لا تعميم هذه الحماية على بقية down."
+      },
+      {
+        "path": "database/migrations/2026_10_24_000001_use_jsonb_for_pg_notification_metadata.php",
+        "up_review": "تحويل JSONB بمعاملة PostgreSQL؛ JSON تاريخي غير صالح يوقف العملية دون حذف السجل.",
+        "down_qualification": "down يبقي JSONB لضمان سلامة المحددات."
+      },
+      {
+        "path": "database/migrations/2026_10_28_000001_create_teacher_reports_tables.php",
+        "up_review": "جداول تقارير/مصادر جديدة ومفاتيح تربط الحسابات القائمة.",
+        "down_qualification": "down يسقط تقارير ومصادر محفوظة."
+      },
+      {
+        "path": "database/migrations/2026_10_28_000002_create_teacher_report_delivery_tables.php",
+        "up_review": "جداول إرسال ونسخ ثابتة جديدة؛ لا حذف إشعارات أو تقارير قائمة أثناء up.",
+        "down_qualification": "down يسقط الإرسال والنسخ الثابتة."
+      }
+    ],
+    "migration_safety": "Forward upgrade passed on populated synthetic baseline with allowed FK/JSON transformations. Several down methods delete tables/columns; destructive rollback is NOT approved or production-tested.",
+    "encryption_scope": "Queued jobs and FCM token values are encrypted. Existing Message.body and notifications.data are not encrypted-at-rest fields; no report claim of inbox encryption.",
+    "source_exclusions": {
+      "primary_stage_migration_not_adopted": true,
+      "source_deployment_checks_not_adopted": 14,
+      "untracked_broken_source_deployment_test_removed": true,
+      "existing_nested_source_copy": {
+        "tracked_files": 653,
+        "introduced_by_this_upgrade": false,
+        "modified_by_this_upgrade": false,
+        "not_a_deployment_target": true
+      }
+    },
+    "limitations": [
+      {
+        "id": "L01",
+        "feature": "Filesystem symlink security test",
+        "status": "BLOCKED",
+        "requirement": "Run the unchanged test on Linux or a Windows environment allowed to create real symlinks; do not weaken the security assertion."
+      },
+      {
+        "id": "L02",
+        "feature": "Bulk PDF browser download capture",
+        "status": "BLOCKED",
+        "requirement": "A browser automation/download surface that captures the submitted export response. Selection and authenticated live HTTP generation/rendering have passed independently."
+      },
+      {
+        "id": "L03",
+        "feature": "Real phone Firebase/Web Push receipt",
+        "status": "BLOCKED",
+        "requirement": "Authorized test Firebase credentials/project/public config/VAPID, HTTPS/service-worker scope and an authorized real phone/device. Provider acceptance is not device receipt."
+      },
+      {
+        "id": "L04",
+        "feature": "Production runtime and school-data migration",
+        "status": "NOT APPROVED / NOT TESTED",
+        "requirement": "Server PHP-FPM identity/runtime, private storage backup/restore, production snapshot preflight and reviewed migration/rollback plan, authorized deployment, persistent queue/scheduler verification."
+      },
+      {
+        "id": "L05",
+        "feature": "Source-school deployment recovery scripts",
+        "status": "NOT ADOPTED",
+        "requirement": "14 source-specific checks do not validate Nisbiya deployment. Source scripts/test module were deliberately omitted, not silently counted as passing."
+      },
+      {
+        "id": "L06",
+        "feature": "Every possible UI combination and inline video playback",
+        "status": "NOT TESTED EXHAUSTIVELY",
+        "requirement": "Browser evidence covers recorded workflows and seven role dashboards, not every CRUD combination/device/browser. Upload/FFmpeg/download passed; inline playback was not executed."
+      }
+    ],
+    "production_prerequisites": [
+      "Preserve existing APP_KEY and secrets; do not run baseline composer setup/key:generate against an existing school deployment.",
+      "Private persistent storage, ownership under actual PHP-FPM user, backups/restoration and disk/resource limits. Attached lesson-uploads/.../body.part files are referenced content, not disposable staging.",
+      "FFmpeg and proc_open under PHP-FPM; run full decode/storage receipt check in authorized staging. CLI success alone does not establish FPM/nginx/proxy upload readiness.",
+      "Persistent database notifications worker; application/jobs/batching databases aligned, retry_after greater than 60-second job timeout, Linux pcntl signals/timeouts, failure monitoring and worker restart procedure.",
+      "Scheduler for existing approved result releases and exam expiry plus scoped temporary-upload cleanup; no production scheduler or cleanup was executed during audit.",
+      "Firebase/legacy VAPID configuration, external credentials kept outside checkout, HTTPS, matching worker scope/build and a real authorized device before asserting phone delivery.",
+      "Review migrations and data anomalies/locking/disk/maintenance plan against a protected staging copy of the school database. Do not execute destructive rollback; up safety does not make down safe.",
+      "Deploy only the Laravel public document root. Existing nested source copy is unchanged history, not an additional running application or newly adopted deployment."
+    ],
+    "evidence": [
+      {
+        "file": "nisbia-audit-final-full.xml",
+        "sha256": "1a93a8b8cec1153a864f889079e8e9e77eed94d9e2551f39a5c3b5e356fee619",
+        "packaged_in_repository": false
+      },
+      {
+        "file": "nisbia-audit-final-js.log",
+        "sha256": "f605a3d559bb1881a6353db72cd2ddcddcd1ce33f51bdb62edbc8e8a83632995",
+        "packaged_in_repository": false
+      },
+      {
+        "file": "nisbia-audit-final-pint.log",
+        "sha256": "acbf5da6385237b6f4cd342c4454d93f6c4df8bfcf1687838edb3b651981c4e1",
+        "packaged_in_repository": false
+      },
+      {
+        "file": "nisbia-audit-final-build.log",
+        "sha256": "7ced5503e34c54f420e2d448b47cf2fd260315add088cf420d62bb808a39d70d",
+        "packaged_in_repository": false
+      },
+      {
+        "file": "nisbia-audit-final-php-lint.json",
+        "sha256": "c019a2090c50b76af09c60c7445b51608fb4ed68cdaf4f67d017a67d0ed09b1d",
+        "packaged_in_repository": false
+      },
+      {
+        "file": "nisbia-audit-final-blade-lint.json",
+        "sha256": "637ddc6e1dd55dc75dad758ee461e97e57c6f7fce5fef52edd73600c60c2151e",
+        "packaged_in_repository": false
+      },
+      {
+        "file": "nisbia-audit-final-runtime.json",
+        "sha256": "2a6ca676503a21a760c32816bd9f7f3917154e8c91cc122c83373985e68cd650",
+        "packaged_in_repository": false
+      },
+      {
+        "file": "nisbia-final-populated-upgrade.json",
+        "sha256": "c10b06cbbb89eb3fcdbf87b7c3c5408445ed82e5f6e786b5f0a9e103767fe8d4",
+        "packaged_in_repository": false
+      },
+      {
+        "file": "nisbia-final-claim-race.log",
+        "sha256": "faeaa7b2cbe685011c231d720d5427e807f4f8d08966c50b47a376c49d73377d",
+        "packaged_in_repository": false
+      },
+      {
+        "file": "nisbia-final-bulk-http.json",
+        "sha256": "a5cfc356a55405c258a51b88ab0f9fc86b68ad4f265235f4ccc7f2b173bd9710",
+        "packaged_in_repository": false
+      },
+      {
+        "file": "nisbia-final-audit-browser.json",
+        "sha256": "efc44043f2598d9f5629bb1a1e3c2ebfb014a79270023024a6a0f1f49fcf3dbb",
+        "packaged_in_repository": false
+      },
+      {
+        "file": "nisbia-audit-final-composer.json",
+        "sha256": "da0388a7d3f7c633e1e211de7777244aacd958f7637bf7089ce1b98f1042ef72",
+        "packaged_in_repository": false
+      },
+      {
+        "file": "nisbia-audit-final-npm.json",
+        "sha256": "083954ec514fabab790e49028e86f3897217db8aef02d8483e2c12c38716123f",
+        "packaged_in_repository": false
+      }
+    ],
+    "github_pr_review_readiness": "READY FOR REVIEW WITH DISCLOSED LIMITATIONS; no PR creation or push authorized by this report",
+    "staging_readiness": "CONDITIONAL: after operator authorization, isolated staging database/storage, server-runtime/worker/scheduler/build verification and migration preflight; disabled policy/provider features remain disabled",
+    "production_readiness": "NOT APPROVED; external delivery, Linux symlink coverage, production runtime/data snapshot preflight and explicit authorization remain outstanding",
+    "local_commit": "User authorized a local commit after audit; its actual hash and final Git status must be provided by the root agent after creation",
+    "push_performed": false,
+    "main_modified": false,
+    "production_database_modified": false,
+    "deployment_performed": false
+  },
+  "pre_final_audit_acceptance_history": {
+    "status": "LOCAL_INTEGRATION_TESTED_WITH_DOCUMENTED_LIMITATIONS",
+    "target_base": "fdeb4df6d0ef461429b79239df4a14ceb857aa4a",
+    "preserved_local_commit": "120e6668a8c8270870637c17ffb96cca613843f5",
+    "source_read_only_commit": "8e1ce7a8b2eecf48198f3a47f425a18d4eb66324",
+    "branch": "integration/nasbia-nasr-upgrade",
+    "head_base_no_new_commit": "fdeb4df6d0ef461429b79239df4a14ceb857aa4a",
+    "full_suite": {
+      "tests": 1005,
+      "assertions": 11008,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1,
+      "passed": 1004
+    },
+    "skipped": [
+      {
+        "test": "test_symlink_to_a_file_outside_the_attachment_disk_is_rejected",
+        "reason": "Windows cannot create the filesystem symlink required by this test"
+      }
+    ],
+    "javascript": {
+      "passed": 211,
+      "failed": 0,
+      "source_deployment_checks_excluded": 14
+    },
+    "php_lint": {
+      "failures": 0,
+      "details": [],
+      "files": 421
+    },
+    "compiled_blade_lint": {
+      "failures": 0,
+      "files": 234,
+      "details": []
+    },
+    "pint": {
+      "files": 250,
+      "result": "PASS"
+    },
+    "build": "PASS",
+    "composer_advisories": 0,
+    "npm_vulnerabilities": 0,
+    "runtime": {
+      "database_isolated": true,
+      "database": "afhamha_browser_testing",
+      "migrations": 51,
+      "routes": 356,
+      "named_routes": 353,
+      "duplicate_names": [],
+      "stages": [
+        "ثانوي",
+        "إعدادي"
+      ],
+      "pending_jobs": 0,
+      "failed_jobs": 0,
+      "video_uploaded": {
+        "size": 10485760,
+        "received_bytes": 10485760,
+        "sha256": "c7fe6da85134001335a1517de9092b783864cd1f519aaad18196c360bedd9a77"
+      },
+      "policy_defaults": {
+        "teacher_sheet_visibility": false,
+        "teacher_sheet_notifications": false,
+        "parent_student_session": false,
+        "external_teacher_reports": false,
+        "shared_assignment_grading": false,
+        "public_student_card_verification": false
+      },
+      "production_checked": false
+    },
+    "browser": {
+      "executed_cases": 39,
+      "passed": 37,
+      "blocked": 2,
+      "case_file": "browser-cases.json"
+    },
+    "evidence": {
+      "full_suite": "C:/dev/nisbia-final-acceptance-suite.xml",
+      "javascript": "C:/dev/nisbia-final-js.log",
+      "build": "C:/dev/nisbia-final-secure-build.log",
+      "pint": "C:/dev/nisbia-final-pint.log",
+      "migration_status": "C:/dev/nisbia-final-migrations-status.log",
+      "scheduler": "C:/dev/nisbia-final-scheduler.log"
+    },
+    "push": false,
+    "main_modified": false,
+    "commit_created": false,
+    "production_database_modified": false,
+    "deployment": false,
+    "preview": "http://localhost:8033/student/dashboard",
+    "production_readiness": "NOT VERIFIED: server runtime, backups/data preflight, authorized deployment, queue/scheduler operation, HTTPS and provider/device delivery remain deployment prerequisites"
+  },
+  "final_audit": {
+    "status": "FINAL_LOCAL_AUDIT_PASSED_WITH_DOCUMENTED_LIMITATIONS",
+    "report": "acceptance.html",
+    "structured_report": "final-audit.json",
+    "full_suite": {
+      "tests": 1017,
+      "assertions": 11131,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1,
+      "passed": 1016,
+      "duration_seconds": 938.839856
+    },
+    "populated_upgrade": {
+      "status": "PASS",
+      "database_isolated": true,
+      "baseline_migrations": 33,
+      "upgraded_migrations": 51,
+      "new_migrations_applied": 18,
+      "baseline_tables_verified": 65,
+      "populated_baseline_tables": 48,
+      "baseline_rows_verified": 140,
+      "assertions": 799,
+      "existing_ids_preserved": true,
+      "password_hashes_preserved": true,
+      "old_columns_and_values_preserved": true,
+      "existing_relationships_preserved": true,
+      "private_attachment_files_verified": 4,
+      "private_bytes_sha256_equal": true,
+      "lesson_and_assignment_pivots_backfilled": true,
+      "global_lesson_scope_preserved": true,
+      "preparatory_secondary_and_tracks_preserved": true,
+      "primary_stage_created": false,
+      "school_branding_settings_and_logo_bytes_preserved": true,
+      "automatic_staff_permission_assignments": 0,
+      "repeat_migrate_is_noop": true,
+      "production_accessed": false,
+      "environment_files_changed": false,
+      "production_readiness_proven": false,
+      "allowed_transformations": [
+        "Map the grade-sheet teacher foreign key to the existing teacher profile; retain sheet identity/content",
+        "Convert notification metadata to JSONB without changing semantic values",
+        "Add nullable metadata columns without rewriting existing values"
+      ]
+    },
+    "claim_race": {
+      "status": "PASS",
+      "separate_disposable_postgresql": true,
+      "waited_for_claim_lock": true,
+      "concurrent_complete_http": 409,
+      "single_attachment": true,
+      "original_lesson_retained": true,
+      "file_unchanged": true
+    },
+    "bulk_http": {
+      "status": "PASS",
+      "method": "Authenticated live HTTP with normal login/CSRF; no authorization bypass",
+      "http": 200,
+      "mime": "application/pdf",
+      "bytes": 294299,
+      "pdf_pages": 1,
+      "selected_card_count": 2,
+      "unselected_card_excluded": true,
+      "browser_selection": "PASS",
+      "browser_download_event_capture": "BLOCKED",
+      "pdf_inspected": true,
+      "production_accessed": false
+    },
+    "limitations": [
+      {
+        "id": "L01",
+        "feature": "Filesystem symlink security test",
+        "status": "BLOCKED",
+        "requirement": "Run the unchanged test on Linux or a Windows environment allowed to create real symlinks; do not weaken the security assertion."
+      },
+      {
+        "id": "L02",
+        "feature": "Bulk PDF browser download capture",
+        "status": "BLOCKED",
+        "requirement": "A browser automation/download surface that captures the submitted export response. Selection and authenticated live HTTP generation/rendering have passed independently."
+      },
+      {
+        "id": "L03",
+        "feature": "Real phone Firebase/Web Push receipt",
+        "status": "BLOCKED",
+        "requirement": "Authorized test Firebase credentials/project/public config/VAPID, HTTPS/service-worker scope and an authorized real phone/device. Provider acceptance is not device receipt."
+      },
+      {
+        "id": "L04",
+        "feature": "Production runtime and school-data migration",
+        "status": "NOT APPROVED / NOT TESTED",
+        "requirement": "Server PHP-FPM identity/runtime, private storage backup/restore, production snapshot preflight and reviewed migration/rollback plan, authorized deployment, persistent queue/scheduler verification."
+      },
+      {
+        "id": "L05",
+        "feature": "Source-school deployment recovery scripts",
+        "status": "NOT ADOPTED",
+        "requirement": "14 source-specific checks do not validate Nisbiya deployment. Source scripts/test module were deliberately omitted, not silently counted as passing."
+      },
+      {
+        "id": "L06",
+        "feature": "Every possible UI combination and inline video playback",
+        "status": "NOT TESTED EXHAUSTIVELY",
+        "requirement": "Browser evidence covers recorded workflows and seven role dashboards, not every CRUD combination/device/browser. Upload/FFmpeg/download passed; inline playback was not executed."
+      }
+    ]
+  }
+}

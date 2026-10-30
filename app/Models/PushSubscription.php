@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PushSubscription extends Model
 {
-    protected $fillable = ['user_id', 'endpoint', 'public_key', 'auth_token', 'content_encoding', 'expires_at'];
+    protected $fillable = ['user_id', 'device_id', 'endpoint', 'public_key', 'auth_token', 'content_encoding', 'expires_at'];
 
     protected function casts(): array
     {

@@ -9,13 +9,15 @@
     </form>
 </section>
 @if(session('success'))<p class="notice success" role="status">{{ session('success') }}</p>@endif
+@include('shared.push-subscription')
 <section class="student-notification-feed" aria-label="قائمة الإشعارات">
     <nav class="student-notification-feed-tabs" aria-label="تصفية الإشعارات">
         <a href="{{ route('student.notifications') }}" class="{{ request()->boolean('unread') ? '' : 'is-active' }}" @unless(request()->boolean('unread')) aria-current="page" @endunless>الكل</a>
         <a href="{{ route('student.notifications', ['unread' => 1]) }}" class="{{ request()->boolean('unread') ? 'is-active' : '' }}" @if(request()->boolean('unread')) aria-current="page" @endif>غير المقروءة <span>{{ $unreadCount }}</span></a>
     </nav>
     @forelse($notifications as $notification)
-        <form method="post" action="{{ route('student.notifications.read', $notification->id) }}">
+        @php($teacherReceiptUrl = ($notification->data['category'] ?? '') === 'teacher_notification' ? app(\App\Services\TeacherMessageReceiptService::class)->deliveryUrl($notification->id) : null)
+        <form method="post" action="{{ route('student.notifications.read', $notification->id) }}" @if($teacherReceiptUrl) data-teacher-receipt-url="{{ $teacherReceiptUrl }}" @endif>
             @csrf @method('patch')
             <button type="submit" class="student-notification-row student-notification-row--full {{ $notification->read_at ? '' : 'is-unread' }}">
                 <span class="student-notification-icon" aria-hidden="true">@include('student.partials.notification-icon')</span>
@@ -24,6 +26,7 @@
                     <strong>{{ $notification->data['title'] ?? 'إشعار جديد' }}</strong>
                     <span>{{ \Illuminate\Support\Str::limit($notification->data['body'] ?? $notification->data['message'] ?? '', 220) }}</span>
                     <time datetime="{{ $notification->created_at->toIso8601String() }}">{{ $notification->created_at->locale('ar')->diffForHumans() }}</time>
+                    <span>عرض التفاصيل</span>
                 </span>
                 @unless($notification->read_at)<span class="student-notification-dot" aria-label="غير مقروء"></span>@endunless
                 <span class="student-notification-row-arrow" aria-hidden="true">‹</span>
@@ -39,4 +42,5 @@
     @endforelse
 </section>
 {{ $notifications->withQueryString()->links() }}
+<script type="module" src="{{ asset('js/teacher-message-receipts.js') }}"></script>
 @endsection

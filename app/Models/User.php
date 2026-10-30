@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\StaffAccess;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -54,14 +55,39 @@ class User extends Authenticatable
 
     public function hasPermission(string $permission): bool
     {
+        if ($this->status !== 'active') {
+            return false;
+        }
+        if ($this->isAdmin()) {
+            return true;
+        }
+        if ($this->staffRoleAssignments()->where('active', true)->whereHas('role', fn ($q) => $q->where('active', true)->whereHas('permissions', fn ($p) => $p->where('permission', $permission)))->exists()) {
+            return true;
+        }
         $p = config('permissions.roles.'.$this->role, []);
-        if ($this->role === 'supervisor') $p = array_merge($p, array_intersect($this->financial_permissions ?? [], ['finance.view', 'finance.pay', 'finance.reports']));
-
+        if ($this->role === 'supervisor') {
+            $p = array_merge($p, array_intersect($this->financial_permissions ?? [], ['finance.view', 'finance.pay', 'finance.reports']));
+        }
         if (empty($p)) {
             return false;
         }
 
         return in_array('*', $p, true) || in_array($permission, $p, true);
+    }
+
+    public function staffRoles(): BelongsToMany
+    {
+        return $this->belongsToMany(StaffRole::class, 'staff_role_assignments')->withPivot(['scope', 'active'])->withTimestamps();
+    }
+
+    public function staffRoleAssignments(): HasMany
+    {
+        return $this->hasMany(StaffRoleAssignment::class);
+    }
+
+    public function hasScopedPermission(string $permission, ?int $classroomId = null, ?int $studentId = null): bool
+    {
+        return app(StaffAccess::class)->allows($this, $permission, $classroomId, $studentId);
     }
 
     public function student(): HasOne
@@ -94,5 +120,10 @@ class User extends Authenticatable
     public function pushSubscriptions(): HasMany
     {
         return $this->hasMany(PushSubscription::class);
+    }
+
+    public function fcmTokens(): HasMany
+    {
+        return $this->hasMany(FcmToken::class);
     }
 }

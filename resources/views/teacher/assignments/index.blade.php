@@ -15,10 +15,9 @@
 <td>{{ $r->title }}</td>
 <td>{{ $r->subject }}</td>
 <td>{{ $r->classroom }}</td>
-<td>{{ \Illuminate\Support\Carbon::parse($r->due_date)->format('Y-m-d') }}</td>
+<td>{{ $r->display_deadline ?? '—' }}</td>
 <td>{{ $r->submissions_count }} تسليم / {{ $r->students_total }}</td>
-@php($dueAt = $r->due_at ?: $r->due_date)
-@php($isClosed = $dueAt && \Illuminate\Support\Carbon::parse($dueAt)->startOfDay()->lte(today()) )
+@php($isClosed = $r->is_closed)
 @php($isCompleted = $r->status !== 'cancelled' && $r->students_total > 0 && $r->submissions_count >= $r->students_total)
 <td><span class="badge {{ $r->status === 'cancelled' ? 'status-cancelled' : ($isCompleted ? 'status-complete' : ($isClosed ? 'inactive' : 'active')) }}">{{ $r->status === 'cancelled' ? 'ملغي' : ($isCompleted ? 'مكتمل' : ($isClosed ? 'مغلق' : 'نشط')) }}</span></td>
 <td><a href="{{ route('teacher.assignments.edit',$r->id) }}">تعديل</a> · <a href="{{ route('teacher.assignments.submissions',$r->id) }}">التسليمات</a>@if($r->status !== 'cancelled' && $isClosed) · <form method="post" action="{{ route('teacher.assignments.cancel',$r->id) }}" style="display:inline">@csrf @method('patch')<button class="teacher-delete-action" type="submit" title="إلغاء الواجب" aria-label="إلغاء الواجب" data-confirm="هل أنت متأكد من إلغاء هذا الواجب؟">إلغاء</button></form>@endif · <form method="post" action="{{ route('teacher.assignments.destroy',$r->id) }}" style="display:inline">@csrf @method('delete')<button class="delete-column-btn teacher-delete-action" type="submit" title="حذف الواجب" aria-label="حذف الواجب" data-confirm="هل أنت متأكد من حذف هذا الواجب؟">×</button></form></td>

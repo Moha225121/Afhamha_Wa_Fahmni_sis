@@ -9,6 +9,7 @@ use App\Services\ParentPortalContext;
 use App\Services\StudentLevelAnalysisService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Throwable;
 
 class StudentLevelAnalysisController extends Controller
 {
@@ -30,7 +31,7 @@ class StudentLevelAnalysisController extends Controller
 
         $student->load(['user', 'classroom']);
         $snapshot = $service->snapshot($student, $teacher, $audience);
-        $key = 'student-analysis:v1:'.$request->user()->id.':'.$student->id.':'.$audience.':'.hash('sha256', json_encode($snapshot));
+        $key = 'student-analysis:v2:'.$request->user()->id.':'.$student->id.':'.$audience.':'.hash('sha256', json_encode($snapshot));
         $report = Cache::get($key);
         $error = null;
         if ($request->isMethod('post') && ! $report && $service->hasEvidence($snapshot)) {
@@ -50,6 +51,9 @@ class StudentLevelAnalysisController extends Controller
                         SmartTutorGatewayException::RATE_LIMITED => 'خدمة التحليل مشغولة حاليًا. يرجى المحاولة لاحقًا.',
                         default => 'تعذر إنشاء التحليل الآن. بيانات الطالب محفوظة ويمكنك المحاولة مجددًا.',
                     };
+                } catch (Throwable $exception) {
+                    report($exception);
+                    $error = 'تعذر الاتصال بخدمة التحليل الآن. بيانات الطالب محفوظة ويمكنك المحاولة مجددًا.';
                 } finally {
                     $lock->release();
                 }

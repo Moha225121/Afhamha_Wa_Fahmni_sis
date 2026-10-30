@@ -9,11 +9,14 @@ use App\Models\Student;
 use App\Models\User;
 use App\Services\ParentPortalContext;
 use App\Services\SchoolChatService;
+use App\Services\TeacherContactScope;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
+use Throwable;
 
 class ConversationController extends Controller
 {
@@ -91,17 +94,80 @@ class ConversationController extends Controller
     }
 
     /** @return Collection<int, User> */
+    public function show(Request $request, Conversation $conversation): View
+    {
+        $this->assertParticipant($request, $conversation);
+
+        $guardian = $this->context->guardian($request);
+        $children = $this->context->children($guardian);
+        $selectedStudent = $this->context->selectedStudent($guardian, $children, $request->query('student', $conversation->student_id));
+        abort_if($conversation->student_id && (int) $conversation->student_id !== (int) $selectedStudent?->id, 404);
+
+        $conversation->participants()->updateExistingPivot($request->user()->id, ['last_read_at' => now()]);
+        $conversation->load(['student.user', 'participants', 'messages.sender']);
+
+        return view('parent.conversations.show', compact('conversation', 'selectedStudent'));
+    }
+
+    public function storeMessage(Request $request, Conversation $conversation): RedirectResponse
+    {
+        $this->assertParticipant($request, $conversation);
+        if ($conversation->student) {
+            $this->context->assertChild($this->context->guardian($request), $conversation->student);
+        }
+        abort_unless($conversation->status === 'open', 403);
+        $recipient = $this->currentTeacher($request, $conversation);
+
+        $validated = $request->validate(['body' => ['required', 'string', 'max:3000']]);
+        $conversation->messages()->create(['sender_id' => $request->user()->id, 'body' => $validated['body']]);
+        $conversation->update(['last_message_at' => now()]);
+
+        $this->notify($recipient, [
+            'title' => 'رسالة جديدة',
+            'body' => (string) str($validated['body'])->limit(140),
+            'url' => match ($recipient->role) {
+                'parent' => route('parent.conversations.show', $conversation),
+                'teacher' => route('teacher.dashboard'),
+                default => route('admin.dashboard'),
+            },
+            'category' => 'message',
+            'conversation_id' => $conversation->id,
+            'student_id' => $conversation->student_id,
+        ]);
+
+        return back()->with('success', 'تم إرسال الرسالة.');
+    }
+
+    private function assertParticipant(Request $request, Conversation $conversation): void
+    {
+        abort_unless($conversation->participants()->whereKey($request->user()->id)->exists(), 404);
+    }
+
+    /** @return Collection<int, User> */
     private function recipientsFor(Student $student): Collection
     {
-        return User::query()
-            ->where('status', 'active')
-            ->where(function ($query) use ($student): void {
-                $query->where('role', 'admin')->orWhere(function ($teachers) use ($student): void {
-                    $teachers->where('role', 'teacher')->whereHas('teacher.classrooms', fn ($classes) => $classes->whereKey($student->classroom_id));
-                });
-            })
-            ->orderBy('role')
-            ->orderBy('name')
-            ->get(['id', 'name', 'role']);
+        return app(TeacherContactScope::class)->teachersFor($student);
+    }
+
+    private function currentTeacher(Request $request, Conversation $conversation): User
+    {
+        $guardian = $this->context->guardian($request);
+        abort_unless($guardian->status === 'active' && $conversation->student, 404);
+        $this->context->assertChild($guardian, $conversation->student);
+        $participants = $conversation->participants()->get();
+        $recipient = $participants->firstWhere('id', '!=', $request->user()->id);
+        abort_unless($participants->count() === 2 && $recipient
+            && app(TeacherContactScope::class)->allows($conversation->student, $recipient), 404);
+
+        return $recipient;
+    }
+
+    private function notify(User $recipient, array $payload): void
+    {
+        try {
+            $this->notifications->send($recipient, $payload);
+        } catch (Throwable) {
+            Log::warning('A saved parent conversation message could not send its device notification.', ['recipient_id' => $recipient->id]);
+        }
     }
 }

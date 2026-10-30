@@ -99,6 +99,7 @@ function workerEnvironment(filename) {
     let currentCache;
     const context = {
         URL,
+        importScripts: () => {},
         self: {
             location: {origin: 'https://school.test'},
             addEventListener: (name, handler) => events[name] = handler,

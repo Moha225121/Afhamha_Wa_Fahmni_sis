@@ -1,0 +1,7 @@
+{
+ "unlinkedPolicy":"student-only",
+ "grades":[{"id":"first","name":"الصف الأول","classIds":[1,16,17]},{"id":"sixth","name":"الصف السادس","classIds":[6,26,27]},{"id":"secondary","name":"الثالث ثانوي","classIds":[14]}],
+ "classes":[{"id":1,"name":"الصف الأول A","branch":"A"},{"id":16,"name":"الصف الأول B","branch":"B"},{"id":17,"name":"الصف الأول C","branch":"C"},{"id":6,"name":"الصف السادس A","branch":"A"},{"id":26,"name":"الصف السادس B","branch":"B"},{"id":27,"name":"الصف السادس C","branch":"C"},{"id":14,"name":"الثالث ثانوي","branch":""}],
+ "students":[{"id":1,"name":"أحمد التجريبي","classId":1,"parentIds":[101]},{"id":2,"name":"سارة التجريبية","classId":1,"parentIds":[102]},{"id":3,"name":"محمد التجريبي","classId":16,"parentIds":[101]},{"id":4,"name":"مريم التجريبية","classId":16,"parentIds":[103]},{"id":5,"name":"عمر التجريبي","classId":17,"parentIds":[104]},{"id":6,"name":"ليان التجريبية","classId":17,"parentIds":[105]},{"id":7,"name":"يوسف التجريبي","classId":6,"parentIds":[106]},{"id":8,"name":"نعيمة التجريبية","classId":26,"parentIds":[107]},{"id":9,"name":"عبدالله التجريبي","classId":27,"parentIds":[108]},{"id":10,"name":"خالد التجريبي","classId":14,"parentIds":[]}],
+ "parents":[{"id":101,"name":"ولي أمر أحمد ومحمد"},{"id":102,"name":"ولي أمر سارة"},{"id":103,"name":"ولي أمر مريم"},{"id":104,"name":"ولي أمر عمر"},{"id":105,"name":"ولي أمر ليان"},{"id":106,"name":"ولي أمر يوسف"},{"id":107,"name":"ولي أمر نعيمة"},{"id":108,"name":"ولي أمر عبدالله"}]
+}

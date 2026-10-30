@@ -57,7 +57,8 @@ html {
     max-width: 760px;
     min-height: 100dvh;
     margin: 0 auto;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: visible;
     background: var(--bg);
     border: 0;
     box-shadow: 0 0 0 1px rgba(15, 23, 42, .04);
@@ -383,6 +384,16 @@ html {
 .student-portal .service-card--notifications {
     --service-color: #b5476b;
     --service-soft: #fff0f5;
+}
+
+.student-portal .service-card--results {
+    --service-color: #315b80;
+    --service-soft: #edf4fb;
+}
+
+.student-portal .service-card--messages {
+    --service-color: #7b4f9b;
+    --service-soft: #f5effb;
 }
 
 .student-portal .service-icon {
@@ -1305,6 +1316,110 @@ html {
 .student-portal .bottom-nav a.active .nav-icon {
     background: #dff2ee;
     box-shadow: inset 0 0 0 1px rgba(15, 118, 110, .08);
+}
+
+.student-portal .bottom-nav .nav-section-label {
+    letter-spacing: .01em;
+}
+
+@media (max-width: 1023px) {
+    .student-portal .bottom-nav .nav-secondary {
+        display: none;
+    }
+
+    .student-portal .app-shell {
+        width: 100%;
+        max-width: none;
+        min-width: 0;
+        overflow-x: hidden;
+    }
+
+    .student-portal .app-content {
+        width: 100%;
+        min-width: 0;
+        padding: 18px 12px 112px;
+    }
+
+    .student-portal .table-wrap,
+    .student-portal .portal-table-scroll,
+    .student-portal .grade-grid-wrap,
+    .student-portal .list-section,
+    .student-portal .info-list,
+    .student-portal .profile-form,
+    .student-portal .filter-form,
+    .student-portal .resource-card,
+    .student-portal .lesson-content {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+@media (max-width: 430px) {
+    .student-portal .bottom-nav a {
+        padding-inline: 2px;
+    }
+
+    .student-portal .bottom-nav .nav-icon {
+        width: 27px;
+        height: 27px;
+    }
+}
+
+/* Keep the student PWA chrome aligned with the parent portal on phones. */
+@media (max-width: 1023px) {
+    .student-portal .app-shell {
+        width: 100%;
+        max-width: none;
+    }
+
+    .student-portal .app-header {
+        height: 72px;
+        padding-block: 14px;
+    }
+
+    .student-portal .bottom-nav {
+        width: min(100%, 520px);
+        min-height: 70px;
+        padding-block: 8px calc(8px + env(safe-area-inset-bottom));
+    }
+
+    .student-portal .more-menu-panel {
+        top: 72px;
+        bottom: 78px;
+    }
+}
+
+/* The student page already has a content list named .more-list; scope the
+   PWA drawer rules so that both components keep their intended layouts. */
+.student-portal .more-menu-panel .more-list {
+    overflow-y: auto;
+    margin-top: 0;
+    padding: 7px 6px 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+.student-portal .more-menu-panel .more-list a,
+.student-portal .more-menu-panel .more-list button,
+.student-portal .more-menu-panel .more-list form {
+    min-height: 38px;
+    padding: 4px 3px;
+    border: 0;
+    border-radius: 8px;
+    font-size: 9.5px;
+    line-height: 1.3;
+}
+
+.student-portal .more-menu-panel .more-list span {
+    width: auto;
+    height: auto;
+    display: inline;
+    border-radius: 0;
+    background: transparent;
+    color: inherit;
+    font-size: 12px;
 }
 
 @media (min-width: 560px) {

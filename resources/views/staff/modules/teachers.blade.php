@@ -1,0 +1,1 @@
+@extends('staff.layout') @section('title','متابعة المعلمين') @section('subtitle','المعلمون الذين يدرّسون في نطاقك.') @section('content')@php($headers=['المعلم','الصفوف','الدروس','الواجبات'])@php($rowView='staff.modules.rows.teachers')@include('staff.modules._table')@endsection

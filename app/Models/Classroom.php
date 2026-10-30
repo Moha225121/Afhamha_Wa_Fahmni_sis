@@ -7,9 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable(['name', 'stage', 'section', 'academic_year_id'])] class Classroom extends Model
 {
+    use SoftDeletes;
+
     public function academicYear(): BelongsTo
     {
         return $this->belongsTo(AcademicYear::class);

@@ -4,6 +4,9 @@ namespace App\Http\Controllers\TeacherPortal;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\TeacherPortal\Concerns\InteractsWithTeacherScope;
+use App\Models\Lesson;
+use App\Services\PortalAnnouncementFeed;
+use App\Support\AssignmentDeadline;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
@@ -34,16 +37,7 @@ class DashboardController extends Controller
             'attendance_rate' => $attendanceRate ?? 0,
             'draft_exams' => DB::table('exams')->where('teacher_id', $teacher->id)->where('status', 'draft')->count(),
             'active_assignments' => DB::table('assignments')->where('teacher_id', $teacher->id)->whereIn('status', ['active', 'published'])->count(),
-            'lessons' => DB::table('lessons')
-                ->where('teacher_id', $teacher->id)
-                ->where(function ($query) {
-                    $query->where('status', 'draft')
-                        ->orWhere(function ($query) {
-                            $query->where('status', 'published')
-                                ->where('published_at', '>', now());
-                        });
-                })
-                ->count(),
+            'lessons' => Lesson::where('teacher_id', $teacher->id)->count(),
         ];
 
         $upcomingExams = DB::table('exams')
@@ -60,9 +54,21 @@ class DashboardController extends Controller
             ->join('classrooms', 'assignments.classroom_id', '=', 'classrooms.id')
             ->join('subjects', 'assignments.subject_id', '=', 'subjects.id')
             ->where('assignments.teacher_id', $teacher->id)
-            ->where('assignments.due_date', '>=', $today)
+            ->whereIn('assignments.status', ['active', 'published'])
+            ->where(fn ($query) => $query->whereNotNull('assignments.due_date')->orWhereNotNull('assignments.due_at'))
+            ->where(fn ($query) => AssignmentDeadline::whereState($query, false))
+            ->whereRaw('not '.$this->assignmentCompletionExpression())
             ->select('assignments.*', 'classrooms.name as classroom', 'subjects.name as subject')
-            ->orderBy('assignments.due_date')
+            ->orderByRaw('COALESCE(assignments.due_at, assignments.due_date)')
+            ->limit(5)
+            ->get();
+
+        $recentLessons = DB::table('lessons')
+            ->join('subjects', 'lessons.subject_id', '=', 'subjects.id')
+            ->where('lessons.teacher_id', $teacher->id)
+            ->whereIn('lessons.status', ['draft', 'published'])
+            ->select('lessons.id', 'lessons.title', 'lessons.status', 'subjects.name as subject')
+            ->orderByDesc('lessons.updated_at')
             ->limit(5)
             ->get();
 
@@ -78,6 +84,8 @@ class DashboardController extends Controller
             ->limit(6)
             ->get();
 
-        return view('teacher.dashboard', compact('teacher', 'stats', 'upcomingExams', 'upcomingAssignments', 'todayDetails'));
+        return view('teacher.dashboard', compact('teacher', 'stats', 'upcomingExams', 'upcomingAssignments', 'recentLessons', 'todayDetails') + [
+            'announcements' => app(PortalAnnouncementFeed::class)->for($request, 5),
+        ]);
     }
 }

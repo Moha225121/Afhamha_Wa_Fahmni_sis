@@ -6,6 +6,9 @@ use App\Contracts\SmartTutorGateway;
 use App\Data\SmartTutorPrompt;
 use App\Data\SmartTutorReply;
 use App\Exceptions\SmartTutorGatewayException;
+use App\Models\Assignment;
+use App\Models\AssignmentSubmission;
+use App\Models\Classroom;
 use App\Models\Guardian;
 use App\Models\Teacher;
 use App\Models\User;
@@ -74,13 +77,16 @@ class StudentLevelAnalysisTest extends TestCase
         $parent = $this->parentFor($fixture['student']);
         $gateway = $this->gateway();
         $url = route('parent.students.analysis', $fixture['student']);
-        $this->actingAs($parent)->get($url)->assertOk()->assertSee('75%');
+        $this->actingAs($parent)->get($url)->assertOk()->assertSee('<strong>75%</strong>', false)
+            ->assertSeeText('متوسط نسب النتائج المنشورة')->assertSeeText('المتوسط المعروض ليس المعدل الرسمي');
         $this->assertCount(0, $gateway->prompts);
         $this->post($url)->assertOk()->assertSeeText('خطة أسبوعية')
             ->assertDontSee('<script>alert(1)</script>', false);
         $this->post($url)->assertOk();
         $this->assertCount(1, $gateway->prompts);
         $payload = $gateway->prompts[0]->turns[1]->content;
+        $this->assertEquals(75, json_decode($payload, true)['average_percent']);
+        $this->assertStringContainsString('المتوسط متوسط نسب النتائج المتاحة وليس معدلًا رسميًا', $gateway->prompts[0]->turns[0]->content);
         $this->assertStringNotContainsString($fixture['user']->name, $payload);
         $this->assertStringNotContainsString('student_id', $payload);
         $this->assertStringNotContainsString('private note', $payload);
@@ -158,6 +164,26 @@ class StudentLevelAnalysisTest extends TestCase
             ->assertOk()->assertSeeText('تعذر إنشاء التحليل الآن')->assertSeeText('إنشاء التحليل وخطة الدعم');
     }
 
+    public function test_unexpected_analysis_failure_shows_safe_retry_message(): void
+    {
+        $fixture = $this->createStudentFixture('UNEXPECTED');
+        $this->publish($fixture);
+        $this->app->instance(SmartTutorGateway::class, new class implements SmartTutorGateway
+        {
+            public function reply(SmartTutorPrompt $prompt): SmartTutorReply
+            {
+                throw new \RuntimeException('internal provider endpoint and secret detail');
+            }
+        });
+
+        $this->actingAs($this->parentFor($fixture['student']))
+            ->post(route('parent.students.analysis.generate', $fixture['student']))
+            ->assertOk()
+            ->assertSeeText('تعذر الاتصال بخدمة التحليل')
+            ->assertSeeText('إنشاء التحليل وخطة الدعم')
+            ->assertDontSeeText('internal provider endpoint and secret detail');
+    }
+
     public function test_private_teacher_sheets_are_not_in_parent_snapshot_or_shared_reports(): void
     {
         $fixture = $this->createStudentFixture('A');
@@ -176,5 +202,44 @@ class StudentLevelAnalysisTest extends TestCase
         $this->actingAs($parent)->get(route('parent.students.analysis', $fixture['student']))->assertOk()->assertDontSeeText('خطة أسبوعية: مراجعة');
         $this->post(route('parent.students.analysis.generate', $fixture['student']))->assertOk();
         $this->assertCount(2, $gateway->prompts);
+    }
+
+    public function test_shared_homework_snapshot_counts_only_targeted_published_expired_assignments_and_own_submissions(): void
+    {
+        $fixture = $this->createStudentFixture('SHARED', 'إعدادي');
+        $room = $fixture['classroom'];
+        $primary = Classroom::create(['name' => $room->name, 'stage' => $room->stage, 'section' => 'ب', 'academic_year_id' => $room->academic_year_id]);
+        $subject = $this->createSubjectFor($room, 'SHARED');
+        $subject->classrooms()->attach($primary);
+        $teacher = Teacher::create(['user_id' => User::factory()->create(['role' => 'teacher', 'status' => 'active'])->id, 'status' => 'active']);
+        $otherTeacher = Teacher::create(['user_id' => User::factory()->create(['role' => 'teacher', 'status' => 'active'])->id, 'status' => 'active']);
+        DB::table('teacher_assignments')->insert(['teacher_id' => $teacher->id, 'classroom_id' => $room->id, 'subject_id' => $subject->id]);
+        $attributes = ['teacher_id' => $teacher->id, 'classroom_id' => $primary->id, 'subject_id' => $subject->id,
+            'due_at' => now()->subDay(), 'status' => 'published', 'published_at' => now()->subDays(2)];
+        $shared = Assignment::create($attributes + ['title' => 'QA Shared Analysis']);
+        $shared->classrooms()->attach([$primary->id, $room->id]);
+        $direct = Assignment::create(array_replace($attributes, ['title' => 'QA Direct Analysis', 'classroom_id' => $room->id]));
+        $direct->classrooms()->attach($room->id);
+        $other = Assignment::create(array_replace($attributes, ['title' => 'QA Other Teacher Analysis', 'teacher_id' => $otherTeacher->id]));
+        $other->classrooms()->attach($room->id);
+        Assignment::create($attributes + ['title' => 'QA Untargeted Analysis']);
+        foreach ([['status' => 'draft'], ['published_at' => now()->addDay()], ['due_at' => now()->addDay()]] as $index => $excluded) {
+            $assignment = Assignment::create(array_replace($attributes, $excluded, ['title' => 'QA Excluded '.$index]));
+            $assignment->classrooms()->attach($room->id);
+        }
+        AssignmentSubmission::create(['assignment_id' => $shared->id, 'student_id' => $fixture['student']->id, 'submitted_at' => now()->subDays(2), 'status' => 'submitted']);
+        AssignmentSubmission::create(['assignment_id' => $direct->id, 'student_id' => $fixture['student']->id, 'submitted_at' => null, 'status' => 'draft']);
+        $foreign = $this->createStudentFixture('FOREIGN', 'إعدادي');
+        AssignmentSubmission::create(['assignment_id' => $other->id, 'student_id' => $foreign['student']->id, 'submitted_at' => now(), 'status' => 'submitted']);
+
+        $service = app(StudentLevelAnalysisService::class);
+        $parentSnapshot = $service->snapshot($fixture['student'], null, 'parent');
+        $this->assertSame(3, $parentSnapshot['assignments_total']);
+        $this->assertSame(1, $parentSnapshot['assignments_submitted']);
+        $teacherSnapshot = $service->snapshot($fixture['student'], $teacher, 'teacher');
+        $this->assertSame(2, $teacherSnapshot['assignments_total']);
+        $this->assertSame(1, $teacherSnapshot['assignments_submitted']);
+        $this->actingAs($this->parentFor($fixture['student']))->get(route('parent.students.analysis', $fixture['student']))
+            ->assertOk()->assertSee('1 / 3');
     }
 }

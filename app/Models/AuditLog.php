@@ -11,6 +11,15 @@ use Illuminate\Database\Eloquent\Model;
 
     const UPDATED_AT = null;
 
+    protected static function booted(): void
+    {
+        // Store new audit timestamps in the application's timezone instead of
+        // inheriting a PostgreSQL server timezone. Existing records stay intact.
+        static::creating(function (self $record): void {
+            $record->created_at ??= now();
+        });
+    }
+
     protected function casts(): array
     {
         return ['old_values' => 'array', 'new_values' => 'array', 'created_at' => 'datetime'];

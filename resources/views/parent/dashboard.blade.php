@@ -5,7 +5,7 @@
 @section('content')
     <section class="hero">
         <p>متابعة اليوم</p>
-        <h1>مرحباً {{ strtok(auth()->user()->name, ' ') ?: auth()->user()->name }}</h1>
+        <h1>مرحباً {{ strtok($parentIdentity['name'], ' ') ?: $parentIdentity['name'] }}</h1>
         <span>{{ now()->format('Y-m-d') }}</span>
     </section>
 
@@ -39,15 +39,6 @@
                 <span>نتائج منشورة</span>
                 <strong>{{ $summary['published_grades'] }}</strong>
             </article>
-            <article class="metric">
-                <span>متوسط درجات الطالب</span>
-                @if($summary['average_percent'] === null)
-                    <strong class="metric-empty">لا توجد نتائج بعد</strong>
-                @else
-                    <strong>{{ $summary['average_percent'] }}%</strong>
-                @endif
-                <small class="metric-help">متوسط نسب الدرجات المنشورة في جميع المواد</small>
-            </article>
         </section>
 
         <section class="list-section">
@@ -74,9 +65,23 @@
             <a href="{{ route('parent.attendance', ['student' => $selectedStudent->id]) }}">الحضور</a>
             <a href="{{ route('parent.assignments', ['student' => $selectedStudent->id]) }}">الواجبات</a>
             <a href="{{ route('parent.exams', ['student' => $selectedStudent->id]) }}">الاختبارات</a>
-            <a href="{{ route('parent.notifications') }}">الإشعارات</a>
+            <a href="{{ route('parent.notifications', ['student' => $selectedStudent->id]) }}">الإشعارات</a>
         </section>
 
+        <section class="list-section">
+            <div class="section-title">
+                <h2>الرسائل</h2>
+                <a href="{{ route('parent.messages', ['student' => $selectedStudent->id]) }}">الكل</a>
+            </div>
+            @forelse($announcements as $announcement)
+                <a class="message-row" href="{{ route('parent.messages', ['student' => $selectedStudent->id]) }}">
+                    <strong>{{ $announcement->title }}</strong>
+                    <span>{{ $announcement->published_at?->format('Y-m-d') ?? $announcement->created_at?->format('Y-m-d') }}</span>
+                </a>
+            @empty
+                <p class="muted-line">لا توجد رسائل منشورة حالياً.</p>
+            @endforelse
+        </section>
     @endif
 
     <section class="list-section section-gap">

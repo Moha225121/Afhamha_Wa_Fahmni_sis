@@ -20,25 +20,19 @@
 @php
     $startsAt = \Illuminate\Support\Carbon::parse($r->starts_at);
     $isPassed = $startsAt->isPast();
-    $statusLabel = 'مسودة';
-    $statusClass = 'status-draft';
-
-    if ($r->status === 'cancelled') {
-        $statusLabel = 'ملغي';
-        $statusClass = 'status-cancelled';
-    } elseif ($r->status === 'completed') {
-        $statusLabel = 'مكتمل';
-        $statusClass = 'status-complete';
-    } elseif ($isPassed && in_array($r->status, ['scheduled', 'published'], true)) {
-        $statusLabel = 'منشور';
-        $statusClass = 'status-scheduled';
-    } elseif ($r->status === 'published') {
-        $statusLabel = 'منشور';
-        $statusClass = 'status-scheduled';
-    } elseif (in_array($r->status, ['scheduled'], true)) {
-        $statusLabel = 'مجدول';
-        $statusClass = 'status-scheduled';
-    }
+    $statusLabel = match ($r->status) {
+        'cancelled' => 'ملغي',
+        'completed' => 'مكتمل',
+        'published' => 'منشور',
+        'scheduled' => 'مجدول',
+        default => 'مسودة',
+    };
+    $statusClass = match ($r->status) {
+        'cancelled' => 'status-cancelled',
+        'completed' => 'status-complete',
+        'published', 'scheduled' => 'status-scheduled',
+        default => 'status-draft',
+    };
 @endphp
 <tr>
 <td><div class="exam-title">{{ $r->title }}</div></td>

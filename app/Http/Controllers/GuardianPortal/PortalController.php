@@ -3,17 +3,21 @@
 namespace App\Http\Controllers\GuardianPortal;
 
 use App\Http\Controllers\Controller;
-use App\Models\Announcement;
 use App\Models\Assignment;
 use App\Models\Guardian;
 use App\Models\Student;
+use App\Services\ParentIdentityService;
 use App\Services\ParentPortalContext;
+use App\Services\PortalAnnouncementFeed;
+use App\Services\ResultPublicationService;
 use App\Services\SubjectDisplayName;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class PortalController extends Controller
@@ -30,7 +34,7 @@ class PortalController extends Controller
             'selectedStudent' => $selectedStudent,
             'summary' => $this->summaryFor($selectedStudent),
             'recentGrades' => $this->recentGradesFor($selectedStudent, 3),
-            'announcements' => $this->announcementsFor($guardian, 4),
+            'announcements' => app(PortalAnnouncementFeed::class)->for($request, 4),
         ]);
     }
 
@@ -69,7 +73,7 @@ class PortalController extends Controller
         $grades = $grades->when($selectedSubjectId, fn ($items) => $items->where('subject_id', $selectedSubjectId))->values();
         $percentages = $grades->filter(fn ($grade) => (float) $grade->total_score > 0)
             ->map(fn ($grade) => (float) $grade->score * 100 / (float) $grade->total_score);
-        $publications = $selectedStudent ? app(\App\Services\ResultPublicationService::class)->publications($selectedStudent) : collect();
+        $publications = $selectedStudent ? app(ResultPublicationService::class)->publications($selectedStudent) : collect();
         $publications = $publications->map(function ($publication) use ($selectedSubjectId) {
             $publication->result['subjects'] = collect($publication->result['subjects'])
                 ->when($selectedSubjectId, fn ($items) => $items->where('subject_id', $selectedSubjectId))
@@ -83,12 +87,9 @@ class PortalController extends Controller
             'selectedStudent' => $selectedStudent,
             'subjects' => $subjects,
             'selectedSubjectId' => $selectedSubjectId,
-            'summary' => [
-                'published_grades' => $grades->count(),
-                'average_percent' => $percentages->isEmpty() ? null : round((float) $percentages->avg(), 1),
-            ],
-            // Period subjects appear in their report once; individual exams appear below.
+            'summary' => ['published_grades' => $grades->count(), 'average_percent' => $percentages->isNotEmpty() ? round($percentages->avg(), 1) : null],
             'recentGrades' => $grades->filter(fn ($grade) => isset($grade->exam_id))->values(),
+            'teacherSheetGrades' => app(ResultPublicationService::class)->teacherSheetDetails($selectedStudent),
             'publications' => $publications,
         ]);
     }
@@ -97,7 +98,7 @@ class PortalController extends Controller
     {
         [, $children, $selectedStudent] = $this->parentContext($request);
         $filters = $request->validate([
-            'period' => ['nullable', \Illuminate\Validation\Rule::in(['all', 'week', 'month', 'semester', 'custom'])],
+            'period' => ['nullable', Rule::in(['all', 'week', 'month', 'semester', 'custom'])],
             'from' => ['nullable', 'date_format:Y-m-d'], 'to' => ['nullable', 'date_format:Y-m-d'],
         ]);
         $period = $filters['period'] ?? 'all';
@@ -108,7 +109,9 @@ class PortalController extends Controller
             'custom' => [$filters['from'] ?? null, $filters['to'] ?? null],
             default => [null, null],
         };
-        if ($dateFrom && $dateTo && $dateFrom > $dateTo) [$dateFrom, $dateTo] = [$dateTo, $dateFrom];
+        if ($dateFrom && $dateTo && $dateFrom > $dateTo) {
+            [$dateFrom, $dateTo] = [$dateTo, $dateFrom];
+        }
         $query = DB::table('attendance_records')->where('student_id', $selectedStudent?->id ?? 0)
             ->when($dateFrom, fn ($items) => $items->whereDate('date', '>=', $dateFrom))
             ->when($dateTo, fn ($items) => $items->whereDate('date', '<=', $dateTo));
@@ -122,6 +125,7 @@ class PortalController extends Controller
             'excused' => (int) ($counts['excused_absence'] ?? 0) + (int) ($counts['excused_late'] ?? 0),
             'attendance_percent' => $total ? round(($present + $late) / $total * 100, 1) : null,
         ];
+
         return view('parent.attendance', [
             'children' => $children,
             'selectedStudent' => $selectedStudent,
@@ -132,17 +136,21 @@ class PortalController extends Controller
 
     public function assignments(Request $request): View
     {
+        $request->validate(['assignment' => ['nullable', 'integer', 'min:1']]);
         [, $children, $selectedStudent] = $this->parentContext($request);
         $assignments = collect();
 
         if ($selectedStudent?->classroom_id) {
+            $hasClassroomAssignments = Schema::hasTable('assignment_classroom');
             $assignments = Assignment::query()
+                ->when($request->filled('assignment'), fn ($query) => $query->whereKey($request->integer('assignment')))
                 ->with([
                     'subject',
                     'attachments',
                     'submissions' => fn ($query) => $query->where('student_id', $selectedStudent->id),
                 ])
-                ->where('classroom_id', $selectedStudent->classroom_id)
+                ->where(fn ($query) => $query->where('classroom_id', $selectedStudent->classroom_id)
+                    ->when($hasClassroomAssignments, fn ($query) => $query->orWhereHas('classrooms', fn ($classrooms) => $classrooms->whereKey($selectedStudent->classroom_id))))
                 ->whereIn('status', ['published', 'active'])
                 ->where(fn ($query) => $query->whereNull('published_at')->orWhere('published_at', '<=', now()))
                 ->orderByRaw('case when due_at is null then 1 else 0 end')
@@ -150,6 +158,7 @@ class PortalController extends Controller
                 ->get();
         }
 
+        abort_if($request->filled('assignment') && $assignments->isEmpty(), 404);
         $assignments->each(function ($assignment): void {
             $assignment->subject_label = SubjectDisplayName::arabic($assignment->subject?->name);
         });
@@ -161,6 +170,7 @@ class PortalController extends Controller
 
     public function exams(Request $request): View
     {
+        $request->validate(['exam' => ['nullable', 'integer', 'min:1']]);
         [, $children, $selectedStudent] = $this->parentContext($request);
         $exams = collect();
 
@@ -171,6 +181,7 @@ class PortalController extends Controller
                 ->whereIn('status', ['submitted', 'pending_review'])
                 ->groupBy('exam_id');
             $exams = DB::table('exams')
+                ->when($request->filled('exam'), fn ($query) => $query->where('exams.id', $request->integer('exam')))
                 ->join('subjects', 'exams.subject_id', '=', 'subjects.id')
                 ->leftJoin('grades', function ($join) use ($selectedStudent): void {
                     $join->on('grades.exam_id', '=', 'exams.id')->where('grades.student_id', '=', $selectedStudent->id);
@@ -191,13 +202,18 @@ class PortalController extends Controller
                 ])
                 ->orderBy('exams.starts_at')
                 ->get()->map(function ($exam) {
-                    if (!app(\App\Services\ResultPublicationService::class)->legacyAttemptVisible($exam)) {
-                        $exam->score = null; $exam->automatic_score = null; $exam->automatic_percentage = null; $exam->grade_published_at = null;
+                    if (! app(ResultPublicationService::class)->legacyAttemptVisible($exam)) {
+                        $exam->score = null;
+                        $exam->automatic_score = null;
+                        $exam->automatic_percentage = null;
+                        $exam->grade_published_at = null;
                     }
+
                     return $exam;
                 });
         }
 
+        abort_if($request->filled('exam') && $exams->isEmpty(), 404);
         $exams->each(function ($exam): void {
             $exam->subject_label = SubjectDisplayName::arabic($exam->subject);
         });
@@ -226,12 +242,20 @@ class PortalController extends Controller
 
     public function updateProfile(Request $request): RedirectResponse
     {
+        $guardian = $this->context->guardian($request);
+        $identities = app(ParentIdentityService::class);
+        $key = $identities->selectedKey($request, $guardian);
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'phone' => ['nullable', 'string', 'max:30'],
+            'phone' => [$key === 'additional' ? 'required' : 'nullable', 'string', 'max:30'],
         ]);
 
-        $request->user()->update($validated);
+        if ($key === 'additional') {
+            $guardian->update(['additional_guardian_name' => $validated['name'], 'additional_guardian_phone' => $validated['phone']]);
+        } else {
+            $request->user()->update($validated);
+        }
+        $identities->remember($request, $guardian->fresh('user'), $key);
 
         return redirect()->route('parent.dashboard')->with('success', 'تم حفظ الملف الشخصي.');
     }
@@ -315,14 +339,6 @@ class PortalController extends Controller
 
     private function publishedResultsFor(?Student $student): Collection
     {
-        return app(\App\Services\ResultPublicationService::class)->visibleResults($student);
-    }
-
-    private function announcementsFor(Guardian $guardian, int $limit): Collection
-    {
-        return Announcement::visibleToParent($guardian)
-            ->orderByRaw('COALESCE(published_at, created_at) DESC')->orderByDesc('id')
-            ->limit($limit)
-            ->get();
+        return app(ResultPublicationService::class)->visibleResults($student);
     }
 }

@@ -70,7 +70,7 @@ class TeacherHighSeverityFixTest extends TestCase
         ])->assertRedirect();
         $this->assertDatabaseHas('assignment_submissions', ['assignment_id' => $assignment->id, 'student_id' => $this->ctx['student']->id]);
         $this->assertSame('published', $assignment->status);
-        $this->actingAs($this->ctx['teacher']->user)->get(route('teacher.assignments.index', ['status' => 'active']))->assertSeeText($assignment->title);
+        $this->actingAs($this->ctx['teacher']->user)->get(route('teacher.assignments.index', ['status' => 'completed']))->assertSeeText($assignment->title);
     }
 
     public static function assignmentStates(): array
@@ -99,6 +99,23 @@ class TeacherHighSeverityFixTest extends TestCase
             'file' => UploadedFile::fake()->create('answer.pdf', 10, 'application/pdf'),
         ])->assertStatus($expected);
         $this->assertDatabaseCount('assignment_submissions', $expected === 302 ? 1 : 0);
+    }
+
+    public function test_another_teacher_with_the_same_curriculum_pair_cannot_view_or_grade_the_owners_submissions(): void
+    {
+        $assignment = Assignment::create([
+            'teacher_id' => $this->ctx['teacher']->id, 'classroom_id' => $this->ctx['classroom']->id,
+            'subject_id' => $this->ctx['subject']->id, 'title' => 'QA Ownership', 'status' => 'published',
+            'due_at' => now()->addDay(), 'max_score' => 20,
+        ]);
+        $otherUser = User::factory()->create(['role' => 'teacher', 'status' => 'active']);
+        $otherTeacher = Teacher::create(['user_id' => $otherUser->id, 'status' => 'active']);
+        $otherTeacher->classrooms()->attach($this->ctx['classroom'], ['subject_id' => $this->ctx['subject']->id]);
+        $this->actingAs($otherUser)->get(route('teacher.assignments.submissions', $assignment))->assertNotFound();
+        $this->post(route('teacher.assignments.submissions.store', $assignment), [
+            'submitted' => [$this->ctx['student']->id => 1], 'scores' => [$this->ctx['student']->id => 19],
+        ])->assertNotFound();
+        $this->assertDatabaseCount('assignment_submissions', 0);
     }
 
     public function test_unrelated_student_cannot_submit_teacher_created_assignment(): void

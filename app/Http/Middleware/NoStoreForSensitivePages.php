@@ -15,7 +15,7 @@ class NoStoreForSensitivePages
         if ($request->user() && $request->route()) {
             $routeName = (string) $request->route()->getName();
 
-            if ($routeName !== '' && preg_match('/^(teacher|student|parent|admin|supervisor)\./', $routeName) === 1) {
+            if ($routeName !== '' && preg_match('/^(teacher|student|parent|admin|supervisor|staff|finance|received-reports|teacher-messages)\./', $routeName) === 1) {
                 $response->headers->set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0, private');
                 $response->headers->set('Pragma', 'no-cache');
                 $response->headers->set('Expires', '0');
