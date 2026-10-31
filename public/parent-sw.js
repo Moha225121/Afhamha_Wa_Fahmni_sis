@@ -2,7 +2,7 @@ const CACHE_NAME = 'afhamha-parent-static-v9-nasr-daem';
 const OFFLINE_URL = '/parent-offline.html';
 const STATIC_ASSETS = [
     OFFLINE_URL,
-    '/icons/nasr-daem-logo.jpg',
+    '/icons/nasbia-logo.jpg',
     '/school-branding/icon-180.png?v=20261007-nasr-daem',
     '/school-branding/icon-192.png?v=20261007-nasr-daem',
     '/school-branding/icon-512.png?v=20261007-nasr-daem',

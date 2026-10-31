@@ -1,7 +1,7 @@
 {
-    "name": "مدرسة النصر الدائم - الطالب",
-    "short_name": "النصر الدائم",
-    "description": "بوابة الطالب داخل منصة افهمها وفهمني",
+    "name": "مدرسة النسبية - الطالب",
+    "short_name": "النسبية",
+    "description": "بوابة الطالب في مدرسة النسبية",
     "id": "/student/",
     "start_url": "/student/dashboard",
     "scope": "/student/",

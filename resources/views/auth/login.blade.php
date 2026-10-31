@@ -3,14 +3,14 @@
 <head>
     <meta charset="utf-8">@include('shared.pwa-head')
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>دخول المنصة | افهمها وفهمني</title>
+    <title>دخول المنصة | مدرسة النسبية</title>
     <link rel="stylesheet" href="{{ asset('css/admin.css') }}?v=login-style-1">
     @include('shared.portal-assets')@include('shared.branding-style')
 </head>
 <body class="login-page">
 <main class="login-card">
     <div class="brand-mark">@include('shared.brand-mark')</div>
-    <p class="eyebrow">منصة افهمها وفهمني</p>
+    <p class="eyebrow">مدرسة النسبية</p>
     <h1>دخول المنصة</h1>
 
     <form method="post" action="{{ route('login.store') }}">

@@ -4,8 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="theme-color" content="#101632">
-    <link rel="icon" href="/icons/nasr-daem-logo.jpg" type="image/jpeg">
-    <title>تعذّر الاتصال | مدرسة النصر الدائم</title>
+    <link rel="icon" href="/icons/nasbia-logo.jpg" type="image/jpeg">
+    <title>تعذّر الاتصال | مدرسة النسبية</title>
     <style>
         *{box-sizing:border-box}
         body{margin:0;min-height:100vh;min-height:100svh;display:grid;place-items:center;padding:28px 16px;background:#FFFFFF;color:#101632;font-family:Tahoma,Arial,sans-serif;text-align:center}
@@ -28,8 +28,8 @@
 </head>
 <body>
 <main class="card">
-    <img class="logo" src="/icons/nasr-daem-logo.jpg" width="204" height="192" alt="شعار مدرسة النصر الدائم">
-    <p class="company">مدرسة النصر الدائم</p>
+    <img class="logo" src="/icons/nasbia-logo.jpg" width="204" height="192" alt="شعار مدرسة النسبية">
+    <p class="company">مدرسة النسبية</p>
     <p class="slogan">التعليم كما يجب أن يكون</p>
     <section class="status" aria-labelledby="offline-title">
         <h1 id="offline-title">تعذّر الاتصال بالنظام</h1>

@@ -1,7 +1,7 @@
 {
-    "name": "مدرسة النصر الدائم - ولي الأمر",
-    "short_name": "النصر الدائم",
-    "description": "بوابة ولي الأمر داخل منصة افهمها وفهمني",
+    "name": "مدرسة النسبية - ولي الأمر",
+    "short_name": "النسبية",
+    "description": "بوابة ولي الأمر في مدرسة النسبية",
     "id": "/parent/",
     "start_url": "/parent/dashboard",
     "scope": "/parent/",

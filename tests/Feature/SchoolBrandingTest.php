@@ -19,7 +19,7 @@ class SchoolBrandingTest extends TestCase
     {
         $this->obsoleteBranding();
         $response = $this->get('/login')->assertOk()
-            ->assertSee('icons/nasr-daem-logo.jpg')
+            ->assertSee('icons/nasbia-logo.jpg')
             ->assertSee('css/school-branding.css')
             ->assertSee('content="#101632"', false)
             ->assertDontSee('other-school.jpg')
@@ -41,7 +41,7 @@ class SchoolBrandingTest extends TestCase
             imagedestroy($image);
         }
         $this->get('/school-branding/icon-999.png')->assertNotFound();
-        $this->get('/favicon.ico')->assertRedirect('/icons/nasr-daem-logo.jpg');
+        $this->get('/favicon.ico')->assertRedirect('/icons/nasbia-logo.jpg');
     }
 
     public function test_student_cards_and_pdf_use_the_original_logo_despite_old_settings(): void
@@ -72,7 +72,7 @@ class SchoolBrandingTest extends TestCase
         $this->obsoleteBranding();
         $response = app(FinancialPdfService::class)->download('finance.receipt', [
             'receipt' => (object) ['number' => 'QA-1', 'status' => 'paid'],
-            'snapshot' => ['school' => 'مدرسة النصر الدائم', 'amount_millimes' => 1000, 'remaining_millimes' => 0],
+            'snapshot' => ['school' => 'مدرسة النسبية', 'amount_millimes' => 1000, 'remaining_millimes' => 0],
             'pdfLogo' => 'data:image/jpeg;base64,invalid-replacement',
         ], 'receipt.pdf');
 
@@ -103,6 +103,6 @@ class SchoolBrandingTest extends TestCase
             }
         }
 
-        return ['school_name' => 'مدرسة النصر الدائم', 'timezone' => 'Africa/Tripoli', 'academic_year_name' => '2026/2027', 'academic_year_starts_at' => '2026-09-01', 'academic_year_ends_at' => '2027-06-30', 'periods_sunday' => 6, 'periods_monday' => 6, 'periods_tuesday' => 6, 'periods_wednesday' => 6, 'periods_thursday' => 6, 'break_after_period' => 3, 'break_duration_minutes' => 30, 'period_times' => $times];
+        return ['school_name' => 'مدرسة النسبية', 'timezone' => 'Africa/Tripoli', 'academic_year_name' => '2026/2027', 'academic_year_starts_at' => '2026-09-01', 'academic_year_ends_at' => '2027-06-30', 'periods_sunday' => 6, 'periods_monday' => 6, 'periods_tuesday' => 6, 'periods_wednesday' => 6, 'periods_thursday' => 6, 'break_after_period' => 3, 'break_duration_minutes' => 30, 'period_times' => $times];
     }
 }

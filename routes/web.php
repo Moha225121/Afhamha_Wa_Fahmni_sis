@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AccountNumberingController;
 
 Route::redirect('/', '/login');
-Route::redirect('/favicon.ico', '/icons/nasr-daem-logo.jpg');
+Route::redirect('/favicon.ico', '/icons/nasbia-logo.jpg');
 Route::get('/school-branding/icon-{size}.png', fn (string $size) => response(\App\Support\SchoolBranding::iconPng((int) $size), 200, [
     'Content-Type' => 'image/png',
     'Cache-Control' => 'public, max-age=86400',

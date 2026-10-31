@@ -2,7 +2,7 @@ const CACHE_NAME = 'afhamha-shell-v3-nasr-daem';
 const OFFLINE_URL = '/offline.html';
 const APP_ASSETS = [
     OFFLINE_URL,
-    '/icons/nasr-daem-logo.jpg',
+    '/icons/nasbia-logo.jpg',
     '/school-branding/icon-180.png?v=20261007-nasr-daem',
     '/school-branding/icon-192.png?v=20261007-nasr-daem',
     '/school-branding/icon-512.png?v=20261007-nasr-daem',

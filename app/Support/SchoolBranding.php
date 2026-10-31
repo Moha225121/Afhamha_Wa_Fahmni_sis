@@ -4,11 +4,11 @@ namespace App\Support;
 
 final class SchoolBranding
 {
-    public const LOGO = 'icons/nasr-daem-logo.jpg';
-    public const NAVY = '#101632';
-    public const NAVY_LIGHT = '#1A2346';
-    public const GOLD = '#E6C52A';
-    public const GOLD_LIGHT = '#EFD75C';
+    public const LOGO = 'icons/nasbia-logo.jpg';
+    public const NAVY = '#172b73';
+    public const NAVY_LIGHT = '#244a9b';
+    public const GOLD = '#f5a623';
+    public const GOLD_LIGHT = '#ffbf3f';
     public const WHITE = '#FFFFFF';
     public const GRAY = '#F1F2F5';
 

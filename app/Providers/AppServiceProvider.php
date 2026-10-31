@@ -31,8 +31,8 @@ class AppServiceProvider extends ServiceProvider
         View::composer('*', function ($view): void {
             $settings = Schema::hasTable('settings') ? DB::table('settings')->pluck('value', 'key') : collect();
             $view->with('schoolBranding', [
-                'platform_name' => 'افهمها وفهمني',
-                'school_name' => $settings['school_name'] ?? 'مدرسة النصر الدائم',
+                'platform_name' => 'مدرسة النسبية',
+                'school_name' => $settings['school_name'] ?? 'مدرسة النسبية',
                 'logo' => SchoolBranding::LOGO,
                 'theme_color' => SchoolBranding::NAVY,
             ]);
