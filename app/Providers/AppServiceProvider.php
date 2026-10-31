@@ -7,6 +7,7 @@ use App\Services\GeminiSmartTutorGateway;
 use App\Support\SchoolBranding;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Schema;
@@ -28,6 +29,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Paginator::defaultView('vendor.pagination.nasbia');
+        Paginator::defaultSimpleView('vendor.pagination.nasbia-simple');
+
         View::composer('*', function ($view): void {
             $settings = Schema::hasTable('settings') ? DB::table('settings')->pluck('value', 'key') : collect();
             $view->with('schoolBranding', [
