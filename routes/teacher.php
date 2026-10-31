@@ -12,7 +12,7 @@ use App\Http\Controllers\LibraryCatalogController;
 use App\Http\Controllers\PortalAnnouncementController;
 use Illuminate\Support\Facades\Route;
 
-Route::prefix('teacher')->name('teacher.')->middleware(['auth', 'teacher'])->group(function (): void {
+Route::prefix('teacher')->name('teacher.')->middleware(['auth', 'teacher', 'no-cache'])->group(function (): void {
     Route::get('/students/{student}/analysis', \App\Http\Controllers\StudentLevelAnalysisController::class)->name('students.analysis');
     Route::post('/students/{student}/analysis', \App\Http\Controllers\StudentLevelAnalysisController::class)->middleware('throttle:6,1')->name('students.analysis.generate');
     Route::get('/', fn () => redirect()->route('teacher.dashboard'));

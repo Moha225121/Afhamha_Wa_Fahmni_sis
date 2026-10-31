@@ -1,12 +1,14 @@
-const CACHE_NAME = 'afhamha-parent-static-v9-nasr-daem';
+const CACHE_NAME = 'afhamha-parent-static-v8';
 const OFFLINE_URL = '/parent-offline.html';
 const STATIC_ASSETS = [
     OFFLINE_URL,
+    '/favicon.ico',
     '/icons/nasbia-logo.jpg',
-    '/school-branding/icon-180.png?v=20261007-nasr-daem',
-    '/school-branding/icon-192.png?v=20261007-nasr-daem',
-    '/school-branding/icon-512.png?v=20261007-nasr-daem',
-    '/parent-manifest.webmanifest'
+    '/icons/parent-icon.svg',
+    '/icons/parent-icon-192.png',
+    '/icons/parent-icon-512.png',
+    '/icons/parent-maskable-512.png',
+    '/school-app-icon'
 ];
 
 self.addEventListener('install', (event) => {
@@ -20,7 +22,7 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
     event.waitUntil(
         caches.keys()
-            .then((keys) => Promise.all(keys.filter((key) => key.startsWith('afhamha-parent-static-') && key !== CACHE_NAME).map((key) => caches.delete(key))))
+            .then((keys) => Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))))
             .then(() => self.clients.claim())
     );
 });
@@ -38,7 +40,15 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    if (STATIC_ASSETS.includes(url.pathname + url.search) || STATIC_ASSETS.includes(url.pathname)) {
+    if (url.pathname === '/school-app-icon') {
+        event.respondWith(fetch(request).then((response) => caches.open(CACHE_NAME)
+            .then((cache) => cache.put(request, response.clone()))
+            .then(() => response)
+        ).catch(() => caches.match(request)));
+        return;
+    }
+
+    if (STATIC_ASSETS.includes(url.pathname)) {
         event.respondWith(caches.match(request).then((cached) => cached || fetch(request)));
     }
 });
@@ -47,8 +57,8 @@ self.addEventListener('push', (event) => {
     const payload = event.data ? event.data.json() : {};
     event.waitUntil(self.registration.showNotification(payload.title || 'افهمها وفهمني', {
         body: payload.body || 'لديك إشعار جديد.',
-        icon: '/school-branding/icon-192.png?v=20261007-nasr-daem',
-        badge: '/school-branding/icon-192.png?v=20261007-nasr-daem',
+        icon: '/school-app-icon',
+        badge: '/icons/parent-maskable-512.png',
         data: { url: payload.url || '/parent/notifications' },
         dir: 'rtl',
         lang: 'ar',

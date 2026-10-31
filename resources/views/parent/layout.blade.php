@@ -1,13 +1,18 @@
-@php($unreadNotifications = auth()->user()->unreadNotifications()->count())
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="utf-8">@include('shared.pwa-head', ['manifestUrl' => route('parent.pwa.manifest').'?v=20261007-nasr-daem'])
+    <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="theme-color" content="#0e7c86">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="ولي الأمر">
     <title>@yield('title', 'بوابة ولي الأمر') | افهمها وفهمني</title>
-    <link rel="stylesheet" href="{{ asset('css/parent.css') }}?v=parent-identity-1">
-    @include('shared.portal-assets')@include('shared.branding-style')
+    <link rel="manifest" href="{{ route('parent.pwa.manifest') }}">
+    <link rel="icon" href="{{ route('school.pwa.icon') }}" sizes="any">
+    <link rel="apple-touch-icon" href="{{ route('school.pwa.icon') }}">
+    <link rel="stylesheet" href="{{ asset('css/parent.css') }}?v=portal-style-1">
+    @include('shared.branding-style')@include('shared.portal-assets')
     <script src="{{ asset('js/enhanced-selects.js') }}" defer></script>
 </head>
 <body>
@@ -17,21 +22,17 @@
             <span class="brand-mark">@include('shared.brand-mark')</span>
             <span class="brand-copy">
                 <b>افهمها وفهمني</b>
-                <small>{{ $parentIdentity['name'] ?? 'بوابة ولي الأمر' }}</small>
+                <small>بوابة ولي الأمر</small>
             </span>
         </a>
         <div class="header-actions">
             <button type="button" class="install-app-button" data-install-app>
                 <span aria-hidden="true">⇩</span><span>تثبيت التطبيق</span>
             </button>
-            @if(!request()->routeIs('parent.identity.*'))
             <button type="button" class="more-menu-toggle" data-more-toggle aria-expanded="false" aria-controls="parent-more-menu">
                 <span class="more-menu-toggle-icon" aria-hidden="true">☰</span>
                 <span>المزيد</span>
             </button>
-            @else
-            <form method="post" action="{{ route('logout') }}">@csrf<button type="submit" class="more-menu-toggle">خروج</button></form>
-            @endif
         </div>
     </header>
 
@@ -43,9 +44,6 @@
         </div>
         <div class="more-list">
             <button type="button" data-install-app><span aria-hidden="true">⇩</span> تثبيت التطبيق</button>
-            @if(count($parentIdentityOptions ?? []) > 1)
-                <a href="{{ route('parent.identity.create') }}"><span aria-hidden="true">⇄</span> تغيير مستخدم المنصة</a>
-            @endif
             <a href="{{ route('parent.profile') }}" class="{{ request()->routeIs('parent.profile') ? 'active' : '' }}">
                 <span aria-hidden="true">◉</span>
                 الملف الشخصي
@@ -58,7 +56,6 @@
                 <span aria-hidden="true">✉</span>
                 الرسائل
             </a>
-            <a href="{{ route('parent.ads.index') }}" class="{{ request()->routeIs('parent.ads.*') ? 'active' : '' }}"><span aria-hidden="true">▣</span> إعلانات المدرسة</a>
             <a href="{{ route('parent.attendance') }}" class="{{ request()->routeIs('parent.attendance') ? 'active' : '' }}">
                 <span aria-hidden="true">✓</span>
                 الحضور
@@ -75,7 +72,7 @@
             </a>
             <a href="{{ route('parent.notifications') }}" class="{{ request()->routeIs('parent.notifications') ? 'active' : '' }}">
                 <span aria-hidden="true">●</span>
-                الإشعارات @if($unreadNotifications)<b class="notification-badge" aria-label="{{ $unreadNotifications }} إشعار غير مقروء">{{ $unreadNotifications }}</b>@endif
+                الإشعارات
             </a>
             <form method="post" action="{{ route('logout') }}">
                 @csrf
@@ -86,6 +83,7 @@
 
     <dialog class="install-dialog" id="parent-install-dialog" aria-labelledby="install-dialog-title">
         <form method="dialog"><button class="install-dialog-close" aria-label="إغلاق">×</button></form>
+        <img src="{{ route('school.pwa.icon') }}" alt="شعار {{ $schoolBranding['school_name'] }}" style="display:block;width:72px;height:72px;object-fit:contain;margin:0 auto 16px">
         <h2 id="install-dialog-title">تثبيت تطبيق ولي الأمر</h2>
         <p data-install-message>يمكن تثبيت التطبيق من قائمة المتصفح.</p>
         <ol data-install-steps></ol>
@@ -104,7 +102,6 @@
         @yield('content')
     </main>
 
-    @if(!request()->routeIs('parent.identity.*'))
     <nav class="bottom-nav" aria-label="تنقل ولي الأمر">
         <a href="{{ route('parent.dashboard') }}" class="{{ request()->routeIs('parent.dashboard') ? 'active' : '' }}">
             <span>⌂</span>
@@ -123,7 +120,6 @@
             الرسائل
         </a>
     </nav>
-    @endif
 </div>
 
 <script>
@@ -139,10 +135,10 @@ let deferredInstallPrompt = null;
 
 const isStandalone = () => window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
 const hideInstallButtons = () => installButtons.forEach(button => button.hidden = true);
-const showInstallHelp = () => {
+const showInstallHelp = (errorMessage = null) => {
     const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
     const isAndroid = /android/i.test(navigator.userAgent);
-    installMessage.textContent = isIOS ? 'لتثبيت التطبيق على iPhone أو iPad:' : 'لم يعرض المتصفح نافذة التثبيت التلقائي. يمكنك تثبيته يدويًا:';
+    installMessage.textContent = errorMessage || (isIOS ? 'لتثبيت التطبيق على iPhone أو iPad:' : 'لم يعرض المتصفح نافذة التثبيت التلقائي. يمكنك تثبيته يدويًا:');
     const steps = isIOS
         ? ['افتح هذه الصفحة في Safari.', 'اضغط زر المشاركة.', 'اختر «إضافة إلى الشاشة الرئيسية»، ثم اضغط «إضافة».']
         : isAndroid
@@ -161,9 +157,14 @@ window.addEventListener('beforeinstallprompt', event => {
 installButtons.forEach(button => button.addEventListener('click', async () => {
     if (isStandalone()) { hideInstallButtons(); return; }
     if (! deferredInstallPrompt) { showInstallHelp(); return; }
-    deferredInstallPrompt.prompt();
-    await deferredInstallPrompt.userChoice;
-    deferredInstallPrompt = null;
+    try {
+        deferredInstallPrompt.prompt();
+        await deferredInstallPrompt.userChoice;
+        deferredInstallPrompt = null;
+    } catch {
+        deferredInstallPrompt = null;
+        showInstallHelp('تعذر تثبيت التطبيق تلقائيًا. يمكنك اتباع خطوات التثبيت اليدوي:');
+    }
 }));
 
 window.addEventListener('appinstalled', () => { deferredInstallPrompt = null; hideInstallButtons(); });
@@ -217,6 +218,5 @@ if ('serviceWorker' in navigator) {
 }
 </script>
 @stack('scripts')
-@include('shared.pwa-install')
 </body>
 </html>

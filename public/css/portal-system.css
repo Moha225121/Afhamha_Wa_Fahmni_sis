@@ -16,10 +16,7 @@ button:disabled, .btn[aria-disabled="true"] { opacity: .6; cursor: wait; }
 [hidden] { display: none !important; }
 .skip-link { position: fixed; inset-block-start: -100px; inset-inline-start: 16px; z-index: 100; padding: 12px 20px; background: white; color: var(--ui-ink); border-radius: 8px; }
 .skip-link:focus { inset-block-start: 12px; }
-.portal-back-button { display: inline-flex; align-items: center; gap: 8px; min-height: 42px; margin-block-end: 18px; padding: 8px 15px; border: 1px solid var(--ui-line); border-radius: 10px; background: white; color: var(--ui-ink); box-shadow: var(--ui-shadow); cursor: pointer; font-weight: 700; line-height: 1.5; }
-.portal-back-button:hover { color: var(--theme-primary, #008c95); border-color: var(--theme-primary, #008c95); }
-.portal-back-button span:first-child { color: var(--theme-primary, #008c95); font-size: 20px; line-height: 1; }
-.sidebar { inset-inline-start: 0; inset-inline-end: auto; width: 260px; background: #132f3b; padding: 24px 14px; scrollbar-width: thin; scrollbar-color: #647e87 transparent; }
+.sidebar { inset-inline-start: 0; inset-inline-end: auto; right: 0; left: auto; width: 260px; background: #132f3b; padding: 24px 14px; scrollbar-width: thin; scrollbar-color: #647e87 transparent; }
 .teacher-portal .sidebar { width: 260px; background: #132f3b; box-shadow: none; }
 .sidebar .logo { border-bottom: 1px solid #ffffff18; margin-bottom: 16px; padding-bottom: 22px; }
 .sidebar .brand-mark { flex-shrink: 0; box-shadow: none; background: var(--theme-primary, #008c95); border-radius: 12px; }
@@ -27,7 +24,7 @@ button:disabled, .btn[aria-disabled="true"] { opacity: .6; cursor: wait; }
 .sidebar nav a.active { background: #ffffff13; border: 1px solid #ffffff1f; border-inline-start: 3px solid #60d4ce; color: white; }
 .sidebar nav a:hover { transform: none; background: #ffffff10; }
 .nav-section { margin: 19px 12px 7px; font-size: 11px; font-weight: 700; color: #94b5bd; }
-.page, .teacher-portal .page { margin-inline-start: 260px; margin-inline-end: 0; }
+.page, .teacher-portal .page { width: calc(100% - 260px); min-width: 0; margin: 0 260px 0 0; }
 .topbar { min-height: 76px; height: auto; padding: 15px 32px; background: white; border-color: var(--ui-line); }
 .global-search { display: flex; align-items: center; gap: 8px; }
 .global-search input { width: min(300px, 30vw); background: var(--ui-bg); border: 1px solid var(--ui-line); border-radius: 10px; }
@@ -95,7 +92,7 @@ td .btn { min-height: 36px; padding: 6px 12px; }
     body:not(.student-portal) .app-shell .metrics-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
 @media (max-width: 768px) {
-    .page, .teacher-portal .page { margin-inline: 0; }
+    .page, .teacher-portal .page { width: 100%; margin: 0; }
     .sidebar, .teacher-portal .sidebar { width: min(290px, 85vw); transform: translateX(105%); z-index: 40; }
     .sidebar.open { transform: translateX(0); }
     .menu-toggle { z-index: 50; min-width: 42px; min-height: 42px; top: 15px; right: 12px; border-radius: 10px; }
@@ -125,25 +122,8 @@ td .btn { min-height: 36px; padding: 6px 12px; }
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }
-
-/* Cross-portal mobile guardrails: prevent desktop-width controls from breaking the viewport. */
-*, *::before, *::after { box-sizing: border-box; }
-img, svg, video, canvas { max-width: 100%; height: auto; }
-button, .btn, a { -webkit-tap-highlight-color: transparent; }
-.content, .app-content, .finance-sheet { min-width: 0; overflow-wrap: anywhere; }
-.page-head > *, .topbar > *, .account, .form-actions, .filters { min-width: 0; }
-@media (max-width: 640px) {
-    .page-head h1, .page-title h1 { font-size: clamp(21px, 7vw, 28px); }
-    .page-head, .form-actions, .finance-actions { align-items: stretch; }
-    .page-head > :last-child, .form-actions > .btn, .form-actions > button, .finance-actions > .btn { width: 100%; }
-    .panel, .form-card, .card, .metric, .list-card { border-radius: 13px; }
-    .table-wrap, .portal-table-scroll { -webkit-overflow-scrolling: touch; }
-    .table-wrap table, .portal-table-scroll table { font-size: 12px; }
-    th, td { padding: 11px 12px; }
-    input:not([type="checkbox"]):not([type="radio"]), select, textarea { font-size: 16px; }
-}
 @media print {
-    .sidebar, .topbar, .app-header, .bottom-nav, .menu-toggle, .nav-backdrop, .portal-back-button, .analysis-back, #analysis-form { display: none !important; }
+    .sidebar, .topbar, .app-header, .bottom-nav, .menu-toggle, .nav-backdrop, .analysis-back, #analysis-form { display: none !important; }
     .page, .teacher-portal .page { margin: 0; }
     .app-shell { max-width: none; box-shadow: none; }
     .analysis-report { border: 0; padding: 0; }

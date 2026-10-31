@@ -1,4 +1,4 @@
-const CACHE_NAME = 'afhamha-parent-static-v7';
+const CACHE_NAME = 'afhamha-parent-static-v8';
 const OFFLINE_URL = '/parent-offline.html';
 const STATIC_ASSETS = [
     OFFLINE_URL,
@@ -7,7 +7,7 @@ const STATIC_ASSETS = [
     '/icons/parent-icon-192.png',
     '/icons/parent-icon-512.png',
     '/icons/parent-maskable-512.png',
-    '/parent-manifest.webmanifest'
+    '/school-app-icon'
 ];
 
 self.addEventListener('install', (event) => {
@@ -39,6 +39,14 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
+    if (url.pathname === '/school-app-icon') {
+        event.respondWith(fetch(request).then((response) => caches.open(CACHE_NAME)
+            .then((cache) => cache.put(request, response.clone()))
+            .then(() => response)
+        ).catch(() => caches.match(request)));
+        return;
+    }
+
     if (STATIC_ASSETS.includes(url.pathname)) {
         event.respondWith(caches.match(request).then((cached) => cached || fetch(request)));
     }
@@ -48,7 +56,7 @@ self.addEventListener('push', (event) => {
     const payload = event.data ? event.data.json() : {};
     event.waitUntil(self.registration.showNotification(payload.title || 'افهمها وفهمني', {
         body: payload.body || 'لديك إشعار جديد.',
-        icon: '/icons/parent-icon-192.png',
+        icon: '/school-app-icon',
         badge: '/icons/parent-maskable-512.png',
         data: { url: payload.url || '/parent/notifications' },
         dir: 'rtl',

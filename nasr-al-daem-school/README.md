@@ -36,6 +36,26 @@ In VS Code, use the task named `Start Laravel local server`. You can also double
 
 Why this script exists: `start-local.ps1` starts PHP directly and uses `start-local-router.php` so static files such as CSS, icons, and service worker files are served correctly.
 
+## Primary classroom branches
+
+The migration `2026_10_05_000001_complete_primary_classroom_branches` completes
+branches A, B, and C for grades one through six in each current academic year.
+It recognizes existing Arabic and Latin section labels, preserves classroom IDs
+and student placements, and copies the source grade's subject links to its branches.
+It does not add branches to secondary or literary classrooms.
+
+When deploying the GitHub update, run the normal application migrations:
+
+```bash
+cd nasr-al-daem-school
+php artisan migrate --force
+```
+
+Pushing code to GitHub alone does not update the site's database. Administrators
+can subsequently manage primary branches from **الصفوف → إضافة تشعبات للصفوف من
+الأول إلى السادس**. Teacher assignments support selecting an individual branch
+or **جميع الشعب**, with only the subjects shared by all selected branches available.
+
 ## Demo Accounts
 
 ### Default password for new accounts
