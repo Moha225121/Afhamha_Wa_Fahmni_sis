@@ -790,6 +790,46 @@ tbody tr:hover {
     height: 16px;
 }
 
+.nasbia-pagination {
+    justify-content: center;
+    direction: rtl;
+    margin-top: 20px;
+    gap: 10px;
+}
+
+.nasbia-pagination .pagination-button {
+    min-width: 76px;
+    min-height: 40px;
+    padding: 9px 14px;
+    border: 1px solid #dce6e9;
+    border-radius: 10px;
+    background: #fff;
+    color: #123b79;
+    font-weight: 700;
+    text-align: center;
+    text-decoration: none;
+}
+
+.nasbia-pagination a.pagination-button:hover,
+.nasbia-pagination a.pagination-button:focus-visible {
+    background: #123b79;
+    border-color: #123b79;
+    color: #fff;
+}
+
+.nasbia-pagination .pagination-button.is-disabled {
+    color: #9aa8b5;
+    background: #f4f7fa;
+    cursor: not-allowed;
+}
+
+.nasbia-pagination .pagination-summary {
+    min-width: 105px;
+    color: #667789;
+    font-size: 13px;
+    text-align: center;
+}
+
 /* Laravel's default paginator does not always include a .pagination wrapper. */
 nav[role="navigation"] svg {
     width: 16px !important;
