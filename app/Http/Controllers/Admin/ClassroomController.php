@@ -16,7 +16,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 
 class ClassroomController extends Controller
 {
