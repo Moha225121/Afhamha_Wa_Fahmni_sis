@@ -5,6 +5,7 @@
 @endphp
 <form class="form-card" method="post" action="{{ $assignment ? route('teacher.assignments.update',$assignment->id) : route('teacher.assignments.store') }}" enctype="multipart/form-data" id="assignment-form">
 @csrf
+@if(!$assignment)<input type="hidden" name="creation_token" value="{{ $creationToken }}">@endif
 @if($assignment) @method('put') @endif
 <div class="form-hint">
     اكتب تعليمات واضحة للطلاب وحدد الصف والمادة والدرجة بحيث يكون الواجب مفهومًا وقياسه دقيقًا.
@@ -73,6 +74,14 @@
   const subjectSelect = document.getElementById('a-subject');
   const editor = document.querySelector('#assignment-form .rich-editor');
   const hiddenField = document.querySelector('#assignment-form textarea[name="description"]');
+  @if(!$assignment)
+  let submitting = false;
+  document.getElementById('assignment-form').addEventListener('submit', event => {
+    if (submitting) { event.preventDefault(); return; }
+    submitting = true;
+  });
+  window.addEventListener('pageshow', () => { submitting = false; });
+  @endif
 
   function filterClassrooms(){
     const selectedSubject = subjectSelect.value;

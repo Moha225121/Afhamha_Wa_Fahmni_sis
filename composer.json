@@ -12,12 +12,14 @@
         "php": "^8.3",
         "laravel/framework": "^13.17",
         "laravel/tinker": "^3.0",
+        "league/commonmark": "^2.8.1",
         "minishlink/web-push": "^11.0",
         "mpdf/mpdf": "~8.2.5",
         "mpdf/qrcode": "1.1",
         "symfony/console": "^7.4.0",
         "symfony/http-foundation": "^7.4.0",
         "symfony/http-kernel": "^7.4.0",
+        "symfony/html-sanitizer": "^7.4.0",
         "symfony/routing": "^7.4.0"
     },
     "require-dev": {

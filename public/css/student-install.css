@@ -1,0 +1,37 @@
+.student-portal .app-header .student-install-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 44px;
+    flex-shrink: 0;
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+.student-install-button svg {
+    width: 19px;
+    height: 19px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.student-portal .install-dialog { max-height: calc(100dvh - 40px); overflow-y: auto; }
+.student-portal .install-dialog p { color: var(--muted); line-height: 1.8; }
+.student-portal .install-dialog h2 { padding-inline-end: 18px; font-size: 22px; }
+
+@media (max-width: 640px) {
+    .student-portal .app-header { gap: 8px; }
+    .student-portal .header-actions { flex-shrink: 0; gap: 6px; }
+    .student-portal .student-install-button { gap: 5px; padding: 8px 10px; font-size: 12px; }
+    .student-portal .brand { gap: 8px; }
+    .student-portal .brand-copy b { display: none; }
+    .student-portal .brand-copy small { font-size: 11px; white-space: nowrap; }
+}
+
+@media (max-width: 380px) {
+    .student-portal .brand-copy { display: none; }
+}

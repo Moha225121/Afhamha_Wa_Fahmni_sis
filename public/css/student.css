@@ -57,8 +57,7 @@ html {
     max-width: 760px;
     min-height: 100dvh;
     margin: 0 auto;
-    overflow-x: hidden;
-    overflow-y: visible;
+    overflow: hidden;
     background: var(--bg);
     border: 0;
     box-shadow: 0 0 0 1px rgba(15, 23, 42, .04);
@@ -384,16 +383,6 @@ html {
 .student-portal .service-card--notifications {
     --service-color: #b5476b;
     --service-soft: #fff0f5;
-}
-
-.student-portal .service-card--results {
-    --service-color: #315b80;
-    --service-soft: #edf4fb;
-}
-
-.student-portal .service-card--messages {
-    --service-color: #7b4f9b;
-    --service-soft: #f5effb;
 }
 
 .student-portal .service-icon {
@@ -1030,6 +1019,8 @@ html {
 
 /* Tutor chat */
 .student-portal .tutor-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: 18px;
 }
 
@@ -1052,6 +1043,7 @@ html {
 }
 
 .student-portal .chat-panel {
+    min-width: 0;
     border-radius: 22px;
 }
 
@@ -1062,28 +1054,141 @@ html {
 }
 
 .student-portal .chat-history {
+    display: flex;
+    flex-direction: column;
+    list-style: none;
+    margin: 0;
     gap: 14px;
-    padding: 20px;
+    padding: clamp(10px, 3vw, 20px);
 }
 
 .student-portal .chat-message {
+    min-width: 0;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    text-align: start;
     border-radius: 16px;
     padding: 13px 15px;
     box-shadow: var(--shadow-sm);
 }
 
 .student-portal .chat-message.from-student {
+    color: #fff;
     border-bottom-right-radius: 5px;
-    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    background: linear-gradient(135deg, #0f766e, #0b5f58);
+}
+
+.student-portal .from-student > strong,
+.student-portal .from-student .student-message-content,
+.student-portal .from-student .message-status {
     color: #fff;
 }
 
-.student-portal .chat-message.from-student strong,
-.student-portal .chat-message.from-student p,
-.student-portal .chat-message.from-student span,
-.student-portal .chat-message.from-student button {
-    color: #fff;
+.student-portal .student-message-content {
+    white-space: pre-wrap;
+    unicode-bidi: plaintext;
+    margin-block: .6rem 0;
 }
+
+.student-portal .tutor-markdown {
+    color: var(--ink);
+    line-height: 1.9;
+    margin-block-start: .75rem;
+}
+
+.student-portal .tutor-markdown p {
+    color: inherit;
+    margin-block: 0 .9rem;
+    unicode-bidi: plaintext;
+}
+
+.student-portal .tutor-markdown :is(h1, h2, h3, h4, h5, h6) {
+    color: var(--primary-deep);
+    line-height: 1.5;
+    margin-block: 1.25rem .6rem;
+}
+
+.student-portal .tutor-markdown h1 { font-size: 1.4rem; }
+.student-portal .tutor-markdown h2 { font-size: 1.25rem; }
+.student-portal .tutor-markdown h3 { font-size: 1.125rem; }
+.student-portal .tutor-markdown :is(h4, h5, h6) { font-size: 1rem; }
+.student-portal .tutor-markdown > :first-child { margin-block-start: 0; }
+.student-portal .tutor-markdown > :last-child { margin-block-end: 0; }
+
+.student-portal .tutor-markdown :is(ul, ol) {
+    margin-block: .6rem 1rem;
+    padding-inline-start: 1.6rem;
+    padding-inline-end: 0;
+}
+
+.student-portal .tutor-markdown ul { list-style: disc outside; }
+.student-portal .tutor-markdown ol { list-style: decimal outside; }
+.student-portal .tutor-markdown li { margin-block: .35rem; }
+.student-portal .tutor-markdown li > p { margin-block: .35rem; }
+.student-portal .tutor-markdown a { color: #0b5f58; text-decoration: underline; }
+.student-portal .tutor-markdown blockquote {
+    margin-inline: 0;
+    padding-inline-start: 1rem;
+    border-inline-start: 3px solid var(--primary);
+}
+
+.student-portal .tutor-markdown code {
+    font-family: Consolas, monospace;
+    font-size: .9em;
+    direction: ltr;
+    unicode-bidi: isolate;
+    background: #e3eeec;
+    color: #162033;
+    padding: .12em .3em;
+    border-radius: 4px;
+}
+
+.student-portal .tutor-markdown pre {
+    max-width: 100%;
+    overflow-x: auto;
+    direction: ltr;
+    text-align: left;
+    white-space: pre;
+    padding: 1rem;
+    border-radius: 10px;
+    background: #162033;
+    color: #f8fafc;
+    line-height: 1.6;
+    overscroll-behavior-inline: contain;
+}
+
+.student-portal .tutor-markdown pre code {
+    padding: 0;
+    color: inherit;
+    background: transparent;
+    overflow-wrap: normal;
+}
+
+.student-portal .tutor-table-scroll {
+    max-width: 100%;
+    overflow-x: auto;
+    margin-block: 1rem;
+    overscroll-behavior-inline: contain;
+}
+
+.student-portal .tutor-markdown table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: .95rem;
+}
+
+.student-portal .tutor-markdown :is(th, td) {
+    min-width: 9rem;
+    padding: .65rem .8rem;
+    border: 1px solid var(--line);
+    text-align: start;
+    vertical-align: top;
+}
+
+.student-portal .tutor-markdown th { background: #e3eeec; font-weight: 700; }
+.student-portal .tutor-markdown [align="left"] { text-align: left; }
+.student-portal .tutor-markdown [align="right"] { text-align: right; }
+.student-portal .tutor-markdown [align="center"] { text-align: center; }
 
 .student-portal .chat-message.from-tutor {
     border: 1px solid var(--line);
@@ -1096,6 +1201,19 @@ html {
     background: rgba(255, 255, 255, .96);
     padding: 14px;
     backdrop-filter: blur(12px);
+}
+
+/* Keep reader controls usable without the shared form input's full width. */
+.student-portal .library-reader .lib-pdf-jump input {
+    width: 3.5rem;
+    min-height: 44px;
+    padding: 4px 7px;
+    text-align: center;
+}
+
+.student-portal .library-reader .lib-pdf-controls .lib-button,
+.student-portal .library-reader .lib-pdf-zoom select {
+    min-height: 44px;
 }
 
 /* Pagination, including Laravel's default pagination view */
@@ -1187,110 +1305,6 @@ html {
 .student-portal .bottom-nav a.active .nav-icon {
     background: #dff2ee;
     box-shadow: inset 0 0 0 1px rgba(15, 118, 110, .08);
-}
-
-.student-portal .bottom-nav .nav-section-label {
-    letter-spacing: .01em;
-}
-
-@media (max-width: 1023px) {
-    .student-portal .bottom-nav .nav-secondary {
-        display: none;
-    }
-
-    .student-portal .app-shell {
-        width: 100%;
-        max-width: none;
-        min-width: 0;
-        overflow-x: hidden;
-    }
-
-    .student-portal .app-content {
-        width: 100%;
-        min-width: 0;
-        padding: 18px 12px 112px;
-    }
-
-    .student-portal .table-wrap,
-    .student-portal .portal-table-scroll,
-    .student-portal .grade-grid-wrap,
-    .student-portal .list-section,
-    .student-portal .info-list,
-    .student-portal .profile-form,
-    .student-portal .filter-form,
-    .student-portal .resource-card,
-    .student-portal .lesson-content {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-    }
-}
-
-@media (max-width: 430px) {
-    .student-portal .bottom-nav a {
-        padding-inline: 2px;
-    }
-
-    .student-portal .bottom-nav .nav-icon {
-        width: 27px;
-        height: 27px;
-    }
-}
-
-/* Keep the student PWA chrome aligned with the parent portal on phones. */
-@media (max-width: 1023px) {
-    .student-portal .app-shell {
-        width: 100%;
-        max-width: none;
-    }
-
-    .student-portal .app-header {
-        height: 72px;
-        padding-block: 14px;
-    }
-
-    .student-portal .bottom-nav {
-        width: min(100%, 520px);
-        min-height: 70px;
-        padding-block: 8px calc(8px + env(safe-area-inset-bottom));
-    }
-
-    .student-portal .more-menu-panel {
-        top: 72px;
-        bottom: 78px;
-    }
-}
-
-/* The student page already has a content list named .more-list; scope the
-   PWA drawer rules so that both components keep their intended layouts. */
-.student-portal .more-menu-panel .more-list {
-    overflow-y: auto;
-    margin-top: 0;
-    padding: 7px 6px 0;
-    border: 0;
-    border-radius: 0;
-    background: transparent;
-    box-shadow: none;
-}
-
-.student-portal .more-menu-panel .more-list a,
-.student-portal .more-menu-panel .more-list button,
-.student-portal .more-menu-panel .more-list form {
-    min-height: 38px;
-    padding: 4px 3px;
-    border: 0;
-    border-radius: 8px;
-    font-size: 9.5px;
-    line-height: 1.3;
-}
-
-.student-portal .more-menu-panel .more-list span {
-    width: auto;
-    height: auto;
-    display: inline;
-    border-radius: 0;
-    background: transparent;
-    color: inherit;
-    font-size: 12px;
 }
 
 @media (min-width: 560px) {

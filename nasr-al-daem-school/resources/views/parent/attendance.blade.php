@@ -12,7 +12,7 @@
         <section class="empty-state"><h2>لا يوجد أبناء مرتبطون</h2><p>لا يمكن عرض الحضور قبل ربط طالب بحساب ولي الأمر.</p></section>
     @else
         @include('parent.partials.child-switcher')
-        <form class="filters"><select name="period"><option value="week">هذا الأسبوع</option><option value="month">هذا الشهر</option><option value="semester">الفصل الدراسي</option><option value="custom">تاريخ مخصص</option></select><input type="date" name="from"><input type="date" name="to"><input type="hidden" name="student" value="{{ $selectedStudent->id }}"><button>تطبيق</button></form>
+        <form class="filters"><select name="period" aria-label="فترة الحضور"><option value="week" @selected(request('period', 'month') === 'week')>هذا الأسبوع</option><option value="month" @selected(request('period', 'month') === 'month')>هذا الشهر</option><option value="semester" @selected(request('period', 'month') === 'semester')>الفصل الدراسي</option><option value="custom" @selected(request('period', 'month') === 'custom')>تاريخ مخصص</option></select><input type="date" name="from" value="{{ request('from') }}" aria-label="تاريخ البداية"><input type="date" name="to" value="{{ request('to') }}" aria-label="تاريخ النهاية"><input type="hidden" name="student" value="{{ $selectedStudent->id }}"><button>تطبيق</button></form>
         <section class="metrics-grid">
             <article class="metric"><span>نسبة الحضور</span><strong>{{ $summary['attendance_percent'] === null ? '-' : $summary['attendance_percent'].'%' }}</strong></article>
             <article class="metric"><span>إجمالي السجلات</span><strong>{{ $summary['attendance_total'] }}</strong></article>

@@ -5,12 +5,13 @@ namespace App\Http\Controllers\TeacherPortal;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\TeacherPortal\Concerns\InteractsWithTeacherScope;
 use App\Http\Requests\TeacherPortal\AssignmentRequest;
+use App\Models\AssignmentAttachment;
 use App\Models\AssignmentSubmission;
 use App\Models\Classroom;
-use App\Models\AssignmentAttachment;
 use App\Models\Student;
 use App\Models\Subject;
 use App\Services\AuditService;
+use App\Services\TeacherCreationIntent;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -142,6 +143,7 @@ class AssignmentController extends Controller
             'classrooms' => Classroom::whereIn('id', $classroomIds)->get(),
             'subjects' => Subject::whereIn('id', $pairs->pluck('subject_id')->unique())->get(),
             'pairs' => $pairs,
+            'creationToken' => $assignment ? null : app(TeacherCreationIntent::class)->issue($teacher->id, 'assignments', $request->old('creation_token')),
         ]);
     }
 
@@ -151,30 +153,34 @@ class AssignmentController extends Controller
         $data = $request->validated();
         abort_unless($this->ownsPair($teacher, (int) $data['classroom_id'], (int) $data['subject_id']), 403, 'أنت غير مكلف بهذا الصف/المادة.');
 
-        $path = null;
-        $files = $this->uploadedFiles($request);
-        if ($files !== []) {
-            $path = $files[0]->store('assignments', 'local');
-        }
+        app(TeacherCreationIntent::class)->once($data['creation_token'], $teacher->id, 'assignments', function () use ($data, $teacher, $request): int {
+            $path = null;
+            $files = $this->uploadedFiles($request);
+            if ($files !== []) {
+                $path = $files[0]->store('assignments', 'local');
+            }
 
-        $assignmentId = DB::table('assignments')->insertGetId([
-            'title' => $data['title'],
-            'classroom_id' => $data['classroom_id'],
-            'subject_id' => $data['subject_id'],
-            'teacher_id' => $teacher->id,
-            'description' => $data['description'] ?? null,
-            'instructions' => $data['description'] ?? null,
-            'due_date' => $data['due_date'],
-            'due_at' => $data['due_date'],
-            'max_score' => $data['max_score'],
-            'attachment_path' => $path,
-            'status' => 'active',
-            'published_at' => now(),
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-        $this->storeAttachments($files, $assignmentId);
-        AuditService::record('created', 'assignments');
+            $assignmentId = DB::table('assignments')->insertGetId([
+                'title' => $data['title'],
+                'classroom_id' => $data['classroom_id'],
+                'subject_id' => $data['subject_id'],
+                'teacher_id' => $teacher->id,
+                'description' => $data['description'] ?? null,
+                'instructions' => $data['description'] ?? null,
+                'due_date' => $data['due_date'],
+                'due_at' => $data['due_date'],
+                'max_score' => $data['max_score'],
+                'attachment_path' => $path,
+                'status' => 'published',
+                'published_at' => now(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+            $this->storeAttachments($files, $assignmentId);
+            AuditService::record('created', 'assignments');
+
+            return $assignmentId;
+        });
 
         return redirect()->route('teacher.assignments.index')->with('success', 'تم إنشاء الواجب.');
     }

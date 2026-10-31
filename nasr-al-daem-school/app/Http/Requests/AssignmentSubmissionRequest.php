@@ -18,7 +18,7 @@ class AssignmentSubmissionRequest extends FormRequest
             && $assignment instanceof Assignment
             && $student
             && $assignment->classroom_id === $student->classroom_id
-            && $assignment->status === 'published'
+            && in_array($assignment->status, ['published', 'active'], true)
             && (! $assignment->published_at || $assignment->published_at->lte(now()));
     }
 

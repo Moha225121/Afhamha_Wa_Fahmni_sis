@@ -115,8 +115,8 @@
         initializing = true;
         setLoading('جارٍ فتح الكتاب…');
         try {
-            library ||= await import(`${assets}pdf.mjs`);
-            library.GlobalWorkerOptions.workerSrc = `${assets}pdf.worker.mjs`;
+            library ||= await import(reader.dataset.pdfModule || `${assets}pdf.mjs`);
+            library.GlobalWorkerOptions.workerSrc = reader.dataset.pdfWorker || `${assets}pdf.worker.mjs`;
             if (documentTask) await documentTask.destroy();
             documentTask = library.getDocument({
                 url: reader.dataset.pdfUrl,

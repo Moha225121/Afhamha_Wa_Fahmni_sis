@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Announcement;
 use App\Models\Lesson;
 use App\Models\LessonAttachment;
+use App\Models\LibraryResource;
 use App\Models\Teacher;
 use App\Models\Unit;
 use App\Models\User;
@@ -201,5 +202,86 @@ class StudentEducationTest extends TestCase
             ->assertSeeText('تنبيه الصف المسموح')
             ->assertDontSeeText('تنبيه المعلمين المخفي')
             ->assertDontSeeText('تنبيه صف آخر');
+    }
+
+    public function test_missing_subject_assignments_have_clear_empty_states_and_dashboard_links(): void
+    {
+        $student = $this->createStudentFixture('EMPTY');
+        $this->actingAs($student['user'])->get(route('student.subjects.index'))
+            ->assertOk()->assertSeeText('لم تُربط مواد نشطة بصفك حتى الآن.');
+        $this->get(route('student.dashboard'))->assertOk()
+            ->assertSeeText($student['user']->name)->assertSeeText($student['classroom']->name)
+            ->assertSeeText('لا توجد مواد نشطة مرتبطة بصفك حاليًا.')
+            ->assertSee(route('student.subjects.index'), false)
+            ->assertSee(route('student.library.index'), false)
+            ->assertSee(route('student.tutor.index'), false);
+        $subject = $this->createSubjectFor($student['classroom'], 'NOW-LINKED');
+        $this->get(route('student.subjects.index'))->assertOk()->assertSeeText($subject->name);
+        $this->get(route('student.dashboard'))->assertOk()->assertSeeText($subject->name);
+        $student['student']->update(['classroom_id' => null]);
+        $this->get(route('student.subjects.index'))->assertOk()->assertSeeText('بدون صف')->assertDontSeeText($subject->name);
+        $this->get(route('student.subjects.show', $subject))->assertNotFound();
+    }
+
+    public function test_attachments_obey_the_same_class_and_publication_restrictions_as_the_lesson(): void
+    {
+        Storage::fake('local');
+        $student = $this->createStudentFixture('SAME-SUBJECT');
+        $other = $this->createStudentFixture('OTHER-CLASS');
+        $subject = $this->createSubjectFor($student['classroom'], 'SHARED');
+        $subject->classrooms()->attach($other['classroom']);
+        Storage::disk('local')->put('lessons/class-only.pdf', 'class-only');
+
+        foreach ([
+            ['classroom_id' => $other['classroom']->id, 'status' => 'published', 'published_at' => now()->subMinute()],
+            ['classroom_id' => $student['classroom']->id, 'status' => 'draft', 'published_at' => null],
+            ['classroom_id' => $student['classroom']->id, 'status' => 'published', 'published_at' => now()->addDay()],
+        ] as $attributes) {
+            $lesson = Lesson::create($attributes + ['subject_id' => $subject->id, 'title' => 'درس محظور', 'content' => 'خاص']);
+            $attachment = $lesson->attachments()->create(['title' => 'خاص', 'disk' => 'local', 'file_path' => 'lessons/class-only.pdf']);
+            $this->actingAs($student['user'])->get(route('student.lessons.show', [$subject, $lesson]))->assertNotFound();
+            $this->get(route('student.lessons.attachments.download', [$subject, $lesson, $attachment]))->assertNotFound();
+            $this->get(route('student.lessons.index', $subject))->assertOk()->assertDontSeeText('درس محظور');
+        }
+    }
+
+    public function test_missing_or_invalid_lesson_files_have_a_useful_student_error(): void
+    {
+        Storage::fake('local');
+        $student = $this->createStudentFixture('FILES');
+        $subject = $this->createSubjectFor($student['classroom'], 'FILES');
+        $lesson = Lesson::create(['subject_id' => $subject->id, 'classroom_id' => $student['classroom']->id,
+            'title' => 'درس الملفات', 'content' => 'محتوى الدرس', 'status' => 'published', 'published_at' => now()->subMinute()]);
+        $attachment = $lesson->attachments()->create(['title' => 'ملف', 'disk' => 'local', 'file_path' => 'lessons/missing.pdf']);
+        $this->actingAs($student['user']);
+        foreach (['lessons/missing.pdf', '../outside.pdf', 'C:\\outside.pdf'] as $path) {
+            $attachment->update(['file_path' => $path]);
+            $this->get(route('student.lessons.attachments.download', [$subject, $lesson, $attachment]))
+                ->assertNotFound()->assertSeeText('ملف الدرس غير متاح حاليًا')
+                ->assertSee(route('student.lessons.show', [$subject, $lesson]), false);
+        }
+        Storage::disk('local')->put('lessons/valid.pdf', 'safe worksheet');
+        $attachment->update(['file_path' => 'lessons/valid.pdf', 'original_name' => 'worksheet.pdf']);
+        $this->get(route('student.lessons.attachments.download', [$subject, $lesson, $attachment]))
+            ->assertOk()->assertDownload('worksheet.pdf')->assertStreamedContent('safe worksheet');
+        $otherLesson = Lesson::create(['subject_id' => $subject->id, 'title' => 'آخر', 'status' => 'published', 'published_at' => now()->subMinute()]);
+        $this->get(route('student.lessons.attachments.download', [$subject, $otherLesson, $attachment]))->assertNotFound();
+    }
+
+    public function test_related_resources_follow_the_library_grade_access_rules(): void
+    {
+        $student = $this->createStudentFixture('RESOURCE-GRADE');
+        $student['classroom']->update(['name' => 'الصف الأول']);
+        $subject = $this->createSubjectFor($student['classroom'], 'RESOURCE-GRADE');
+        $lesson = Lesson::create(['subject_id' => $subject->id, 'title' => 'درس الموارد', 'status' => 'published', 'published_at' => now()->subMinute()]);
+        foreach ([1 => 'مورد صفي', 2 => 'مورد صف آخر غير متاح'] as $grade => $title) {
+            LibraryResource::create(['title' => $title, 'subject_id' => $subject->id, 'grade_levels' => [$grade],
+                'disk' => 'local', 'file_path' => 'library/grade-'.$grade.'.pdf', 'is_public' => true,
+                'status' => 'active', 'created_by' => $student['user']->id]);
+        }
+        $this->actingAs($student['user']);
+        foreach ([route('student.subjects.show', $subject), route('student.lessons.show', [$subject, $lesson]), route('student.library.index')] as $url) {
+            $this->get($url)->assertOk()->assertSeeText('مورد صفي')->assertDontSeeText('مورد صف آخر غير متاح');
+        }
     }
 }

@@ -15,6 +15,7 @@ class ExamRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'creation_token' => [Rule::requiredIf($this->routeIs('teacher.exams.store')), 'nullable', 'uuid'],
             'title' => ['required', 'string', 'max:255'],
             'classroom_id' => ['required', 'integer', 'exists:classrooms,id'],
             'subject_id' => ['required', 'integer', 'exists:subjects,id'],

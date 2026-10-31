@@ -3,3 +3,12 @@ Source: https://www.npmjs.com/package/pdfjs-dist/v/6.3.289
 Upstream: https://github.com/mozilla/pdf.js
 License: Apache-2.0 (see LICENSE and notices in asset directories)
 Locally hosted minified display/worker builds; no external requests are required.
+Student reader: matching legacy/build/pdf.min.mjs and pdf.worker.min.mjs from
+the same 6.3.289 package, in legacy/. These include upstream compatibility
+polyfills for older browsers. Shared fonts, cmaps, ICC profiles and WASM remain
+in the parent asset directory. The modern builds remain available to other roles.
+Student module/worker wrappers also load core-js-bundle 3.49.0 minified.js
+(https://www.npmjs.com/package/core-js-bundle/v/3.49.0, MIT, LICENSE_CORE_JS)
+before PDF.js. PDF.js 6.x legacy no longer supplies Promise.withResolvers and
+URL.parse on browsers below its current baseline; core-js supplies these and
+other standard API polyfills in both realms. Vendor bundles are unmodified.

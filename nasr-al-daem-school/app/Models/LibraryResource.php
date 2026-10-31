@@ -30,6 +30,40 @@ class LibraryResource extends Model
         return trim(preg_replace('/\s+/u', ' ', mb_strtolower($text)) ?? $text);
     }
 
+    private static function normalizeSubjectMatch(string $name): string
+    {
+        $name = self::normalizeSearch($name);
+        $name = preg_replace('/^ال/u', '', $name) ?? $name;
+
+        $aliases = [
+            'arabic' => ['arabic', 'لغه عربيه', 'لغه العربيه'],
+            'english' => ['english', 'لغه انجليزيه', 'لغه الانجليزيه', 'english language'],
+            'science' => ['science', 'علوم'],
+            'mathematics' => ['mathematics', 'math', 'رياضيات'],
+            'physics' => ['physics', 'فيزياء'],
+            'chemistry' => ['chemistry', 'كيمياء'],
+            'biology' => ['biology', 'احياء'],
+            'history' => ['history', 'تاريخ'],
+            'geography' => ['geography', 'جغرافيا'],
+            'islamic_education' => ['islamic education', 'التربيه الاسلاميه'],
+            'national_education' => ['national education', 'التربيه الوطنيه'],
+            'information_technology' => ['information technology', 'it', 'تقنيه المعلومات'],
+            'computer' => ['computer', 'computer science', 'حاسوب'],
+            'statistics' => ['statistics', 'احصاء'],
+            'sociology' => ['sociology', 'علم الاجتماع'],
+            'psychology' => ['psychology', 'علم النفس'],
+            'philosophy' => ['philosophy', 'فلسفه'],
+            'vocational_culture' => ['vocational culture', 'الثقافه المهنيه'],
+        ];
+        foreach ($aliases as $canonical => $variants) {
+            if (in_array($name, $variants, true)) {
+                return $canonical;
+            }
+        }
+
+        return $name;
+    }
+
     public static function searchTextFor(array $attributes): string
     {
         $parts = [];
@@ -82,17 +116,26 @@ class LibraryResource extends Model
 
     public function scopeVisibleToTeacher(Builder $query, Teacher $teacher): Builder
     {
+        $assignedSubjectNames = $teacher->subjects()
+            ->where('subjects.status', 'active')
+            ->pluck('subjects.name')
+            ->map(fn (string $name) => self::normalizeSubjectMatch($name))
+            ->filter()
+            ->unique();
+        $matchingCatalogNames = self::query()
+            ->whereNotNull('subject_name')
+            ->where('subject_name', '!=', '')
+            ->distinct()
+            ->pluck('subject_name')
+            ->filter(fn (string $name) => $assignedSubjectNames->contains(self::normalizeSubjectMatch($name)))
+            ->values()
+            ->all();
+
         return $query->where('status', 'active')->whereIn('audience', ['all', 'teachers'])
-            ->where(function (Builder $scope) use ($teacher): void {
+            ->where(function (Builder $scope) use ($teacher, $matchingCatalogNames): void {
             $scope->where(fn (Builder $national) => $national->whereNull('subject_id')->whereNull('classroom_id')
                 ->where(fn (Builder $audience) => $audience->where('is_public', true)->orWhere('audience', 'teachers')))
-                ->whereExists(function ($subjects) use ($teacher): void {
-                    $subjects->selectRaw('1')->from('teacher_assignments as library_national_assignment')
-                        ->join('subjects as library_national_subject', 'library_national_subject.id', '=', 'library_national_assignment.subject_id')
-                        ->where('library_national_assignment.teacher_id', $teacher->id)
-                        ->where('library_national_subject.status', 'active')
-                        ->whereColumn('library_national_subject.name', 'library_resources.subject_name');
-                })
+                ->whereIn('library_resources.subject_name', $matchingCatalogNames)
                 ->orWhereExists(function ($assignments) use ($teacher): void {
                         $assignments->selectRaw('1')->from('teacher_assignments as library_assignment')
                             ->join('subjects as library_subject', 'library_subject.id', '=', 'library_assignment.subject_id')

@@ -172,6 +172,7 @@ class EducationController extends Controller
         $lesson = $subject->lessons()
             ->published()
             ->whereKey($lesson)
+            ->where(fn ($query) => $query->where('classroom_id', $student->classroom_id)->orWhereNull('classroom_id'))
             ->where(function ($query) use ($subject): void {
                 $query
                     ->whereNull('unit_id')

@@ -177,13 +177,13 @@ class ParentPortalTest extends TestCase
         $this->get('/parent-app.webmanifest')
             ->assertOk()
             ->assertHeader('Content-Type', 'application/manifest+json; charset=UTF-8')
-            ->assertSee('مدرسة النصر الدائم - بوابة ولي الأمر')
-            ->assertSee('/school-app-icon?v=', false);
+            ->assertJsonPath('name', 'مدرسة النصر الدائم - بوابة ولي الأمر')
+            ->assertJsonPath('icons.0.src', fn (string $src): bool => str_starts_with($src, '/school-app-icon?v='));
 
         $this->get('/school-app.webmanifest')
             ->assertOk()
-            ->assertSee('مدرسة النصر الدائم - افهمها وفهمني')
-            ->assertSee('/school-app-icon?v=', false);
+            ->assertJsonPath('name', 'مدرسة النصر الدائم - افهمها وفهمني')
+            ->assertJsonPath('icons.0.src', fn (string $src): bool => str_starts_with($src, '/school-app-icon?v='));
 
         $this->get('/school-app-icon')->assertOk()->assertHeader('Content-Type', 'image/svg+xml');
 

@@ -6,6 +6,7 @@ use App\Models\Announcement;
 use App\Models\Student;
 use App\Models\User;
 use App\Notifications\ParentPortalNotification;
+use Illuminate\Support\Facades\DB;
 
 class ParentNotificationService
 {
@@ -15,36 +16,12 @@ class ParentNotificationService
     public function send(User $user, array $payload): void
     {
         $user->notify(new ParentPortalNotification($payload));
-        $this->webPush->send($user, $payload);
+        DB::afterCommit(fn () => $this->webPush->send($user, $payload));
     }
 
     public function sendAnnouncement(Announcement $announcement): void
     {
-        if (! in_array($announcement->audience, ['all', 'parent', 'parents', 'classroom'], true)
-            || $announcement->status !== 'published'
-            || ($announcement->published_at && $announcement->published_at->isFuture())
-            || ($announcement->expires_at && $announcement->expires_at->isPast())) {
-            return;
-        }
-
-        $parents = User::query()
-            ->where('role', 'parent')
-            ->where('status', 'active')
-            ->whereHas('guardian', function ($query) use ($announcement): void {
-                if ($announcement->classroom_id) {
-                    $query->whereHas('students', fn ($students) => $students->where('classroom_id', $announcement->classroom_id));
-                }
-            })
-            ->get();
-
-        $payload = [
-            'title' => $announcement->title,
-            'body' => (string) str($announcement->content)->limit(140),
-            'url' => route('parent.notifications'),
-            'category' => 'announcement',
-        ];
-
-        $parents->each(fn (User $parent) => $this->send($parent, $payload));
+        app(ParentAnnouncementNotificationService::class)->sendAnnouncement($announcement);
     }
 
     /** @param array{title: string, body: string, url?: string, category?: string, student_id?: int|null} $payload */

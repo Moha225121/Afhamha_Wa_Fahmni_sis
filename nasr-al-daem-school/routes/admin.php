@@ -21,6 +21,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
     Route::get('/dashboard/index', fn () => redirect()->route('admin.dashboard'))->name('dashboard.index');
     Route::get('students/cards', [\App\Http\Controllers\Admin\AccountNumberingController::class, 'cards'])->name('students.cards');
+    Route::get('students/cards/class/{classroom}', [\App\Http\Controllers\Admin\AccountNumberingController::class, 'printClass'])->name('students.cards.class');
+    Route::get('students/cards/class/{classroom}/pdf', [\App\Http\Controllers\Admin\AccountNumberingController::class, 'downloadClassPdf'])->name('students.cards.class.pdf');
+    Route::get('students/cards/{student}/qr', [\App\Http\Controllers\Admin\AccountNumberingController::class, 'classCardQr'])->name('students.cards.qr');
     Route::resource('students', StudentController::class)->except('destroy');
     Route::resource('teachers', TeacherController::class)->except('destroy');
     Route::resource('supervisors', SupervisorController::class)->only(['index','create','store','edit','update']);

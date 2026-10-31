@@ -723,7 +723,7 @@ textarea:focus {
     padding:14px 20px;
     border-radius:12px;
     box-shadow:0 8px 18px rgba(17,31,78,0.12);
-    background:linear-gradient(135deg,var(--school-navy) 0%,var(--school-navy-light) 100%) !important;
+    background:linear-gradient(135deg,#12264f 0%,#18316e 100%) !important;
     color:#fff !important;
     font-size:16px;
 }
@@ -842,21 +842,12 @@ textarea:focus {
 .grade-headline h2 { margin: 3px 0 0; color: var(--teacher-ink); font-size: 22px; }
 .grade-filter-form { min-width: 210px; }
 .grade-filter-form .mini-select { width: 100%; min-height: 44px; border-color: #cce7e3; background-color: #f3faf9; color: var(--teacher-primary-dark); font-weight: 700; }
-.grade-student-switcher { display: grid; gap: 6px; max-width: 360px; color: var(--teacher-ink); font-weight: 700; }
-.grade-student-switcher select { min-height: 44px; width: 100%; border: 1px solid #cce7e3; border-radius: 9px; padding: 8px 11px; background: #fff; color: var(--teacher-ink); }
 .grade-actions { display: flex; flex-wrap: wrap; gap: 9px; }
 .grade-actions .btn { min-height: 44px; white-space: nowrap; }
 .grade-instructions { margin: 0; border-color: #cce7e3; border-radius: 16px; background: #eaf6f4; color: #245c58; }
 .grade-panel { overflow: hidden; border: 1px solid var(--teacher-line); border-radius: 20px; background: #fff; box-shadow: 0 14px 34px rgba(15, 23, 42, .06); }
-.grade-grid-wrap { overflow: auto; max-height: min(62vh, 680px); -webkit-overflow-scrolling: touch; }
+.grade-grid-wrap { overflow: auto; max-height: min(62vh, 680px); overscroll-behavior: contain; }
 .grade-grid { min-width: 820px; border-collapse: separate; border-spacing: 0; }
-
-@media (max-width: 600px) {
-    .grade-grid-wrap {
-        max-width: 100%;
-        overflow-x: auto;
-    }
-}
 .grade-grid th, .grade-grid td { border-bottom: 1px solid #e7edf3; border-inline-end: 1px solid #edf1f5; padding: 12px 14px; }
 .grade-grid thead th { position: sticky; top: 0; z-index: 2; background: #f1f8f7; color: #3d5b60; }
 .grade-grid .student-col { position: sticky; right: 0; z-index: 3; min-width: 190px; background: #eaf6f4; }
@@ -875,7 +866,6 @@ textarea:focus {
 .grade-empty { padding: 64px 24px; border: 1px dashed #b7d9d5; border-radius: 20px; background: rgba(255, 255, 255, .74); color: var(--teacher-muted); text-align: center; font-weight: 700; }
 
 @media (max-width: 800px) {
-    .grade-student-switcher { max-width: none; }
     .grade-top-row { align-items: stretch; flex-direction: column; padding: 20px; }
     .grade-headline { align-items: stretch; flex-direction: column; gap: 12px; }
     .grade-filter-form { min-width: 0; }
@@ -1090,3 +1080,4 @@ textarea:focus {
         .teacher-portal .class-tabs { margin-inline: -2px; overflow-x: auto; }
         .teacher-portal .class-tabs a { flex: 0 0 auto; }
     }
+
