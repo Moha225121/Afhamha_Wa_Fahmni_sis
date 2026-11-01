@@ -28,7 +28,8 @@ class FcmDestination
             default => null,
         };
 
-        if (! is_string($path) || ! $prefix || ! str_starts_with($path, $prefix)) {
+        if (! is_string($path) || ! $prefix || ! str_starts_with($path, $prefix)
+            || str_contains($path, '\\') || preg_match('~(?:^|/)\.{1,2}(?:/|$)|%(?:2e|2f|5c|00)~i', $path)) {
             return $fallback;
         }
 

@@ -74,14 +74,37 @@
                     status.textContent = 'لم يتم منح إذن الإشعارات.';
                     return;
                 }
-                const registration = await navigator.serviceWorker.ready;
-                const subscription = await registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: toUint8Array(publicKey) });
-                const response = await fetch(@json(route('parent.push-subscriptions.store')), {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
-                    body: JSON.stringify(subscription.toJSON()),
-                });
-                status.textContent = response.ok ? 'تم تفعيل إشعارات الهاتف لهذا الجهاز.' : 'تعذر حفظ اشتراك الإشعارات.';
+                try {
+                    // Use the parent registration explicitly; the root PWA worker may control this page initially.
+                    const registration = await navigator.serviceWorker.register(@json(asset('parent-sw.js')), { scope: '/parent/' });
+                    if (!registration.active) {
+                        const worker = registration.installing || registration.waiting;
+                        if (!worker) throw new Error('Parent service worker is unavailable.');
+                        await new Promise((resolve, reject) => {
+                            const finish = (error) => {
+                                clearTimeout(timer);
+                                worker.removeEventListener('statechange', check);
+                                error ? reject(error) : resolve();
+                            };
+                            const check = () => {
+                                if (worker.state === 'activated') finish();
+                                if (worker.state === 'redundant') finish(new Error('Parent service worker failed to activate.'));
+                            };
+                            const timer = setTimeout(() => finish(new Error('Parent service worker activation timed out.')), 15000);
+                            worker.addEventListener('statechange', check);
+                            check();
+                        });
+                    }
+                    const subscription = await registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: toUint8Array(publicKey) });
+                    const response = await fetch(@json(route('parent.push-subscriptions.store')), {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
+                        body: JSON.stringify(subscription.toJSON()),
+                    });
+                    status.textContent = response.ok ? 'تم تفعيل إشعارات الهاتف لهذا الجهاز.' : 'تعذر حفظ اشتراك الإشعارات.';
+                } catch {
+                    status.textContent = 'تعذر تفعيل الإشعارات. حاول مرة أخرى.';
+                }
             });
         })();
         </script>

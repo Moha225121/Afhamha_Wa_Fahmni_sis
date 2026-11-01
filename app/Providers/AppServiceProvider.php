@@ -3,7 +3,9 @@
 namespace App\Providers;
 
 use App\Contracts\SmartTutorGateway;
+use App\Contracts\FcmAccessTokenProvider;
 use App\Services\GeminiSmartTutorGateway;
+use App\Services\GoogleFcmAccessTokenProvider;
 use App\Support\SchoolBranding;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -22,6 +24,7 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(SmartTutorGateway::class, GeminiSmartTutorGateway::class);
+        $this->app->singleton(FcmAccessTokenProvider::class, GoogleFcmAccessTokenProvider::class);
     }
 
     /**

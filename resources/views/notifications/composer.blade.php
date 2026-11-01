@@ -13,7 +13,7 @@
         <label>المستلمون
             <select name="audience" required>
                 @foreach($audiences as $audience)
-                    <option value="{{ $audience }}" @selected(old('audience', $audiences[0]) === $audience)>{{ ['all' => 'الطلاب وأولياء الأمور والمعلمون', 'students' => 'الطلاب', 'parents' => 'أولياء الأمور', 'teachers' => 'المعلمون'][$audience] }}</option>
+                    <option value="{{ $audience }}" @selected(old('audience', $audiences[0]) === $audience)>{{ ['all' => 'جميع الحسابات', 'students' => 'الطلاب', 'parents' => 'أولياء الأمور', 'teachers' => 'المعلمون', 'administrators' => 'الإدارة'][$audience] }}</option>
                 @endforeach
             </select>
         </label>
@@ -27,6 +27,6 @@
         </label>
         <div><button class="btn primary" type="submit">إرسال الإشعار</button></div>
     </form>
-    <p class="muted">سيُحفظ الإشعار داخل المنصة. سيصل تنبيه المتصفح إلى الحسابات التي فعّلت الإشعارات.</p>
+    <p class="muted">سيُحفظ الإشعار داخل المنصة. سيصل تنبيه المتصفح إلى الحسابات التي فعّلت الإشعارات. عند اختيار صف، يشمل خيار جميع الحسابات الطلاب وأولياء أمورهم والمعلمين المكلفين بذلك الصف.</p>
 </section>
 @endsection

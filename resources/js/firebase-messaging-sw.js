@@ -1,19 +1,12 @@
 import { initializeApp } from 'firebase/app';
 import { getMessaging, onBackgroundMessage } from 'firebase/messaging/sw';
 
-const app = initializeApp({
+const config = {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
     projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
     messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
     appId: import.meta.env.VITE_FIREBASE_APP_ID,
-});
-
-onBackgroundMessage(getMessaging(app), ({ data = {} }) => {
-    self.registration.showNotification(data.title || 'إشعار جديد', {
-        body: data.body || '',
-        data: { url: data.url || '/login' },
-    });
-});
+};
 
 self.addEventListener('notificationclick', (event) => {
     event.notification.close();
@@ -39,3 +32,11 @@ self.addEventListener('notificationclick', (event) => {
         }
     })());
 });
+
+if (config.apiKey && config.projectId && config.messagingSenderId && config.appId) {
+    const app = initializeApp(config);
+    onBackgroundMessage(getMessaging(app), ({ data = {} }) => self.registration.showNotification(data.title || 'إشعار جديد', {
+        body: data.body || '',
+        data: { url: data.url || '/login' },
+    }));
+}

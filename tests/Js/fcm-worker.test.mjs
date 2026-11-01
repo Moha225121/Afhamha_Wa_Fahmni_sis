@@ -67,3 +67,16 @@ test('notification clicks reject external destinations and use the login fallbac
 
     assert.equal(worker.context.opened, 'https://school.example/login');
 });
+
+test('missing Firebase settings do not initialize messaging', () => {
+    const unconfigured = readFileSync(new URL('../../resources/js/firebase-messaging-sw.js', import.meta.url), 'utf8')
+        .replace(/^import .*;\s*$/gm, '')
+        .replace(/import\.meta\.env\.VITE_FIREBASE_[A-Z_]+/g, 'undefined');
+    const listeners = new Map();
+    vm.runInNewContext(unconfigured, {
+        URL,
+        initializeApp: () => { throw new Error('Unexpected Firebase initialization'); },
+        self: {addEventListener: (name, handler) => listeners.set(name, handler)},
+    });
+    assert.equal(typeof listeners.get('notificationclick'), 'function');
+});

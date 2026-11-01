@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\User;
+use App\Models\FcmDevice;
 use App\Services\FcmService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -19,8 +20,6 @@ class SendFcmNotification implements ShouldBeUnique, ShouldQueue
 
     public array $backoff = [10, 60, 180];
 
-    public bool $afterCommit = true;
-
     public int $uniqueFor = 3600;
 
     /** @param array{title: string, body: string, url?: string} $payload */
@@ -29,7 +28,10 @@ class SendFcmNotification implements ShouldBeUnique, ShouldQueue
         public readonly string $eventKey,
         public readonly int $deliveryId,
         public readonly array $payload,
-    ) {}
+    ) {
+        $this->onConnection('database');
+        $this->afterCommit();
+    }
 
     public function uniqueId(): string
     {
@@ -42,12 +44,12 @@ class SendFcmNotification implements ShouldBeUnique, ShouldQueue
             return;
         }
         $user = User::with('fcmDevices')->find($this->userId);
-        if (! $user || $user->fcmDevices->isEmpty()) {
+        if (! $user || ! FcmDevice::canReceive($user) || $user->fcmDevices->isEmpty()) {
             \Illuminate\Support\Facades\DB::table('fcm_notification_events')->where('id', $this->deliveryId)->update(['sent_at' => now(), 'updated_at' => now()]);
             return;
         }
 
-        $fcm->sendToUser($user, $this->payload);
+        $fcm->sendToUser($user, $this->payload, $this->deliveryId);
         \Illuminate\Support\Facades\DB::table('fcm_notification_events')->where('id', $this->deliveryId)->update(['sent_at' => now(), 'updated_at' => now()]);
     }
 }

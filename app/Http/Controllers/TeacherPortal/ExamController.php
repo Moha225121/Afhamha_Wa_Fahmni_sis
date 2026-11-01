@@ -131,8 +131,7 @@ class ExamController extends Controller
     private function saveExam(ExamRequest $request, $teacher, ?int $examId): RedirectResponse
     {
         $data = $request->validated();
-        $wasPublished = $examId !== null && DB::table('exams')->where('id', $examId)->value('status') === 'published';
-
+        $previousExam = $examId === null ? null : DB::table('exams')->where('id', $examId)->first(['status', 'classroom_id']);
         abort_unless($this->ownsPair($teacher, (int) $data['classroom_id'], (int) $data['subject_id']), 403, 'أنت غير مكلف بهذا الصف/المادة.');
 
         $questions = collect($data['questions'] ?? [])->values();
@@ -209,14 +208,16 @@ class ExamController extends Controller
             $savedExamId = DB::transaction($save);
         }
 
-        if ($normalizedStatus === 'published' && ! $wasPublished) {
+        $wasVisible = $previousExam && in_array($previousExam->status, ['scheduled', 'published'], true);
+        $classroomChanged = $previousExam && (int) $previousExam->classroom_id !== (int) $data['classroom_id'];
+        if (in_array($normalizedStatus, ['scheduled', 'published'], true) && (! $wasVisible || $classroomChanged)) {
             $publishedExam = DB::table('exams')->where('id', $savedExamId)->first();
-            if ($publishedExam && $publishedExam->status === 'published') {
+            if ($publishedExam && in_array($publishedExam->status, ['scheduled', 'published'], true)) {
                 app(FcmNotificationService::class)->notifyClassroom('exam:'.$savedExamId, (int) $publishedExam->classroom_id, [
-                'title' => 'اختبار جديد',
-                'body' => $publishedExam->title,
-                'student_url' => route('student.exams.index', [], false),
-                'parent_url' => route('parent.exams', [], false),
+                    'title' => 'اختبار جديد',
+                    'body' => $publishedExam->title,
+                    'student_url' => route('student.exams.index', [], false),
+                    'parent_url' => route('parent.exams', [], false),
                 ]);
             }
         }
@@ -281,7 +282,7 @@ class ExamController extends Controller
             }
 
             DB::table('exams')->where('id', $exam)->update(['status' => $data['status'], 'updated_at' => now()]);
-            if ($data['status'] === 'published' && $examRow->status !== 'published') {
+            if (in_array($data['status'], ['scheduled', 'published'], true) && ! in_array($examRow->status, ['scheduled', 'published'], true)) {
                 $publishedClassroom = (int) $examRow->classroom_id;
             }
             AuditService::record('status_changed', 'exams');

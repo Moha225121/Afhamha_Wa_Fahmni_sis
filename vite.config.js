@@ -7,7 +7,7 @@ export default defineConfig({
     build: {
         rollupOptions: {
             output: {
-                entryFileNames: (chunk) => chunk.name === 'app-sw' ? 'assets/app-sw.js' : 'assets/[name]-[hash].js',
+                entryFileNames: (chunk) => chunk.name === 'firebase-messaging-sw' ? 'assets/firebase-messaging-sw.js' : 'assets/[name]-[hash].js',
             },
         },
     },
@@ -17,7 +17,7 @@ export default defineConfig({
                 'resources/css/app.css',
                 'resources/js/app.js',
                 'resources/js/firebase-messaging.js',
-                'resources/js/app-sw.js',
+                'resources/js/firebase-messaging-sw.js',
             ],
             refresh: true,
             fonts: [

@@ -176,8 +176,18 @@ class OperationsController extends Controller
 
     public function examStore(ExamRequest $r): RedirectResponse
     {
-        DB::table('exams')->insert($r->validated() + ['created_at' => now(), 'updated_at' => now()]);
+        $data = $r->validated();
+        $examId = DB::table('exams')->insertGetId($data + ['created_at' => now(), 'updated_at' => now()]);
         AuditService::record('created', 'exams');
+
+        if (in_array($data['status'] ?? null, ['scheduled', 'published'], true)) {
+            app(\App\Services\FcmNotificationService::class)->notifyClassroom('exam:'.$examId, (int) $data['classroom_id'], [
+                'title' => 'اختبار جديد',
+                'body' => $data['title'],
+                'student_url' => route('student.exams.index', [], false),
+                'parent_url' => route('parent.exams', [], false),
+            ]);
+        }
 
         return redirect()->route('admin.exams.index')->with('success', 'تم إنشاء الاختبار.');
     }
@@ -190,7 +200,7 @@ class OperationsController extends Controller
         DB::table('exams')->where('id', $id)->update($d + ['updated_at' => now()]);
         AuditService::record('status_changed', 'exams');
 
-        if ($d['status'] === 'published' && $exam->status !== 'published') {
+        if (in_array($d['status'], ['scheduled', 'published'], true) && ! in_array($exam->status, ['scheduled', 'published'], true)) {
             app(\App\Services\FcmNotificationService::class)->notifyClassroom('exam:'.$id, (int) $exam->classroom_id, [
                 'title' => 'اختبار جديد',
                 'body' => $exam->title,

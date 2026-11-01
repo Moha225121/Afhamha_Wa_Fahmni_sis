@@ -19,7 +19,7 @@ class NotificationComposerController extends Controller
     {
         return view('notifications.composer', [
             'classrooms' => Classroom::orderBy('name')->get(),
-            'audiences' => ['all', 'students', 'parents', 'teachers'],
+            'audiences' => ['all', 'students', 'parents', 'teachers', 'administrators'],
             'teacherMode' => false,
             'submissionKey' => (string) Str::uuid(),
         ]);
@@ -27,7 +27,7 @@ class NotificationComposerController extends Controller
 
     public function teacherForm(Request $request): View
     {
-        $classrooms = $request->user()->teacher?->classrooms()->orderBy('name')->get() ?? collect();
+        $classrooms = $request->user()->teacher?->classrooms()->orderBy('name')->get()->unique('id')->values() ?? collect();
 
         return view('notifications.composer', [
             'classrooms' => $classrooms,
@@ -43,7 +43,7 @@ class NotificationComposerController extends Controller
             'submission_key' => ['required', 'uuid'],
             'title' => ['required', 'string', 'max:150'],
             'body' => ['required', 'string', 'max:600'],
-            'audience' => ['required', Rule::in(['all', 'students', 'parents', 'teachers'])],
+            'audience' => ['required', Rule::in(['all', 'students', 'parents', 'teachers', 'administrators'])],
             'classroom_id' => ['nullable', 'integer', 'exists:classrooms,id'],
         ]);
         $users = $this->adminRecipients($data['audience'], isset($data['classroom_id']) ? (int) $data['classroom_id'] : null);
@@ -72,14 +72,19 @@ class NotificationComposerController extends Controller
 
     private function adminRecipients(string $audience, ?int $classroomId): Collection
     {
-        $roles = $audience === 'all' ? ['students', 'parents', 'teachers'] : [$audience];
+        $roles = $audience === 'all' ? ['students', 'parents', 'teachers', ...($classroomId ? [] : ['administrators'])] : [$audience];
         $users = collect();
         foreach ($roles as $role) {
+            if ($role === 'administrators') {
+                $users = $users->concat(User::query()->where('role', 'admin')->where('status', 'active')->get());
+                continue;
+            }
             if ($role === 'students' || $role === 'parents') {
                 $users = $users->concat($this->classroomRecipients($role, $classroomId));
                 continue;
             }
             $users = $users->concat(User::query()->where('role', 'teacher')->where('status', 'active')
+                ->whereHas('teacher', fn ($teacher) => $teacher->where('status', 'active'))
                 ->when($classroomId, fn ($query) => $query->whereHas('teacher.classrooms', fn ($classrooms) => $classrooms->where('classrooms.id', $classroomId)))
                 ->get());
         }

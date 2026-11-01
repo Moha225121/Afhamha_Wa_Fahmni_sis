@@ -3,10 +3,11 @@
 namespace App\Services;
 
 use App\Contracts\FcmAccessTokenProvider;
-use App\Models\FcmDevice;
 use App\Models\User;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
 class FcmService
@@ -14,7 +15,7 @@ class FcmService
     public function __construct(private readonly FcmAccessTokenProvider $tokens) {}
 
     /** @param array{title: string, body: string, url?: string} $payload */
-    public function sendToUser(User $user, array $payload): void
+    public function sendToUser(User $user, array $payload, ?int $eventId = null): void
     {
         $projectId = config('services.firebase.project_id');
         if (! is_string($projectId) || $projectId === '') {
@@ -33,22 +34,45 @@ class FcmService
             'url' => $destination,
         ];
 
+        $failures = [];
         foreach ($user->fcmDevices()->get() as $device) {
-            $response = Http::withToken($accessToken)
-                ->acceptJson()
-                ->timeout(15)
-                ->post('https://fcm.googleapis.com/v1/projects/'.rawurlencode($projectId).'/messages:send', [
-                    'message' => ['token' => $device->token, 'data' => $data],
-                ]);
+            if ($eventId !== null && DB::table('fcm_notification_deliveries')->where('event_id', $eventId)->where('device_id', $device->id)->exists()) {
+                continue;
+            }
+            try {
+                $response = Http::withToken($accessToken)
+                    ->acceptJson()
+                    ->timeout(15)
+                    ->post('https://fcm.googleapis.com/v1/projects/'.rawurlencode($projectId).'/messages:send', [
+                        'message' => ['token' => $device->token, 'data' => $data],
+                    ]);
+            } catch (ConnectionException) {
+                $failures[] = 'connection error';
+                continue;
+            }
 
             if ($this->isInvalidToken($response)) {
-                $device->delete();
+                $user->fcmDevices()->whereKey($device->getKey())->where('token_hash', $device->token_hash)->delete();
                 continue;
             }
 
             if (! $response->successful()) {
-                throw new RuntimeException('FCM HTTP v1 delivery failed with status '.$response->status().'.');
+                $failures[] = 'status '.$response->status();
+                continue;
             }
+
+            if ($eventId !== null) {
+                DB::table('fcm_notification_deliveries')->insertOrIgnore([
+                    'event_id' => $eventId,
+                    'device_id' => $device->id,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+        }
+
+        if ($failures !== []) {
+            throw new RuntimeException('FCM HTTP v1 delivery failed: '.implode(', ', array_unique($failures)).'.');
         }
     }
 
@@ -57,7 +81,7 @@ class FcmService
         $details = $response->json('error.details', []);
         foreach (is_array($details) ? $details : [] as $detail) {
             if (($detail['@type'] ?? null) === 'type.googleapis.com/google.firebase.fcm.v1.FcmError'
-                && in_array($detail['errorCode'] ?? null, ['UNREGISTERED', 'INVALID_ARGUMENT'], true)) {
+                && ($detail['errorCode'] ?? null) === 'UNREGISTERED') {
                 return true;
             }
         }
