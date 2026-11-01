@@ -9,6 +9,7 @@ use App\Models\Classroom;
 use App\Models\ExamQuestion;
 use App\Models\Subject;
 use App\Services\AuditService;
+use App\Services\FcmNotificationService;
 use App\Services\TeacherCreationIntent;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -130,6 +131,7 @@ class ExamController extends Controller
     private function saveExam(ExamRequest $request, $teacher, ?int $examId): RedirectResponse
     {
         $data = $request->validated();
+        $wasPublished = $examId !== null && DB::table('exams')->where('id', $examId)->value('status') === 'published';
 
         abort_unless($this->ownsPair($teacher, (int) $data['classroom_id'], (int) $data['subject_id']), 403, 'أنت غير مكلف بهذا الصف/المادة.');
 
@@ -202,12 +204,30 @@ class ExamController extends Controller
         };
 
         if ($examId === null) {
-            app(TeacherCreationIntent::class)->once($data['creation_token'], $teacher->id, 'exams', $save);
+            $savedExamId = app(TeacherCreationIntent::class)->once($data['creation_token'], $teacher->id, 'exams', $save);
         } else {
-            DB::transaction($save);
+            $savedExamId = DB::transaction($save);
         }
 
-        return redirect()->route('teacher.exams.index')->with('success', $normalizedStatus === 'scheduled' ? 'تم جدولة الاختبار.' : 'تم حفظ الاختبار كمسودة.');
+        if ($normalizedStatus === 'published' && ! $wasPublished) {
+            $publishedExam = DB::table('exams')->where('id', $savedExamId)->first();
+            if ($publishedExam && $publishedExam->status === 'published') {
+                app(FcmNotificationService::class)->notifyClassroom('exam:'.$savedExamId, (int) $publishedExam->classroom_id, [
+                'title' => 'اختبار جديد',
+                'body' => $publishedExam->title,
+                'student_url' => route('student.exams.index', [], false),
+                'parent_url' => route('parent.exams', [], false),
+                ]);
+            }
+        }
+
+        $success = match ($normalizedStatus) {
+            'scheduled' => 'تم جدولة الاختبار.',
+            'published' => 'تم نشر الاختبار وإشعار الصف.',
+            default => 'تم حفظ الاختبار كمسودة.',
+        };
+
+        return redirect()->route('teacher.exams.index')->with('success', $success);
     }
 
     private function assertPublishable($questions): void
@@ -234,7 +254,8 @@ class ExamController extends Controller
     public function status(Request $request, int $exam): RedirectResponse
     {
         $teacher = $this->teacher($request);
-        DB::transaction(function () use ($request, $teacher, $exam): void {
+        $publishedClassroom = null;
+        DB::transaction(function () use ($request, $teacher, $exam, &$publishedClassroom): void {
             $examRow = DB::table('exams')->where('id', $exam)->lockForUpdate()->first();
             abort_unless($examRow && (int) $examRow->teacher_id === $teacher->id, 404);
             $data = $request->validate(['status' => ['required', Rule::in(['draft', 'scheduled', 'published', 'completed'])]]);
@@ -260,8 +281,21 @@ class ExamController extends Controller
             }
 
             DB::table('exams')->where('id', $exam)->update(['status' => $data['status'], 'updated_at' => now()]);
+            if ($data['status'] === 'published' && $examRow->status !== 'published') {
+                $publishedClassroom = (int) $examRow->classroom_id;
+            }
             AuditService::record('status_changed', 'exams');
         });
+
+        if ($publishedClassroom !== null) {
+            $title = DB::table('exams')->where('id', $exam)->value('title') ?? 'اختبار جديد';
+            app(FcmNotificationService::class)->notifyClassroom('exam:'.$exam, $publishedClassroom, [
+                'title' => 'اختبار جديد',
+                'body' => $title,
+                'student_url' => route('student.exams.index', [], false),
+                'parent_url' => route('parent.exams', [], false),
+            ]);
+        }
 
         return back()->with('success', 'تم تحديث حالة الاختبار.');
     }

@@ -38,6 +38,6 @@
     window.addEventListener('appinstalled', () => { deferredPrompt = null; hide(); });
     if (isStandalone()) hide();
     window.addEventListener('load', () => {
-        if ('serviceWorker' in navigator) navigator.serviceWorker.register('/app-sw.js', { scope: '/' }).catch(() => {});
+        if ('serviceWorker' in navigator) navigator.serviceWorker.register('/app-sw.js', { scope: '/', type: 'module' }).catch(() => {});
     });
 })();

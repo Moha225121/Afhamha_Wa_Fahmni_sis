@@ -138,6 +138,8 @@ class ParentAnnouncementNotificationService
         ];
         $data = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
         $existing = $existingById === null ? DB::table('notifications')->where('id', $id)->value('data') : ($existingById[$id] ?? null);
+        $inserted = false;
+        $legacy = null;
         if ($existing === null) {
             $legacy = $parent->notifications()->where('type', ParentPortalNotification::class)
                 ->where('data->category', 'announcement')->where('data->title', $announcement->title)
@@ -153,6 +155,10 @@ class ParentAnnouncementNotificationService
             }
         } elseif ($existing !== $data) {
             DB::table('notifications')->where('id', $id)->update(['data' => $data, 'updated_at' => now()]);
+        }
+
+        if ($push && ! $legacy) {
+            app(FcmNotificationService::class)->dispatch($parent, 'announcement:'.$announcement->id, $payload);
         }
 
         return $id;

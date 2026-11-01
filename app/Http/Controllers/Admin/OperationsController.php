@@ -185,8 +185,19 @@ class OperationsController extends Controller
     public function examStatus(Request $r, int $id): RedirectResponse
     {
         $d = $r->validate(['status' => ['required', Rule::in(['draft', 'scheduled', 'published', 'completed', 'cancelled'])]]);
-        abort_unless(DB::table('exams')->where('id', $id)->update($d + ['updated_at' => now()]), 404);
+        $exam = DB::table('exams')->where('id', $id)->first();
+        abort_unless($exam, 404);
+        DB::table('exams')->where('id', $id)->update($d + ['updated_at' => now()]);
         AuditService::record('status_changed', 'exams');
+
+        if ($d['status'] === 'published' && $exam->status !== 'published') {
+            app(\App\Services\FcmNotificationService::class)->notifyClassroom('exam:'.$id, (int) $exam->classroom_id, [
+                'title' => 'اختبار جديد',
+                'body' => $exam->title,
+                'student_url' => route('student.exams.index', [], false),
+                'parent_url' => route('parent.exams', [], false),
+            ]);
+        }
 
         return back()->with('success', 'تم تحديث الحالة.');
     }

@@ -4,6 +4,7 @@ require __DIR__.'/finance.php';
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ParentPwaController;
+use App\Http\Controllers\FcmDeviceController;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Route;
@@ -15,6 +16,12 @@ Route::get('/parent-sw.js', fn () => Response::make(File::get(public_path('paren
 Route::view('/parent-offline.html', 'parent.offline')->name('parent.offline');
 Route::get('/student-manifest.webmanifest', fn () => Response::make(File::get(public_path('student-manifest.webmanifest')), 200, ['Content-Type' => 'application/manifest+json']))->name('student.pwa.manifest');
 Route::get('/student-sw.js', fn () => Response::make(File::get(public_path('student-sw.js')), 200, ['Content-Type' => 'application/javascript']))->name('student.pwa.service-worker');
+Route::middleware(['auth', 'throttle:30,1'])->prefix('fcm-devices')->name('fcm.devices.')->group(function (): void {
+    Route::get('/status', [FcmDeviceController::class, 'status'])->name('status');
+    Route::post('/', [FcmDeviceController::class, 'store'])->name('store');
+    Route::delete('/current', [FcmDeviceController::class, 'destroyCurrent'])->name('destroy-current');
+    Route::delete('/{device}', [FcmDeviceController::class, 'destroy'])->whereNumber('device')->name('destroy');
+});
 Route::view('/student-offline.html', 'student.offline')->name('student.offline');
 Route::get('/login', [AuthController::class, 'create'])->name('login');
 Route::post('/login', [AuthController::class, 'store'])->name('login.store');

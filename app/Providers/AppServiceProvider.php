@@ -41,6 +41,18 @@ class AppServiceProvider extends ServiceProvider
                 'theme_color' => SchoolBranding::NAVY,
             ]);
         });
+        View::composer('parent.layout', function ($view): void {
+            $parent = auth()->user();
+            if ($parent?->isParent()) {
+                $view->with('parentNotificationSummary', app(\App\Services\ParentAnnouncementNotificationService::class)->summary($parent));
+            }
+        });
+        View::composer('student.layout', function ($view): void {
+            $student = auth()->user()?->student;
+            if ($student) {
+                $view->with('studentNotificationSummary', app(\App\Services\StudentNotificationService::class)->summary($student));
+            }
+        });
         RateLimiter::for('smart-tutor-conversations', function (Request $request): Limit {
             $maximum = max(1, (int) config('smart_tutor.rate_limits.conversations_per_minute', 10));
 

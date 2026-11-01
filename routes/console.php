@@ -36,3 +36,17 @@ Artisan::command('results:publish-due', function (\App\Services\ResultPublicatio
     $this->info('Scheduled result publications processed.');
 })->purpose('Publish approved result periods when their release date arrives');
 Schedule::command('results:publish-due')->everyMinute()->withoutOverlapping();
+
+Artisan::command('announcements:notify-due', function (\App\Services\StudentNotificationService $students, \App\Services\ParentNotificationService $parents): void {
+    \App\Models\Announcement::currentlyPublished()
+        ->whereNotNull('published_at')
+        ->where('published_at', '>', now()->subMinutes(3))
+        ->where('published_at', '<=', now())
+        ->orderBy('id')->chunkById(100, function ($announcements) use ($students, $parents): void {
+            foreach ($announcements as $announcement) {
+                $students->sendAnnouncement($announcement);
+                $parents->sendAnnouncement($announcement);
+            }
+        });
+})->purpose('Notify school portals when scheduled announcements become visible');
+Schedule::command('announcements:notify-due')->everyMinute()->withoutOverlapping();
