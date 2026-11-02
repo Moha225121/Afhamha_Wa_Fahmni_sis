@@ -20,7 +20,7 @@
     <script src="{{ asset('js/student-notifications.js') }}?v=20261015-1" defer></script>
     <script src="{{ asset('js/student-tutor.js') }}" defer></script>
     <script src="{{ asset('js/enhanced-selects.js') }}" defer></script>
-    @vite('resources/js/firebase-messaging.js')
+    @include('shared.fcm-assets')
 </head>
 <body class="student-portal">
 @include('shared.fcm-activation')

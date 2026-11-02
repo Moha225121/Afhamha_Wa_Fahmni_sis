@@ -30,3 +30,15 @@ an application backup policy.
 
 These scripts are for first deployment, not destructive reinstallation or
 automatic upgrades. Back up the production database and uploads before upgrades.
+
+When updating application code, build and deploy frontend assets from the same
+revision with `npm ci --ignore-scripts` and `npm run build`. Deploy the complete
+`public/build` directory, including its manifest and all chunks, before refreshing
+Laravel's view cache. Firebase requires the `resources/js/firebase-messaging.js`
+and `resources/js/firebase-messaging-sw.js` entries in `public/build/manifest.json`.
+An old or missing manifest disables device push activation and records a warning;
+the portals remain accessible. Supply the production `VITE_FIREBASE_*` values at
+build time to enable push notifications.
+
+After deploying updated routes and views, run `php artisan route:cache` and
+`php artisan view:cache` from `/var/www/nasbia` as the application user.

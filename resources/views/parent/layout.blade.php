@@ -18,7 +18,7 @@
     <link rel="stylesheet" href="{{ asset('css/parent-followup.css') }}?v=20261016-1">
     <script src="{{ asset('js/parent-notifications.js') }}?v=20261016-2" defer></script>
     <script src="{{ asset('js/enhanced-selects.js') }}" defer></script>
-    @vite('resources/js/firebase-messaging.js')
+    @include('shared.fcm-assets')
     @stack('styles')
 </head>
 <body class="parent-portal">
@@ -56,6 +56,15 @@
                 <span aria-hidden="true">◉</span>
                 الملف الشخصي
             </a>
+            @if(count($parentIdentityOptions ?? []) > 1)
+                <a href="{{ route('parent.identity.create') }}">
+                    <span aria-hidden="true">⇄</span>
+                    تغيير مستخدم المنصة
+                    @if($parentIdentity)
+                        <small>{{ $parentIdentity['name'] }}</small>
+                    @endif
+                </a>
+            @endif
             <a href="{{ route('parent.children.index') }}" class="{{ request()->routeIs('parent.children.*') ? 'active' : '' }}">
                 <span aria-hidden="true">◱</span>
                 أبنائي

@@ -7,6 +7,7 @@ use App\Models\Announcement;
 use App\Models\Assignment;
 use App\Models\Guardian;
 use App\Models\Student;
+use App\Services\ParentIdentityService;
 use App\Services\ParentPortalContext;
 use App\Services\SubjectDisplayName;
 use Illuminate\Http\RedirectResponse;
@@ -231,7 +232,22 @@ class PortalController extends Controller
             'phone' => ['nullable', 'string', 'max:30'],
         ]);
 
-        $request->user()->update($validated);
+        $guardian = $this->context->guardian($request);
+        $identities = app(ParentIdentityService::class);
+        $key = $identities->selectedKey($request, $guardian);
+        abort_if($key === null, 403);
+
+        if ($key === 'additional') {
+            $guardian->update([
+                'additional_guardian_name' => $validated['name'],
+                'additional_guardian_phone' => $validated['phone'] ?? null,
+            ]);
+        } else {
+            $request->user()->update($validated);
+        }
+
+        // Keep this browser's selection valid after the selected person's details change.
+        $identities->remember($request, $guardian->refresh()->load('user'), $key);
 
         return redirect()->route('parent.dashboard')->with('success', 'تم حفظ الملف الشخصي.');
     }
