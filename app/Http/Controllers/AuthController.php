@@ -49,6 +49,10 @@ class AuthController
 
     public function destroy(Request $request): RedirectResponse
     {
+        $tokenHash = $request->session()->get(FcmDeviceController::SESSION_TOKEN_HASH);
+        if (is_string($tokenHash)) {
+            $request->user()->fcmDevices()->where('token_hash', $tokenHash)->delete();
+        }
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();

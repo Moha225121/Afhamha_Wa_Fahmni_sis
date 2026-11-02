@@ -11,6 +11,7 @@ use App\Models\Classroom;
 use App\Models\Student;
 use App\Models\Subject;
 use App\Services\AuditService;
+use App\Services\FcmNotificationService;
 use App\Services\TeacherCreationIntent;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -153,7 +154,7 @@ class AssignmentController extends Controller
         $data = $request->validated();
         abort_unless($this->ownsPair($teacher, (int) $data['classroom_id'], (int) $data['subject_id']), 403, 'أنت غير مكلف بهذا الصف/المادة.');
 
-        app(TeacherCreationIntent::class)->once($data['creation_token'], $teacher->id, 'assignments', function () use ($data, $teacher, $request): int {
+        $assignmentId = app(TeacherCreationIntent::class)->once($data['creation_token'], $teacher->id, 'assignments', function () use ($data, $teacher, $request): int {
             $path = null;
             $files = $this->uploadedFiles($request);
             if ($files !== []) {
@@ -181,6 +182,16 @@ class AssignmentController extends Controller
 
             return $assignmentId;
         });
+
+        $publishedAssignment = DB::table('assignments')->where('id', $assignmentId)->first();
+        if ($publishedAssignment && in_array($publishedAssignment->status, ['published', 'active'], true)) {
+            app(FcmNotificationService::class)->notifyClassroom('assignment:'.$assignmentId, (int) $publishedAssignment->classroom_id, [
+                'title' => 'واجب جديد',
+                'body' => $publishedAssignment->title,
+                'student_url' => route('student.assignments.show', $assignmentId, false),
+                'parent_url' => route('parent.assignments', [], false),
+            ]);
+        }
 
         return redirect()->route('teacher.assignments.index')->with('success', 'تم إنشاء الواجب.');
     }

@@ -82,6 +82,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::get('audit-logs', [OperationsController::class, 'auditLogs'])->name('audit-logs.index');
     Route::get('notifications', [OperationsController::class, 'notifications'])->name('notifications.index');
     Route::patch('notifications/read', [OperationsController::class, 'notificationsRead'])->name('notifications.read');
+    Route::get('notifications/compose', [\App\Http\Controllers\NotificationComposerController::class, 'adminForm'])->name('notifications.create');
+    Route::post('notifications/compose', [\App\Http\Controllers\NotificationComposerController::class, 'adminStore'])->middleware('throttle:6,1')->name('notifications.store');
     Route::get('/{module}', [ModuleController::class, 'index'])->whereIn('module', ['schedules', 'attendance', 'exams', 'grades', 'library', 'reports', 'users', 'roles', 'audit-logs', 'settings', 'notifications'])->name('module.index');
     Route::patch('/{module}/{id}/toggle', [ModuleController::class, 'toggle'])->whereIn('module', ['students', 'teachers', 'parents', 'subjects', 'users', 'library'])->name('module.toggle');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

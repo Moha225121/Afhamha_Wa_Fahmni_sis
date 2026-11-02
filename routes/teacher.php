@@ -22,6 +22,8 @@ Route::prefix('teacher')->name('teacher.')->middleware(['auth', 'teacher', 'no-c
     Route::get('/', fn () => redirect()->route('teacher.dashboard'));
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/index', fn () => redirect()->route('teacher.dashboard'))->name('dashboard.index');
+    Route::get('/notifications/compose', [\App\Http\Controllers\NotificationComposerController::class, 'teacherForm'])->name('notifications.create');
+    Route::post('/notifications/compose', [\App\Http\Controllers\NotificationComposerController::class, 'teacherStore'])->middleware('throttle:6,1')->name('notifications.store');
     Route::get('/ads', [PortalAnnouncementController::class, 'index'])->name('ads.index');
     Route::get('/library', [LibraryCatalogController::class, 'index'])->name('library.index');
     Route::get('/library/{resource}/read', [LibraryCatalogController::class, 'read'])->whereNumber('resource')->name('library.read');

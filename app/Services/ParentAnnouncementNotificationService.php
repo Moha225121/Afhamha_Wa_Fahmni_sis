@@ -6,6 +6,7 @@ use App\Models\Announcement;
 use App\Models\User;
 use App\Notifications\ParentAnnouncementNotification;
 use App\Notifications\ParentPortalNotification;
+use App\Support\NotificationData;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Notifications\DatabaseNotification;
@@ -49,6 +50,7 @@ class ParentAnnouncementNotificationService
         }
 
         $studentIds = $guardian?->students()->pluck('students.id') ?? collect();
+        $notificationStudentIds = $studentIds->map(fn ($id) => NotificationData::id($id));
         $withdrawn = DB::table('exam_periods as e')->join('result_publications as p', 'p.exam_period_id', '=', 'e.id')
             ->whereIn('p.student_id', $studentIds)
             ->where(fn ($query) => $query->where('e.status', '!=', 'published')->orWhereNull('e.published_at')->orWhere('e.published_at', '>', now()))
@@ -61,14 +63,14 @@ class ParentAnnouncementNotificationService
         }
 
         return $parent->notifications()->whereNotIn('id', $withdrawnIds)
-            ->where(fn (Builder $personal) => $personal->whereNull('data->student_id')->orWhereIn('data->student_id', $studentIds))
-            ->where(fn (Builder $followup) => $followup->whereNull('data->category')
-                ->orWhereNotIn('data->category', ['student_note', 'guardian_call'])->orWhereIn('id', $followupIds))
+            ->where(fn (Builder $personal) => $personal->whereNull(NotificationData::field('student_id'))->orWhereIn(NotificationData::field('student_id'), $notificationStudentIds))
+            ->where(fn (Builder $followup) => $followup->whereNull(NotificationData::field('category'))
+                ->orWhereNotIn(NotificationData::field('category'), ['student_note', 'guardian_call'])->orWhereIn('id', $followupIds))
             ->where(function (Builder $query) use ($ids): void {
                 // Old generic announcement rows may be duplicates or mistargeted.
                 $query->where(fn (Builder $personal) => $personal->where('type', '!=', ParentAnnouncementNotification::class)
                     ->where(fn (Builder $legacy) => $legacy->where('type', '!=', ParentPortalNotification::class)
-                        ->orWhereNull('data->category')->orWhere('data->category', '!=', 'announcement')))
+                        ->orWhereNull(NotificationData::field('category'))->orWhere(NotificationData::field('category'), '!=', 'announcement')))
                     ->orWhereIn('id', $ids);
             });
     }
@@ -80,8 +82,8 @@ class ParentAnnouncementNotificationService
         return [
             'unread_count' => (clone $query)->whereNull('read_at')->count(),
             'unread_by_category' => [
-                'student_note' => (clone $query)->where('data->category', 'student_note')->whereNull('read_at')->count(),
-                'guardian_call' => (clone $query)->where('data->category', 'guardian_call')->whereNull('read_at')->count(),
+                'student_note' => (clone $query)->where(NotificationData::field('category'), 'student_note')->whereNull('read_at')->count(),
+                'guardian_call' => (clone $query)->where(NotificationData::field('category'), 'guardian_call')->whereNull('read_at')->count(),
             ],
             'notifications' => (clone $query)->when($unreadOnly, fn ($items) => $items->whereNull('read_at'))
                 ->latest()->orderByDesc('id')->limit(5)->get()->map(fn (DatabaseNotification $item) => $this->serialize($item))->all(),
@@ -138,9 +140,11 @@ class ParentAnnouncementNotificationService
         ];
         $data = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
         $existing = $existingById === null ? DB::table('notifications')->where('id', $id)->value('data') : ($existingById[$id] ?? null);
+        $inserted = false;
+        $legacy = null;
         if ($existing === null) {
             $legacy = $parent->notifications()->where('type', ParentPortalNotification::class)
-                ->where('data->category', 'announcement')->where('data->title', $announcement->title)
+                ->where(NotificationData::field('category'), 'announcement')->where(NotificationData::field('title'), $announcement->title)
                 ->get()->first(fn (DatabaseNotification $record) => ($record->data['body'] ?? '') === Str::limit($announcement->content, 140));
             $inserted = DB::table('notifications')->insertOrIgnore([
                 'id' => $id, 'type' => ParentAnnouncementNotification::class,
@@ -153,6 +157,10 @@ class ParentAnnouncementNotificationService
             }
         } elseif ($existing !== $data) {
             DB::table('notifications')->where('id', $id)->update(['data' => $data, 'updated_at' => now()]);
+        }
+
+        if ($push && ! $legacy) {
+            app(FcmNotificationService::class)->dispatch($parent, 'announcement:'.$announcement->id, $payload);
         }
 
         return $id;

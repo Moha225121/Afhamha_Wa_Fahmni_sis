@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Conversation;
 use App\Models\Message;
 use App\Models\User;
+use App\Support\NotificationData;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -46,9 +47,9 @@ class SchoolChatService
     public function markRead(User $user, Conversation $conversation): void
     {
         $conversation->participants()->updateExistingPivot($user->id, ['last_read_at' => now()]);
-        $user->notifications()->where('data->category', 'message')->where(function ($query) use ($conversation, $user): void {
-            $query->where('data->conversation_id', $conversation->id)
-                ->orWhere('data->url', $this->destination($user, $conversation));
+        $user->notifications()->where(NotificationData::field('category'), 'message')->where(function ($query) use ($conversation, $user): void {
+            $query->where(NotificationData::field('conversation_id'), NotificationData::id($conversation->id))
+                ->orWhere(NotificationData::field('url'), $this->destination($user, $conversation));
         })->whereNull('read_at')->update(['read_at' => now()]);
     }
 

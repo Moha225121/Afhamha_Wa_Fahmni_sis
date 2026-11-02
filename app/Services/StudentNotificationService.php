@@ -28,7 +28,7 @@ class StudentNotificationService
             ->when($announcement->audience === 'classroom', fn (Builder $students) => $students->where('classroom_id', $announcement->classroom_id))
             ->with('user')->chunkById(200, function ($students) use ($announcement): void {
                 foreach ($students as $student) {
-                    $this->storeAnnouncement($student->user, $announcement);
+                    $this->storeAnnouncement($student->user, $announcement, push: true);
                 }
             });
     }
@@ -117,7 +117,7 @@ class StudentNotificationService
         $student->user->notifications()->whereKey($id)->whereNull('read_at')->update(['read_at' => now()]);
     }
 
-    private function storeAnnouncement(User $user, Announcement $announcement, ?array $existingById = null): string
+    private function storeAnnouncement(User $user, Announcement $announcement, ?array $existingById = null, bool $push = false): string
     {
         $id = Uuid::uuid5(Uuid::NAMESPACE_URL, 'awf:student-announcement:'.$announcement->id.':'.$user->id)->toString();
         $data = json_encode([
@@ -133,7 +133,7 @@ class StudentNotificationService
             : ($existingById[$id] ?? null);
         if ($existingData === null) {
             // The deterministic primary key also makes overlapping polls/publications safe.
-            DB::table('notifications')->insertOrIgnore([
+            $inserted = DB::table('notifications')->insertOrIgnore([
                 'id' => $id,
                 'type' => StudentAnnouncementNotification::class,
                 'notifiable_type' => $user->getMorphClass(),
@@ -145,6 +145,14 @@ class StudentNotificationService
             ]);
         } elseif ($existingData !== $data) {
             DB::table('notifications')->where('id', $id)->update(['data' => $data, 'updated_at' => now()]);
+        }
+
+        if ($push) {
+            app(FcmNotificationService::class)->dispatch($user, 'announcement:'.$announcement->id, [
+                'title' => $announcement->title,
+                'body' => Str::limit(strip_tags($announcement->content), 220),
+                'url' => route('student.announcements.show', $announcement->id, false),
+            ]);
         }
 
         return $id;

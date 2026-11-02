@@ -103,4 +103,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(PushSubscription::class);
     }
+
+    public function fcmDevices(): HasMany
+    {
+        return $this->hasMany(FcmDevice::class);
+    }
 }

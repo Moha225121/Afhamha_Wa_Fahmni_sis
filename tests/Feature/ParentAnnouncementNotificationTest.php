@@ -134,7 +134,7 @@ class ParentAnnouncementNotificationTest extends TestCase
         $archived = $this->announcement();
         $class = $this->announcement(['audience' => 'classroom', 'classroom_id' => $child['classroom']->id]);
         $this->actingAs($parent)->getJson(route('parent.notifications.summary'))->assertJsonPath('unread_count', 4);
-        $id = $parent->notifications()->where('data->announcement_id', $ad->id)->firstOrFail()->id;
+        $id = $parent->notifications()->where(\App\Support\NotificationData::field('announcement_id'), \App\Support\NotificationData::id($ad->id))->firstOrFail()->id;
         $ad->refresh()->update(['audience' => 'teachers']);
         $expired->update(['expires_at' => now()->subSecond()]);
         $archived->update(['status' => 'archived']);

@@ -7,6 +7,7 @@ use App\Models\StudentNote;
 use App\Models\User;
 use App\Notifications\ParentFollowupNotification;
 use App\Notifications\ParentPortalNotification;
+use App\Support\NotificationData;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -51,7 +52,7 @@ class ParentFollowupNotificationService
         $ids = $this->syncFor($parent);
         $key = $category === 'student_note' ? 'student_note_id' : 'guardian_call_id';
 
-        return $parent->notifications()->whereIn('id', $ids)->where('data->category', $category)
+        return $parent->notifications()->whereIn('id', $ids)->where(NotificationData::field('category'), $category)
             ->whereNull('read_at')->get()->map(fn ($item) => (int) $item->data[$key]);
     }
 
@@ -90,8 +91,8 @@ class ParentFollowupNotificationService
         if ($existing === null) {
             // Direct summons used to create generic alerts. Keep their read state and hide the duplicate in the feed.
             $legacyCandidates = $isNote ? collect() : $parent->notifications()->where('type', ParentPortalNotification::class)
-                ->where('data->category', 'guardian_call')->where('data->student_id', $record->student_id)
-                ->whereNull('data->guardian_call_id')->whereBetween('created_at', [
+                ->where(NotificationData::field('category'), 'guardian_call')->where(NotificationData::field('student_id'), NotificationData::id($record->student_id))
+                ->whereNull(NotificationData::field('guardian_call_id'))->whereBetween('created_at', [
                     $record->created_at->copy()->subSeconds(5), $record->created_at->copy()->addSeconds(5),
                 ])->get();
             $legacy = null;

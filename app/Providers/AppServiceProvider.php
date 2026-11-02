@@ -3,7 +3,9 @@
 namespace App\Providers;
 
 use App\Contracts\SmartTutorGateway;
+use App\Contracts\FcmAccessTokenProvider;
 use App\Services\GeminiSmartTutorGateway;
+use App\Services\GoogleFcmAccessTokenProvider;
 use App\Support\SchoolBranding;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -22,6 +24,7 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(SmartTutorGateway::class, GeminiSmartTutorGateway::class);
+        $this->app->singleton(FcmAccessTokenProvider::class, GoogleFcmAccessTokenProvider::class);
     }
 
     /**
@@ -47,6 +50,18 @@ class AppServiceProvider extends ServiceProvider
                 'logo' => SchoolBranding::LOGO,
                 'theme_color' => SchoolBranding::NAVY,
             ]);
+        });
+        View::composer('parent.layout', function ($view): void {
+            $parent = auth()->user();
+            if ($parent?->isParent()) {
+                $view->with('parentNotificationSummary', app(\App\Services\ParentAnnouncementNotificationService::class)->summary($parent));
+            }
+        });
+        View::composer('student.layout', function ($view): void {
+            $student = auth()->user()?->student;
+            if ($student) {
+                $view->with('studentNotificationSummary', app(\App\Services\StudentNotificationService::class)->summary($student));
+            }
         });
         RateLimiter::for('smart-tutor-conversations', function (Request $request): Limit {
             $maximum = max(1, (int) config('smart_tutor.rate_limits.conversations_per_minute', 10));

@@ -18,9 +18,11 @@
     <link rel="stylesheet" href="{{ asset('css/parent-followup.css') }}?v=20261016-1">
     <script src="{{ asset('js/parent-notifications.js') }}?v=20261016-2" defer></script>
     <script src="{{ asset('js/enhanced-selects.js') }}" defer></script>
+    @vite('resources/js/firebase-messaging.js')
     @stack('styles')
 </head>
 <body class="parent-portal">
+@include('shared.fcm-activation')
 <div class="app-shell">
     <header class="app-header">
         <a class="brand" href="{{ route('parent.dashboard') }}" aria-label="بوابة ولي الأمر">

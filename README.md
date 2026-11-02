@@ -327,4 +327,39 @@ php artisan schedule:work --no-interaction
 
 على خادم الإنتاج استخدم مشرف عمليات أو استدعاء `php artisan schedule:run` كل دقيقة. النشر المجدول يفحص الفترات المعتمدة كل دقيقة؛ تذكير الأقساط يعمل 08:00 بتوقيت التطبيق الحالي UTC. سجلات التشغيل المحلي في `storage/logs/scheduler-output.log` و`scheduler-error.log`.
 
+### إشعارات المتصفح عبر Firebase Cloud Messaging
+
+يحفظ النظام الإشعارات المعتادة في جدول `notifications`، ويضيف FCM HTTP v1 كقناة تسليم مستقلة. تسجيلات FCM مشفرة في `fcm_devices`، بينما تبقى اشتراكات Web Push الحالية لأولياء الأمور وإعدادات VAPID الخاصة بها كما هي.
+
+أعد إعدادات Web App في Firebase Console لهذا المشروع فقط:
+
+```dotenv
+VITE_FIREBASE_API_KEY=
+VITE_FIREBASE_PROJECT_ID=
+VITE_FIREBASE_MESSAGING_SENDER_ID=
+VITE_FIREBASE_APP_ID=
+VITE_FIREBASE_VAPID_KEY=
+```
+
+هذه قيم إعداد عامة تُضمّن في ملفات المتصفح عند `npm run build`. مفتاح VAPID العام هنا هو مفتاح Web Push الذي ينشئه مسؤول Firebase لهذا المشروع، ولا يستبدل `VAPID_PUBLIC_KEY` أو `VAPID_PRIVATE_KEY` المستخدمين مع Minishlink.
+
+يحتاج الخادم إلى معرّف المشروع وملف JSON لحساب خدمة ذي صلاحية إرسال FCM. خزّن الملف خارج المستودع ومجلد `public`، واجعل الوصول إليه مقصورًا على حساب تشغيل التطبيق:
+
+```dotenv
+FIREBASE_PROJECT_ID=
+GOOGLE_APPLICATION_CREDENTIALS=/secure/path/to/this-schools-service-account.json
+```
+
+لا تضع محتوى ملف الحساب أو مفتاحه الخاص في أي متغير `VITE_` أو في Git. اضبط `APP_URL` على عنوان HTTPS المنشور. يحتاج المتصفح إلى HTTPS لتسجيل Service Worker واستلام الإشعارات.
+
+يعمل FCM في عامل خدمة منفصل `/firebase-messaging-sw.js` بنطاق `/firebase-cloud-messaging-push-scope/`؛ ويظل عامل PWA الجذري وعاملا الطالب وولي الأمر بنطاقاتهم الحالية. يستخدم اشتراك Web Push لولي الأمر عامل `/parent/` ومفاتيح VAPID الحالية. يحتاج عامل FCM إلى بناء Vite حديث عند نشر تغيير فيه.
+
+تستخدم FCM قاعدة بيانات الطوابير؛ طبّق ترحيلات Laravel المعتادة التي تنشئ جداول `jobs` و`failed_jobs`، ثم شغّل عاملًا دائمًا تحت مشرف عمليات:
+
+```powershell
+php artisan queue:work database --queue=default --sleep=3 --tries=4 --timeout=60
+```
+
+راقب `failed_jobs` وسجلات Laravel؛ أخطاء الشبكة والخدمة تعاد محاولتها، وتُحذف رموز الأجهزة التي يعلّمها FCM على أنها غير مسجلة. يحتفظ النظام بحالة التسليم لكل جهاز لتجنب إعادة إرسال التنبيهات المؤكدة عند إعادة المحاولة، ويحذف تسجيل الجهاز المرتبط بالجلسة عند تسجيل الخروج. يحتاج النشر المجدول إلى `schedule:run` كل دقيقة لتسليم الإعلانات التي يحين وقت نشرها؛ يحفظ مؤشرًا لآخر تشغيل ناجح لاستدراك التوقف. تُنشأ إشعارات الإعلانات والنتائج والواجبات والاختبارات بعد اعتماد الحدث، مع منع تكرار الحدث لكل حساب. عند تشغيل عدة خوادم، استخدم مخزن cache مشتركًا للأقفال بين العاملين والمجدول.
+
 تفاصيل البنية وحماية البيانات والتحقق في [توثيق التطوير](docs/administrative-expansion.md).

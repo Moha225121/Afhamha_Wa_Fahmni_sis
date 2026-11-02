@@ -124,7 +124,7 @@ class StudentAnnouncementNotificationTest extends TestCase
         $archived = $this->announcement();
         $class = $this->announcement(['audience' => 'classroom', 'classroom_id' => $student['classroom']->id]);
         $this->actingAs($student['user'])->getJson(route('student.notifications.summary'))->assertJsonPath('unread_count', 4);
-        $id = $student['user']->notifications()->where('data->announcement_id', $retargeted->id)->firstOrFail()->id;
+        $id = $student['user']->notifications()->where(\App\Support\NotificationData::field('announcement_id'), \App\Support\NotificationData::id($retargeted->id))->firstOrFail()->id;
 
         $retargeted->update(['audience' => 'teachers']);
         $expired->update(['expires_at' => now()->subSecond()]);
