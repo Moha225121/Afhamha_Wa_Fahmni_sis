@@ -12,6 +12,13 @@ final class SchoolBranding
     public const WHITE = '#FFFFFF';
     public const GRAY = '#F1F2F5';
 
+    public const THEME_COLORS = ['#1239B3', '#078DB5', '#008C95', '#00B978', '#6D4AFF', '#102A43', self::NAVY];
+
+    public static function themeColor(?string $value): string
+    {
+        return in_array($value, self::THEME_COLORS, true) ? $value : self::NAVY;
+    }
+
     public static function logoDataUri(): string
     {
         return 'data:image/jpeg;base64,'.base64_encode(file_get_contents(public_path(self::LOGO)));

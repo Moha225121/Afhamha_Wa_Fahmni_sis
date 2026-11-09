@@ -26,6 +26,7 @@ Route::prefix('parent')->name('parent.')->middleware(['auth', 'parent'])->group(
     Route::get('/assignments', [PortalController::class, 'assignments'])->name('assignments');
     Route::get('/exams', [PortalController::class, 'exams'])->name('exams');
     Route::get('/messages', [PortalController::class, 'messages'])->name('messages');
+    Route::get('/ads', [\App\Http\Controllers\PortalAnnouncementController::class, 'index'])->name('ads.index');
     Route::get('/conversations', [ConversationController::class, 'index'])->name('conversations.index');
     Route::get('/conversations/create', [ConversationController::class, 'create'])->name('conversations.create');
     Route::post('/conversations', [ConversationController::class, 'store'])->name('conversations.store');

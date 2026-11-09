@@ -26,7 +26,7 @@ class SchoolAccountNumberingTest extends TestCase
         $teacher = Teacher::firstOrFail();
         $this->assertSame('ST-'.now()->year.'-0001', $student->student_number);
         $this->assertSame('TCH-'.now()->year.'-0001', $teacher->teacher_number);
-        $this->assertSame('mohamed_'.strtolower($student->student_number).'@awf_alnisbiya.com', $student->user->email);
+        $this->assertSame('mohamed_'.strtolower($student->student_number).'@nbs_alnisbiya.com', $student->user->email);
         $this->assertTrue($student->user->school_email_generated);
         auth()->logout();
         $this->post('/login', ['email' => $student->user->email, 'password' => 'AWFN#26'])->assertRedirect('/student/dashboard');
@@ -64,7 +64,7 @@ class SchoolAccountNumberingTest extends TestCase
         $this->assertSame($userId, $student->user_id);
         $this->assertSame($hash, $student->user->password);
         $this->assertSame('NEW-'.now()->year.'-00001', $student->student_number);
-        $this->assertStringEndsWith('@awf_newschool.com', $student->user->email);
+        $this->assertStringEndsWith('@nbs_newschool.com', $student->user->email);
         $this->assertDatabaseHas('audit_logs', ['action' => 'account_regenerated', 'record_id' => $student->id]);
         $this->get(route('admin.students.account-card', $student))->assertOk()->assertSee($student->user->email)->assertDontSee('password123');
     }

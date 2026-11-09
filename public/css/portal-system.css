@@ -11,6 +11,9 @@ body { background: var(--ui-bg); color: var(--ui-ink); font-family: Cairo, Tahom
 body.student-portal { font-family: Cairo, Tahoma, Arial, sans-serif; background: var(--ui-bg); }
 button, input, select, textarea { font: inherit; }
 button, .btn { touch-action: manipulation; }
+.portal-back-button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-width: 92px; min-height: 44px; padding: 9px 16px; margin-block-end: 16px; border: 1px solid var(--ui-line); border-radius: 10px; background: white; color: var(--theme-primary, var(--ui-ink)); font-weight: 700; line-height: 1.5; cursor: pointer; box-shadow: 0 2px 8px #102d3c0a; }
+.portal-back-button:hover { background: var(--ui-bg); border-color: var(--theme-primary, var(--ui-line)); }
+.portal-back-button > span[aria-hidden] { font-size: 21px; line-height: 1; }
 button:disabled, .btn[aria-disabled="true"] { opacity: .6; cursor: wait; }
 :where(a, button, input, select, textarea, summary):focus-visible { outline: 3px solid var(--theme-primary, #008c95); outline-offset: 3px; }
 [hidden] { display: none !important; }
@@ -94,6 +97,8 @@ td .btn { min-height: 36px; padding: 6px 12px; }
 @media (max-width: 768px) {
     .page, .teacher-portal .page { width: 100%; margin: 0; }
     .sidebar, .teacher-portal .sidebar { width: min(290px, 85vw); transform: translateX(105%); z-index: 40; }
+    .sidebar.sidebar--closable { padding-top: 66px; }
+    .menu-toggle.has-sidebar-close[aria-expanded="true"] { visibility: hidden; }
     .sidebar.open { transform: translateX(0); }
     .menu-toggle { z-index: 50; min-width: 42px; min-height: 42px; top: 15px; right: 12px; border-radius: 10px; }
     .nav-backdrop:not([hidden]) { display: block; position: fixed; inset: 0; z-index: 35; background: #102d3c88; border: 0; }
@@ -123,7 +128,7 @@ td .btn { min-height: 36px; padding: 6px 12px; }
     *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }
 @media print {
-    .sidebar, .topbar, .app-header, .bottom-nav, .menu-toggle, .nav-backdrop, .analysis-back, #analysis-form { display: none !important; }
+    .sidebar, .topbar, .app-header, .bottom-nav, .menu-toggle, .nav-backdrop, .analysis-back, .portal-back-button, #analysis-form { display: none !important; }
     .page, .teacher-portal .page { margin: 0; }
     .app-shell { max-width: none; box-shadow: none; }
     .analysis-report { border: 0; padding: 0; }

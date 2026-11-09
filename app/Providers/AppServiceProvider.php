@@ -48,7 +48,7 @@ class AppServiceProvider extends ServiceProvider
                 'platform_name' => 'مدرسة النسبية',
                 'school_name' => $settings['school_name'] ?? 'مدرسة النسبية',
                 'logo' => SchoolBranding::LOGO,
-                'theme_color' => SchoolBranding::NAVY,
+                'theme_color' => SchoolBranding::themeColor($settings['theme_color'] ?? null),
             ]);
         });
         View::composer('parent.layout', function ($view): void {

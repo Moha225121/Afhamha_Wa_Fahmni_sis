@@ -86,6 +86,7 @@ class StudentNotificationService
         return [
             'id' => $notification->id,
             'title' => $notification->data['title'] ?? 'إشعار جديد',
+            'source' => \App\Support\NotificationContext::label($notification->data),
             'body' => Str::limit(strip_tags($notification->data['body'] ?? $notification->data['message'] ?? ''), 140),
             'category' => $notification->data['category'] ?? 'general',
             'url' => $this->destination($notification),

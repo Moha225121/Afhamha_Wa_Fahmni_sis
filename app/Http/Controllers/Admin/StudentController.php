@@ -20,9 +20,9 @@ class StudentController extends Controller
 {
     public function index(Request $r): View
     {
-        $students = Student::with(['user', 'classroom.academicYear', 'guardians.user'])->when($r->q, fn ($q, $v) => $q->whereHas('user', fn ($u) => $u->where('name', 'like', "%$v%"))->orWhere('student_number', 'like', "%$v%"))->when($r->classroom_id, fn ($q, $v) => $q->where('classroom_id', $v))->when($r->status, fn ($q, $v) => $q->where('status', $v))->latest()->paginate(15)->withQueryString();
+        $students = Student::with(['user', 'classroom.academicYear', 'guardians.user'])->when($r->q, fn ($q, $v) => $q->where(fn ($match) => $match->whereHas('user', fn ($u) => $u->where('name', 'like', "%$v%"))->orWhere('student_number', 'like', "%$v%")))->when($r->classroom_id, fn ($q, $v) => $q->where('classroom_id', $v))->when($r->status, fn ($q, $v) => $q->where('status', $v))->latest()->paginate(15)->withQueryString();
 
-        return view('admin.students.index', compact('students') + ['classrooms' => Classroom::orderBy('name')->get()]);
+        return view('admin.students.index', compact('students') + ['classrooms' => \App\Support\AcademicClassroomOrder::sort(Classroom::with('academicYear')->get())]);
     }
 
     public function create(): View

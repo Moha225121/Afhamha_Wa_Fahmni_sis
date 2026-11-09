@@ -2,10 +2,11 @@
 <div class="chat-contact-list">
 @forelse($conversations as $conversation)
     @php($recipient = $conversation->participants->firstWhere('id', '!=', auth()->id()))
+    @php($localTime = $conversation->last_message_at?->copy()->timezone(\App\Support\DisplayTimezone::name()))
     <a class="chat-contact {{ $conversation->unread_count ? 'has-unread' : '' }}" data-chat-contact data-chat-search-text="{{ $recipient?->name }} {{ $conversation->student?->user?->name }} {{ $conversation->latestMessage?->body }}" href="{{ route(auth()->user()->role.'.conversations.show', $conversation) }}">
         <span class="chat-avatar" aria-hidden="true">{{ mb_substr($recipient?->name ?? 'المدرسة', 0, 1) }}</span>
         <div class="chat-contact-copy">
-            <div class="chat-contact-top"><strong>{{ $recipient?->name ?? 'المدرسة' }}</strong><time>{{ $conversation->last_message_at?->isToday() ? $conversation->last_message_at->format('H:i') : $conversation->last_message_at?->format('m-d') }}</time></div>
+            <div class="chat-contact-top"><strong>{{ $recipient?->name ?? 'المدرسة' }}</strong><time>{{ $localTime?->isToday() ? $localTime->format('H:i') : $localTime?->format('m-d') }}</time></div>
             <span class="chat-student">{{ $conversation->student?->user?->name ?? 'محادثة عامة' }}</span>
             <p>{{ $conversation->latestMessage?->sender_id === auth()->id() ? 'أنت: ' : '' }}{{ \Illuminate\Support\Str::limit($conversation->latestMessage?->body ?? 'ابدأ المحادثة بكتابة رسالة.', 90) }}</p>
         </div>

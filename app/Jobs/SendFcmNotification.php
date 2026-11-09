@@ -11,6 +11,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Queue\Middleware\WithoutOverlapping;
 
 class SendFcmNotification implements ShouldBeUnique, ShouldQueue
 {
@@ -36,6 +37,14 @@ class SendFcmNotification implements ShouldBeUnique, ShouldQueue
     public function uniqueId(): string
     {
         return $this->userId.':'.$this->eventKey;
+    }
+
+    public function middleware(): array
+    {
+        // A released overlap also consumes an attempt. With four attempts, a
+        // 60-second delay survives the full 120-second lease even if a worker
+        // dies or an identical job collides immediately after lock acquisition.
+        return [(new WithoutOverlapping('fcm-event:'.$this->deliveryId))->shared()->releaseAfter(60)->expireAfter(120)];
     }
 
     public function handle(FcmService $fcm): void

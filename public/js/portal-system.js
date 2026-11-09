@@ -40,6 +40,8 @@ document.addEventListener('DOMContentLoaded', () => {
         menu.setAttribute('aria-expanded', 'false');
         menu.setAttribute('aria-label', 'فتح القائمة');
         const mobile = window.matchMedia('(max-width: 768px)');
+        const closeButton = sidebar.querySelector('.sidebar-close');
+        menu.classList.toggle('has-sidebar-close', Boolean(closeButton));
         const toggle = (open, restoreFocus = false) => {
             sidebar.classList.toggle('open', open);
             document.body.classList.toggle('nav-open', open && mobile.matches);
@@ -47,10 +49,12 @@ document.addEventListener('DOMContentLoaded', () => {
             menu.setAttribute('aria-expanded', String(open));
             menu.setAttribute('aria-label', open ? 'إغلاق القائمة' : 'فتح القائمة');
             sidebar.inert = mobile.matches && !open;
+            if (open && closeButton && mobile.matches) closeButton.focus();
             if (restoreFocus) menu.focus();
         };
         menu.onclick = () => toggle(!sidebar.classList.contains('open'));
         backdrop.onclick = () => toggle(false, true);
+        if (closeButton) closeButton.onclick = () => toggle(false, true);
         document.addEventListener('keydown', event => {
             if (event.key === 'Escape' && sidebar.classList.contains('open')) toggle(false, true);
         });

@@ -1,0 +1,94 @@
+{
+  "testedAt": "2026-11-08T21:30:50.7405590Z",
+  "base_head": "1a5cfe27c72e38acd05c837682a3f29b0d7b3402",
+  "code_manifest_sha256": "6b86510fbbb03ed2edc9783670175e6d12eb52a24840f7d90bedc9fac5000cb1",
+  "phpunit": {
+    "duration_ms": 40502,
+    "assertions": 4004,
+    "junit": "tmp/qa-runs/a52b77bcc7694543b2bda06b37892c9b/phpunit.xml",
+    "tests": 492,
+    "errors": 0,
+    "failures": 0,
+    "skipped": 0
+  },
+  "javascript": {
+    "tests": 15,
+    "failed": 0,
+    "skipped": 0,
+    "passed": 15
+  },
+  "vite": {
+    "seconds": 2.12,
+    "result": "PASS",
+    "firebase_build_values": "Explicitly empty in Node process; not a production build"
+  },
+  "browser": [
+    {
+      "passed": 15,
+      "testedAt": "2026-11-08T21:29:24.735Z",
+      "script": "browser-smoke",
+      "checks": 15
+    },
+    {
+      "passed": 6,
+      "testedAt": "2026-11-08T21:29:44.539Z",
+      "script": "browser-learning",
+      "checks": 6
+    },
+    {
+      "passed": 9,
+      "testedAt": "2026-11-08T21:30:10.355Z",
+      "script": "browser-academics",
+      "checks": 9
+    },
+    {
+      "passed": 4,
+      "testedAt": "2026-11-08T21:30:17.563Z",
+      "script": "browser-tutor",
+      "checks": 4
+    },
+    {
+      "passed": 2,
+      "testedAt": "2026-11-08T21:30:20.015Z",
+      "script": "browser-pwa",
+      "checks": 2
+    }
+  ],
+  "browser_total": 36,
+  "browser_fixture": "171cedda9d8f9cf8",
+  "browser_log_error_lines": 0,
+  "runtime": {
+    "configuration serialization": {
+      "exit": 0
+    },
+    "route:cache": {
+      "exit": 0,
+      "output": "INFO  Routes cached successfully."
+    },
+    "view:cache": {
+      "exit": 0,
+      "output": "INFO  Blade templates cached successfully."
+    },
+    "schedule:list": {
+      "exit": 0,
+      "output": "* * * * *  php artisan student-exams:finalize-expired ................................ Next Due: 36 seconds from now\r\n  0 0 * * *  php artisan library:prune-uploads ............................................ Next Due: 2 hours from now\r\n  0 8 * * *  php artisan finance:send-reminders .......................................... Next Due: 10 hours from now\r\n  * * * * *  php artisan results:publish-due ........................................... Next Due: 36 seconds from now\r\n  * * * * *  php artisan announcements:notify-due ...................................... Next Due: 36 seconds from now\r\n  * * * * *  php artisan fcm:retry-pending ............................................. Next Due: 36 seconds from now"
+    },
+    "route_count": 319,
+    "testedAt": "2026-11-08T23:28:23+02:00",
+    "environment": "Fresh isolated SQLite fixture, synthetic configuration cache, no production environment file"
+  },
+  "syntax": {
+    "failures": [],
+    "diff_check_exit": 0,
+    "php_files": 65,
+    "javascript_files": 10,
+    "testedAt": "2026-11-08T21:28:25.5736414Z"
+  },
+  "release_decision": "NO_GO",
+  "limits": [
+    "SQLite only; PostgreSQL upgrade and concurrency unverified",
+    "No production or DigitalOcean connection",
+    "No real device install/update or Push",
+    "No paid Gemini or external-provider call"
+  ]
+}

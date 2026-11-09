@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Support\SchoolBranding;
 use Illuminate\Http\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\DB;
@@ -13,7 +14,7 @@ class ParentPwaController extends Controller
     public function manifest(): JsonResponse
     {
         $settings = Schema::hasTable('settings') ? DB::table('settings')->pluck('value', 'key') : collect();
-        $schoolName = $settings['school_name'] ?? 'افهمها وفهمني';
+        $schoolName = $settings['school_name'] ?? 'مدرسة النسبية';
         $logo = $settings['school_logo'] ?? null;
         $iconUrl = route('school.pwa.icon', absolute: false);
         $mimeType = $this->logoMimeType($logo);
@@ -21,20 +22,22 @@ class ParentPwaController extends Controller
         if ($logo && $mimeType) {
             $iconUrl .= '?v='.substr(hash('sha256', $logo), 0, 12);
         } else {
-            $iconUrl = asset('icons/parent-icon-192.png');
+            $iconUrl = route('school.branding.icon', ['size' => 192], absolute: false);
             $mimeType = 'image/png';
         }
 
-        $icons = $mimeType === 'image/svg+xml'
+        $icons = ! $logo || ! $this->logoMimeType($logo)
+            ? array_map(fn ($size) => ['src' => route('school.branding.icon', ['size' => $size], absolute: false), 'sizes' => $size.'x'.$size, 'type' => 'image/png', 'purpose' => 'any'], [192, 512])
+            : ($mimeType === 'image/svg+xml'
             ? [['src' => $iconUrl, 'sizes' => 'any', 'type' => $mimeType, 'purpose' => 'any']]
             : [
                 ['src' => $iconUrl, 'sizes' => '192x192', 'type' => $mimeType, 'purpose' => 'any'],
                 ['src' => $iconUrl, 'sizes' => '512x512', 'type' => $mimeType, 'purpose' => 'any'],
-            ];
+            ]);
 
         return response()->json([
             'name' => $schoolName.' - بوابة ولي الأمر',
-            'short_name' => 'ولي الأمر',
+            'short_name' => $schoolName,
             'description' => 'بوابة ولي الأمر في '.$schoolName,
             'id' => '/parent/',
             'start_url' => '/parent/dashboard',
@@ -62,7 +65,8 @@ class ParentPwaController extends Controller
         $mimeType = $this->logoMimeType($logo);
 
         if (! $logo || ! $mimeType) {
-            return response()->file(public_path('icons/parent-icon-192.png'), [
+            return response(SchoolBranding::iconPng(192), 200, [
+                'Content-Type' => 'image/png',
                 'Cache-Control' => 'no-store',
             ]);
         }

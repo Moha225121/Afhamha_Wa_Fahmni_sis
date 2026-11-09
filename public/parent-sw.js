@@ -1,13 +1,12 @@
-const CACHE_NAME = 'afhamha-parent-static-v8';
+const CACHE_NAME = 'afhamha-parent-static-v9';
+importScripts('/js/school-push-privacy.js?v=20261109');
 const OFFLINE_URL = '/parent-offline.html';
 const STATIC_ASSETS = [
     OFFLINE_URL,
     '/favicon.ico',
     '/icons/nasbia-logo.jpg',
-    '/icons/parent-icon.svg',
-    '/icons/parent-icon-192.png',
-    '/icons/parent-icon-512.png',
-    '/icons/parent-maskable-512.png',
+    '/school-branding/icon-192.png',
+    '/school-branding/icon-512.png',
     '/school-app-icon'
 ];
 
@@ -55,17 +54,18 @@ self.addEventListener('fetch', (event) => {
 
 self.addEventListener('push', (event) => {
     const payload = event.data ? event.data.json() : {};
-    event.waitUntil(self.registration.showNotification(payload.title || 'افهمها وفهمني', {
-        body: payload.body || 'لديك إشعار جديد.',
+    event.waitUntil(SchoolPushPrivacy.show(self.registration, payload, {
         icon: '/school-app-icon',
-        badge: '/icons/parent-maskable-512.png',
-        data: { url: payload.url || '/parent/notifications' },
+        badge: '/school-branding/icon-192.png',
         dir: 'rtl',
         lang: 'ar',
-    }));
+    }).catch(() => {}));
 });
 
 self.addEventListener('notificationclick', (event) => {
     event.notification.close();
-    event.waitUntil(clients.openWindow(event.notification.data.url));
+    event.waitUntil((async () => {
+        const recipient = await SchoolPushPrivacy.currentRecipient();
+        await clients.openWindow(SchoolPushPrivacy.destination(event.notification.data || {}, recipient, self.location.origin));
+    })());
 });

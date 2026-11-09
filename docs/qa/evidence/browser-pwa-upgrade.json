@@ -1,0 +1,499 @@
+{
+  "startedAt": "2026-11-09T08:41:00.532Z",
+  "testedAt": "2026-11-09T08:41:29.692Z",
+  "browser": "156.0.4314.58",
+  "origin": "http://127.0.0.1:8766",
+  "fixture": "befdc6fa6a770247",
+  "environment": "Clean local browser contexts, isolated synthetic database, actual worker upgrade and account switching; external network blocked",
+  "baseline": "Workers copied from HEAD 1a5cfe27c72e38acd05c837682a3f29b0d7b3402. Missing historic icon assets supplied by explicit QA-only approved PNG shim.",
+  "limits": "Not a physical-device installation/update, real Push or historic artifact equivalence test.",
+  "results": [
+    {
+      "name": "parent: baseline-to-current upgrade, unsaved form, logout and account switch",
+      "result": "PASS",
+      "old": {
+        "cache": "afhamha-parent-static-v8",
+        "sha256": "cc4855de20101dc74a3c9bd3db3592805333f19bc8f6890023f71f904948b5e5"
+      },
+      "current": {
+        "cache": "afhamha-parent-static-v9",
+        "sha256": "8673537abbd85e150368d6bed73ab9aae31c66792809849f138f659ce1dc4b40"
+      },
+      "active": {
+        "scope": "http://127.0.0.1:8766/parent/",
+        "script": "http://127.0.0.1:8766/parent-sw.js",
+        "state": "activated"
+      },
+      "upgrade": {
+        "forcedNavigations": 0,
+        "sameDocument": true,
+        "draftPreserved": true
+      },
+      "accountSwitch": {
+        "oldResourceDenied": [
+          {
+            "path": "/parent/children/2",
+            "status": 404
+          }
+        ],
+        "offlineGeneric": true,
+        "historyBackRequiresLogin": true
+      },
+      "cache": {
+        "beforeLogout": [
+          {
+            "name": "afhamha-shell-v3-nasr-daem",
+            "entries": [
+              {
+                "path": "/offline.html",
+                "status": 200,
+                "method": "GET"
+              },
+              {
+                "path": "/icons/nasbia-logo.jpg",
+                "status": 200,
+                "method": "GET"
+              },
+              {
+                "path": "/school-branding/icon-180.png",
+                "status": 200,
+                "method": "GET"
+              },
+              {
+                "path": "/school-branding/icon-192.png",
+                "status": 200,
+                "method": "GET"
+              },
+              {
+                "path": "/school-branding/icon-512.png",
+                "status": 200,
+                "method": "GET"
+              },
+              {
+                "path": "/manifest.webmanifest",
+                "status": 200,
+                "method": "GET"
+              }
+            ]
+          },
+          {
+            "name": "afhamha-parent-static-v9",
+            "entries": [
+              {
+                "path": "/parent-offline.html",
+                "status": 200,
+                "method": "GET"
+              },
+              {
+                "path": "/favicon.ico",
+                "status": 200,
+                "method": "GET"
+              },
+              {
+                "path": "/icons/nasbia-logo.jpg",
+                "status": 200,
+                "method": "GET"
+              },
+              {
+                "path": "/school-branding/icon-192.png",
+                "status": 200,
+                "method": "GET"
+              },
+              {
+                "path": "/school-branding/icon-512.png",
+                "status": 200,
+                "method": "GET"
+              },
+              {
+                "path": "/school-app-icon",
+                "status": 200,
+                "method": "GET"
+              }
+            ]
+          }
+        ],
+        "afterSwitch": [
+          {
+            "name": "afhamha-shell-v3-nasr-daem",
+            "entries": [
+              {
+                "path": "/offline.html",
+                "status": 200,
+                "method": "GET"
+              },
+              {
+                "path": "/icons/nasbia-logo.jpg",
+                "status": 200,
+                "method": "GET"
+              },
+              {
+                "path": "/school-branding/icon-180.png",
+                "status": 200,
+                "method": "GET"
+              },
+              {
+                "path": "/school-branding/icon-192.png",
+                "status": 200,
+                "method": "GET"
+              },
+              {
+                "path": "/school-branding/icon-512.png",
+                "status": 200,
+                "method": "GET"
+              },
+              {
+                "path": "/manifest.webmanifest",
+                "status": 200,
+                "method": "GET"
+              }
+            ]
+          },
+          {
+            "name": "afhamha-parent-static-v9",
+            "entries": [
+              {
+                "path": "/parent-offline.html",
+                "status": 200,
+                "method": "GET"
+              },
+              {
+                "path": "/favicon.ico",
+                "status": 200,
+                "method": "GET"
+              },
+              {
+                "path": "/icons/nasbia-logo.jpg",
+                "status": 200,
+                "method": "GET"
+              },
+              {
+                "path": "/school-branding/icon-192.png",
+                "status": 200,
+                "method": "GET"
+              },
+              {
+                "path": "/school-branding/icon-512.png",
+                "status": 200,
+                "method": "GET"
+              },
+              {
+                "path": "/school-app-icon",
+                "status": 200,
+                "method": "GET"
+              }
+            ]
+          }
+        ],
+        "afterOffline": [
+          {
+            "name": "afhamha-shell-v3-nasr-daem",
+            "entries": [
+              {
+                "path": "/offline.html",
+                "status": 200,
+                "method": "GET"
+              },
+              {
+                "path": "/icons/nasbia-logo.jpg",
+                "status": 200,
+                "method": "GET"
+              },
+              {
+                "path": "/school-branding/icon-180.png",
+                "status": 200,
+                "method": "GET"
+              },
+              {
+                "path": "/school-branding/icon-192.png",
+                "status": 200,
+                "method": "GET"
+              },
+              {
+                "path": "/school-branding/icon-512.png",
+                "status": 200,
+                "method": "GET"
+              },
+              {
+                "path": "/manifest.webmanifest",
+                "status": 200,
+                "method": "GET"
+              }
+            ]
+          },
+          {
+            "name": "afhamha-parent-static-v9",
+            "entries": [
+              {
+                "path": "/parent-offline.html",
+                "status": 200,
+                "method": "GET"
+              },
+              {
+                "path": "/favicon.ico",
+                "status": 200,
+                "method": "GET"
+              },
+              {
+                "path": "/icons/nasbia-logo.jpg",
+                "status": 200,
+                "method": "GET"
+              },
+              {
+                "path": "/school-branding/icon-192.png",
+                "status": 200,
+                "method": "GET"
+              },
+              {
+                "path": "/school-branding/icon-512.png",
+                "status": 200,
+                "method": "GET"
+              },
+              {
+                "path": "/school-app-icon",
+                "status": 200,
+                "method": "GET"
+              }
+            ]
+          }
+        ]
+      },
+      "errors": []
+    },
+    {
+      "name": "student: baseline-to-current upgrade, unsaved form, logout and account switch",
+      "result": "PASS",
+      "old": {
+        "cache": "afhamha-student-static-v1",
+        "sha256": "63ced069970064ac6f6a7b37c0979c3dff413569aeb98e1699a070d0d8150473"
+      },
+      "current": {
+        "cache": "afhamha-student-static-v2",
+        "sha256": "e9f99f73963c03636eaef1347b6ae22762ace74398b4aacc41df51206536a088"
+      },
+      "active": {
+        "scope": "http://127.0.0.1:8766/student/",
+        "script": "http://127.0.0.1:8766/student-sw.js",
+        "state": "activated"
+      },
+      "upgrade": {
+        "forcedNavigations": 0,
+        "sameDocument": true,
+        "draftPreserved": true
+      },
+      "accountSwitch": {
+        "oldResourceDenied": [
+          {
+            "path": "/student/tutor/conversations/1",
+            "status": 404
+          }
+        ],
+        "offlineGeneric": true,
+        "historyBackRequiresLogin": true
+      },
+      "cache": {
+        "beforeLogout": [
+          {
+            "name": "afhamha-shell-v3-nasr-daem",
+            "entries": [
+              {
+                "path": "/offline.html",
+                "status": 200,
+                "method": "GET"
+              },
+              {
+                "path": "/icons/nasbia-logo.jpg",
+                "status": 200,
+                "method": "GET"
+              },
+              {
+                "path": "/school-branding/icon-180.png",
+                "status": 200,
+                "method": "GET"
+              },
+              {
+                "path": "/school-branding/icon-192.png",
+                "status": 200,
+                "method": "GET"
+              },
+              {
+                "path": "/school-branding/icon-512.png",
+                "status": 200,
+                "method": "GET"
+              },
+              {
+                "path": "/manifest.webmanifest",
+                "status": 200,
+                "method": "GET"
+              }
+            ]
+          },
+          {
+            "name": "afhamha-student-static-v2",
+            "entries": [
+              {
+                "path": "/student-offline.html",
+                "status": 200,
+                "method": "GET"
+              },
+              {
+                "path": "/favicon.ico",
+                "status": 200,
+                "method": "GET"
+              },
+              {
+                "path": "/school-branding/icon-192.png",
+                "status": 200,
+                "method": "GET"
+              },
+              {
+                "path": "/school-branding/icon-512.png",
+                "status": 200,
+                "method": "GET"
+              },
+              {
+                "path": "/student-manifest.webmanifest",
+                "status": 200,
+                "method": "GET"
+              }
+            ]
+          }
+        ],
+        "afterSwitch": [
+          {
+            "name": "afhamha-shell-v3-nasr-daem",
+            "entries": [
+              {
+                "path": "/offline.html",
+                "status": 200,
+                "method": "GET"
+              },
+              {
+                "path": "/icons/nasbia-logo.jpg",
+                "status": 200,
+                "method": "GET"
+              },
+              {
+                "path": "/school-branding/icon-180.png",
+                "status": 200,
+                "method": "GET"
+              },
+              {
+                "path": "/school-branding/icon-192.png",
+                "status": 200,
+                "method": "GET"
+              },
+              {
+                "path": "/school-branding/icon-512.png",
+                "status": 200,
+                "method": "GET"
+              },
+              {
+                "path": "/manifest.webmanifest",
+                "status": 200,
+                "method": "GET"
+              }
+            ]
+          },
+          {
+            "name": "afhamha-student-static-v2",
+            "entries": [
+              {
+                "path": "/student-offline.html",
+                "status": 200,
+                "method": "GET"
+              },
+              {
+                "path": "/favicon.ico",
+                "status": 200,
+                "method": "GET"
+              },
+              {
+                "path": "/school-branding/icon-192.png",
+                "status": 200,
+                "method": "GET"
+              },
+              {
+                "path": "/school-branding/icon-512.png",
+                "status": 200,
+                "method": "GET"
+              },
+              {
+                "path": "/student-manifest.webmanifest",
+                "status": 200,
+                "method": "GET"
+              }
+            ]
+          }
+        ],
+        "afterOffline": [
+          {
+            "name": "afhamha-shell-v3-nasr-daem",
+            "entries": [
+              {
+                "path": "/offline.html",
+                "status": 200,
+                "method": "GET"
+              },
+              {
+                "path": "/icons/nasbia-logo.jpg",
+                "status": 200,
+                "method": "GET"
+              },
+              {
+                "path": "/school-branding/icon-180.png",
+                "status": 200,
+                "method": "GET"
+              },
+              {
+                "path": "/school-branding/icon-192.png",
+                "status": 200,
+                "method": "GET"
+              },
+              {
+                "path": "/school-branding/icon-512.png",
+                "status": 200,
+                "method": "GET"
+              },
+              {
+                "path": "/manifest.webmanifest",
+                "status": 200,
+                "method": "GET"
+              }
+            ]
+          },
+          {
+            "name": "afhamha-student-static-v2",
+            "entries": [
+              {
+                "path": "/student-offline.html",
+                "status": 200,
+                "method": "GET"
+              },
+              {
+                "path": "/favicon.ico",
+                "status": 200,
+                "method": "GET"
+              },
+              {
+                "path": "/school-branding/icon-192.png",
+                "status": 200,
+                "method": "GET"
+              },
+              {
+                "path": "/school-branding/icon-512.png",
+                "status": 200,
+                "method": "GET"
+              },
+              {
+                "path": "/student-manifest.webmanifest",
+                "status": 200,
+                "method": "GET"
+              }
+            ]
+          }
+        ]
+      },
+      "errors": []
+    }
+  ]
+}

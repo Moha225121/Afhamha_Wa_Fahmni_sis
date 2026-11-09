@@ -15,8 +15,21 @@ class SchoolChatController extends Controller
 
     public function index(Request $request): View
     {
-        return view('shared.chat.inbox', ['layout' => $request->user()->role.'.layout',
-            'conversations' => $this->chat->inbox($request->user())->get()]);
+        $query = $this->chat->inbox($request->user());
+        $classrooms = collect();
+        if ($request->user()->isAdmin()) {
+            $filters = $request->validate(['q' => ['nullable', 'string', 'max:150'], 'status' => ['nullable', 'in:open,closed'], 'classroom_id' => ['nullable', 'integer']]);
+            $query->when($filters['status'] ?? null, fn ($q, $status) => $q->where('conversations.status', $status))
+                ->when($filters['classroom_id'] ?? null, fn ($q, $id) => $q->whereHas('student', fn ($students) => $students->where('classroom_id', $id)))
+                ->when($filters['q'] ?? null, fn ($q, $text) => $q->where(fn ($match) => $match->where('subject', 'like', '%'.$text.'%')
+                    ->orWhereHas('participants', fn ($users) => $users->where('name', 'like', '%'.$text.'%'))
+                    ->orWhereHas('student.user', fn ($users) => $users->where('name', 'like', '%'.$text.'%'))
+                    ->orWhereHas('messages', fn ($messages) => $messages->where('body', 'like', '%'.$text.'%'))));
+            $classrooms = \App\Support\AcademicClassroomOrder::sort(\App\Models\Classroom::with('academicYear')->get());
+        }
+
+        return view('shared.chat.inbox', ['layout' => $request->user()->role.'.layout', 'classrooms' => $classrooms,
+            'conversations' => $query->paginate(20)->withQueryString()]);
     }
 
     public function show(Request $request, Conversation $conversation): View

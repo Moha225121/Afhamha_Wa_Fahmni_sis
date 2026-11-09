@@ -1,0 +1,36 @@
+.teacher-tutor { min-width: 0; overflow-wrap: anywhere; }
+.teacher-tutor .tutor-intro, .teacher-tutor .tutor-conversations, .teacher-tutor .conversation-sidebar, .teacher-tutor .chat-panel { border: 1px solid #dce7e4; border-radius: 16px; background: #fff; padding: 20px; margin-bottom: 16px; min-width: 0; }
+.teacher-tutor p { line-height: 1.8; }
+.teacher-tutor button { min-height: 44px; padding: 10px 16px; background: var(--school-navy); border: 1px solid var(--school-navy); color: #fff; border-radius: 10px; font: inherit; cursor: pointer; }
+.teacher-tutor button:hover { background: var(--school-navy-light); }
+.teacher-tutor :is(button, a, textarea):focus-visible { outline: 3px solid var(--school-gold); outline-offset: 3px; }
+.teacher-tutor button:disabled { opacity: .65; cursor: wait; }
+.teacher-tutor .tutor-conversation { display: flex; flex-wrap: wrap; gap: 8px 20px; justify-content: space-between; padding: 16px 0; border-bottom: 1px solid #e1e9e7; color: var(--school-navy); }
+.teacher-tutor .tutor-conversation span { color: #52645e; font-size: .9rem; }
+.teacher-tutor.tutor-layout { display: grid; grid-template-columns: minmax(190px, 260px) minmax(0, 1fr); gap: 18px; align-items: start; }
+.teacher-tutor .conversation-sidebar { display: grid; gap: 8px; }
+.teacher-tutor .conversation-sidebar a { display: block; padding: 10px; min-height: 44px; border-radius: 8px; color: var(--school-navy); }
+.teacher-tutor .conversation-sidebar a.active { background: #e6f2ef; }
+.teacher-tutor .chat-panel > header { border-bottom: 1px solid #e1e9e7; }
+.teacher-tutor .chat-panel h2 { font-size: 1.2rem; }
+.teacher-tutor .chat-history { display: flex; flex-direction: column; list-style: none; padding: 16px 0; margin: 0; gap: 14px; }
+.teacher-tutor .chat-message { min-width: 0; max-width: 100%; padding: 16px; border-radius: 12px; background: #f3f8f6; border: 1px solid #dce7e4; }
+.teacher-tutor .from-teacher { background: #e5f2ed; }
+.teacher-tutor .teacher-message-content { white-space: pre-wrap; unicode-bidi: plaintext; }
+.teacher-tutor .message-status { display: block; margin-block: 8px; }
+.teacher-tutor .chat-composer { display: grid; gap: 10px; border-top: 1px solid #e1e9e7; padding-top: 16px; }
+.teacher-tutor textarea { width: 100%; max-width: 100%; min-height: 120px; box-sizing: border-box; font: inherit; border-radius: 10px; padding: 12px; border: 1px solid #a8c4bb; }
+.teacher-tutor .chat-composer button { justify-self: start; }
+.teacher-tutor .tutor-pagination { display: flex; justify-content: space-between; gap: 16px; padding: 12px 0; }
+.teacher-tutor .tutor-pagination a { min-height: 44px; color: var(--school-navy); padding: 10px; text-decoration: underline; }
+.teacher-tutor .tutor-markdown { line-height: 1.9; }
+.teacher-tutor .tutor-markdown p { unicode-bidi: plaintext; }
+.teacher-tutor .tutor-markdown a { color: var(--school-navy); text-decoration: underline; }
+.teacher-tutor .tutor-markdown :is(ul, ol) { padding-inline-start: 1.6rem; }
+.teacher-tutor .tutor-markdown pre, .teacher-tutor .tutor-table-scroll { max-width: 100%; overflow-x: auto; overscroll-behavior-inline: contain; }
+.teacher-tutor .tutor-markdown pre { direction: ltr; text-align: left; background: #182f2a; color: #fff; padding: 12px; border-radius: 8px; }
+.teacher-tutor .tutor-markdown code { font-family: Consolas, monospace; unicode-bidi: isolate; }
+.teacher-tutor .tutor-markdown table { width: 100%; border-collapse: collapse; }
+.teacher-tutor .tutor-markdown :is(th, td) { min-width: 8rem; padding: 10px; border: 1px solid #dce7e4; text-align: start; }
+@media (max-width: 800px) { .teacher-tutor.tutor-layout { grid-template-columns: minmax(0, 1fr); } .teacher-tutor .conversation-sidebar { max-height: 240px; overflow-y: auto; } }
+@media (max-width: 420px) { .teacher-tutor .tutor-intro, .teacher-tutor .tutor-conversations, .teacher-tutor .conversation-sidebar, .teacher-tutor .chat-panel { padding: 12px; } }

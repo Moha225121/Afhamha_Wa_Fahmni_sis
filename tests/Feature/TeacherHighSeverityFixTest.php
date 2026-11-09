@@ -60,6 +60,9 @@ class TeacherHighSeverityFixTest extends TestCase
 
     public function test_teacher_created_assignment_accepts_eligible_student_submission(): void
     {
+        // Keep one eligible student outstanding: a fully submitted class belongs to the completed filter.
+        Student::create(['user_id' => User::factory()->create(['role' => 'student', 'status' => 'active'])->id,
+            'student_number' => 'QA-OUTSTANDING', 'classroom_id' => $this->ctx['classroom']->id, 'status' => 'active']);
         $this->actingAs($this->ctx['teacher']->user)->post(route('teacher.assignments.store'), $this->assignmentData() + [
             'creation_token' => $this->intent('assignments'),
         ])->assertRedirect();

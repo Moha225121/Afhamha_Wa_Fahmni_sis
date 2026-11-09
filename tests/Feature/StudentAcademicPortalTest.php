@@ -559,7 +559,7 @@ class StudentAcademicPortalTest extends TestCase
         $this->assertDatabaseCount('exam_attempts', 0);
     }
 
-    public function test_student_can_start_exam_when_it_is_scheduled_for_today(): void
+    public function test_student_cannot_start_same_day_exam_before_its_scheduled_time(): void
     {
         $ctx = $this->context('E3A');
         $exam = $this->exam($ctx, ['starts_at' => now()->copy()->addMinutes(5), 'duration_minutes' => 30]);
@@ -567,12 +567,9 @@ class StudentAcademicPortalTest extends TestCase
 
         $this->actingAs($ctx['student']->user)
             ->post(route('student.exams.start', $exam))
-            ->assertRedirect();
+            ->assertUnprocessable();
 
-        $this->assertDatabaseHas('exam_attempts', [
-            'exam_id' => $exam->id,
-            'student_id' => $ctx['student']->id,
-        ]);
+        $this->assertDatabaseCount('exam_attempts', 0);
     }
 
     public function test_student_can_start_scheduled_exam_after_its_start_time(): void

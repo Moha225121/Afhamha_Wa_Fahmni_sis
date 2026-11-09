@@ -88,8 +88,10 @@ class SchoolChatService
 
     public function serialize(Message $message, User $viewer): array
     {
+        $localTime = $message->created_at->copy()->timezone(\App\Support\DisplayTimezone::name());
+
         return ['id' => $message->id, 'body' => $message->body, 'sender' => $message->sender?->name ?? 'حساب المدرسة',
-            'is_mine' => $message->sender_id === $viewer->id, 'time' => $message->created_at->format('H:i'),
-            'day' => $message->created_at->format('Y-m-d'), 'created_at' => $message->created_at->toIso8601String()];
+            'is_mine' => $message->sender_id === $viewer->id, 'time' => $localTime->format('H:i'),
+            'day' => $localTime->format('Y-m-d'), 'created_at' => $message->created_at->toIso8601String()];
     }
 }

@@ -113,6 +113,10 @@ function workerEnvironment(filename) {
         fetch: async () => ({online: true}),
     };
     vm.createContext(context);
+    context.importScripts = (url) => {
+        assert.equal(url, '/js/school-push-privacy.js?v=20261109');
+        vm.runInContext(readFileSync(new URL('../../public/js/school-push-privacy.js', import.meta.url), 'utf8'), context);
+    };
     vm.runInContext(readFileSync(new URL(`../../public/${filename}`, import.meta.url), 'utf8'), context);
     currentCache = vm.runInContext('CACHE_NAME', context);
     const run = async name => {

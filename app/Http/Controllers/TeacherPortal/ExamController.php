@@ -209,13 +209,15 @@ class ExamController extends Controller
         }
 
         $wasVisible = $previousExam && in_array($previousExam->status, ['scheduled', 'published'], true);
+        $notifications = app(FcmNotificationService::class);
         $classroomChanged = $previousExam && (int) $previousExam->classroom_id !== (int) $data['classroom_id'];
         if (in_array($normalizedStatus, ['scheduled', 'published'], true) && (! $wasVisible || $classroomChanged)) {
             $publishedExam = DB::table('exams')->where('id', $savedExamId)->first();
             if ($publishedExam && in_array($publishedExam->status, ['scheduled', 'published'], true)) {
-                app(FcmNotificationService::class)->notifyClassroom('exam:'.$savedExamId, (int) $publishedExam->classroom_id, [
+                $notifications->notifyClassroom('exam:'.$savedExamId, (int) $publishedExam->classroom_id, [
                     'title' => 'اختبار جديد',
                     'body' => $publishedExam->title,
+                    'teacher_id' => $teacher->id,
                     'student_url' => route('student.exams.index', [], false),
                     'parent_url' => route('parent.exams', [], false),
                 ]);
@@ -224,9 +226,12 @@ class ExamController extends Controller
 
         $success = match ($normalizedStatus) {
             'scheduled' => 'تم جدولة الاختبار.',
-            'published' => 'تم نشر الاختبار وإشعار الصف.',
+            'published' => 'تم نشر الاختبار وتسجيل إشعار الصف.',
             default => 'تم حفظ الاختبار كمسودة.',
         };
+        if ($notifications->hasPendingDelivery()) {
+            $success .= ' التنبيه الخارجي محفوظ وبانتظار إعادة محاولة التسليم.';
+        }
 
         return redirect()->route('teacher.exams.index')->with('success', $success);
     }
@@ -256,6 +261,7 @@ class ExamController extends Controller
     {
         $teacher = $this->teacher($request);
         $publishedClassroom = null;
+        $notifications = app(FcmNotificationService::class);
         DB::transaction(function () use ($request, $teacher, $exam, &$publishedClassroom): void {
             $examRow = DB::table('exams')->where('id', $exam)->lockForUpdate()->first();
             abort_unless($examRow && (int) $examRow->teacher_id === $teacher->id, 404);
@@ -290,15 +296,16 @@ class ExamController extends Controller
 
         if ($publishedClassroom !== null) {
             $title = DB::table('exams')->where('id', $exam)->value('title') ?? 'اختبار جديد';
-            app(FcmNotificationService::class)->notifyClassroom('exam:'.$exam, $publishedClassroom, [
+            $notifications->notifyClassroom('exam:'.$exam, $publishedClassroom, [
                 'title' => 'اختبار جديد',
                 'body' => $title,
+                'teacher_id' => $teacher->id,
                 'student_url' => route('student.exams.index', [], false),
                 'parent_url' => route('parent.exams', [], false),
             ]);
         }
 
-        return back()->with('success', 'تم تحديث حالة الاختبار.');
+        return back()->with('success', 'تم تحديث حالة الاختبار.'.($notifications->hasPendingDelivery() ? ' التنبيه الخارجي محفوظ وبانتظار إعادة محاولة التسليم.' : ''));
     }
 
     public function cancel(Request $request, int $exam): RedirectResponse

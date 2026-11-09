@@ -1,0 +1,11 @@
+# Only new production setting in this release; optional and non-secret.
+# Runtime display for chat messages/contacts and the teacher tutor conversation list.
+# Missing, blank or invalid values fall back to Africa/Tripoli.
+# Persisted timestamps, ISO values, exam boundaries and scheduler remain UTC.
+# Rebuild Laravel config cache and refresh long-running processes after changing it.
+# This setting itself does not require a Vite build.
+# Preserve the existing APP_KEY, database, storage and provider settings.
+# Do not replace the production .env with this file; no production action was executed.
+# Operational commands and existing provider/queue requirements are authoritative in:
+# DIGITALOCEAN_HANDOFF_AR.md (identical package-root and source/docs/deployment copies).
+APP_DISPLAY_TIMEZONE=Africa/Tripoli

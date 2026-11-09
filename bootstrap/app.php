@@ -25,6 +25,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'student' => EnsureUserIsStudent::class,
             'teacher' => EnsureUserIsTeacher::class,
             'supervisor' => EnsureUserIsSupervisor::class,
+            'staff' => \App\Http\Middleware\EnsureUserIsStaff::class,
             'permission' => EnsureUserHasPermission::class,
             'no-cache' => NoStoreForSensitivePages::class,
         ]);
@@ -37,6 +38,8 @@ return Application::configure(basePath: dirname(__DIR__))
                 $user?->isStudent() => 'student.dashboard',
                 $user?->isTeacher() => 'teacher.assignments.index',
                 $user?->isSupervisor() => 'supervisor.dashboard',
+                $user?->role === 'staff' => 'staff.dashboard',
+                $user?->role === 'financial_officer' => 'finance.parent-notifications.create',
                 default => 'admin.dashboard',
             });
         });

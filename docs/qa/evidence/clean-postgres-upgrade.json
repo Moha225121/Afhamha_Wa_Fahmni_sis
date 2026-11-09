@@ -1,0 +1,78 @@
+{
+  "source_id": "bd85ab15c580a7b239acf9996ed1e1a8c9ac589b47203771f420825e0b1b1f84",
+  "baseline": {
+    "mode": "verified-source-manifest",
+    "baseline_ref": "1a5cfe27c72e38acd05c837682a3f29b0d7b3402",
+    "manifest_sha256": "2695ddb25633acac258b6d3e43e57a62ca0c7df4bdb4c6abcff252995ade7a7f",
+    "verified_files": 44,
+    "verified_migrations": 42
+  },
+  "phases": [
+    {
+      "phase": "baseline",
+      "result": "PASS",
+      "engine": "PostgreSQL 17.11 on x86_64-windows, compiled by msvc-19.44.35229, 64-bit",
+      "database": "nasbia_qa_upgrade",
+      "checks": [
+        "dedicated upgrade database",
+        "baseline starts in an exclusively new empty database",
+        "baseline migrations from Git reference applied",
+        "baseline excludes both new migrations",
+        "legacy student foreign key rejects unknown owner"
+      ],
+      "duration_seconds": 6.184
+    },
+    {
+      "phase": "upgrade",
+      "result": "PASS",
+      "engine": "PostgreSQL 17.11 on x86_64-windows, compiled by msvc-19.44.35229, 64-bit",
+      "database": "nasbia_qa_upgrade",
+      "checks": [
+        "pre-upgrade snapshot unchanged since synthetic backup",
+        "exactly two release migrations applied",
+        "legacy student ownership was not reassigned",
+        "legacy delivery metadata remains null",
+        "legacy sent pending and partial events are not replayed",
+        "safe down before new data preserves every legacy fixture field",
+        "teacher-scoped creation key is unique in PostgreSQL",
+        "new teacher foreign key rejects unknown user",
+        "legacy student foreign key survives upgrade",
+        "same creation UUID is allowed for independent teacher owners",
+        "student reads only its old private history",
+        "invalid owner 9 fails closed before provider",
+        "invalid owner 10 fails closed before provider",
+        "ambiguous imported row is hidden from student scope",
+        "teacher scope excludes ambiguous and other owners",
+        "down refuses teacher or unknown history",
+        "refused rollback changes no fixture data",
+        "new queue failure retains pending event without job",
+        "pending new event recovers into database queue once",
+        "source replay and retry do not enqueue duplicates",
+        "injected PostgreSQL DDL failure observed",
+        "PostgreSQL transaction rolls back DDL and retains new event payload",
+        "re-running Artisan migration is a no-op"
+      ],
+      "duration_seconds": 1.117
+    },
+    {
+      "phase": "restore",
+      "result": "PASS",
+      "engine": "PostgreSQL 17.11 on x86_64-windows, compiled by msvc-19.44.35229, 64-bit",
+      "database": "nasbia_qa_restore",
+      "checks": [
+        "restore uses a separate dedicated database",
+        "pg_restore preserves all checked old and new fixture rows exactly",
+        "restored conversation sequence allocates an unused ID",
+        "restored outbox retains durable payload and queue marker"
+      ],
+      "duration_seconds": 0.09
+    }
+  ],
+  "fixture_tables": 13,
+  "scope": "Synthetic PostgreSQL 17.11 fresh baseline/upgrade/backup/restore, not production",
+  "dump_hashes": {
+    "before-upgrade.dump": "17ed6f0f14f6121d6a01425f816e150345435e273772e5e520a9409ed420683e",
+    "after-upgrade.dump": "2f2e0e0138926b385f272550f410a5738cb6138f990d6638980ea5375399b713"
+  },
+  "exit": 0
+}

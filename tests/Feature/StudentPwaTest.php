@@ -16,10 +16,13 @@ class StudentPwaTest extends TestCase
         $this->assertSame('/student/', $manifest['id']);
         $this->assertSame('/student/', $manifest['scope']);
         $this->assertSame('/student/dashboard', $manifest['start_url']);
-        $this->assertSame('بوابة الطالب', $manifest['short_name']);
+        $this->assertSame('النسبية', $manifest['short_name']);
+        $this->assertSame('مدرسة النسبية - الطالب', $manifest['name']);
         $this->assertSame('standalone', $manifest['display']);
         foreach ($manifest['icons'] as $icon) {
-            $this->assertFileExists(public_path($icon['src']));
+            $response = $this->get($icon['src'])->assertOk()->assertHeader('Content-Type', 'image/png');
+            $dimensions = getimagesizefromstring($response->getContent());
+            $this->assertSame($icon['sizes'], $dimensions[0].'x'.$dimensions[1]);
         }
         foreach ($manifest['shortcuts'] as $shortcut) {
             $this->assertStringStartsWith('/student/', $shortcut['url']);

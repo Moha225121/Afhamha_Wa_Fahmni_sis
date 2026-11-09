@@ -19,13 +19,9 @@
                     <option value="inactive" @selected(old('status', $parent->status) === 'inactive')>موقوف</option>
                 </select>
             </label>
-            <label class="wide">الأبناء
-                <select name="student_ids[]" multiple data-searchable data-placeholder="اختر الأبناء">
-                    @foreach($students as $s)
-                        <option value="{{ $s->id }}" @selected(in_array($s->id, old('student_ids', session()->hasOldInput() ? [] : ($parent->students?->pluck('id')->all() ?? []))))>{{ $s->user->name }} — {{ $s->student_number }}</option>
-                    @endforeach
-                </select>
-            </label>
+            <x-check-list name="student_ids" legend="الأبناء"
+                :options="$students->mapWithKeys(fn ($child) => [$child->id => $child->user->name.' — '.$child->student_number])"
+                :selected="$parent->students?->pluck('id')->all() ?? []" />
         </div>
 
         <fieldset class="additional-guardian-section">

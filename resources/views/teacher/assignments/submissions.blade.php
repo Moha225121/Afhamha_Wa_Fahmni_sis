@@ -20,6 +20,10 @@
 </tbody>
 </table>
 </div>
-@if($students->isNotEmpty())<button class="btn primary">حفظ</button>@endif
+@if($students->isNotEmpty())
+<p class="muted-line">حفظ المسودة لا يعرض درجة جديدة للطالب أو ولي الأمر. نشر الدرجات يعرض الدرجات المدخلة ويشعر أصحابها. تعديل درجة منشورة يعيدها إلى المسودة حتى نشرها مجددًا.</p>
+<button class="btn secondary" type="submit">حفظ كمسودة</button>
+<button class="btn primary" type="submit" name="publish_results" value="1">حفظ ونشر الدرجات</button>
+@endif
 </form>
 @endsection

@@ -144,16 +144,29 @@ class OperationsController extends Controller
         return back()->with('success', 'تم حفظ الحضور.');
     }
 
-    public function exams(): View
+    public function exams(Request $request): View
     {
-        $rows = DB::table('exams')->join('subjects', 'exams.subject_id', '=', 'subjects.id')->join('classrooms', 'exams.classroom_id', '=', 'classrooms.id')->join('teachers', 'exams.teacher_id', '=', 'teachers.id')->join('users', 'teachers.user_id', '=', 'users.id')->select('exams.*', 'subjects.name as subject', 'classrooms.name as classroom', 'users.name as teacher')->latest('starts_at')->paginate(20);
+        $filters = $request->validate(['q' => ['nullable', 'string', 'max:150'], 'classroom_id' => ['nullable', 'integer'], 'subject_id' => ['nullable', 'integer'], 'teacher_id' => ['nullable', 'integer'], 'status' => ['nullable', Rule::in(['draft', 'scheduled', 'published', 'completed', 'cancelled'])]]);
+        $query = DB::table('exams')->join('subjects', 'exams.subject_id', '=', 'subjects.id')->join('classrooms', 'exams.classroom_id', '=', 'classrooms.id')->join('teachers', 'exams.teacher_id', '=', 'teachers.id')->join('users', 'teachers.user_id', '=', 'users.id')->select('exams.*', 'subjects.name as subject', 'subjects.code as subject_code', 'classrooms.name as classroom', 'classrooms.section as section', 'users.name as teacher')
+            ->when($filters['q'] ?? null, fn ($q, $text) => $q->where('exams.title', 'like', '%'.$text.'%'));
+        foreach (['classroom_id', 'subject_id', 'teacher_id'] as $key) {
+            $query->when($filters[$key] ?? null, fn ($q, $value) => $q->where('exams.'.$key, $value));
+        }
+        if (($filters['status'] ?? null) === 'published') {
+            $query->where(fn ($q) => $q->where('exams.status', 'published')->orWhere(fn ($scheduled) => $scheduled->where('exams.status', 'scheduled')->where('starts_at', '<=', now())));
+        } elseif (($filters['status'] ?? null) === 'scheduled') {
+            $query->where('exams.status', 'scheduled')->where('starts_at', '>', now());
+        } elseif ($filters['status'] ?? null) {
+            $query->where('exams.status', $filters['status']);
+        }
+        $rows = $query->latest('starts_at')->orderByDesc('exams.id')->paginate(20)->withQueryString();
         $rows->getCollection()->transform(function ($exam) {
             $exam->effective_status = $this->effectiveExamStatus($exam);
 
             return $exam;
         });
 
-        return view('admin.operations.exams', compact('rows'));
+        return view('admin.operations.exams', compact('rows') + ['classrooms' => \App\Support\AcademicClassroomOrder::sort(Classroom::with('academicYear')->get()), 'subjects' => Subject::orderBy('name')->get(), 'teachers' => Teacher::with('user')->get()]);
     }
 
     private function effectiveExamStatus(object $exam): string
@@ -214,11 +227,15 @@ class OperationsController extends Controller
 
     public function grades(Request $r): View
     {
-        $grades = Classroom::with('academicYear')->get()->map(function (Classroom $classroom) {
+        $filters = $r->validate(['classroom_id' => ['nullable', 'integer'], 'academic_year_id' => ['nullable', 'integer'], 'subject_id' => ['nullable', 'integer']]);
+        $grades = Classroom::with('academicYear')
+            ->when($filters['classroom_id'] ?? null, fn ($q, $id) => $q->whereKey($id))
+            ->when($filters['academic_year_id'] ?? null, fn ($q, $id) => $q->where('academic_year_id', $id))
+            ->orderBy('id')->paginate(20)->withQueryString()->through(function (Classroom $classroom) use ($filters) {
             $studentsTotal = Student::where('classroom_id', $classroom->id)->where('status', 'active')->count();
             $values = collect();
 
-            DB::table('grade_sheets')->where('classroom_id', $classroom->id)->pluck('scores')->each(function ($scores) use ($values): void {
+            DB::table('grade_sheets')->where('classroom_id', $classroom->id)->when($filters['subject_id'] ?? null, fn ($q, $id) => $q->where('subject_id', $id))->pluck('scores')->each(function ($scores) use ($values): void {
                 $decoded = json_decode($scores ?? '{}', true);
                 if (is_array($decoded)) {
                     collect($decoded)->each(function ($score) use ($values): void {
@@ -241,7 +258,7 @@ class OperationsController extends Controller
             ];
         });
 
-        return view('admin.operations.grades', compact('grades'));
+        return view('admin.operations.grades', compact('grades') + ['classrooms' => \App\Support\AcademicClassroomOrder::sort(Classroom::with('academicYear')->get()), 'years' => AcademicYear::orderByDesc('starts_at')->get(), 'subjects' => Subject::orderBy('name')->get()]);
     }
 
     public function gradesStore(Request $r, ParentNotificationService $notifications): RedirectResponse
@@ -332,7 +349,8 @@ class OperationsController extends Controller
 
     public function users(Request $r): View
     {
-        $users = User::when($r->q, fn ($q, $v) => $q->where('name', 'like', "%$v%")->orWhere('email', 'like', "%$v%"))->when($r->role, fn ($q, $v) => $q->where('role', $v))->latest()->paginate(20)->withQueryString();
+        $filters = $r->validate(['q' => ['nullable', 'string', 'max:150'], 'role' => ['nullable', Rule::in(['admin', 'supervisor', 'teacher', 'student', 'parent', 'staff', 'financial_officer'])], 'status' => ['nullable', Rule::in(['active', 'inactive'])]]);
+        $users = User::when($filters['q'] ?? null, fn ($q, $v) => $q->where(fn ($match) => $match->where('name', 'like', "%$v%")->orWhere('email', 'like', "%$v%")))->when($filters['role'] ?? null, fn ($q, $v) => $q->where('role', $v))->when($filters['status'] ?? null, fn ($q, $v) => $q->where('status', $v))->latest()->orderByDesc('id')->paginate(20)->withQueryString();
 
         $classrooms = Classroom::orderBy('name')->get();
         $users->getCollection()->load('supervisedClassrooms');
@@ -341,16 +359,24 @@ class OperationsController extends Controller
 
     public function userUpdate(Request $r, User $user): RedirectResponse
     {
-        $d = $r->validate(['role' => ['required', Rule::in(['admin', 'supervisor', 'teacher', 'student', 'parent', 'staff'])], 'status' => ['required', Rule::in(['active', 'inactive'])], 'classroom_ids'=>['nullable','array'],'classroom_ids.*'=>['integer','exists:classrooms,id']]);
+        $d = $r->validate(['role' => ['required', Rule::in(['admin', 'supervisor', 'teacher', 'student', 'parent', 'staff', 'financial_officer'])], 'status' => ['required', Rule::in(['active', 'inactive'])], 'classroom_ids'=>['nullable','array'],'classroom_ids.*'=>['integer','exists:classrooms,id'], 'financial_permissions_present' => 'sometimes|boolean', 'financial_permissions' => ['sometimes', 'array', Rule::prohibitedIf($r->input('role') !== 'supervisor')], 'financial_permissions.*' => [Rule::in(['finance.view', 'finance.pay', 'finance.reports'])]]);
         abort_if($user->is($r->user()) && ($d['status'] === 'inactive' || $d['role'] !== $user->role), 422, 'لا يمكنك تعديل امتيازات حسابك.');
-        $old = $user->getAttributes();
-        $user->update(collect($d)->only(['role','status'])->all());
-        if ($d['role'] === 'supervisor') {
-            $user->supervisedClassrooms()->sync($d['classroom_ids'] ?? []);
-        } else {
-            $user->supervisedClassrooms()->detach();
-        }
-        AuditService::record('updated', 'users', $user, $old);
+        DB::transaction(function () use ($user, $r, $d): void {
+            $old = $user->getAttributes();
+            $updates = collect($d)->only(['role', 'status'])->all();
+            if ($d['role'] !== 'supervisor') {
+                $updates['financial_permissions'] = [];
+            } elseif ($r->boolean('financial_permissions_present') || $r->has('financial_permissions')) {
+                $updates['financial_permissions'] = array_values(array_unique($d['financial_permissions'] ?? []));
+            }
+            $user->update($updates);
+            if ($d['role'] === 'supervisor' && ($r->has('classroom_ids') || $r->boolean('classroom_assignments_present'))) {
+                $user->supervisedClassrooms()->sync($d['classroom_ids'] ?? []);
+            } elseif ($d['role'] !== 'supervisor') {
+                $user->supervisedClassrooms()->detach();
+            }
+            AuditService::record('updated', 'users', $user, $old);
+        });
 
         return back()->with('success', 'تم تحديث المستخدم.');
     }
@@ -502,7 +528,7 @@ class OperationsController extends Controller
         $d = $r->validate([
             'school_name' => ['required','string','max:255'], 'school_phone' => ['nullable','string','max:30'], 'school_email' => ['nullable','email'], 'school_address' => ['nullable','string'],
             'school_logo' => ['prohibited'],
-            'theme_color' => ['exclude'],
+            'theme_color' => ['sometimes', 'required', Rule::in(\App\Support\SchoolBranding::THEME_COLORS)],
             'timezone' => ['required','timezone'], 'academic_year_name' => ['required','string','max:30'], 'academic_year_starts_at' => ['required','date'], 'academic_year_ends_at' => ['required','date','after:academic_year_starts_at'],
             'periods_sunday' => ['required','integer','min:1','max:12'], 'periods_monday' => ['required','integer','min:1','max:12'], 'periods_tuesday' => ['required','integer','min:1','max:12'], 'periods_wednesday' => ['required','integer','min:1','max:12'], 'periods_thursday' => ['required','integer','min:1','max:12'],
             'break_after_period' => ['required','integer','min:1','max:11'], 'break_duration_minutes' => ['required','integer','min:5','max:120'],
@@ -517,7 +543,6 @@ class OperationsController extends Controller
             if(isset($periods[$after],$periods[$after+1])) { $breakEnds=Carbon::createFromFormat('H:i',$periods[$after]['ends_at'])->addMinutes((int)$d['break_duration_minutes'])->format('H:i'); if($periods[$after+1]['starts_at']<$breakEnds) return back()->withInput()->withErrors(["period_times.$day.".($after+1).'.starts_at'=>"يجب أن تبدأ الحصة التالية بعد نهاية الاستراحة عند {$breakEnds}."]); }
         }
         $d['school_logo'] = \App\Support\SchoolBranding::LOGO;
-        $d['theme_color'] = \App\Support\SchoolBranding::NAVY;
         $year = ['name' => $d['academic_year_name'], 'starts_at' => $d['academic_year_starts_at'], 'ends_at' => $d['academic_year_ends_at']];
         unset($d['academic_year_name'], $d['academic_year_starts_at'], $d['academic_year_ends_at']);
         AcademicYear::query()->update(['is_current' => false]);

@@ -1,0 +1,144 @@
+{
+  "startedAt": "2026-11-09T08:25:26.909Z",
+  "testedAt": "2026-11-09T08:25:54.637Z",
+  "browser": "156.0.4314.58",
+  "origin": "http://127.0.0.1:8766",
+  "fixture": "964bbcd6bf5792eb",
+  "database": "fresh isolated SQLite",
+  "historicalReport": "NOT_REPRODUCED; current acceptance evaluated separately",
+  "results": [
+    {
+      "name": "QA009 390: one subject create, persisted record, reload, multi-subject edit",
+      "result": "PASS",
+      "create": {
+        "status": 302,
+        "location": "http://127.0.0.1:8766/admin/classes/4",
+        "method": "POST"
+      },
+      "update": {
+        "status": 302,
+        "location": "http://127.0.0.1:8766/admin/classes/4",
+        "method": "POST"
+      },
+      "persisted": [
+        {
+          "id": 4,
+          "name": "QA-CLOSE-390-1794212731753",
+          "stage": "أساسي",
+          "section": "أ",
+          "academic_year_id": 1,
+          "subjects": [
+            1,
+            2
+          ]
+        }
+      ],
+      "layout": {
+        "viewport": 390,
+        "scroll": 390,
+        "dir": "rtl"
+      },
+      "input": "real rendered form; touch emulated at 390, pointer at 1440"
+    },
+    {
+      "name": "QA009 390: multi-subject create then remove relation and reload",
+      "result": "PASS",
+      "create": {
+        "status": 302,
+        "location": "http://127.0.0.1:8766/admin/classes/5",
+        "method": "POST"
+      },
+      "update": {
+        "status": 302,
+        "location": "http://127.0.0.1:8766/admin/classes/5",
+        "method": "POST"
+      },
+      "persisted": [
+        {
+          "id": 5,
+          "name": "QA-CLOSE-390-1794212731753-multi",
+          "stage": "أساسي",
+          "section": "أ",
+          "academic_year_id": 1,
+          "subjects": [
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "name": "QA009 390: invalid, missing and duplicate requests are validated without partial records",
+      "result": "FAIL",
+      "detail": "duplicate name+section+year: {\"status\":500,\"errorKeys\":[]}\n\n500 !== 422\n"
+    },
+    {
+      "name": "QA009 1440: one subject create, persisted record, reload, multi-subject edit",
+      "result": "PASS",
+      "create": {
+        "status": 302,
+        "location": "http://127.0.0.1:8766/admin/classes/6",
+        "method": "POST"
+      },
+      "update": {
+        "status": 302,
+        "location": "http://127.0.0.1:8766/admin/classes/6",
+        "method": "POST"
+      },
+      "persisted": [
+        {
+          "id": 6,
+          "name": "QA-CLOSE-1440-1794212744197",
+          "stage": "أساسي",
+          "section": "أ",
+          "academic_year_id": 1,
+          "subjects": [
+            1,
+            2
+          ]
+        }
+      ],
+      "layout": {
+        "viewport": 1440,
+        "scroll": 1440,
+        "dir": "rtl"
+      },
+      "input": "real rendered form; touch emulated at 390, pointer at 1440"
+    },
+    {
+      "name": "QA009 1440: multi-subject create then remove relation and reload",
+      "result": "PASS",
+      "create": {
+        "status": 302,
+        "location": "http://127.0.0.1:8766/admin/classes/7",
+        "method": "POST"
+      },
+      "update": {
+        "status": 302,
+        "location": "http://127.0.0.1:8766/admin/classes/7",
+        "method": "POST"
+      },
+      "persisted": [
+        {
+          "id": 7,
+          "name": "QA-CLOSE-1440-1794212744197-multi",
+          "stage": "أساسي",
+          "section": "أ",
+          "academic_year_id": 1,
+          "subjects": [
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "name": "QA009 1440: invalid, missing and duplicate requests are validated without partial records",
+      "result": "FAIL",
+      "detail": "duplicate name+section+year: {\"status\":500,\"errorKeys\":[]}\n\n500 !== 422\n"
+    },
+    {
+      "name": "No page errors or HTTP 5xx",
+      "result": "PASS",
+      "errors": []
+    }
+  ]
+}

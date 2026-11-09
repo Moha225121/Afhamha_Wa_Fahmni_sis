@@ -1,0 +1,279 @@
+{
+  "startedAt": "2026-11-09T09:11:38.499Z",
+  "testedAt": "2026-11-09T09:12:06.411Z",
+  "browser": "156.0.4314.58",
+  "origin": "http://127.0.0.1:8765",
+  "fixture": "fd26797295aa3ce1",
+  "database": "isolated PostgreSQL 17.11 nasbia_qa_browser",
+  "historicalReport": "NOT_REPRODUCED; current acceptance evaluated separately",
+  "results": [
+    {
+      "name": "QA009 390: one subject create, persisted record, reload, multi-subject edit",
+      "result": "PASS",
+      "create": {
+        "status": 302,
+        "location": "http://127.0.0.1:8765/admin/classes/5",
+        "method": "POST"
+      },
+      "update": {
+        "status": 302,
+        "location": "http://127.0.0.1:8765/admin/classes/5",
+        "method": "POST"
+      },
+      "persisted": [
+        {
+          "id": 5,
+          "name": "QA-CLOSE-390-1794215501062",
+          "stage": "أساسي",
+          "section": "أ",
+          "academic_year_id": 1,
+          "subjects": [
+            1,
+            2
+          ]
+        }
+      ],
+      "layout": {
+        "viewport": 390,
+        "scroll": 390,
+        "dir": "rtl"
+      },
+      "input": "real rendered form; touch emulated at 390, pointer at 1440"
+    },
+    {
+      "name": "QA009 390: multi-subject create then remove relation and reload",
+      "result": "PASS",
+      "create": {
+        "status": 302,
+        "location": "http://127.0.0.1:8765/admin/classes/6",
+        "method": "POST"
+      },
+      "update": {
+        "status": 302,
+        "location": "http://127.0.0.1:8765/admin/classes/6",
+        "method": "POST"
+      },
+      "persisted": [
+        {
+          "id": 6,
+          "name": "QA-CLOSE-390-1794215501062-multi",
+          "stage": "أساسي",
+          "section": "أ",
+          "academic_year_id": 1,
+          "subjects": [
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "name": "QA009 390: invalid, missing and duplicate requests are validated without partial records",
+      "result": "PASS",
+      "outcomes": [
+        {
+          "case": "missing stage",
+          "field": "stage",
+          "status": 422,
+          "errorKeys": [
+            "stage"
+          ]
+        },
+        {
+          "case": "missing year",
+          "field": "academic_year_id",
+          "status": 422,
+          "errorKeys": [
+            "academic_year_id"
+          ]
+        },
+        {
+          "case": "unknown year",
+          "field": "academic_year_id",
+          "status": 422,
+          "errorKeys": [
+            "academic_year_id"
+          ]
+        },
+        {
+          "case": "malformed year",
+          "field": "academic_year_id",
+          "status": 422,
+          "errorKeys": [
+            "academic_year_id"
+          ]
+        },
+        {
+          "case": "unknown subject",
+          "field": "subject_ids.0",
+          "status": 422,
+          "errorKeys": [
+            "subject_ids.0"
+          ]
+        },
+        {
+          "case": "malformed subject",
+          "field": "subject_ids.0",
+          "status": 422,
+          "errorKeys": [
+            "subject_ids.0"
+          ]
+        },
+        {
+          "case": "oversized stage",
+          "field": "stage",
+          "status": 422,
+          "errorKeys": [
+            "stage"
+          ]
+        },
+        {
+          "case": "duplicate name+section+year",
+          "field": "name",
+          "status": 422,
+          "errorKeys": [
+            "name"
+          ]
+        }
+      ],
+      "unchangedDatabase": true
+    },
+    {
+      "name": "QA009 1440: one subject create, persisted record, reload, multi-subject edit",
+      "result": "PASS",
+      "create": {
+        "status": 302,
+        "location": "http://127.0.0.1:8765/admin/classes/7",
+        "method": "POST"
+      },
+      "update": {
+        "status": 302,
+        "location": "http://127.0.0.1:8765/admin/classes/7",
+        "method": "POST"
+      },
+      "persisted": [
+        {
+          "id": 7,
+          "name": "QA-CLOSE-1440-1794215514843",
+          "stage": "أساسي",
+          "section": "أ",
+          "academic_year_id": 1,
+          "subjects": [
+            1,
+            2
+          ]
+        }
+      ],
+      "layout": {
+        "viewport": 1440,
+        "scroll": 1440,
+        "dir": "rtl"
+      },
+      "input": "real rendered form; touch emulated at 390, pointer at 1440"
+    },
+    {
+      "name": "QA009 1440: multi-subject create then remove relation and reload",
+      "result": "PASS",
+      "create": {
+        "status": 302,
+        "location": "http://127.0.0.1:8765/admin/classes/8",
+        "method": "POST"
+      },
+      "update": {
+        "status": 302,
+        "location": "http://127.0.0.1:8765/admin/classes/8",
+        "method": "POST"
+      },
+      "persisted": [
+        {
+          "id": 8,
+          "name": "QA-CLOSE-1440-1794215514843-multi",
+          "stage": "أساسي",
+          "section": "أ",
+          "academic_year_id": 1,
+          "subjects": [
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "name": "QA009 1440: invalid, missing and duplicate requests are validated without partial records",
+      "result": "PASS",
+      "outcomes": [
+        {
+          "case": "missing stage",
+          "field": "stage",
+          "status": 422,
+          "errorKeys": [
+            "stage"
+          ]
+        },
+        {
+          "case": "missing year",
+          "field": "academic_year_id",
+          "status": 422,
+          "errorKeys": [
+            "academic_year_id"
+          ]
+        },
+        {
+          "case": "unknown year",
+          "field": "academic_year_id",
+          "status": 422,
+          "errorKeys": [
+            "academic_year_id"
+          ]
+        },
+        {
+          "case": "malformed year",
+          "field": "academic_year_id",
+          "status": 422,
+          "errorKeys": [
+            "academic_year_id"
+          ]
+        },
+        {
+          "case": "unknown subject",
+          "field": "subject_ids.0",
+          "status": 422,
+          "errorKeys": [
+            "subject_ids.0"
+          ]
+        },
+        {
+          "case": "malformed subject",
+          "field": "subject_ids.0",
+          "status": 422,
+          "errorKeys": [
+            "subject_ids.0"
+          ]
+        },
+        {
+          "case": "oversized stage",
+          "field": "stage",
+          "status": 422,
+          "errorKeys": [
+            "stage"
+          ]
+        },
+        {
+          "case": "duplicate name+section+year",
+          "field": "name",
+          "status": 422,
+          "errorKeys": [
+            "name"
+          ]
+        }
+      ],
+      "unchangedDatabase": true
+    },
+    {
+      "name": "No page errors or HTTP 5xx",
+      "result": "PASS",
+      "errors": []
+    }
+  ],
+  "environment": "Extracted complete source, isolated PostgreSQL 17.11 nasbia_qa_browser, Windows/Edge headless with emulated viewport/touch; no physical device or live provider",
+  "source_id": "bd85ab15c580a7b239acf9996ed1e1a8c9ac589b47203771f420825e0b1b1f84",
+  "raw_runner_output_sha256": "990820cbeeb8ad5b4c0e00b81c70f263cf12b02de5dd446b5a44dd7bfa7cbf92"
+}

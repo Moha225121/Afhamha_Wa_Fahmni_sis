@@ -1,0 +1,17 @@
+{
+    "tested_at": "2026-11-09T08:46:23+00:00",
+    "engine": "PostgreSQL 17.11 on x86_64-windows, compiled by msvc-19.44.35229, 64-bit",
+    "scope": "Two local PHP processes, PostgreSQL row locks and database cache locks; mocked provider only",
+    "checks": {
+        "one_notification_after_two_source_processes": true,
+        "one_event_after_two_source_processes": true,
+        "one_job_after_concurrent_enqueue": true,
+        "one_mock_provider_acceptance_across_two_workers_and_duplicate_retry": true,
+        "one_delivery_receipt": true,
+        "event_processing_complete": true,
+        "queue_drained": true,
+        "process_exit_after_mock_acceptance_preserves_reserved_job": true,
+        "restart_waits_for_surviving_overlap_lock": true,
+        "restarted_process_recovers_with_two_possible_provider_acceptances": true
+    }
+}

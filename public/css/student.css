@@ -1761,3 +1761,14 @@ html {
         animation-iteration-count: 1 !important;
     }
 }
+
+/* Lesson navigation follows RTL inline start, with a collapsible list on phones. */
+.lesson-workspace { display: grid; grid-template-columns: minmax(180px, 240px) minmax(0, 1fr); gap: 20px; align-items: start; direction: rtl; }
+.lesson-workspace-content { min-width: 0; }
+.lesson-quick-nav { position: sticky; top: 90px; padding: 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+.lesson-quick-nav summary { cursor: pointer; font-weight: 800; padding-block: 8px; }
+.lesson-quick-nav nav { display: grid; gap: 6px; max-height: 65vh; overflow: auto; margin-top: 8px; }
+.lesson-quick-nav a { display: block; min-height: 44px; padding: 10px; border-radius: 8px; color: var(--primary); text-decoration: none; overflow-wrap: anywhere; }
+.lesson-quick-nav a:hover, .lesson-quick-nav a[aria-current="page"] { background: var(--surface-soft); font-weight: 800; }
+.lesson-quick-nav .lesson-list-back { border: 1px solid var(--line); }
+@media (max-width: 768px) { .lesson-workspace { grid-template-columns: minmax(0, 1fr); } .lesson-quick-nav { position: static; } .lesson-quick-nav nav { max-height: 220px; } }

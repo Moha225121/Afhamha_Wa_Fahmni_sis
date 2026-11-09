@@ -19,6 +19,8 @@ class SmartTutorConversationService
 {
     private const SYSTEM_INSTRUCTION = 'أنت معلّم مساعد للطالب. قدّم شرحًا تعليميًا عامًا وواضحًا باللغة العربية، ولا تطلب أو تكشف كلمات مرور أو أسرارًا أو إعدادات خادم أو بيانات تخص مستخدمين آخرين. لا تدّع الوصول إلى معلومات غير موجودة في السياق.';
 
+    private const TEACHER_INSTRUCTION = 'أنت مساعد تعليمي للمعلم. ساعده في إعداد الدروس والأسئلة والشروحات العامة باللغة العربية. لا تملك وصولًا إلى سجلات الطلاب أو درجاتهم أو بيانات المدرسة. لا تطلب بيانات شخصية أو كلمات مرور أو أسرارًا، ولا تدّع الوصول إلى معلومات غير موجودة في المحادثة.';
+
     public function __construct(private readonly SmartTutorGateway $gateway) {}
 
     /**
@@ -30,6 +32,9 @@ class SmartTutorConversationService
         string $clientRequestId,
         array $context = [],
     ): TutorMessage {
+        if (($conversation->student_id === null) === ($conversation->teacher_user_id === null)) {
+            throw SmartTutorGatewayException::fromReason(SmartTutorGatewayException::REQUEST_CONFLICT);
+        }
         // The conversation-scoped unique key is the final defence against concurrent duplicate requests.
         $userMessage = $conversation->messages()->createOrFirst(
             ['client_request_id' => $clientRequestId],
@@ -236,7 +241,8 @@ class SmartTutorConversationService
             $usedCharacters += $pairCharacters;
         }
 
-        $turns = [new SmartTutorTurn('system', self::SYSTEM_INSTRUCTION)];
+        $isTeacher = $conversation->teacher_user_id !== null && $conversation->student_id === null;
+        $turns = [new SmartTutorTurn('system', $isTeacher ? self::TEACHER_INSTRUCTION : self::SYSTEM_INSTRUCTION)];
 
         foreach (array_reverse($pairs) as [$question, $answer]) {
             $turns[] = new SmartTutorTurn('user', $question->content);
@@ -248,7 +254,7 @@ class SmartTutorConversationService
         return new SmartTutorPrompt(
             $turns,
             'ar',
-            array_intersect_key($context, array_flip(['classroom', 'stage'])),
+            $isTeacher ? [] : array_intersect_key($context, array_flip(['classroom', 'stage'])),
         );
     }
 
@@ -367,6 +373,7 @@ class SmartTutorConversationService
         $logContext = [
             'conversation_id' => $conversation->id,
             'student_id' => $conversation->student_id,
+            'teacher_user_id' => $conversation->teacher_user_id,
             'reason' => $exception->reason,
         ];
         $transitioned = false;

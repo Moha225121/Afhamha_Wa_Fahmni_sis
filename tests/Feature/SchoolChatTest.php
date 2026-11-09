@@ -87,14 +87,15 @@ class SchoolChatTest extends TestCase
     public function test_history_is_ordered_and_loads_older_messages_without_skipping(): void
     {
         $conversation = $this->conversation($this->teacher);
+        $messageIds = [];
         for ($i = 1; $i <= 125; $i++) {
-            $conversation->messages()->create(['sender_id' => $this->teacher->id, 'body' => 'رسالة رقم '.$i]);
+            $messageIds[$i] = $conversation->messages()->create(['sender_id' => $this->teacher->id, 'body' => 'رسالة رقم '.$i])->id;
         }
         $this->actingAs($this->parent)->get(route('parent.conversations.show', $conversation))->assertOk()
             ->assertViewHas('messages', fn ($items) => $items->count() === 50 && $items->first()->body === 'رسالة رقم 76' && $items->last()->body === 'رسالة رقم 125');
-        $this->getJson(route('parent.conversations.messages', $conversation).'?before=76')->assertOk()
+        $this->getJson(route('parent.conversations.messages', $conversation).'?before='.$messageIds[76])->assertOk()
             ->assertJsonCount(50, 'messages')->assertJsonPath('messages.0.body', 'رسالة رقم 26')->assertJsonPath('messages.49.body', 'رسالة رقم 75')->assertJsonPath('has_older', true);
-        $this->getJson(route('parent.conversations.messages', $conversation).'?after=120')->assertOk()
+        $this->getJson(route('parent.conversations.messages', $conversation).'?after='.$messageIds[120])->assertOk()
             ->assertJsonCount(5, 'messages')->assertJsonPath('messages.0.body', 'رسالة رقم 121');
     }
 

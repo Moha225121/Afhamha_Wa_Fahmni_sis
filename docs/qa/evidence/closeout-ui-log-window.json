@@ -1,0 +1,11 @@
+{
+  "error_critical_emergency_in_final_window": 0,
+  "window_start": "2026-11-09T08:41:00.4290000+00:00",
+  "log_timezone": "UTC",
+  "database": "PostgreSQL 17.11 loopback, nasbia_qa_browser",
+  "retained_errors_outside_final_window": 4,
+  "window_end": "2026-11-09T08:41:46.3940000+00:00",
+  "old_logs_deleted": false,
+  "code_scope": "QA009 create/edit/reload/negative and parent/student PWA upgrade/account switch",
+  "fixture": "befdc6fa6a770247"
+}

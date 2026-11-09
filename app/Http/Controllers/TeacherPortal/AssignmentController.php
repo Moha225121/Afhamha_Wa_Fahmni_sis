@@ -10,9 +10,11 @@ use App\Models\AssignmentSubmission;
 use App\Models\Classroom;
 use App\Models\Student;
 use App\Models\Subject;
+use App\Models\User;
 use App\Services\AuditService;
 use App\Services\FcmNotificationService;
 use App\Services\TeacherCreationIntent;
+use App\Support\NotificationContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -184,16 +186,18 @@ class AssignmentController extends Controller
         });
 
         $publishedAssignment = DB::table('assignments')->where('id', $assignmentId)->first();
+        $notifications = app(FcmNotificationService::class);
         if ($publishedAssignment && in_array($publishedAssignment->status, ['published', 'active'], true)) {
-            app(FcmNotificationService::class)->notifyClassroom('assignment:'.$assignmentId, (int) $publishedAssignment->classroom_id, [
+            $notifications->notifyClassroom('assignment:'.$assignmentId, (int) $publishedAssignment->classroom_id, [
                 'title' => 'واجب جديد',
                 'body' => $publishedAssignment->title,
+                'teacher_id' => $teacher->id,
                 'student_url' => route('student.assignments.show', $assignmentId, false),
                 'parent_url' => route('parent.assignments', [], false),
             ]);
         }
 
-        return redirect()->route('teacher.assignments.index')->with('success', 'تم إنشاء الواجب.');
+        return redirect()->route('teacher.assignments.index')->with('success', 'تم إنشاء الواجب.'.($notifications->hasPendingDelivery() ? ' التنبيه الخارجي محفوظ وبانتظار إعادة محاولة التسليم.' : ''));
     }
 
     public function update(AssignmentRequest $request, int $assignment): RedirectResponse
@@ -318,9 +322,11 @@ class AssignmentController extends Controller
             'submitted.*' => ['nullable'],
             'scores' => ['nullable', 'array'],
             'scores.*' => ['nullable', 'numeric', 'min:0'],
+            'publish_results' => ['nullable', 'boolean'],
         ]);
 
-        DB::transaction(function () use ($data, $row, $request) {
+        $notifications = app(FcmNotificationService::class);
+        DB::transaction(function () use ($data, $row, $request, $notifications) {
             $studentIds = Student::where('classroom_id', $row->classroom_id)->where('status', 'active')->pluck('id');
 
             foreach ($studentIds as $studentId) {
@@ -335,7 +341,11 @@ class AssignmentController extends Controller
                     continue;
                 }
 
-                $existing = DB::table('assignment_submissions')->where('assignment_id', $row->id)->where('student_id', $studentId)->first();
+                $existing = DB::table('assignment_submissions')->where('assignment_id', $row->id)->where('student_id', $studentId)->lockForUpdate()->first();
+                $unchangedPublished = $existing && $existing->status === 'graded' && $existing->graded_at
+                    && $score !== null && $existing->score !== null && (float) $existing->score === (float) $score;
+                $publish = $score !== null && (! empty($data['publish_results']) || $unchangedPublished);
+                $gradedAt = $publish ? ($unchangedPublished ? $existing->graded_at : now()) : null;
 
                 DB::table('assignment_submissions')->updateOrInsert(
                     ['assignment_id' => $row->id, 'student_id' => $studentId],
@@ -343,14 +353,37 @@ class AssignmentController extends Controller
                         'submitted_at' => $submitted ? ($existing->submitted_at ?? now()) : null,
                         'score' => $score,
                         'graded_by' => $score !== null ? $request->user()->id : null,
+                        // Existing graded status and timestamp are the explicit publication marker.
+                        'status' => $publish ? 'graded' : 'submitted',
+                        'graded_at' => $gradedAt,
                         'updated_at' => now(),
                         'created_at' => $existing->created_at ?? now(),
                     ]
                 );
+                if ($publish && ! $unchangedPublished) {
+                    $student = Student::with('user', 'guardians.user')->findOrFail($studentId);
+                    $recipients = $student->guardians->where('status', 'active')->pluck('user')
+                        ->filter(fn ($user) => $user?->isParent());
+                    if ($student->user?->isStudent()) {
+                        $recipients->push($student->user);
+                    }
+                    $recipients = $recipients->unique('id');
+                    $context = NotificationContext::academic((int) $row->classroom_id, $request->user()->teacher->id);
+                    $notifications->recordForUsers($recipients,
+                        'assignment-result:'.$row->id.':'.$studentId.':'.hash('sha256', (string) $gradedAt.':'.$score),
+                        fn (User $recipient) => [
+                            'title' => 'نتيجة الواجب المنشورة', 'body' => $row->title,
+                            'category' => 'assignment_result', 'student_id' => $studentId,
+                            'url' => $recipient->role === 'student' ? route('student.assignments.show', $row->id, false)
+                                : route('parent.assignments', ['student' => $studentId], false),
+                        ] + $context);
+                }
             }
             AuditService::record('graded', 'assignments');
         });
 
-        return back()->with('success', 'تم حفظ حالة التسليمات والدرجات.');
+        $message = ! empty($data['publish_results']) ? 'تم حفظ الدرجات ونشر النتائج للطالب وولي أمره.' : 'تم حفظ حالة التسليمات والدرجات.';
+
+        return back()->with('success', $message.($notifications->hasPendingDelivery() ? ' التنبيه الخارجي محفوظ وبانتظار إعادة محاولة التسليم.' : ''));
     }
 }

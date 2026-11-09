@@ -238,24 +238,25 @@ class TeacherController extends Controller
 
     public function destroy(Teacher $teacher): RedirectResponse
     {
-        try {
-            DB::transaction(function () use ($teacher): void {
-                $teacher->classrooms()->detach();
-                DB::table('teacher_assignments')->where('teacher_id', $teacher->id)->delete();
-                $teacher->loadMissing('user');
-                $teacher->delete();
-
-                if ($teacher->user) {
-                    $teacher->user()->delete();
+        DB::transaction(function () use ($teacher): void {
+            $teacher = Teacher::whereKey($teacher->id)->lockForUpdate()->firstOrFail();
+            foreach (['teacher_assignments', 'schedules', 'exams', 'assignments', 'lessons', 'grade_sheets', 'teacher_student_notes'] as $table) {
+                if (DB::table($table)->where('teacher_id', $teacher->id)->exists()) {
+                    throw \Illuminate\Validation\ValidationException::withMessages(['teacher' => 'لا يمكن حذف معلم مرتبط بتكليفات أو سجل تعليمي. تُحفظ العلاقات والسجلات الحالية.']);
                 }
-            });
-        } catch (\Throwable $exception) {
-            report($exception);
-
-            return redirect()->route('admin.teachers.index')->withErrors(['teacher' => 'تعذر حذف المعلم.']);
-        }
-
-        AuditService::record('deleted', 'teachers', $teacher);
+            }
+            $user = $teacher->user()->lockForUpdate()->firstOrFail();
+            if ($user->conversations()->exists() || $user->sentMessages()->exists()) {
+                throw \Illuminate\Validation\ValidationException::withMessages(['teacher' => 'لا يمكن حذف معلم مرتبط بسجل مراسلات.']);
+            }
+            // The profile already uses SoftDeletes. Its user FK intentionally
+            // prevents hard deletion, so retain the identity and revoke login.
+            $old = $teacher->getAttributes();
+            $user->update(['status' => 'inactive']);
+            $teacher->update(['status' => 'inactive']);
+            $teacher->delete();
+            AuditService::record('deleted', 'teachers', $teacher, $old);
+        });
 
         return redirect()->route('admin.teachers.index')->with('success', 'تم حذف المعلم.');
     }

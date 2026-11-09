@@ -35,17 +35,17 @@ class WebPushService
                         'authToken' => $subscription->auth_token,
                         'contentEncoding' => $subscription->content_encoding,
                     ]),
-                    json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR),
+                    json_encode(array_replace($payload, ['recipient_user_id' => (string) $user->id]), JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR),
                 );
             }
 
             foreach ($webPush->flush() as $report) {
                 if (! $report->isSuccess()) {
-                    Log::warning('Unable to send parent web push notification.', ['reason' => $report->getReason()]);
+                    Log::warning('Unable to send parent web push notification.', ['status_code' => $report->getResponse()?->getStatusCode()]);
                 }
             }
         } catch (\Throwable $exception) {
-            Log::warning('Parent web push notification failed.', ['exception' => $exception->getMessage()]);
+            Log::warning('Parent web push notification failed.', ['exception_type' => $exception::class]);
         }
     }
 }

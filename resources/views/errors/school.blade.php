@@ -18,11 +18,7 @@
 </head>
 <body>
 <main>
-    @if($schoolBranding['logo'])
-        <img src="{{ asset('storage/'.$schoolBranding['logo']) }}" alt="شعار {{ $schoolBranding['school_name'] }}">
-    @else
-        <img src="{{ asset('icons/parent-icon-192.png') }}" alt="افهمها وفهمني">
-    @endif
+    <img src="{{ asset(\App\Support\SchoolBranding::LOGO) }}" alt="شعار {{ $schoolBranding['school_name'] }}">
     <div class="code">{{ $statusCode }}</div>
     <h1>{{ $heading }}</h1>
     <p>{{ $message }}</p>

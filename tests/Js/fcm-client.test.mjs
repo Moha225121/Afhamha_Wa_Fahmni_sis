@@ -17,7 +17,7 @@ test('enabling notifications registers an isolated FCM worker and activates fore
     const message = {textContent: ''};
     const banner = {hidden: true, querySelector: (selector) => selector === '[data-fcm-enable]' ? enable : message};
     const notifications = [];
-    const registration = {active: {}, showNotification: (...args) => notifications.push(args)};
+    const registration = {active: {}, getNotifications: async () => [], showNotification: (...args) => notifications.push(args)};
     const registrations = [];
     const requests = [];
     let foreground;
@@ -26,11 +26,12 @@ test('enabling notifications registers an isolated FCM worker and activates fore
         document: {querySelector: (selector) => selector === '[data-fcm-banner]' ? banner : {content: 'csrf'}},
         window: {Notification: notification}, Notification: notification,
         navigator: {serviceWorker: {register: async (...args) => { registrations.push(args); return registration; }}},
-        fetch: async (url, options) => { requests.push([url, options]); return {ok: true, json: async () => ({configured: true, project_id: 'school-project'})}; },
+        fetch: async (url, options) => { requests.push([url, options]); return {ok: true, json: async () => ({configured: true, project_id: 'school-project', user_id: '42', role: 'student'})}; },
         initializeApp: () => ({}), getMessaging: () => ({}), isSupported: async () => true,
         getToken: async (_messaging, options) => { assert.equal(options.serviceWorkerRegistration, registration); return 'test-token'; },
         onMessage: (_messaging, callback) => { foreground = callback; },
     };
+    vm.runInNewContext(readFileSync(new URL('../../public/js/school-push-privacy.js', import.meta.url), 'utf8'), context);
     vm.runInNewContext(clientSource, context);
     await new Promise(setImmediate);
     assert.equal(banner.hidden, false);
@@ -43,9 +44,11 @@ test('enabling notifications registers an isolated FCM worker and activates fore
     assert.equal(JSON.parse(requests[1][1].body).token, 'test-token');
     assert.equal(banner.hidden, true);
     assert.equal(typeof foreground, 'function');
-    foreground({data: {title: 'Exam', body: 'Published', url: '/student/exams'}});
+    await foreground({data: {title: 'Exam', body: 'Published', url: '/student/exams', recipient_user_id: '42'}});
     assert.equal(notifications[0][0], 'Exam');
     assert.equal(notifications[0][1].data.url, '/student/exams');
+    await foreground({data: {title: 'Other account', recipient_user_id: '99'}});
+    assert.equal(notifications.length, 1);
 });
 
 test('FCM token retrieval waits for a newly installed custom worker to activate', async () => {

@@ -1,5 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getMessaging, onBackgroundMessage } from 'firebase/messaging/sw';
+import '../../public/js/school-push-privacy.js';
 
 const config = {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -10,33 +11,21 @@ const config = {
 
 self.addEventListener('notificationclick', (event) => {
     event.notification.close();
-    const raw = event.notification.data?.url || '/login';
-    let destination;
-    try {
-        destination = new URL(raw, self.location.origin);
-    } catch {
-        destination = new URL('/login', self.location.origin);
-    }
-    if (destination.origin !== self.location.origin || !/^\/(admin|teacher|student|parent)(\/|$)/.test(destination.pathname)) {
-        destination = new URL('/login', self.location.origin);
-    }
-
     event.waitUntil((async () => {
+        const recipient = await SchoolPushPrivacy.currentRecipient();
+        const destination = SchoolPushPrivacy.destination(event.notification.data || {}, recipient, self.location.origin);
         const windows = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
         const existing = windows.find((client) => new URL(client.url).origin === self.location.origin);
         if (existing) {
-            await existing.navigate(destination.href);
+            await existing.navigate(destination);
             await existing.focus();
         } else {
-            await self.clients.openWindow(destination.href);
+            await self.clients.openWindow(destination);
         }
     })());
 });
 
 if (config.apiKey && config.projectId && config.messagingSenderId && config.appId) {
     const app = initializeApp(config);
-    onBackgroundMessage(getMessaging(app), ({ data = {} }) => self.registration.showNotification(data.title || 'إشعار جديد', {
-        body: data.body || '',
-        data: { url: data.url || '/login' },
-    }));
+    onBackgroundMessage(getMessaging(app), ({ data = {} }) => SchoolPushPrivacy.show(self.registration, data).catch(() => {}));
 }

@@ -84,7 +84,7 @@ class ExcelImportService
     private function subjects(array $rows): int
     { foreach ($rows as $row) Subject::updateOrCreate(['code' => $this->value($row, ['code','الرمز'])], ['name' => $this->value($row, ['name','الاسم']), 'stage' => $this->value($row, ['stage','المرحلة'], false), 'description' => $this->value($row, ['description','الوصف'], false), 'status' => 'active']); return count($rows); }
     private function classes(array $rows): int
-    { foreach ($rows as $row) { $year = AcademicYear::firstOrCreate(['name' => $this->value($row, ['academicyear','year','السنةالدراسية'])], ['starts_at' => now()->startOfYear(), 'ends_at' => now()->endOfYear()]); Classroom::updateOrCreate(['name' => $this->value($row, ['name','الصف']), 'section' => $this->value($row, ['section','الشعبة'], false), 'academic_year_id' => $year->id], ['stage' => $this->value($row, ['stage','المرحلة']),]); } return count($rows); }
+    { foreach ($rows as $row) { $year = AcademicYear::firstOrCreate(['name' => $this->value($row, ['academicyear','year','السنةالدراسية'])], ['starts_at' => now()->startOfYear(), 'ends_at' => now()->endOfYear()]); Classroom::updateOrCreate(['name' => $this->value($row, ['name','الصف','الاسم']), 'section' => $this->value($row, ['section','الشعبة'], false), 'academic_year_id' => $year->id], ['stage' => $this->value($row, ['stage','المرحلة']),]); } return count($rows); }
     private function stages(array $rows): int
     { foreach ($rows as $row) Stage::updateOrCreate(['name' => $this->value($row, ['name','stage','المرحلة','الاسم'])], ['status' => 'active']); return count($rows); }
     private function parents(array $rows): int

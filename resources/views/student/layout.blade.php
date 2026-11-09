@@ -10,14 +10,14 @@
     <title>{{ strip_tags($__env->yieldContent('title', 'بوابة الطالب')) }} | افهمها وفهمني</title>
     <link rel="manifest" href="{{ route('student.pwa.manifest') }}">
     <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="any">
-    <link rel="apple-touch-icon" href="{{ asset('icons/parent-icon-192.png') }}">
+    <link rel="apple-touch-icon" href="{{ route('school.branding.icon', ['size' => 180]) }}">
     <link rel="stylesheet" href="{{ asset('css/parent.css') }}?v=portal-style-1">
-    <link rel="stylesheet" href="{{ asset('css/student.css') }}?v=20261017-reader-1">
+    <link rel="stylesheet" href="{{ asset('css/student.css') }}?v=qa-20261108">
     @include('shared.branding-style')@include('shared.portal-assets')
     <link rel="stylesheet" href="{{ asset('css/student-notifications.css') }}?v=20261015-1">
     <link rel="stylesheet" href="{{ asset('css/student-install.css') }}?v=20261015-1">
     <script src="{{ asset('js/student-install.js') }}?v=20261015-1" defer></script>
-    <script src="{{ asset('js/student-notifications.js') }}?v=20261015-1" defer></script>
+    <script src="{{ asset('js/student-notifications.js') }}?v=20261108-context" defer></script>
     <script src="{{ asset('js/student-tutor.js') }}" defer></script>
     <script src="{{ asset('js/enhanced-selects.js') }}" defer></script>
     @include('shared.fcm-assets')

@@ -1,0 +1,67 @@
+{
+  "testedAt": "2026-11-08T21:29:24.735Z",
+  "browser": "156.0.4314.58",
+  "environment": "Loopback isolated synthetic SQLite; real browser, emulated widths/touch; no physical device or push verification",
+  "results": [
+    {
+      "name": "QA009/011 create class by touch, reload, edit by keyboard",
+      "result": "PASS"
+    },
+    {
+      "name": "QA010 parent two-child selection persists after reload",
+      "result": "PASS"
+    },
+    {
+      "name": "QA001 role labels toggle exactly their own saved permission",
+      "result": "PASS"
+    },
+    {
+      "name": "QA017 student finance link and independent setting persistence",
+      "result": "PASS"
+    },
+    {
+      "name": "QA033/034 admin RTL layout 360",
+      "result": "PASS"
+    },
+    {
+      "name": "QA033/034 admin RTL layout 390",
+      "result": "PASS"
+    },
+    {
+      "name": "QA033/034 admin RTL layout 768",
+      "result": "PASS"
+    },
+    {
+      "name": "QA033/034 admin RTL layout 1440",
+      "result": "PASS"
+    },
+    {
+      "name": "QA024/025/035/037 student login, lesson rich text, attachment and navigation",
+      "result": "PASS"
+    },
+    {
+      "name": "QA024 server denies unrelated student lesson",
+      "result": "PASS"
+    },
+    {
+      "name": "Regression browser dashboard parent",
+      "result": "PASS"
+    },
+    {
+      "name": "Regression browser dashboard teacher",
+      "result": "PASS"
+    },
+    {
+      "name": "Regression browser dashboard supervisor",
+      "result": "PASS"
+    },
+    {
+      "name": "QA026 Nasbia manifest names and real icon dimensions",
+      "result": "PASS"
+    },
+    {
+      "name": "Browser has no uncaught JavaScript errors or HTTP 5xx responses",
+      "result": "PASS"
+    }
+  ]
+}

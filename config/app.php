@@ -67,6 +67,9 @@ return [
 
     'timezone' => 'UTC',
 
+    // Presentation only: persisted timestamps and scheduler comparisons remain UTC.
+    'display_timezone' => \App\Support\DisplayTimezone::normalize(env('APP_DISPLAY_TIMEZONE', 'Africa/Tripoli')),
+
     /*
     |--------------------------------------------------------------------------
     | Application Locale Configuration

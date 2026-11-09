@@ -3,6 +3,9 @@
 @section('title', 'دروس '.$subject->name)
 
 @section('content')
+<div class="lesson-workspace">
+    @include('student.lessons.quick-nav', ['quickLessons' => $subject->units->flatMap->lessons->concat($unassignedLessons)])
+    <div class="lesson-workspace-content">
     <nav class="breadcrumbs" aria-label="مسار التنقل">
         <a href="{{ route('student.subjects.index') }}">المواد</a>
         <span aria-hidden="true">/</span>
@@ -57,4 +60,6 @@
             @endforeach
         </section>
     @endif
+    </div>
+</div>
 @endsection

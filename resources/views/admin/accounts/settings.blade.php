@@ -1,6 +1,14 @@
 @extends('admin.layout')
 @section('title','إعدادات الترقيم والحسابات')
 @section('content')
+<form class="form-card" method="post" action="{{ route('admin.accounts.student-finance') }}" id="student-finance-access">
+@csrf @method('patch')
+<h2>إعدادات وصول الطالب</h2>
+<p>السماح للطالب بعرض كشفه المالي وإيصالاته فقط. لا يغيّر هذا الإعداد وصول ولي الأمر أو المديونيات والمدفوعات.</p>
+<label for="student-finance-visible">عرض البيانات المالية للطالب</label>
+<select id="student-finance-visible" name="student_finance_visible"><option value="0" @selected(!old('student_finance_visible', $settings['student_finance_visible']))>غير مسموح</option><option value="1" @selected(old('student_finance_visible', $settings['student_finance_visible']))>مسموح</option></select>
+<button class="btn primary">حفظ وصول الطالب</button>
+</form>
 <form class="form-card" method="post" action="{{ route('admin.accounts.preview') }}" id="account-patterns">@csrf
 <h2>هوية المدرسة</h2><div class="form-grid">
 @foreach(['school_name'=>'اسم المدرسة بالعربية','school_english_name'=>'اسم المدرسة بالإنجليزية','school_code'=>'رمز المدرسة / الفرع'] as $key=>$label)

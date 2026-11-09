@@ -61,7 +61,7 @@ MD;
         ])->assertRedirect(route('student.tutor.show', $conversation));
 
         for ($visit = 0; $visit < 3; $visit++) {
-            $this->get(route('student.tutor.show', $conversation))
+            $response = $this->get(route('student.tutor.show', $conversation))
                 ->assertOk()
                 ->assertSee('<h3>شرح الكسور Fractions</h3>', false)
                 ->assertSee('<strong>مقارنة مهمة</strong>', false)
@@ -73,8 +73,17 @@ MD;
                 ->assertSee('<code>total &#61; 2</code>', false)
                 ->assertSee('<pre><code>', false)
                 ->assertSee("<br />\n", false)
-                ->assertSee(e($question), false)
-                ->assertDontSee('<img ', false);
+                ->assertSee(e($question), false);
+            // Inspect untrusted messages rather than rejecting the school's
+            // legitimate logo elsewhere in the page shell.
+            $document = new DOMDocument;
+            $previous = libxml_use_internal_errors(true);
+            $document->loadHTML('<?xml encoding="UTF-8">'.$response->getContent());
+            libxml_clear_errors();
+            libxml_use_internal_errors($previous);
+            $xpath = new DOMXPath($document);
+            $this->assertSame(0, $xpath->query('//ol[contains(@class,"chat-history")]//img')->length);
+            $this->assertSame(0, $xpath->query('//ol[contains(@class,"chat-history")]//@*[starts-with(name(),"on")]')->length);
             $this->get(route('student.tutor.index'))->assertOk()->assertSeeText($conversation->fresh()->title);
         }
 

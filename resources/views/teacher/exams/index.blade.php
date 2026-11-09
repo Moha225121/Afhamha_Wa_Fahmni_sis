@@ -43,6 +43,7 @@
 <td><span class="badge {{ $statusClass }}">{{ $statusLabel }}</span></td>
 <td>
     <div class="action-group">
+<a class="action-link" href="{{ route('teacher.exams.attempts.index', $r->id) }}">المحاولات والتصحيح</a>
 @if($r->status === 'draft')
 <a class="action-link" href="{{ route('teacher.exams.edit', $r->id) }}">متابعة</a>
 @elseif(

@@ -13,6 +13,10 @@ use App\Http\Controllers\PortalAnnouncementController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('teacher')->name('teacher.')->middleware(['auth', 'teacher', 'no-cache'])->group(function (): void {
+    Route::get('/tutor', [\App\Http\Controllers\TeacherPortal\TutorController::class, 'index'])->name('tutor.index');
+    Route::post('/tutor/conversations', [\App\Http\Controllers\TeacherPortal\TutorController::class, 'storeConversation'])->middleware('throttle:smart-tutor-conversations')->name('tutor.conversations.store');
+    Route::get('/tutor/conversations/{conversation}', [\App\Http\Controllers\TeacherPortal\TutorController::class, 'show'])->whereNumber('conversation')->name('tutor.show');
+    Route::post('/tutor/conversations/{conversation}/messages', [\App\Http\Controllers\TeacherPortal\TutorController::class, 'storeMessage'])->whereNumber('conversation')->middleware('throttle:smart-tutor-messages')->name('tutor.messages.store');
     Route::get('/conversations', [\App\Http\Controllers\SchoolChatController::class, 'index'])->name('conversations.index');
     Route::get('/conversations/{conversation}', [\App\Http\Controllers\SchoolChatController::class, 'show'])->name('conversations.show');
     Route::get('/conversations/{conversation}/messages', [\App\Http\Controllers\SchoolChatController::class, 'messages'])->middleware('throttle:120,1')->name('conversations.messages');
@@ -48,6 +52,8 @@ Route::prefix('teacher')->name('teacher.')->middleware(['auth', 'teacher', 'no-c
 
     Route::get('/exams', [ExamController::class, 'index'])->name('exams.index');
     Route::get('/exams/create', [ExamController::class, 'create'])->name('exams.create');
+    Route::get('/exams/{exam}/attempts', [\App\Http\Controllers\TeacherPortal\ExamReviewController::class, 'index'])->name('exams.attempts.index');
+    Route::post('/exams/{exam}/attempts/{attempt}', [\App\Http\Controllers\TeacherPortal\ExamReviewController::class, 'store'])->name('exams.attempts.store');
     Route::post('/exams', [ExamController::class, 'store'])->name('exams.store');
     Route::get('/exams/{exam}/edit', [ExamController::class, 'edit'])->name('exams.edit');
     Route::put('/exams/{exam}', [ExamController::class, 'update'])->name('exams.update');

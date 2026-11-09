@@ -1,5 +1,9 @@
 # Afhamha Wa Fahmni SIS
 
+> تسليم 2026-11-09: الهدف **مدرسة النسبية، جذر هذا المستودع**. لا تنتقل إلى `nasr-al-daem-school`؛ هو تطبيق آخر وليس اعتمادًا لهذا الجذر. المرجع التنفيذي الوحيد للنشر والبناء والاعتمادات والبيئة والترقية والرجوع هو [DIGITALOCEAN_HANDOFF_AR.md](docs/deployment/DIGITALOCEAN_HANDOFF_AR.md). حالة التسليم مستقلة عن موافقة الإنتاج في [RELEASE_READINESS.md](docs/qa/RELEASE_READINESS.md).
+>
+> الأقسام أدناه خلفية تشغيل وتطوير، وليست إجراءات نشر معتمدة. لا تستخدم `composer setup` أو `composer create-project` أو سكربتات التثبيت التاريخية لترقية موقع قائم؛ تتضمن هذه المسارات توليد مفتاح أو migrations. تعتمد حزمة التسليم على ملفات القفل، وتثبت الاعتمادات دون scripts/plugins ثم تنفذ الخطوات المراجعة صراحة. مشغلات QA المعزولة في `scripts/qa` لا تقرأ `.env` الحقيقي. لا تستخدم المشغلات المحلية القديمة مع بيانات المدرسة للاختبار.
+
 Laravel-based school information system for administration, parents, and students.
 
 The current implementation is one unified Laravel application. The parent and student portals are Blade-based web portals inside the same project, using the same authentication system and the same database models/relationships as the administration portal.
@@ -44,12 +48,8 @@ It recognizes existing Arabic and Latin section labels, preserves classroom IDs
 and student placements, and copies the source grade's subject links to its branches.
 It does not add branches to secondary or literary classrooms.
 
-When deploying the GitHub update, run the normal application migrations:
-
-```bash
-cd nasr-al-daem-school
-php artisan migrate --force
-```
+For a reviewed Nasbia deployment, follow `docs/deployment/DIGITALOCEAN_HANDOFF_AR.md`
+from this repository root. The nested school directory is not the deployment target.
 
 Pushing code to GitHub alone does not update the site's database. Administrators
 can subsequently manage primary branches from **الصفوف → إضافة تشعبات للصفوف من
@@ -208,19 +208,9 @@ Only active admin users can access administration pages.
 
 The application database target is PostgreSQL. Keep the existing database name and credentials in `.env`; do not use `migrate:fresh` against the real database.
 
-Current local `.env` values:
-
-```text
-DB_CONNECTION=pgsql
-DB_HOST=127.0.0.1
-DB_PORT=5432
-DB_DATABASE=afhamha_sis
-DB_USERNAME=postgres
-DB_PASSWORD=
-SESSION_DRIVER=file
-QUEUE_CONNECTION=sync
-CACHE_STORE=file
-```
+Current production connection settings and engine version are not verified by this
+README. Never infer authorization from a saved local connection. QA uses an explicitly
+marked isolated PostgreSQL cluster or in-memory SQLite, as recorded in the handover.
 
 ## Local Database Setup
 
@@ -244,7 +234,7 @@ Books are stored on the private `local` disk and served through authenticated re
 
 The browser reader uses locally hosted PDF.js 6.3.289 (`public/vendor/pdfjs`, Apache-2.0) with page navigation, zoom and authenticated HTTP byte ranges. It does not send books to an external viewer. Preserve the vendor directory when deploying and serve `.mjs` files as JavaScript and `.wasm` files as `application/wasm`.
 
-From `nasr-al-daem-school`, import a reviewed JSON manifest with paths relative to its source folder:
+From the target application root, import a reviewed JSON manifest with paths relative to its source folder:
 
 ```powershell
 php artisan library:import "C:/Users/Lenovo LOQ/Documents/libyan_books" "tmp/library-import/manifest.json" --admin=1
@@ -261,13 +251,13 @@ Temporary uploads expire after 24 hours. `php artisan library:prune-uploads` rem
 Parent PWA files:
 
 ```text
-/parent-manifest.webmanifest
+/parent-app.webmanifest
 /parent-sw.js
 /parent-offline.html
-/icons/parent-icon.svg
-/icons/parent-icon-192.png
-/icons/parent-icon-512.png
-/icons/parent-maskable-512.png
+/school-app-icon
+/school-branding/icon-180.png
+/school-branding/icon-192.png
+/school-branding/icon-512.png
 /favicon.ico
 ```
 
@@ -299,11 +289,8 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\run-tests.ps1
 
 On Windows you can also double-click `run-tests.cmd`.
 
-Recent verification:
-
-```text
-178 tests, 1090 assertions
-```
+Current verification counts, dates, source identity and limitations are in
+`docs/qa/TEST_EVIDENCE.md`. Historical counts are not new test results.
 
 ## الأنظمة الإدارية والمالية الجديدة
 

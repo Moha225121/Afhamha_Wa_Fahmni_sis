@@ -25,7 +25,7 @@
                     @csrf @method('patch')
                     <button type="submit" class="parent-notification-row {{ $item['is_read'] ? '' : 'is-unread' }}">
                         <span class="parent-notification-icon" aria-hidden="true">@include('parent.partials.notification-icon')</span>
-                        <span class="parent-notification-copy"><strong>{{ $item['title'] }}</strong><span>{{ \Illuminate\Support\Str::limit($item['body'], 90) }}</span><time datetime="{{ $item['created_at'] }}">{{ $item['time_label'] }}</time></span>
+                        <span class="parent-notification-copy"><strong>{{ $item['title'] }}</strong>@if($item['source'] ?? '')<span>{{ $item['source'] }}</span>@endif<span>{{ \Illuminate\Support\Str::limit($item['body'], 90) }}</span><time datetime="{{ $item['created_at'] }}">{{ $item['time_label'] }}</time></span>
                         @unless($item['is_read'])<span class="parent-notification-dot" aria-label="غير مقروء"></span>@endunless
                     </button>
                 </form>

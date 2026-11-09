@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Classroom;
 use App\Models\User;
 use App\Services\FcmNotificationService;
+use App\Support\NotificationContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -49,7 +50,7 @@ class NotificationComposerController extends Controller
         $users = $this->adminRecipients($data['audience'], isset($data['classroom_id']) ? (int) $data['classroom_id'] : null);
         $count = $notifications->recordForUsers($users, 'manual:'.$data['submission_key'], fn (User $user) => $this->payloadFor($user, $data['title'], $data['body']));
 
-        return back()->with('success', "تم تسجيل الإشعار لـ {$count} حسابًا.");
+        return back()->with('success', "تم تسجيل الإشعار لـ {$count} حسابًا.".($notifications->hasPendingDelivery() ? ' التنبيه الخارجي محفوظ وبانتظار إعادة محاولة التسليم.' : ''));
     }
 
     public function teacherStore(Request $request, FcmNotificationService $notifications): RedirectResponse
@@ -65,9 +66,10 @@ class NotificationComposerController extends Controller
         abort_unless($teacher && DB::table('teacher_assignments')->where('teacher_id', $teacher->id)->where('classroom_id', $data['classroom_id'])->exists(), 403);
 
         $users = $this->classroomRecipients($data['audience'], (int) $data['classroom_id']);
-        $count = $notifications->recordForUsers($users, 'teacher:'.$request->user()->id.':'.$data['submission_key'], fn (User $user) => $this->payloadFor($user, $data['title'], $data['body']));
+        $context = NotificationContext::academic((int) $data['classroom_id'], $teacher->id);
+        $count = $notifications->recordForUsers($users, 'teacher:'.$request->user()->id.':'.$data['submission_key'], fn (User $user) => $this->payloadFor($user, $data['title'], $data['body']) + $context);
 
-        return back()->with('success', "تم تسجيل الإشعار لـ {$count} حسابًا.");
+        return back()->with('success', "تم تسجيل الإشعار لـ {$count} حسابًا.".($notifications->hasPendingDelivery() ? ' التنبيه الخارجي محفوظ وبانتظار إعادة محاولة التسليم.' : ''));
     }
 
     private function adminRecipients(string $audience, ?int $classroomId): Collection

@@ -1,5 +1,10 @@
 # nasbia.com.ly on DigitalOcean
 
+> Historical infrastructure notes, not the current execution authority. The
+> deployment type, service names and production engine below have not been
+> revalidated. Use `docs/deployment/DIGITALOCEAN_HANDOFF_AR.md` from the application
+> root. Do not run these first-installation scripts on an existing deployment.
+
 Target: a new Ubuntu 24.04 Droplet in Frankfurt. Nginx and PHP 8.3 serve
 the Laravel application; PostgreSQL listens locally. Libyan Spider retains DNS.
 

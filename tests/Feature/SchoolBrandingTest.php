@@ -57,14 +57,18 @@ class SchoolBrandingTest extends TestCase
         $this->get(route('admin.students.cards'))->assertOk()->assertSee('طالب النصر')->assertSee(SchoolBranding::LOGO);
     }
 
-    public function test_saving_settings_keeps_the_school_identity_fixed(): void
+    public function test_saving_settings_keeps_logo_and_applies_selected_portal_color(): void
     {
         $this->obsoleteBranding();
         $this->actingAs(User::factory()->create(['role' => 'admin', 'status' => 'active']));
         $this->put(route('admin.settings.update'), $this->settingsPayload() + ['theme_color' => '#6D4AFF'])->assertSessionHasNoErrors();
         $this->assertDatabaseHas('settings', ['key' => 'school_logo', 'value' => SchoolBranding::LOGO]);
-        $this->assertDatabaseHas('settings', ['key' => 'theme_color', 'value' => SchoolBranding::NAVY]);
-        $this->get(route('admin.settings.index'))->assertOk()->assertDontSee('name="school_logo"', false)->assertDontSee('name="theme_color"', false);
+        $this->assertDatabaseHas('settings', ['key' => 'theme_color', 'value' => '#6D4AFF']);
+        $this->get(route('admin.settings.index'))->assertOk()->assertDontSee('name="school_logo"', false)
+            ->assertSee('name="theme_color" value="#6D4AFF" checked required', false)
+            ->assertSee('--school-navy: #6D4AFF', false);
+        $this->put(route('admin.settings.update'), $this->settingsPayload() + ['theme_color' => 'red; color: red'])->assertSessionHasErrors('theme_color');
+        $this->assertDatabaseHas('settings', ['key' => 'theme_color', 'value' => '#6D4AFF']);
     }
 
     public function test_financial_pdf_uses_the_approved_logo_even_if_the_caller_supplies_another(): void
@@ -84,6 +88,19 @@ class SchoolBrandingTest extends TestCase
     {
         $this->actingAs(User::factory()->create(['role' => 'admin', 'status' => 'active']));
         $this->put(route('admin.settings.update'), $this->settingsPayload() + ['school_logo' => UploadedFile::fake()->image('replacement.jpg')])->assertSessionHasErrors('school_logo');
+    }
+
+    public function test_parent_install_metadata_names_target_school_and_declares_actual_icon_sizes(): void
+    {
+        DB::table('settings')->updateOrInsert(['key' => 'school_name'], ['value' => 'مدرسة النسبية', 'group' => 'school']);
+        $manifest = $this->get(route('parent.pwa.manifest'))->assertOk()
+            ->assertJsonPath('name', 'مدرسة النسبية - بوابة ولي الأمر')
+            ->assertJsonPath('short_name', 'مدرسة النسبية')->json();
+        foreach ($manifest['icons'] as $icon) {
+            $image = $this->get($icon['src'])->assertOk()->getContent();
+            $dimensions = getimagesizefromstring($image);
+            $this->assertSame($icon['sizes'], $dimensions[0].'x'.$dimensions[1]);
+        }
     }
 
     private function obsoleteBranding(): void

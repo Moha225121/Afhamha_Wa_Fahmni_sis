@@ -1,5 +1,6 @@
 import { getMessaging, getToken, isSupported, onMessage } from 'firebase/messaging';
 import { initializeApp } from 'firebase/app';
+import '../../public/js/school-push-privacy.js';
 
 const config = {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -63,10 +64,7 @@ if (banner && config.apiKey && config.projectId && config.messagingSenderId && c
         if (!foregroundListenerInstalled) {
             onMessage(messaging, (payload) => {
                 const data = payload.data || {};
-                registration.showNotification(data.title || 'إشعار جديد', {
-                    body: data.body || '',
-                    data: { url: data.url || '/login' },
-                });
+                return SchoolPushPrivacy.show(registration, data).catch(() => {});
             });
             foregroundListenerInstalled = true;
         }

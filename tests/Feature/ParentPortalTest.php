@@ -197,7 +197,8 @@ class ParentPortalTest extends TestCase
 
         $this->get('/missing-school-page')
             ->assertNotFound()
-            ->assertSee('storage/school-branding/nusayba-logo.svg', false);
+            ->assertSee(\App\Support\SchoolBranding::LOGO, false)
+            ->assertDontSee('storage/'.\App\Support\SchoolBranding::LOGO, false);
     }
 
     public function test_parent_can_follow_linked_child_attendance_assignments_and_exams_only(): void

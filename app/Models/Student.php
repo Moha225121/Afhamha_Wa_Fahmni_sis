@@ -35,7 +35,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
     public function tutorConversations(): HasMany
     {
-        return $this->hasMany(TutorConversation::class);
+        return $this->hasMany(TutorConversation::class)->whereNull('teacher_user_id');
     }
 
     public function assignmentSubmissions(): HasMany

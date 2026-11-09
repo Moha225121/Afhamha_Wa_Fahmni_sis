@@ -1,0 +1,353 @@
+{
+  "generated_utc": "2026-11-09T08:46:13.9576330Z",
+  "scope": "Synthetic local PostgreSQL validation only; no production, external provider, or real environment credentials",
+  "baseline_ref": "1a5cfe27c72e38acd05c837682a3f29b0d7b3402",
+  "engine": "PostgreSQL 17.11 on x86_64-windows, compiled by msvc-19.44.35229, 64-bit",
+  "php": "8.4.21",
+  "extensions": [
+    "pdo_pgsql",
+    "pgsql"
+  ],
+  "engine_provenance": "Existing portable binaries discovered under C:/Users/pixel/AppData/Local/Temp/awf-fcm-pr8-postgres-review-20261101/pgsql/bin; no installation or old cluster reuse",
+  "baseline_manifest": {
+    "path": "docs/deployment/BASELINE_MIGRATIONS.json",
+    "sha256": "2695ddb25633acac258b6d3e43e57a62ca0c7df4bdb4c6abcff252995ade7a7f",
+    "bytes": 8958
+  },
+  "release_migrations": [
+    {
+      "path": "database/migrations/2026_11_08_000001_add_fcm_outbox_payload.php",
+      "sha256": "cb238b50ec73fb93a416ee838fbba44d7965c7a966ac732540f99d9f8f44f650",
+      "bytes": 757
+    },
+    {
+      "path": "database/migrations/2026_11_08_000002_add_teacher_owner_to_tutor_conversations.php",
+      "sha256": "958b0059ccadab2c9a8933f37f8ef21d53d5873565ec9d6f42cca2f5b4a14b8d",
+      "bytes": 2282
+    }
+  ],
+  "git_baseline_run": {
+    "mode": "actual git archive from pinned baseline object",
+    "archive": {
+      "path": "tmp\\qa-postgres\\f3cf6e5850524d9297895b0002399a56\\upgrade-9048c3fea6c1432a9b7aa924609f9ce3\\baseline-migrations.zip",
+      "sha256": "597790f7f2613c0e3bbdab8766a159b58f3f388fa5fc31082c5717b051ebc2b8",
+      "bytes": 33281
+    },
+    "phases": [
+      {
+        "phase": "baseline",
+        "result": "PASS",
+        "engine": "PostgreSQL 17.11 on x86_64-windows, compiled by msvc-19.44.35229, 64-bit",
+        "database": "nasbia_qa_upgrade",
+        "checks": [
+          "dedicated upgrade database",
+          "baseline starts in an exclusively new empty database",
+          "baseline migrations from Git reference applied",
+          "baseline excludes both new migrations",
+          "legacy student foreign key rejects unknown owner"
+        ],
+        "duration_seconds": 4.331
+      },
+      {
+        "phase": "upgrade",
+        "result": "PASS",
+        "engine": "PostgreSQL 17.11 on x86_64-windows, compiled by msvc-19.44.35229, 64-bit",
+        "database": "nasbia_qa_upgrade",
+        "checks": [
+          "pre-upgrade snapshot unchanged since synthetic backup",
+          "exactly two release migrations applied",
+          "legacy student ownership was not reassigned",
+          "legacy delivery metadata remains null",
+          "legacy sent pending and partial events are not replayed",
+          "safe down before new data preserves every legacy fixture field",
+          "teacher-scoped creation key is unique in PostgreSQL",
+          "new teacher foreign key rejects unknown user",
+          "legacy student foreign key survives upgrade",
+          "same creation UUID is allowed for independent teacher owners",
+          "student reads only its old private history",
+          "invalid owner 9 fails closed before provider",
+          "invalid owner 10 fails closed before provider",
+          "ambiguous imported row is hidden from student scope",
+          "teacher scope excludes ambiguous and other owners",
+          "down refuses teacher or unknown history",
+          "refused rollback changes no fixture data",
+          "new queue failure retains pending event without job",
+          "pending new event recovers into database queue once",
+          "source replay and retry do not enqueue duplicates",
+          "injected PostgreSQL DDL failure observed",
+          "PostgreSQL transaction rolls back DDL and retains new event payload",
+          "re-running Artisan migration is a no-op"
+        ],
+        "duration_seconds": 0.793
+      },
+      {
+        "phase": "restore",
+        "result": "PASS",
+        "engine": "PostgreSQL 17.11 on x86_64-windows, compiled by msvc-19.44.35229, 64-bit",
+        "database": "nasbia_qa_restore",
+        "checks": [
+          "restore uses a separate dedicated database",
+          "pg_restore preserves all checked old and new fixture rows exactly",
+          "restored conversation sequence allocates an unused ID",
+          "restored outbox retains durable payload and queue marker"
+        ],
+        "duration_seconds": 0.081
+      }
+    ],
+    "before_dump": {
+      "path": "tmp\\qa-postgres\\f3cf6e5850524d9297895b0002399a56\\upgrade-9048c3fea6c1432a9b7aa924609f9ce3\\before-upgrade.dump",
+      "sha256": "b76fdb88f5d054180df3d4ce7b427566727ece9f67cd1da41be1ffe4b1c04aac",
+      "bytes": 266795
+    },
+    "after_dump": {
+      "path": "tmp\\qa-postgres\\f3cf6e5850524d9297895b0002399a56\\upgrade-9048c3fea6c1432a9b7aa924609f9ce3\\after-upgrade.dump",
+      "sha256": "1d2f7a2c14be2f7ec67566ecea5fba3f8a5eaa0b76a12e8a85edf738dfe84769",
+      "bytes": 269429
+    },
+    "legacy_snapshot": {
+      "users": {
+        "count": 5,
+        "sha256": "65def98103aba77ddb45717310d93fdd490b86c3d8751b1175596f3665fd9f38"
+      },
+      "students": {
+        "count": 2,
+        "sha256": "4c8e31d7b090a49d2582f400f1cbea6a6be823c84f8cb4324bd78c516366c80b"
+      },
+      "teachers": {
+        "count": 3,
+        "sha256": "04cc1c0ab567f6474c15a2b85876bd6a02da4f9e7c221beb02c50081058635f3"
+      },
+      "academic_years": {
+        "count": 1,
+        "sha256": "bb4e8c3003ebafab8cf51226dbce6b2a7a8cc1cf7814f3d284d051500b1d0862"
+      },
+      "classrooms": {
+        "count": 1,
+        "sha256": "55c34c5263a8c656a0f6329071d8275385e19400c6187d9091d6a321f8f97ffe"
+      },
+      "tutor_conversations": {
+        "count": 2,
+        "sha256": "b8a67b5647a4be6cae8c179a5feb7c29c98778293b663971997bf30d492bd077"
+      },
+      "tutor_messages": {
+        "count": 2,
+        "sha256": "ebfae961e6eddc47e575287d55f8cd2dddc0e79fd7fde211a1b708ee01309154"
+      },
+      "fcm_devices": {
+        "count": 1,
+        "sha256": "f8319a3ec89f7cdd51dbbc35d5b4bc3e61802e6876e0d60a129fdfd86913895b"
+      },
+      "fcm_notification_events": {
+        "count": 3,
+        "sha256": "af98b13a4afea189acd91680b5a7ec36dc669fffb624cba9626b45006c40e8b4"
+      },
+      "fcm_notification_deliveries": {
+        "count": 1,
+        "sha256": "fc5a48c65acbf152284b292ffc44b6f5d10cd811fffeb6a73b3ed99aa152601e"
+      },
+      "jobs": {
+        "count": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "notifications": {
+        "count": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      }
+    },
+    "restored_snapshot": {
+      "users": {
+        "count": 5,
+        "sha256": "65def98103aba77ddb45717310d93fdd490b86c3d8751b1175596f3665fd9f38"
+      },
+      "students": {
+        "count": 2,
+        "sha256": "4c8e31d7b090a49d2582f400f1cbea6a6be823c84f8cb4324bd78c516366c80b"
+      },
+      "teachers": {
+        "count": 3,
+        "sha256": "04cc1c0ab567f6474c15a2b85876bd6a02da4f9e7c221beb02c50081058635f3"
+      },
+      "academic_years": {
+        "count": 1,
+        "sha256": "bb4e8c3003ebafab8cf51226dbce6b2a7a8cc1cf7814f3d284d051500b1d0862"
+      },
+      "classrooms": {
+        "count": 1,
+        "sha256": "55c34c5263a8c656a0f6329071d8275385e19400c6187d9091d6a321f8f97ffe"
+      },
+      "tutor_conversations": {
+        "count": 6,
+        "sha256": "fd717167efbd329e453145da7187a48232b08ce849981fa69f8d1b46c20f3818"
+      },
+      "tutor_messages": {
+        "count": 2,
+        "sha256": "ebfae961e6eddc47e575287d55f8cd2dddc0e79fd7fde211a1b708ee01309154"
+      },
+      "fcm_devices": {
+        "count": 1,
+        "sha256": "f8319a3ec89f7cdd51dbbc35d5b4bc3e61802e6876e0d60a129fdfd86913895b"
+      },
+      "fcm_notification_events": {
+        "count": 4,
+        "sha256": "02e15405b8553dbb39ed7684e10a02ffd4432f4af4ba7cb769f0474a826743a6"
+      },
+      "fcm_notification_deliveries": {
+        "count": 1,
+        "sha256": "fc5a48c65acbf152284b292ffc44b6f5d10cd811fffeb6a73b3ed99aa152601e"
+      },
+      "jobs": {
+        "count": 1,
+        "sha256": "9516990070e14bd1884aee8837978a06047528719438d2c667843616919cbe33"
+      },
+      "notifications": {
+        "count": 1,
+        "sha256": "10e2108e862b92293bb7960953c43c1879db41e2995343e4d82d3c699cde657f"
+      }
+    }
+  },
+  "manifest_baseline_run": {
+    "origin": {
+      "mode": "verified-source-manifest",
+      "baseline_ref": "1a5cfe27c72e38acd05c837682a3f29b0d7b3402",
+      "manifest_sha256": "2695ddb25633acac258b6d3e43e57a62ca0c7df4bdb4c6abcff252995ade7a7f",
+      "verified_files": 44,
+      "verified_migrations": 42
+    },
+    "phases": [
+      {
+        "phase": "baseline",
+        "result": "PASS",
+        "engine": "PostgreSQL 17.11 on x86_64-windows, compiled by msvc-19.44.35229, 64-bit",
+        "database": "nasbia_qa_upgrade",
+        "checks": [
+          "dedicated upgrade database",
+          "baseline starts in an exclusively new empty database",
+          "baseline migrations from Git reference applied",
+          "baseline excludes both new migrations",
+          "legacy student foreign key rejects unknown owner"
+        ],
+        "duration_seconds": 5.996
+      },
+      {
+        "phase": "upgrade",
+        "result": "PASS",
+        "engine": "PostgreSQL 17.11 on x86_64-windows, compiled by msvc-19.44.35229, 64-bit",
+        "database": "nasbia_qa_upgrade",
+        "checks": [
+          "pre-upgrade snapshot unchanged since synthetic backup",
+          "exactly two release migrations applied",
+          "legacy student ownership was not reassigned",
+          "legacy delivery metadata remains null",
+          "legacy sent pending and partial events are not replayed",
+          "safe down before new data preserves every legacy fixture field",
+          "teacher-scoped creation key is unique in PostgreSQL",
+          "new teacher foreign key rejects unknown user",
+          "legacy student foreign key survives upgrade",
+          "same creation UUID is allowed for independent teacher owners",
+          "student reads only its old private history",
+          "invalid owner 9 fails closed before provider",
+          "invalid owner 10 fails closed before provider",
+          "ambiguous imported row is hidden from student scope",
+          "teacher scope excludes ambiguous and other owners",
+          "down refuses teacher or unknown history",
+          "refused rollback changes no fixture data",
+          "new queue failure retains pending event without job",
+          "pending new event recovers into database queue once",
+          "source replay and retry do not enqueue duplicates",
+          "injected PostgreSQL DDL failure observed",
+          "PostgreSQL transaction rolls back DDL and retains new event payload",
+          "re-running Artisan migration is a no-op"
+        ],
+        "duration_seconds": 0.784
+      },
+      {
+        "phase": "restore",
+        "result": "PASS",
+        "engine": "PostgreSQL 17.11 on x86_64-windows, compiled by msvc-19.44.35229, 64-bit",
+        "database": "nasbia_qa_restore",
+        "checks": [
+          "restore uses a separate dedicated database",
+          "pg_restore preserves all checked old and new fixture rows exactly",
+          "restored conversation sequence allocates an unused ID",
+          "restored outbox retains durable payload and queue marker"
+        ],
+        "duration_seconds": 0.082
+      }
+    ],
+    "tampered_manifest_guard": {
+      "check": "changed baseline SHA256 is refused before migration",
+      "result": "PASS",
+      "exit_code": 1,
+      "database_mutations": "none; rejection occurs before PHP migration phase"
+    },
+    "temporary_cluster_55441_stopped": true
+  },
+  "phpunit_runs": [
+    {
+      "purpose": "first PostgreSQL full suite; test harness assumptions exposed",
+      "tests": 496,
+      "passed": 490,
+      "failures": 5,
+      "skipped": 1,
+      "assertions": 3989,
+      "duration_ms": 151867,
+      "evidence": {
+        "path": "tmp/qa-pg-runs/334fd09ec5814fb1931c98ec88caa1e7/phpunit.xml",
+        "sha256": "3d250e0b5c5e8c75be29f4e6278c6ef056f34425bc31c5a257cf80b33234dad0",
+        "bytes": 188536
+      }
+    },
+    {
+      "purpose": "full PostgreSQL suite after sequence/schema test isolation fixes",
+      "tests": 507,
+      "passed": 506,
+      "failures": 0,
+      "skipped": 1,
+      "assertions": 4123,
+      "duration_ms": 162142,
+      "evidence": {
+        "path": "tmp/qa-pg-runs/2b0dfb6e4d364587b035c2ea3747014f/phpunit.xml",
+        "sha256": "d79077bdf7914c3e39ff39c171627c565a9fa88700321d10e264a428e223b23b",
+        "bytes": 190056
+      }
+    },
+    {
+      "purpose": "classroom malformed IDs and related regressions",
+      "tests": 18,
+      "passed": 18,
+      "failures": 0,
+      "skipped": 0,
+      "assertions": 134,
+      "duration_ms": 9729,
+      "evidence": {
+        "path": "tmp/qa-pg-runs/74fcff2d2f0e4d7695f2708a1885467c/phpunit.xml",
+        "sha256": "d4294bf66960bd6c478784a882a5cf60fe530b1b627af181800d9be53e37ea50",
+        "bytes": 7256
+      }
+    },
+    {
+      "purpose": "classroom validation including final NULL section regression",
+      "tests": 5,
+      "passed": 5,
+      "failures": 0,
+      "skipped": 0,
+      "assertions": 40,
+      "duration_ms": 5032,
+      "evidence": {
+        "path": "tmp/qa-pg-runs/a73f00e93b494bc89b2bcf6bf2841d11/phpunit.xml",
+        "sha256": "57588ce9f9dfaf4c6e68a942c5bdce93e93bf62e7db3043ffc9367724711dac9",
+        "bytes": 2500
+      }
+    }
+  ],
+  "skip_reason": "TeacherTutorMigrationTest SQLite-specific DDL transaction guard; not applicable on PostgreSQL",
+  "limitations": [
+    "Production PostgreSQL major/minor version is unconfirmed.",
+    "Windows PostgreSQL 17.11 only; no Linux, hosting, provider, or production access.",
+    "Small synthetic fixture does not measure production DDL lock duration or backup restore capacity.",
+    "External provider delivery is not tested; local queue and mocked provider checks only.",
+    "Manifest verifies exact source bytes; line-ending conversion is rejected.",
+    "Full suite ran before the final NULL section test was added; that test and its file passed in the separate final run.",
+    "Dumps, database directories, portable engine binaries and temporary baseline executable copies must not enter the source package."
+  ]
+}

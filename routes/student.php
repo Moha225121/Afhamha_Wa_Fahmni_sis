@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('student')->name('student.')->middleware(['auth', 'student'])->group(function (): void {
     Route::get('/', fn () => redirect()->route('student.dashboard'));
     Route::get('/dashboard', [PortalController::class, 'dashboard'])->name('dashboard');
+    Route::get('/finance', [\App\Http\Controllers\FinanceController::class, 'student'])->name('finance');
     Route::get('/subjects', [EducationController::class, 'subjects'])->name('subjects.index');
     Route::get('/subjects/{subject}/lessons', [EducationController::class, 'lessons'])->whereNumber('subject')->name('lessons.index');
     Route::get('/subjects/{subject}/lessons/{lesson}', [EducationController::class, 'lesson'])->whereNumber(['subject', 'lesson'])->name('lessons.show');

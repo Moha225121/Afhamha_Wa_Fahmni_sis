@@ -129,7 +129,7 @@ class LibraryCatalogService
             ->when($grade, fn (Builder $books, int $grade) => $books->orWhereJsonContains('grade_levels', $grade)));
     }
 
-    private static function gradeForClassroom(?Classroom $classroom): ?int
+    public static function gradeForClassroom(?Classroom $classroom): ?int
     {
         if (! $classroom) {
             return null;

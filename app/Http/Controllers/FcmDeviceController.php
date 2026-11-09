@@ -17,6 +17,8 @@ class FcmDeviceController extends Controller
         $projectId = config('services.firebase.project_id');
 
         return response()->json([
+            'user_id' => (string) $request->user()->id,
+            'role' => $request->user()->role,
             'enabled' => $request->user()->fcmDevices()->exists(),
             'configured' => is_string($projectId) && $projectId !== '' && is_string($credentials) && is_file($credentials),
             'project_id' => $projectId,

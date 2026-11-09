@@ -102,7 +102,12 @@ class EducationController extends Controller
             ->orderBy('title')
             ->get();
 
-        return view('student.lessons.show', compact('student', 'subject', 'lesson', 'resources'));
+        $quickLessons = $subject->lessons()->published()
+            ->where(fn ($query) => $query->where('classroom_id', $student->classroom_id)->orWhereNull('classroom_id'))
+            ->where(fn ($query) => $query->whereNull('unit_id')->orWhereHas('unit', fn ($units) => $units->where('subject_id', $subject->id)))
+            ->orderBy('position')->orderBy('id')->get(['id', 'title', 'subject_id']);
+
+        return view('student.lessons.show', compact('student', 'subject', 'lesson', 'resources', 'quickLessons'));
     }
 
     public function library(Request $request): View

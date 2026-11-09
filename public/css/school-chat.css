@@ -46,7 +46,8 @@
 .chat-room { position: relative; display: flex; flex-direction: column; height: calc(100dvh - 220px); min-height: 0; border: 1px solid #ccdde0; border-radius: 16px; overflow: hidden; background: #edf4f2; }
 .parent-portal .chat-room { height: calc(100dvh - 178px); }
 .chat-room-heading { display: flex; align-items: center; gap: 10px; padding: 12px; background: white; border-bottom: 1px solid var(--chat-line); flex-shrink: 0; }
-.chat-back-icon { display: grid; place-items: center; flex: 0 0 40px; width: 40px; height: 44px; color: var(--chat-primary); }
+.chat-back-icon { display: grid; place-items: center; flex: 0 0 44px; width: 44px; height: 44px; border: 1px solid var(--chat-line); border-radius: 10px; background: #f1f8f8; color: var(--chat-primary); text-decoration: none; }
+.chat-back-icon:hover { background: #deeff1; }
 .chat-room-heading > div { min-width: 0; }
 .chat-room-heading h1 { font-size: 18px; margin: 0; overflow-wrap: anywhere; }
 .chat-room-heading p { color: var(--chat-muted); font-size: 13px; margin: 4px 0 0; line-height: 1.6; }

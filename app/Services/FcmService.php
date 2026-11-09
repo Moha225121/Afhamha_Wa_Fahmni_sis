@@ -32,10 +32,18 @@ class FcmService
             'title' => mb_substr(strip_tags($payload['title']), 0, 150),
             'body' => mb_substr(strip_tags($payload['body']), 0, 300),
             'url' => $destination,
+            'recipient_user_id' => (string) $user->id,
         ];
+        if ($eventId !== null) {
+            $data['event_id'] = (string) $eventId;
+        }
 
         $failures = [];
         foreach ($user->fcmDevices()->get() as $device) {
+            // A token can move to another account after the initial device query.
+            if (! $user->fcmDevices()->whereKey($device->id)->where('token_hash', $device->token_hash)->exists()) {
+                continue;
+            }
             if ($eventId !== null && DB::table('fcm_notification_deliveries')->where('event_id', $eventId)->where('device_id', $device->id)->exists()) {
                 continue;
             }

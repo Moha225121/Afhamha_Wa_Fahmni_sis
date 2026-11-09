@@ -1,0 +1,83 @@
+{
+  "checks": 19,
+  "passed": 19,
+  "results": [
+    {
+      "name": "valid generated manifest and checksums",
+      "result": "PASS"
+    },
+    {
+      "name": "valid generated ZIP extracts and verifies",
+      "result": "PASS"
+    },
+    {
+      "name": "wrong-source-id",
+      "result": "PASS"
+    },
+    {
+      "name": "duplicate-manifest-entry",
+      "result": "PASS"
+    },
+    {
+      "name": "manifest-traversal",
+      "result": "PASS"
+    },
+    {
+      "name": "checksum-duplicate",
+      "result": "PASS"
+    },
+    {
+      "name": "checksum-missing",
+      "result": "PASS"
+    },
+    {
+      "name": "checksum-traversal",
+      "result": "PASS"
+    },
+    {
+      "name": "checksum-ads",
+      "result": "PASS"
+    },
+    {
+      "name": "zip-traversal",
+      "result": "PASS"
+    },
+    {
+      "name": "zip-absolute",
+      "result": "PASS"
+    },
+    {
+      "name": "zip-backslash",
+      "result": "PASS"
+    },
+    {
+      "name": "zip-drive",
+      "result": "PASS"
+    },
+    {
+      "name": "zip-ads",
+      "result": "PASS"
+    },
+    {
+      "name": "zip-case-collision",
+      "result": "PASS"
+    },
+    {
+      "name": "zip-reserved-device",
+      "result": "PASS"
+    },
+    {
+      "name": "zip-trailing-dot",
+      "result": "PASS"
+    },
+    {
+      "name": "ZIP symlink metadata refused",
+      "result": "PASS"
+    },
+    {
+      "name": "modified source bytes refused",
+      "result": "PASS"
+    }
+  ],
+  "source_id": "bd85ab15c580a7b239acf9996ed1e1a8c9ac589b47203771f420825e0b1b1f84"
+}

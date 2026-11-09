@@ -62,8 +62,9 @@ class StudentFinanceTest extends TestCase
         $this->post(route('finance.students.pay', $this->student), $data)->assertSessionHasNoErrors();
         $this->assertDatabaseCount('student_payments', 1);
         $this->assertDatabaseCount('receipts', 1);
-        $response->assertRedirect(route('finance.receipts.show', 1));
-        $this->get(route('finance.receipts.show', 1))->assertOk()->assertSee('REC-')->assertSee('محمد أحمد');
+        $receipt = DB::table('receipts')->first();
+        $response->assertRedirect(route('finance.receipts.show', $receipt->id));
+        $this->get(route('finance.receipts.show', $receipt->id))->assertOk()->assertSee('REC-')->assertSee('محمد أحمد');
         $this->assertSame(4500000, app(StudentFinanceService::class)->statement($this->student)['totals']['remaining']);
         $this->assertSame(1, $this->parent->notifications()->count());
         $this->post(route('finance.students.pay', $this->student), $this->payment($installment, '500'))->assertSessionHasNoErrors();
@@ -75,13 +76,14 @@ class StudentFinanceTest extends TestCase
     {
         $id = $this->fee();
         $this->post(route('finance.students.pay', $this->student), $this->payment($id, '1000'))->assertSessionHasNoErrors();
+        $receipt = DB::table('receipts')->first();
         foreach ([1, 2] as $i) {
-            $this->patch(route('finance.students.void', [$this->student, 1]), ['reason' => 'تسجيل غير صحيح'])->assertSessionHasNoErrors();
+            $this->patch(route('finance.students.void', [$this->student, $receipt->student_payment_id]), ['reason' => 'تسجيل غير صحيح'])->assertSessionHasNoErrors();
         }
         $this->assertDatabaseCount('receipts', 1);
         $this->assertSame(6000000, app(StudentFinanceService::class)->statement($this->student)['totals']['remaining']);
         $this->assertSame(1, DB::table('financial_transactions')->where('type', 'payment_void')->count());
-        $this->get(route('finance.receipts.show', 1))->assertOk()->assertSee('إيصال ملغى');
+        $this->get(route('finance.receipts.show', $receipt->id))->assertOk()->assertSee('إيصال ملغى');
     }
 
     public function test_discounts_cannot_exceed_balance_and_waiver_is_exact(): void
@@ -101,22 +103,23 @@ class StudentFinanceTest extends TestCase
     {
         $id = $this->fee();
         $this->post(route('finance.students.pay', $this->student), $this->payment($id, '100'))->assertSessionHasNoErrors();
+        $receipt = DB::table('receipts')->first();
         $this->get(route('finance.index'))->assertOk();
         $this->get(route('finance.templates'))->assertOk();
         $this->actingAs($this->parent)->get(route('parent.finance', ['student' => $this->student->id]))->assertOk()->assertSee('S-FIN');
-        $pdf = $this->get(route('finance.receipts.show', [1, 'format' => 'pdf']))->assertOk()->assertHeader('Content-Type', 'application/pdf');
+        $pdf = $this->get(route('finance.receipts.show', [$receipt->id, 'format' => 'pdf']))->assertOk()->assertHeader('Content-Type', 'application/pdf');
         $this->assertStringStartsWith('%PDF-', $pdf->getContent());
         $this->get(route('parent.finance', ['student' => $this->student->id, 'format' => 'pdf']))->assertOk()->assertHeader('Content-Type', 'application/pdf');
         $outsider = User::factory()->create(['role' => 'parent', 'status' => 'active']);
         Guardian::create(['user_id' => $outsider->id, 'status' => 'active']);
         $this->actingAs($outsider)->get(route('parent.finance', ['student' => $this->student->id]))->assertNotFound();
-        $this->get(route('finance.receipts.show', 1))->assertNotFound();
+        $this->get(route('finance.receipts.show', $receipt->id))->assertNotFound();
         $this->actingAs($this->student->user)->get(route('student.finance'))->assertForbidden();
         $this->actingAs(User::factory()->create(['role' => 'teacher', 'status' => 'active']))->get(route('finance.students.show', $this->student))->assertForbidden();
-        $this->get(route('finance.receipts.show', [1, 'format' => 'pdf']))->assertForbidden();
+        $this->get(route('finance.receipts.show', [$receipt->id, 'format' => 'pdf']))->assertForbidden();
         $this->actingAs(User::factory()->create(['role' => 'financial_officer', 'status' => 'active']))->get(route('finance.index'))->assertOk();
         $this->post(route('finance.students.discount', $this->student), [])->assertForbidden();
-        $this->patch(route('finance.students.void', [$this->student, 1]), ['reason' => 'غير مخول'])->assertForbidden();
+        $this->patch(route('finance.students.void', [$this->student, $receipt->student_payment_id]), ['reason' => 'غير مخول'])->assertForbidden();
     }
 
     public function test_installment_reminders_are_deduplicated(): void

@@ -16,7 +16,7 @@
     @include('shared.branding-style')@include('shared.portal-assets')
     <link rel="stylesheet" href="{{ asset('css/parent-notifications.css') }}?v=20261016-2">
     <link rel="stylesheet" href="{{ asset('css/parent-followup.css') }}?v=20261016-1">
-    <script src="{{ asset('js/parent-notifications.js') }}?v=20261016-2" defer></script>
+    <script src="{{ asset('js/parent-notifications.js') }}?v=20261108-context" defer></script>
     <script src="{{ asset('js/enhanced-selects.js') }}" defer></script>
     @include('shared.fcm-assets')
     @stack('styles')

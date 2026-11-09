@@ -31,6 +31,7 @@
                 <span class="parent-notification-copy">
                     <span class="parent-notification-source">{{ match($notification->data['category'] ?? '') { 'student_note' => 'ملاحظة من المشرف', 'guardian_call' => 'استدعاء ولي الأمر', 'announcement' => 'إعلان من إدارة المدرسة', default => 'تحديث الحساب' } }}</span>
                     <strong>{{ $notification->data['title'] ?? 'إشعار جديد' }}</strong>
+                    @if($source = \App\Support\NotificationContext::label($notification->data))<span>{{ $source }}</span>@endif
                     <span>{{ \Illuminate\Support\Str::limit($notification->data['body'] ?? $notification->data['message'] ?? '', 220) }}</span>
                     <time datetime="{{ $notification->created_at->toIso8601String() }}">{{ $notification->created_at->locale('ar')->diffForHumans() }}</time>
                     <span class="parent-notification-open">عرض التفاصيل</span>

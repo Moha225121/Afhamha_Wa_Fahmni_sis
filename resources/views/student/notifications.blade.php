@@ -22,6 +22,7 @@
                 <span class="student-notification-copy">
                     <span class="student-notification-source">{{ isset($notification->data['announcement_id']) ? 'إعلان من إدارة المدرسة' : 'تحديث دراسي' }}</span>
                     <strong>{{ $notification->data['title'] ?? 'إشعار جديد' }}</strong>
+                    @if($source = \App\Support\NotificationContext::label($notification->data))<span>{{ $source }}</span>@endif
                     <span>{{ \Illuminate\Support\Str::limit($notification->data['body'] ?? $notification->data['message'] ?? '', 220) }}</span>
                     <time datetime="{{ $notification->created_at->toIso8601String() }}">{{ $notification->created_at->locale('ar')->diffForHumans() }}</time>
                 </span>

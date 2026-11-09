@@ -9,6 +9,7 @@ use App\Services\SchoolAccountService;
 use App\Services\StudentCardPdfService;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
@@ -17,6 +18,23 @@ class AccountNumberingController extends Controller
     public function index(SchoolAccountService $accounts)
     {
         return view('admin.accounts.settings', ['settings' => $accounts->settings(), 'previewContext' => $accounts->context(), 'counts' => ['student' => Student::withTrashed()->count(), 'teacher' => Teacher::withTrashed()->count()]]);
+    }
+
+    public function studentFinance(Request $request, SchoolAccountService $accounts)
+    {
+        $request->validate(['student_finance_visible' => 'required|boolean']);
+        DB::transaction(function () use ($request, $accounts): void {
+            $settings = $accounts->settings(true);
+            $old = ['student_finance_visible' => $settings['student_finance_visible']];
+            $settings['student_finance_visible'] = $request->boolean('student_finance_visible');
+            DB::table('account_number_settings')->where('id', 1)->update([
+                'configuration' => json_encode($settings, JSON_UNESCAPED_UNICODE),
+                'updated_at' => now(),
+            ]);
+            $accounts->audit('student_finance_access_updated', 'account_settings', 1, $old, ['student_finance_visible' => $settings['student_finance_visible']]);
+        });
+
+        return redirect()->to(route('admin.accounts.index').'#student-finance-access')->with('success', 'تم تحديث وصول الطالب إلى بياناته المالية.');
     }
 
     private function data(Request $request, SchoolAccountService $accounts): array
@@ -28,6 +46,7 @@ class AccountNumberingController extends Controller
         $settings = $request->validate($rules);
         $options = [];
         $old = $accounts->settings();
+        $settings = array_replace($old, $settings);
         foreach (['student', 'teacher'] as $role) {
             if (! preg_match('/\{(SEQ|0+1)\}/', $settings[$role.'_number_pattern'])) {
                 throw ValidationException::withMessages([$role.'_number_pattern' => 'يجب أن يحتوي النمط على {SEQ} أو {0001} لمنع التكرار.']);

@@ -10,18 +10,19 @@ const source = readFileSync(new URL('../../resources/js/firebase-messaging-sw.js
     .replaceAll('import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID', "'sender-id'")
     .replaceAll('import.meta.env.VITE_FIREBASE_APP_ID', "'app-id'");
 
-function loadWorker(clients = []) {
+function loadWorker(clients = [], currentUserId = '42') {
     const listeners = new Map();
     let backgroundHandler;
     const shown = [];
     const context = vm.createContext({
         URL,
+        fetch: async () => ({ok: true, json: async () => ({user_id: currentUserId, role: 'student'})}),
         initializeApp: () => ({}),
         getMessaging: () => ({}),
         onBackgroundMessage: (_messaging, handler) => { backgroundHandler = handler; },
         self: {
             location: {origin: 'https://school.example'},
-            registration: {showNotification: (...args) => shown.push(args)},
+            registration: {getNotifications: async () => [], showNotification: (...args) => shown.push(args)},
             clients: {
                 matchAll: async () => clients,
                 openWindow: async (url) => { context.opened = url; },
@@ -29,13 +30,20 @@ function loadWorker(clients = []) {
             addEventListener: (name, handler) => listeners.set(name, handler),
         },
     });
+    vm.runInContext(readFileSync(new URL('../../public/js/school-push-privacy.js', import.meta.url), 'utf8'), context);
     vm.runInContext(source, context);
     return {context, listeners, backgroundHandler, shown};
 }
 
-test('background message renders its data payload and role-local destination', () => {
+test('background push for the previous account is never displayed after account switching', async () => {
+    const worker = loadWorker([], '99');
+    await worker.backgroundHandler({data: {title: 'Private old account', body: 'Private previous content', url: '/student/exams', recipient_user_id: '42'}});
+    assert.equal(worker.shown.length, 0);
+});
+
+test('background message renders its data payload and role-local destination', async () => {
     const worker = loadWorker();
-    worker.backgroundHandler({data: {title: 'Exam', body: 'Published', url: '/student/exams'}});
+    await worker.backgroundHandler({data: {title: 'Exam', body: 'Published', url: '/student/exams', recipient_user_id: '42'}});
 
     assert.equal(worker.shown[0][0], 'Exam');
     assert.equal(worker.shown[0][1].body, 'Published');
@@ -51,7 +59,7 @@ test('notification clicks navigate an existing same-origin tab to its destinatio
         focus: async () => { focused = true; },
     };
     const worker = loadWorker([client]);
-    const event = {notification: {data: {url: '/student/exams'}, close() {}}, waitUntil: (promise) => { event.pending = promise; }};
+    const event = {notification: {data: {url: '/student/exams', recipient_user_id: '42'}, close() {}}, waitUntil: (promise) => { event.pending = promise; }};
     worker.listeners.get('notificationclick')(event);
     await event.pending;
 

@@ -3,6 +3,9 @@
 @section('title', $lesson->title)
 
 @section('content')
+<div class="lesson-workspace">
+    @include('student.lessons.quick-nav')
+    <div class="lesson-workspace-content">
     <nav class="breadcrumbs" aria-label="مسار التنقل">
         <a href="{{ route('student.subjects.index') }}">المواد</a>
         <span aria-hidden="true">/</span>
@@ -19,7 +22,7 @@
     </section>
 
     <article class="lesson-content">
-        <div class="content-copy">{!! nl2br(e(strip_tags($lesson->content ?? ''))) !!}</div>
+        <div class="content-copy"><x-assignment-content :content="$lesson->content" /></div>
     </article>
 
     <section class="list-section">
@@ -55,4 +58,6 @@
     <div class="page-actions">
         <a class="primary-link" href="{{ route('student.library.index', ['subject_id' => $subject->id]) }}">فتح المكتبة الرقمية</a>
     </div>
+    </div>
+</div>
 @endsection

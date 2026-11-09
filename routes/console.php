@@ -57,3 +57,11 @@ Artisan::command('announcements:notify-due', function (\App\Services\StudentNoti
     \Illuminate\Support\Facades\DB::table('fcm_schedule_cursors')->where('name', 'announcements')->update(['checked_through' => $through]);
 })->purpose('Notify school portals when scheduled announcements become visible');
 Schedule::command('announcements:notify-due')->everyMinute()->withoutOverlapping();
+
+Artisan::command('fcm:retry-pending', function (\App\Services\FcmNotificationService $notifications): void {
+    $this->info($notifications->retryPending().' stored notification event(s) queued.');
+    if ($notifications->hasPendingDelivery()) {
+        $this->warn('Some events remain pending; check queue connectivity and the sanitized application log.');
+    }
+})->purpose('Recover durable FCM events that could not be added to the queue');
+Schedule::command('fcm:retry-pending')->everyMinute()->withoutOverlapping();

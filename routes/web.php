@@ -10,6 +10,11 @@ use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/login');
+Route::get('/student-card/{student}/verify', [\App\Http\Controllers\Admin\AccountNumberingController::class, 'verify'])
+    ->whereNumber('student')->middleware(['signed', 'throttle:30,1'])->name('student.card.verify');
+Route::get('/school-branding/icon-{size}.png', fn (int $size) => response(\App\Support\SchoolBranding::iconPng($size), 200, ['Content-Type' => 'image/png', 'Cache-Control' => 'public, max-age=86400']))
+    ->where('size', '180|192|512')->name('school.branding.icon');
+Route::redirect('/favicon.ico', '/'.\App\Support\SchoolBranding::LOGO);
 Route::get('/parent-app.webmanifest', [ParentPwaController::class, 'manifest'])->name('parent.pwa.manifest');
 Route::get('/school-app-icon', [ParentPwaController::class, 'icon'])->name('school.pwa.icon');
 Route::get('/parent-sw.js', fn () => Response::make(File::get(public_path('parent-sw.js')), 200, ['Content-Type' => 'application/javascript']))->name('parent.pwa.service-worker');
@@ -30,5 +35,6 @@ require __DIR__.'/student.php';
 require __DIR__.'/teacher.php';
 require __DIR__.'/parent.php';
 require __DIR__.'/supervisor.php';
+require __DIR__.'/staff.php';
 require __DIR__.'/admin.php';
 require __DIR__.'/library-uploads.php';

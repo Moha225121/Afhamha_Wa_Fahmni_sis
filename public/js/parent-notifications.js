@@ -73,7 +73,9 @@
             const copy = element('span', 'parent-notification-copy');
             const time = element('time', '', item.time_label);
             time.dateTime = item.created_at;
-            copy.append(element('strong', '', item.title), element('span', '', item.body), time);
+            copy.append(element('strong', '', item.title));
+            if (item.source) copy.append(element('span', '', item.source));
+            copy.append(element('span', '', item.body), time);
             button.append(symbol, copy);
             if (!item.is_read) {
                 const dot = element('span', 'parent-notification-dot');

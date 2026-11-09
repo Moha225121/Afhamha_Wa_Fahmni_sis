@@ -13,8 +13,9 @@
     <div class="chat-history" role="log" aria-label="رسائل المحادثة" tabindex="0" data-chat-history>
         @php($lastDay = null)
         @forelse($messages as $message)
-            @if($lastDay !== $message->created_at->format('Y-m-d'))<p class="chat-day">{{ $message->created_at->isToday() ? 'اليوم' : $message->created_at->locale('ar')->translatedFormat('j F Y') }}</p>@php($lastDay = $message->created_at->format('Y-m-d'))@endif
-            <article class="chat-bubble {{ $message->sender_id === auth()->id() ? 'is-mine' : '' }}" data-message-id="{{ $message->id }}"><p dir="auto">{{ $message->body }}</p><time datetime="{{ $message->created_at->toIso8601String() }}">{{ $message->created_at->format('H:i') }}</time></article>
+            @php($localTime = $message->created_at->copy()->timezone(\App\Support\DisplayTimezone::name()))
+            @if($lastDay !== $localTime->format('Y-m-d'))<p class="chat-day">{{ $localTime->isToday() ? 'اليوم' : $localTime->locale('ar')->translatedFormat('j F Y') }}</p>@php($lastDay = $localTime->format('Y-m-d'))@endif
+            <article class="chat-bubble {{ $message->sender_id === auth()->id() ? 'is-mine' : '' }}" data-message-id="{{ $message->id }}"><p dir="auto">{{ $message->body }}</p><time datetime="{{ $message->created_at->toIso8601String() }}">{{ $localTime->format('H:i') }}</time></article>
         @empty
             <p class="chat-start">ابدأ المحادثة بكتابة رسالتك في الأسفل.</p>
         @endforelse

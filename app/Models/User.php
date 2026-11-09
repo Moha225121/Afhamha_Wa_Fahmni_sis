@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['name', 'email', 'password', 'role', 'status', 'phone', 'avatar_path', 'last_login_at', 'first_name_en', 'last_name_en', 'school_email_generated'])]
+#[Fillable(['name', 'email', 'password', 'role', 'status', 'phone', 'avatar_path', 'last_login_at', 'first_name_en', 'last_name_en', 'school_email_generated', 'financial_permissions'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -19,7 +19,7 @@ class User extends Authenticatable
 
     protected function casts(): array
     {
-        return ['school_email_generated' => 'boolean', 'email_verified_at' => 'datetime', 'password' => 'hashed', 'last_login_at' => 'datetime'];
+        return ['financial_permissions' => 'array', 'school_email_generated' => 'boolean', 'email_verified_at' => 'datetime', 'password' => 'hashed', 'last_login_at' => 'datetime'];
     }
 
     public function isAdmin(): bool
@@ -56,6 +56,10 @@ class User extends Authenticatable
     {
         if ($this->status !== 'active') return false;
         if ($this->isAdmin()) return true;
+        if (in_array($permission, ['finance.view', 'finance.pay', 'finance.reports'], true)) {
+            return $this->role === 'financial_officer'
+                || ($this->role === 'supervisor' && in_array($permission, $this->financial_permissions ?? [], true));
+        }
         if ($this->staffRoleAssignments()->where('active', true)->whereHas('role', fn ($q) => $q->where('active', true)->whereHas('permissions', fn ($p) => $p->where('permission', $permission)))->exists()) return true;
         $p = config('permissions.roles.'.$this->role, []);
         if (empty($p)) {

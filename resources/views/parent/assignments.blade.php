@@ -25,6 +25,7 @@
                     @if($assignment->instructions || $assignment->description)<x-assignment-content :content="$assignment->instructions ?: $assignment->description" />@endif
                     <div class="status-line">
                         <b>{{ $submission?->submitted_at ? 'تم التسليم' : 'لم يتم التسليم' }}</b>
+                        @if($submission?->status === 'graded' && $submission->graded_at && $submission->score !== null)<span>نتيجة الواجب المنشورة: <strong>{{ (float) $submission->score }} / {{ (float) $assignment->max_score }}</strong></span>@endif
                         @if($assignment->attachments->isNotEmpty())<small>{{ $assignment->attachments->count() }} مرفق/مرفقات</small>@endif
                     </div>
                 </article>

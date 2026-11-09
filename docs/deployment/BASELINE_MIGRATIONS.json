@@ -1,0 +1,190 @@
+{
+  "schema_version": 1,
+  "baseline_ref": "1a5cfe27c72e38acd05c837682a3f29b0d7b3402",
+  "provenance": "git archive of the exact baseline object, executed during local PostgreSQL validation",
+  "baseline_archive_sha256": "597790f7f2613c0e3bbdab8766a159b58f3f388fa5fc31082c5717b051ebc2b8",
+  "hash_mode": "exact file bytes; no line-ending normalization",
+  "migration_count": 42,
+  "files": [
+    {
+      "path": "database/migrations/0001_01_01_000000_create_users_table.php",
+      "sha256": "10d79883bc08ce46510f9ad8b1830b4d06d586dc56ae2c8bac3b3e491f69a90f"
+    },
+    {
+      "path": "database/migrations/0001_01_01_000001_create_cache_table.php",
+      "sha256": "fbb4665e5a977e71df4e74ec75b3c06ca4f17ad0de7138fe9786639189978e77"
+    },
+    {
+      "path": "database/migrations/0001_01_01_000002_create_jobs_table.php",
+      "sha256": "df4910687180313a14a3f96a8bddd808ae145ed1b107cd772caf865c0dc2b746"
+    },
+    {
+      "path": "database/migrations/2026_08_22_000001_create_school_admin_schema.php",
+      "sha256": "2009569dd17dd018f959a27c383f8b1a3000e28af9a92d0aede8d9551babae47"
+    },
+    {
+      "path": "database/migrations/2026_08_23_000002_create_notifications_table.php",
+      "sha256": "8ed086ee6290efc9ca90b3d1297bc05bab7eee6242710e6f7787d8e993f4e1e4"
+    },
+    {
+      "path": "database/migrations/2026_08_23_000003_create_learning_content_tables.php",
+      "sha256": "e78228fb53b71e3052616b15d9f921bcfeea61e30a334a9d8654b4a5d400e5e9"
+    },
+    {
+      "path": "database/migrations/2026_08_23_000003_create_student_academic_tables.php",
+      "sha256": "919a95f990325bc475fe8afb4d00b200b64e82bb4679832f2584a6f52a0a96bc"
+    },
+    {
+      "path": "database/migrations/2026_08_23_000004_add_disk_to_library_resources.php",
+      "sha256": "6746e5d16175337f576a996cdf4d526112ad16afd08536ce772a1d67af3fe6a4"
+    },
+    {
+      "path": "database/migrations/2026_08_23_000005_create_tutor_conversations_and_messages.php",
+      "sha256": "4638a4341da9e54fe8ba3ab84408bf32baab83dfbd9a61125b0ccabf0dd8eb34"
+    },
+    {
+      "path": "database/migrations/2026_08_23_000006_add_delivery_metadata_to_tutor_messages.php",
+      "sha256": "bd9faa2e05dbf8c4222217948f3a14b807b14d76fbf9bad1577b5da133f2d8d2"
+    },
+    {
+      "path": "database/migrations/2026_08_24_000001_create_teacher_academic_schema.php",
+      "sha256": "20f2cfd7c95f2a660b49713411252ccc50d3e8add43b290690cb09e20bd3536b"
+    },
+    {
+      "path": "database/migrations/2026_08_24_000002_create_grade_sheets_table.php",
+      "sha256": "2b156c7705585fdf3b1870dadaf23bb2d053e6fb157698aceed44766205c1b9e"
+    },
+    {
+      "path": "database/migrations/2026_08_24_000003_create_parent_academic_and_communication_schema.php",
+      "sha256": "c1821e4df99f0af51fb726526e122409c0661729c7d65ef833188ae499194dbb"
+    },
+    {
+      "path": "database/migrations/2026_08_25_000001_add_scores_to_grade_sheets.php",
+      "sha256": "8b6e008d40e6a63de02be0e4a1c79d329004c993df496e7eb220109e48f178a3"
+    },
+    {
+      "path": "database/migrations/2026_08_27_000001_add_assignment_compatibility_columns.php",
+      "sha256": "cc4cc4fb14637bd0877fc77108b1ed9dc37508d930fc18d1dd8e2b7fa3d2c977"
+    },
+    {
+      "path": "database/migrations/2026_08_27_000002_add_assignment_published_at.php",
+      "sha256": "cc9feeeea096a0186724980362955f75ba889dde74ef3debd737c64ce7e84c7d"
+    },
+    {
+      "path": "database/migrations/2026_08_27_000003_make_assignment_due_date_nullable.php",
+      "sha256": "da3e8693acf652ac874d1c7e6b9b6c440598a7ae8415a4742d8bc9c3e52c4067"
+    },
+    {
+      "path": "database/migrations/2026_08_27_000004_add_assignment_submission_compatibility_columns.php",
+      "sha256": "86cdbc98df396090c7146612577d1abddabf33b6e4953b5fac470a5ebf8893c6"
+    },
+    {
+      "path": "database/migrations/2026_08_27_000005_make_submission_file_metadata_nullable.php",
+      "sha256": "b4e5057f73e77756bddced8e68273f774c7fb76741cc04242ca1d3b33b73f236"
+    },
+    {
+      "path": "database/migrations/2026_08_28_000001_add_column_scores_to_grade_sheets.php",
+      "sha256": "b51d85059f643d0e7d9e4c09237d9b3564dd5183c839c38e5eabd5bc70550aff"
+    },
+    {
+      "path": "database/migrations/2026_08_28_000001_add_student_file_metadata_to_assignment_attachments.php",
+      "sha256": "c784c76f7c448b0717273a689e007729d091b1a72327b4392b95bec60917273e"
+    },
+    {
+      "path": "database/migrations/2026_08_28_000002_align_integration_nullable_columns.php",
+      "sha256": "02f74048a5951b0f8b98d41f13f5573a36679ad8f1bedcef191af2c7705de5ff"
+    },
+    {
+      "path": "database/migrations/2026_08_28_000003_add_teacher_scope_to_lessons.php",
+      "sha256": "086f59440420f894f895fbd812e9cd87994ab7c6804556cf375da128edc0e790"
+    },
+    {
+      "path": "database/migrations/2026_08_28_000004_create_teacher_student_notes_table.php",
+      "sha256": "d059b74d9243a2279b1c1db45327a0676ea70ea04f4dc86583ab6c3c8a4429ab"
+    },
+    {
+      "path": "database/migrations/2026_08_30_000001_rebuild_daily_attendance_and_create_supervisor_schema.php",
+      "sha256": "ae44215a9b2001d8deef3bacd70dfdc74f679243dca5bb9e84241886bf0f1a3e"
+    },
+    {
+      "path": "database/migrations/2026_08_30_000002_create_school_period_times.php",
+      "sha256": "fdb34f97bf720490bb1de61d04c3b414806f03624445a60709ba23507f3db70b"
+    },
+    {
+      "path": "database/migrations/2026_08_30_000003_add_default_school_break_settings.php",
+      "sha256": "ea3c1e0305d8284673984fb3ae1fa57b4d9f6f9b06d17127184314b318d10b93"
+    },
+    {
+      "path": "database/migrations/2026_09_06_000001_add_default_account_password_setting.php",
+      "sha256": "40d5f36593830db243e8b46099764391bf7d47821e619d016ef154da2e978d62"
+    },
+    {
+      "path": "database/migrations/2026_09_06_000002_create_account_numbering_schema.php",
+      "sha256": "439c399626790cb0bd5f8c10e0cf948e9ce65914d12f933e3ba558b1c213920c"
+    },
+    {
+      "path": "database/migrations/2026_09_06_000003_create_student_financial_schema.php",
+      "sha256": "9b50e07b377b547a902fea59b7c6f967990dc1eaedacf36e6196a8b325e02cfc"
+    },
+    {
+      "path": "database/migrations/2026_09_06_000004_create_result_publication_schema.php",
+      "sha256": "9e2dd2e69977331687c7885bc9a012ef6064655476329db55ce7a425cc1750cc"
+    },
+    {
+      "path": "database/migrations/2026_09_26_000001_create_stages_table.php",
+      "sha256": "ce4d2eea69a388da8cc70c472aa6774475f07d334c8fd364dcf55315604624a7"
+    },
+    {
+      "path": "database/migrations/2026_09_30_000001_add_catalog_metadata_to_library_resources.php",
+      "sha256": "6ee286c51741147c6b1107141c53748b8d2807b0efbdf35545f43419d9ec698e"
+    },
+    {
+      "path": "database/migrations/2026_10_05_000001_complete_primary_classroom_branches.php",
+      "sha256": "78b9fbd6e047510cd125f01c3abf708a8649927dd13f38be5b12688bc0ea0a25"
+    },
+    {
+      "path": "database/migrations/2026_10_05_000001_create_configurable_staff_roles.php",
+      "sha256": "27aad3283b7f368798c84a5bd8050544a70b4ef94edf7aa4d764eccbacf69377"
+    },
+    {
+      "path": "database/migrations/2026_10_07_000001_create_teacher_creation_intents_table.php",
+      "sha256": "f63cab1eddab7b37980b85b75052b1c60fda4817475c3f361fdbc154a8fcb4d7"
+    },
+    {
+      "path": "database/migrations/2026_10_08_000001_add_additional_guardian_details.php",
+      "sha256": "c33d23af27fcb8e61c85162477b1d4f7c45b3fad4c4c89548e7113db1b2bdaa4"
+    },
+    {
+      "path": "database/migrations/2026_10_09_000001_create_school_activities_table.php",
+      "sha256": "88930233614e0390d03ebe0b6569ba1b5b13080b2ba231f0478b3f53171b9659"
+    },
+    {
+      "path": "database/migrations/2026_10_11_000001_repoint_grade_sheets_to_teachers.php",
+      "sha256": "06f3c92c38ea78db1cacfa162d786d5f1b91c121516ac851dacfe8cfa51b1e93"
+    },
+    {
+      "path": "database/migrations/2026_10_11_000002_add_submission_key_to_lessons.php",
+      "sha256": "29e714d206224fbe281aee0f66fce9a4f770cfac924246e3768fd920b06faa49"
+    },
+    {
+      "path": "database/migrations/2026_10_11_000003_add_soft_deletes_to_classrooms.php",
+      "sha256": "5b126cea788df751f0be84bd90ae08aa98ab3f5b29cfd4a4563211a67b2628f6"
+    },
+    {
+      "path": "database/migrations/2026_11_01_000001_create_fcm_devices_table.php",
+      "sha256": "80dd521939415c820426cb46dbe9c48957bbcba5b32b9657176b74bd8fd76499"
+    },
+    {
+      "path": "config/school_accounts.php",
+      "sha256": "9e2719af1f9d0071780b5e11bfb267e999d04b27f5f0a6beb4c65c0732480879"
+    },
+    {
+      "path": "config/smart_tutor.php",
+      "sha256": "32e28b0116833936a426801307e1d5057c011240565eefd1699e6213d892c401"
+    }
+  ],
+  "excluded_release_migrations": [
+    "database/migrations/2026_11_08_000001_add_fcm_outbox_payload.php",
+    "database/migrations/2026_11_08_000002_add_teacher_owner_to_tutor_conversations.php"
+  ]
+}

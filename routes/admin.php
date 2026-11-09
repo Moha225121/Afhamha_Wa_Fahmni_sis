@@ -68,6 +68,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::get('reports', [OperationsController::class, 'reports'])->name('reports.index');
     Route::get('reports/pdf', [OperationsController::class, 'reportsPdf'])->name('reports.pdf');
     Route::get('account-settings', [\App\Http\Controllers\Admin\AccountNumberingController::class, 'index'])->name('accounts.index');
+    Route::patch('account-settings/student-finance', [\App\Http\Controllers\Admin\AccountNumberingController::class, 'studentFinance'])->name('accounts.student-finance');
     Route::post('account-settings/preview', [\App\Http\Controllers\Admin\AccountNumberingController::class, 'preview'])->name('accounts.preview');
     Route::put('account-settings', [\App\Http\Controllers\Admin\AccountNumberingController::class, 'update'])->name('accounts.update');
     Route::get('students/{student}/account-card', [\App\Http\Controllers\Admin\AccountNumberingController::class, 'card'])->name('students.account-card');
@@ -77,6 +78,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::get('roles', [OperationsController::class, 'roles'])->name('roles.index');
     Route::post('roles', [\App\Http\Controllers\Admin\StaffRoleController::class, 'store'])->name('roles.store');
     Route::put('roles/{staffRole}', [\App\Http\Controllers\Admin\StaffRoleController::class, 'update'])->name('roles.update');
+    Route::delete('roles/{staffRole}', [\App\Http\Controllers\Admin\StaffRoleController::class, 'destroy'])->name('roles.destroy');
     Route::post('users/{user}/roles', [\App\Http\Controllers\Admin\StaffRoleController::class, 'assign'])->name('users.roles.assign');
     Route::post('users/staff', [\App\Http\Controllers\Admin\StaffRoleController::class, 'storeStaff'])->name('users.staff.store');
     Route::get('audit-logs', [OperationsController::class, 'auditLogs'])->name('audit-logs.index');

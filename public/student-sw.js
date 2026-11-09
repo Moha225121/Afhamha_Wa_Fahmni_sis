@@ -1,13 +1,11 @@
 const CACHE_PREFIX = 'afhamha-student-static-';
-const CACHE_NAME = `${CACHE_PREFIX}v1`;
+const CACHE_NAME = `${CACHE_PREFIX}v2`;
 const OFFLINE_URL = '/student-offline.html';
 const STATIC_ASSETS = [
     OFFLINE_URL,
     '/favicon.ico',
-    '/icons/parent-icon.svg',
-    '/icons/parent-icon-192.png',
-    '/icons/parent-icon-512.png',
-    '/icons/parent-maskable-512.png',
+    '/school-branding/icon-192.png?v=20261031-nasbia',
+    '/school-branding/icon-512.png?v=20261031-nasbia',
     '/student-manifest.webmanifest',
 ];
 
@@ -33,7 +31,7 @@ self.addEventListener('fetch', event => {
     // Account pages and API responses always use the network; cache only public assets.
     if (request.mode === 'navigate' && url.pathname.startsWith('/student/')) {
         event.respondWith(fetch(request).catch(() => caches.match(OFFLINE_URL)));
-    } else if (STATIC_ASSETS.includes(url.pathname)) {
+    } else if (STATIC_ASSETS.includes(url.pathname + url.search) || STATIC_ASSETS.includes(url.pathname)) {
         event.respondWith(caches.match(request).then(cached => cached || fetch(request)));
     }
 });
