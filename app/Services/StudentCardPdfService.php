@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Support\SchoolBranding;
+use Illuminate\Support\Facades\Storage;
 use Mpdf\Mpdf;
 use Mpdf\Output\Destination;
 
@@ -33,6 +34,7 @@ class StudentCardPdfService
             $pageHtml = '';
             foreach ($page->values() as $index => $student) {
                 $student->setAttribute('qr_image', $this->qrImage($student->verification_url));
+                $student->setAttribute('photo_image', $this->studentPhoto($student));
                 $html = view('admin.accounts.card-fragment', ['student' => $student, 'pdfLogo' => $logo, 'schoolBranding' => view()->shared('schoolBranding')])->render();
                 $row = intdiv($index, 2); $column = $index % 2;
                 $pageHtml .= '<div style="position:absolute;left:'.(8 + ($column * 101)).'mm;top:'.(8 + ($row * 68)).'mm;width:94mm;height:62mm">'.$html.'</div>';
@@ -49,9 +51,10 @@ class StudentCardPdfService
             if ($student->verification_url) {
                 $student->setAttribute('qr_image', $this->qrImage($student->verification_url));
             }
-            if ($student->user?->avatar_path) {
-                $student->setAttribute('photo_image', asset('storage/'.$student->user->avatar_path));
-            }
+            $relative = $student->user?->avatar_path;
+            $student->setAttribute('photo_image', $relative && Storage::disk('public')->exists($relative)
+                ? Storage::disk('public')->url($relative)
+                : null);
         });
     }
 
@@ -75,11 +78,12 @@ class StudentCardPdfService
     private function studentPhoto($student): ?string
     {
         $relative = $student->user?->avatar_path;
-        $root = realpath(storage_path('app/public'));
-        $path = $relative ? realpath(storage_path('app/public/'.$relative)) : false;
+        $disk = Storage::disk('public');
+        $root = realpath($disk->path(''));
+        $path = $relative ? realpath($disk->path($relative)) : false;
         if (! $root || ! $path || ! str_starts_with($path, $root.DIRECTORY_SEPARATOR) || ! is_file($path)) return null;
         $mime = mime_content_type($path);
-        return in_array($mime, ['image/png', 'image/jpeg', 'image/gif'], true)
+        return in_array($mime, ['image/png', 'image/jpeg', 'image/gif', 'image/webp'], true)
             ? 'data:'.$mime.';base64,'.base64_encode(file_get_contents($path))
             : null;
     }

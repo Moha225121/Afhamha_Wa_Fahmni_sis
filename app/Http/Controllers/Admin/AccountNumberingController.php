@@ -80,14 +80,17 @@ class AccountNumberingController extends Controller
         return redirect()->route('admin.accounts.index')->with('success', 'تم حفظ الإعدادات وتنفيذ التغييرات المراجعة بأمان.');
     }
 
-    public function card(Student $student)
+    public function card(Student $student, StudentCardPdfService $pdf)
     {
         $student->load(['user', 'classroom', 'guardians.user']);
         $student->setAttribute('verification_url', URL::temporarySignedRoute('student.card.verify', now()->addYear(), ['student' => $student->id]));
         $data = ['student' => $student];
-        return request()->query('format') === 'pdf'
-            ? app(StudentCardPdfService::class)->download('admin.accounts.card', $data, 'student-card-'.$student->student_number.'.pdf')
-            : view('admin.accounts.card', $data);
+        if (request()->query('format') === 'pdf') {
+            return $pdf->download('admin.accounts.card-pdf', $data, 'student-card-'.$student->student_number.'.pdf');
+        }
+        $pdf->preparePrintableCards(collect([$student]));
+
+        return view('admin.accounts.card', $data);
     }
 
     public function cards(Request $request, StudentCardPdfService $pdf)

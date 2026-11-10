@@ -23,6 +23,6 @@ class StudentRequest extends FormRequest
 
     public function messages(): array
     {
-        return ['required' => 'حقل :attribute مطلوب.', 'email.email' => 'البريد الإلكتروني غير صالح.', 'unique' => 'قيمة :attribute مستخدمة مسبقًا.', 'password.confirmed' => 'تأكيد كلمة المرور غير مطابق.'];
+        return ['required' => 'حقل :attribute مطلوب.', 'email.email' => 'البريد الإلكتروني غير صالح.', 'unique' => 'قيمة :attribute مستخدمة مسبقًا.', 'password.confirmed' => 'تأكيد كلمة المرور غير مطابق.', 'photo.image' => 'يجب أن يكون ملف صورة الطالب صورة صالحة.', 'photo.mimes' => 'صورة الطالب يجب أن تكون بصيغة JPG أو PNG أو WebP.', 'photo.max' => 'حجم صورة الطالب يجب ألا يتجاوز 4 ميجابايت.'];
     }
 }
