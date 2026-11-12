@@ -1,0 +1,14 @@
+{
+    "tested_at": "2026-11-12T10:35:05+00:00",
+    "engine": "PostgreSQL 17.11 on x86_64-windows, compiled by msvc-19.44.35229, 64-bit",
+    "scope": "Two real PHP processes released together at a barrier; synthetic local PostgreSQL only. Competing-period case uses a scoped 300ms database trigger at the exam write boundary.",
+    "checks": {
+        "concurrent_same_identity_save_creates_one_mark": true,
+        "concurrent_reimport_creates_one_mark": true,
+        "distinct_subject_preserved": true,
+        "source_grade_and_exam_preserved": true,
+        "competing_period_import_has_one_winner_and_explicit_rejection": true,
+        "competing_periods_have_one_official_mark_total": true,
+        "winning_exam_link_matches_sole_official_mark": true
+    }
+}

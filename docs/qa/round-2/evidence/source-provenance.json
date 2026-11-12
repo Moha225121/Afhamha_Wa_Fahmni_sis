@@ -1,0 +1,22 @@
+[
+  {
+    "source": "T",
+    "pages": 19,
+    "sha256": "de76bb8b90b4cf55057b4c46d6ee7b812209e6e87234bc9fd116ca9a9a08519d"
+  },
+  {
+    "source": "A",
+    "pages": 12,
+    "sha256": "c7ee410a93fbe631d38eab865e54b5f502d3ed97a6891c930060ab1fb88ea0c6"
+  },
+  {
+    "source": "F",
+    "pages": 4,
+    "sha256": "7c1f97fb06d620236163bef668348395ecd57adfa48ec3ca29202c0c44db8dd2"
+  },
+  {
+    "source": "M",
+    "pages": 2,
+    "sha256": "adfa9b5747cb3de397cb6b4178ee10cbbbed8a0412bdea32600ca69cae59a505"
+  }
+]

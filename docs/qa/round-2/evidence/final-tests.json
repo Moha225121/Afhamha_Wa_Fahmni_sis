@@ -1,0 +1,155 @@
+{
+  "generated_at": "2026-11-12T10:53:18.940365+00:00",
+  "scope": "Final local acceptance of Nasbia root application. Synthetic isolated data; no production deployment or provider delivery.",
+  "phpunit": [
+    {
+      "engine": "SQLite",
+      "command": "scripts/qa/run-isolated.ps1 --colors=never",
+      "junit_local_path": "tmp/qa-runs/febf2e6cb4cb4f15abc029a9b54df16c/phpunit.xml",
+      "junit_sha256": "5e2b6ad216ee42c487f1c20856765d4e62d742d97b1e0e5a02eb73ffe4610c47",
+      "tests": 569,
+      "assertions": 4739,
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0,
+      "passed": 569,
+      "duration_seconds": 104.183081,
+      "skip_details": []
+    },
+    {
+      "engine": "PostgreSQL 17.11",
+      "command": "scripts/qa/run-postgres.ps1 -Marker tmp/qa-postgres/7a15d986fae64674aba8e149a2b0ef75/cluster.json --colors=never",
+      "junit_local_path": "tmp/qa-pg-runs/3dbfa46fc6bf4d8fbca4bc8b46770984/phpunit.xml",
+      "junit_sha256": "a5719202b8a50a752ecf0b32e6a158f8c3f65142c609178385365599f78805d0",
+      "tests": 569,
+      "assertions": 4736,
+      "errors": 0,
+      "failures": 0,
+      "skipped": 1,
+      "passed": 568,
+      "duration_seconds": 217.892843,
+      "skip_details": [
+        {
+          "class": "Tests\\Feature\\TeacherTutorMigrationTest",
+          "name": "test_sqlite_migration_refuses_transaction_before_altering_existing_schema",
+          "reason": "SQLite-specific DDL transaction guard; passed on SQLite."
+        }
+      ]
+    }
+  ],
+  "javascript": {
+    "command": "node --test tests/js/*.test.mjs",
+    "tests": 27,
+    "passed": 27,
+    "failures": 0,
+    "skipped": 0,
+    "log_sha256": "9b3b2ebad98d060b3f2f36bb3fab98bcea66a6cff1418134e4f9f4a54d4c353a",
+    "note": "Optional native canvas unavailable; PDF parser and worker compatibility tests passed."
+  },
+  "build": {
+    "result": "PASS",
+    "command": "node --input-type=module -e \"for (const key of ['VITE_FIREBASE_API_KEY','VITE_FIREBASE_PROJECT_ID','VITE_FIREBASE_MESSAGING_SENDER_ID','VITE_FIREBASE_APP_ID','VITE_FIREBASE_VAPID_KEY']) process.env[key]=''; const { build } = await import('vite'); await build({envDir:false});\"",
+    "log_sha256": "9b3709fa8ebc2b588a6e19ca4f76e35342ef2c2cc568ddac998be29455ffeb4a",
+    "note": "Local Vite build without .env; production assets must be built with approved public Firebase config. Optional font metrics fallback warning."
+  },
+  "browser": {
+    "suites": [
+      {
+        "evidence": "browser-pwa-upgrade.json",
+        "sha256": "d8ea0234a0358b8a821b7ad52ebc3dbd43bbf237e59de321f31d1a02ecdc028d",
+        "checks": 2,
+        "pass": 2,
+        "command": "node scripts/qa/browser-pwa-upgrade.cjs"
+      },
+      {
+        "evidence": "browser-pwa.json",
+        "sha256": "6e1256be4fd3be09656475bd17352ca2cf0f1d9c3fc459d7d191628758673dd7",
+        "checks": 2,
+        "pass": 2,
+        "command": "node scripts/qa/browser-pwa.cjs"
+      },
+      {
+        "evidence": "browser-qa009-closeout.json",
+        "sha256": "9da9e962da1b0156b6f2487eb8988a5e6d4e3952a096b61736d0ba5b43425b24",
+        "checks": 7,
+        "pass": 7,
+        "command": "node scripts/qa/browser-qa009-closeout.cjs"
+      },
+      {
+        "evidence": "browser-round-two-admin.json",
+        "sha256": "bb55388edd2f9eb13c3c0ef693482376d4ae893ee1436e7b008fecbfa5c1c29e",
+        "checks": 8,
+        "pass": 8,
+        "command": "node scripts/qa/browser-round-two-admin.cjs"
+      },
+      {
+        "evidence": "browser-round-two.json",
+        "sha256": "951b080c57e9b4afa7b0c1033248a1e7e4c00a2be52cdae84efaf416d8ed0843",
+        "checks": 6,
+        "pass": 6,
+        "command": "node scripts/qa/browser-round-two.cjs"
+      },
+      {
+        "evidence": "browser-smoke.json",
+        "sha256": "f4f017f96b97b918e83f92b14cf5391f26005e625a4eb21029e85627df8a253d",
+        "checks": 15,
+        "pass": 15,
+        "command": "node scripts/qa/browser-smoke.cjs"
+      },
+      {
+        "evidence": "browser-tutor.json",
+        "sha256": "c69ba61777640ed76b8adfa1b10d0982881f4b699cb29822e32e2869bbd980e3",
+        "checks": 4,
+        "pass": 4,
+        "command": "node scripts/qa/browser-tutor.cjs"
+      },
+      {
+        "evidence": "learning/browser-academics.json",
+        "sha256": "71126ed43c04f4c89f1741dfcbadf396cf816459de39cb2f0bc117503a2f4456",
+        "checks": 9,
+        "pass": 9,
+        "command": "node scripts/qa/browser-academics.cjs"
+      },
+      {
+        "evidence": "learning/browser-learning.json",
+        "sha256": "a279b094dc68897062fb51802196985034c8652b6e6e59c9266a14b25b85cd3d",
+        "checks": 6,
+        "pass": 6,
+        "command": "node scripts/qa/browser-learning.cjs"
+      }
+    ],
+    "total_checks": 59,
+    "physical_device": false,
+    "external_provider_delivery": false
+  },
+  "runtime": {
+    "checks": 4,
+    "result": "PASS",
+    "route_count": 326,
+    "command": "php scripts/qa/runtime-check.php (fresh QA_BROWSER_RUN and QA_EVIDENCE_DIR)",
+    "evidence": "runtime-check.json"
+  },
+  "upgrade": {
+    "checks": 22,
+    "result": "PASS",
+    "command": "scripts/qa/validate-round-two-postgres-upgrade.ps1 -Marker tmp/qa-postgres/7a15d986fae64674aba8e149a2b0ef75/cluster.json",
+    "evidence": "postgres-round-two-upgrade.json"
+  },
+  "concurrency": {
+    "checks": 7,
+    "result": "PASS",
+    "command": "php scripts/qa/round-two-result-concurrency.php (isolated PostgreSQL QA_BROWSER_RUN)",
+    "evidence": "result-concurrency.json"
+  },
+  "ci": {
+    "status": "NOT CONFIGURED",
+    "note": "GitHub checks/status/rulesets re-read before merge; local results are not CI."
+  },
+  "limitations": [
+    "Real Firebase/VAPID phone delivery not tested.",
+    "Live Gemini provider response not tested.",
+    "No actual phone, camera, Safari, physical printer, Linux host or production acceptance.",
+    "PostgreSQL suite skip is SQLite-only and passed on SQLite.",
+    "PWA upgrade uses documented historical worker fixture with QA-only icon shim; not exact old artifact or physical device equivalence."
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "testedAt": "2026-11-12T10:20:23.794Z",
+  "browser": "157.0.4341.42",
+  "environment": "Synthetic loopback PostgreSQL 17.11 on Windows; missing Gemini credentials; all external browser requests blocked; not a real device/provider test",
+  "fixture": "62f9ff391df217c0",
+  "results": [
+    {
+      "name": "QA007 teacher entry, repeated creation and reload preserve one owned conversation",
+      "result": "PASS"
+    },
+    {
+      "name": "QA007 missing provider shows safe failure; message persists and user markup cannot execute",
+      "result": "PASS"
+    },
+    {
+      "name": "QA007 teacher, student and parent remain isolated across both conversation URL families",
+      "result": "PASS"
+    },
+    {
+      "name": "QA007 no uncaught browser errors, HTTP 5xx or external provider requests",
+      "result": "PASS"
+    }
+  ]
+}

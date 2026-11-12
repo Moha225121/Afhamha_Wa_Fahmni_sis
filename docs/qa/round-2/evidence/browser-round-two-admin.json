@@ -1,0 +1,57 @@
+{
+  "generated_at": "2026-11-12T10:30:32.961Z",
+  "environment": {
+    "browser": "157.0.4341.42",
+    "executable": "Microsoft Edge Chromium",
+    "os": "win32",
+    "viewportWidths": [
+      390,
+      1440
+    ],
+    "database": "isolated PostgreSQL browser fixture",
+    "externalRequests": "blocked",
+    "actualMobileDevice": false
+  },
+  "results": [
+    {
+      "name": "R2-11 teacher/parent search, status, no matches and reset at mobile/desktop",
+      "result": "PASS"
+    },
+    {
+      "name": "R2-12 timetable class/section/Sunday filters preserve the real break row and reset",
+      "result": "PASS"
+    },
+    {
+      "name": "R2-17 supervisor dialog independent of user filter; save and reload assignments at two widths",
+      "result": "PASS"
+    },
+    {
+      "name": "R2-13/18 financial filter labels and safe deletion of unused inactive fee through UI",
+      "result": "PASS"
+    },
+    {
+      "name": "R2-19 parent message survives archive/reopen and conversation remains readable to its participant",
+      "result": "PASS"
+    },
+    {
+      "name": "R2-10 student photo is saved, reloaded and retrievable as the exact uploaded bytes",
+      "result": "PASS"
+    },
+    {
+      "name": "R2-14 actual single PDF plus multi-card browser PDF with photo/placeholder and empty selection",
+      "result": "PASS",
+      "detail": {
+        "pdfFiles": [
+          "tmp/qa-round-2/card-single.pdf",
+          "tmp/qa-round-2/cards.pdf"
+        ],
+        "cards": 3
+      }
+    },
+    {
+      "name": "R2-09 teacher/admin library filters and truthful empty or populated state render at two widths",
+      "result": "PASS"
+    }
+  ],
+  "errors": []
+}

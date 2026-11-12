@@ -1,0 +1,4283 @@
+{
+  "generated_at": "2026-11-12T10:52:25.687524+00:00",
+  "baseline": "1756cc4bf1019561c6caded736819cb3d62a81b7",
+  "tested_candidate": "8df7ed0a54a8654bf77c12f4c2d66de5910d3bde",
+  "scope": "Git blob bytes of application, assets, migrations, tests, QA scripts and lockfiles; excludes documentation, ignored runtime/build/output and other school.",
+  "source_sha256": "9688b6a2b7bd6657b71e91fe864c3e166c34385a81ca9e824519030ad135f02b",
+  "hash_method": "SHA256 of UTF-8 lines: file_sha256 + two spaces + repository_path + LF, in listed order; per-file hash uses committed Git bytes.",
+  "file_count": 852,
+  "full_suite_worktree_snapshot_sha256": "ebc2fb1c1b526f70d5caebc568888b970cf868571e4ca282a8c48e417453b623",
+  "changes_since_full_suite_snapshot": [
+    "scripts/qa/browser-round-two.cjs",
+    "scripts/qa/round-two-notify.php"
+  ],
+  "changes_explanation": "Only browser timing test synchronization/evidence changed, then the complete browser-round-two suite reran. No application/tested PHP/JS production behavior changed.",
+  "git_line_ending_normalization_only": [
+    "public/css/student.css",
+    "resources/views/admin/announcements/index.blade.php",
+    "resources/views/parent/layout.blade.php",
+    "resources/views/student/layout.blade.php"
+  ],
+  "files": [
+    {
+      "path": "app/Console/Commands/CreateAdminCommand.php",
+      "git_blob": "c9079f6b9ea03f3c6c3703668f9332ba7982bd89",
+      "sha256": "0830abe13903aa184e8f51f7cc8c76d375ad892754f46c592cac859e4cbd3ceb"
+    },
+    {
+      "path": "app/Console/Commands/ImportLibraryBooks.php",
+      "git_blob": "9d56f03f292250414e3439a698078ec97ab72272",
+      "sha256": "2b8fb45618813cfa16ce2fdd7163cd7c8e11677c73e94d6f41f681684b8cbdf7"
+    },
+    {
+      "path": "app/Console/Commands/VerifyLibraryFiles.php",
+      "git_blob": "9ff292311a64545947f09c3422c179e7e1a7d7f7",
+      "sha256": "15f089089984bd46470caf9a5da1b12b87f2e10b96802f186cc1e69f17377498"
+    },
+    {
+      "path": "app/Contracts/FcmAccessTokenProvider.php",
+      "git_blob": "19e22720d4b42d88a020c69115cf8410278da0d8",
+      "sha256": "2a8ab7f72e84104e21d9090de0b5655784425e51ed92203c59f9af8dd171ff2b"
+    },
+    {
+      "path": "app/Contracts/SmartTutorGateway.php",
+      "git_blob": "c4d1cff45da1cd1fc606b21c02c2b4cb5e07e676",
+      "sha256": "c96971cf4a08d9e3ab3e393ccd907e6ac0ad59820552f92320ea8f6e7c23e9f6"
+    },
+    {
+      "path": "app/Data/SmartTutorPrompt.php",
+      "git_blob": "9face84a4709769145509df9e8ad0208163fe031",
+      "sha256": "dab145f32ca05c9fb2608116e8c3427865d789c778ef42a79b5b9a2952fe8b53"
+    },
+    {
+      "path": "app/Data/SmartTutorReply.php",
+      "git_blob": "34687ab4f84141b7bad7d2b8a30494bb979bd673",
+      "sha256": "33d46e199c3855eebc4490c86f50661dcdfcc684fa29dc778209a075e7464027"
+    },
+    {
+      "path": "app/Data/SmartTutorTurn.php",
+      "git_blob": "561ddfdad7067bf68c181c02da7dfd776b5cc5d5",
+      "sha256": "8ba92f6777b5612da8f2c24da041f2f755dede56cafd61c90b87f1dfe31fc418"
+    },
+    {
+      "path": "app/Enums/AttendanceStatus.php",
+      "git_blob": "0f011416609850ac4e1b06c59dd78aa282bd4fe5",
+      "sha256": "fa87f15001a45b2862d3ee0542a16db81726508878327b3e316c66efe2cc7e1c"
+    },
+    {
+      "path": "app/Exceptions/SmartTutorGatewayException.php",
+      "git_blob": "631ea9fb58e48ea39e45c8f618eb8a6219c5708b",
+      "sha256": "85689f4b038e6c5e02aa71705a941e63b3d2fcc35faef60c43b802d22f0eb18e"
+    },
+    {
+      "path": "app/Exceptions/SmartTutorUnavailableException.php",
+      "git_blob": "82e740ba682fee6efed0f24282d0b248dc32e936",
+      "sha256": "7d48388c1c4524655125427e704ba83d496cf30d31c9060b677863a5d73630c7"
+    },
+    {
+      "path": "app/Http/Controllers/Admin/AccountNumberingController.php",
+      "git_blob": "a5fb1302fccb2d36f195340c921ad553a74dc9db",
+      "sha256": "84f0782ef7f329e6d096cd6a9d13c952e2d25a29663bc221d1fe18999c101d18"
+    },
+    {
+      "path": "app/Http/Controllers/Admin/AccountPasswordController.php",
+      "git_blob": "6b2c782008d3562c2d262ac63607dc5f63113421",
+      "sha256": "2d1a15d2e721b3bf618df9b04964769c9b92401d84d753848edc5260348b3e5f"
+    },
+    {
+      "path": "app/Http/Controllers/Admin/AnnouncementController.php",
+      "git_blob": "e0a4c21dcf0f893e317a9b5151599db5cb83b6bd",
+      "sha256": "9ac0da6e2ae99fb8072fac7e7a165ee0c89bfef22bc80abfe86a4d58b4cce0e7"
+    },
+    {
+      "path": "app/Http/Controllers/Admin/ClassroomController.php",
+      "git_blob": "9cd12273f1834f69b77c3ed87c594cb6aa285290",
+      "sha256": "17f3a53684247f6e56ba19bc56fb54df040f34a7ff816c832e2ea863421504cf"
+    },
+    {
+      "path": "app/Http/Controllers/Admin/DashboardController.php",
+      "git_blob": "0f8831fd1e8487a315ff4dbf53497da32ec072b2",
+      "sha256": "39a98dff3d0e2a75216740a811071737550289a3b0c8e44a01e4dea5b30c8e28"
+    },
+    {
+      "path": "app/Http/Controllers/Admin/ExcelImportController.php",
+      "git_blob": "82d6ccbf93c6277674d94f84496901fe8f32898e",
+      "sha256": "610b840e77c9a3199f6906adda746983f802c27b12a5297871b0be50e9ee349d"
+    },
+    {
+      "path": "app/Http/Controllers/Admin/GuardianController.php",
+      "git_blob": "cf9c7d4185f3cd395d80cbe98744c57115e60b7a",
+      "sha256": "31fe1bb3dde258bd08dfc29a28d48879c2f768bd290d06b2e8695c52b7ca1a9c"
+    },
+    {
+      "path": "app/Http/Controllers/Admin/LibraryUploadController.php",
+      "git_blob": "92677a7b51a0c615842786f5d96fc931bfb58ba8",
+      "sha256": "26cac05910dfacf31a36bcb99c22e47a2bd07a1a48c3ffc2ca3837dcf914113d"
+    },
+    {
+      "path": "app/Http/Controllers/Admin/ModuleController.php",
+      "git_blob": "ad1b432aa40e1106805666e3c59890b03d1e66de",
+      "sha256": "e510d4d69b857bb08ec4e4292ea7bd49c6e29b537818a742e0dd57e206a585bf"
+    },
+    {
+      "path": "app/Http/Controllers/Admin/OperationsController.php",
+      "git_blob": "9364d193b12e5c7fbabc067b119ec4c82c217257",
+      "sha256": "3f4324b1bcbe31bc25b3fd2cfb9622fc5cc2abd867bdb5700beca910fe464198"
+    },
+    {
+      "path": "app/Http/Controllers/Admin/ProfileController.php",
+      "git_blob": "c2c53cb33c85ede092199fb5dd7cc7727b56fbb5",
+      "sha256": "b33ee6997496665b3eea41c1d25c877a6e836357b112e7494541a1293ade314a"
+    },
+    {
+      "path": "app/Http/Controllers/Admin/ResultManagementController.php",
+      "git_blob": "38197c15df546d9716b1d0d387cff2785fe92bcc",
+      "sha256": "1df357e7e9f0c49b70a086f63904f70696f0819a67c56914174dd0ee7933b27a"
+    },
+    {
+      "path": "app/Http/Controllers/Admin/StaffRoleController.php",
+      "git_blob": "432bed42c93f19e0e318230cbfeb29bd6efcc072",
+      "sha256": "8f56eed82bbb59798f768276c045f52a7d6d4ba580e0f14174f43c2f58d518eb"
+    },
+    {
+      "path": "app/Http/Controllers/Admin/StudentController.php",
+      "git_blob": "d18ec40f2f852b4d74a2a95f93914e52b56bfe39",
+      "sha256": "92452aa45653aa135af517dc78717d9505d2d8fd126c6ca8cd8360d1fafdb4bc"
+    },
+    {
+      "path": "app/Http/Controllers/Admin/SubjectController.php",
+      "git_blob": "96ab2f7ee9cbb6f3e12ab6e77ea3cee533c3f9bb",
+      "sha256": "c720372cc17d24a88906a0caa795ab71bae780db9dcffe63ff45df5979ca5433"
+    },
+    {
+      "path": "app/Http/Controllers/Admin/SupervisorController.php",
+      "git_blob": "a87003c15450f025c2a2c8ebaaf62dbf35ea0e88",
+      "sha256": "3439199ac2a586a3bd7a7a3f4c4ee849586ed133bb5181ee5251f403816652bb"
+    },
+    {
+      "path": "app/Http/Controllers/Admin/TeacherController.php",
+      "git_blob": "e15b745d2e6834d079c81df39144f6625b54c1d9",
+      "sha256": "753d742c8086200f922d6fdfc81a0c5eea6e4bbd2410cdb2482cd7589aff2372"
+    },
+    {
+      "path": "app/Http/Controllers/AuthController.php",
+      "git_blob": "5c40b55417599ad4aebd474ef8efbc4e5e8b0431",
+      "sha256": "6bf472835ca098107d19114870f21847de77686f09fad842e194905cc6add877"
+    },
+    {
+      "path": "app/Http/Controllers/Controller.php",
+      "git_blob": "8677cd5cabb06901eac3d8f9a500094d2c1dab45",
+      "sha256": "25d1c1ef8e6cc8a376553faacfba2b07d9dfaee9bdbb84f14f77517580e9deb1"
+    },
+    {
+      "path": "app/Http/Controllers/FcmDeviceController.php",
+      "git_blob": "ea56ed1f9d5e1631f826cc2dc252250ff17e8428",
+      "sha256": "59fee7271785001d38288c2c24279b4da156c93e99f9106a8ec2c8669d107011"
+    },
+    {
+      "path": "app/Http/Controllers/FinanceController.php",
+      "git_blob": "efc9e48e16b4c6e0f806812887ab2e017bdcb2ee",
+      "sha256": "3a2aefadddd151902b851e1bb1dd21d48dad7f0dd1184550120e5f0d3bbb87fa"
+    },
+    {
+      "path": "app/Http/Controllers/GuardianPortal/ConversationController.php",
+      "git_blob": "ec5c9181dccc62aada3f240adebc811584b5fcda",
+      "sha256": "3457a9c5f12969900a12dcee745aec4dff311499b1171ff815cf6e211bd79f53"
+    },
+    {
+      "path": "app/Http/Controllers/GuardianPortal/FollowupController.php",
+      "git_blob": "d90a6f3e09a7328dc8accb733781455ecb5c70bd",
+      "sha256": "9adc202576e1bfa693010e4c2d294324d9749bb38220861863bed77c5605f18a"
+    },
+    {
+      "path": "app/Http/Controllers/GuardianPortal/IdentityController.php",
+      "git_blob": "94ab912a0e053b508021bed752d3f44e994bddbc",
+      "sha256": "9a8f08db170f40dbe6a0eee6d7d376c610baf867b48eaf982916118ec0be9acd"
+    },
+    {
+      "path": "app/Http/Controllers/GuardianPortal/NotificationController.php",
+      "git_blob": "4caf702d19def9322785c3f61d6e7dfd029fab0c",
+      "sha256": "7229de05313b123d0578b0a3914ea2ba8907ef8e0ca17c6dbe94599cf6750869"
+    },
+    {
+      "path": "app/Http/Controllers/GuardianPortal/PortalController.php",
+      "git_blob": "f120cd53878d5b4b60a2d1b18c40fb4067dd82cf",
+      "sha256": "543c18ebece2f0d59bf1bb37237b3e263373daab4ea28f1a9840e6f73bb74b53"
+    },
+    {
+      "path": "app/Http/Controllers/LibraryCatalogController.php",
+      "git_blob": "f6f2dfb3be7386ee2efedea55f6a818653475978",
+      "sha256": "a921c43cb7efaa5aa6100606a702e9c912ec996570ba1bf2e7579e0f03edeb12"
+    },
+    {
+      "path": "app/Http/Controllers/NotificationComposerController.php",
+      "git_blob": "2652e7b891767a5d167e0fe37aef4efc9a6b0b82",
+      "sha256": "a4a7f04170f71f8c35592e1678eb0b2291ad285232f60a409d67e7eeadcca1d2"
+    },
+    {
+      "path": "app/Http/Controllers/ParentPwaController.php",
+      "git_blob": "c1a650753d255d4b111570b4455481403f70ae52",
+      "sha256": "933e6279b3bc2d24b0e16610600b335849e05909d5c29328cfdcad18eb4c0351"
+    },
+    {
+      "path": "app/Http/Controllers/PortalAnnouncementController.php",
+      "git_blob": "acf05e314d3f6099b050770fdc284397f38e6d10",
+      "sha256": "ddfa7ac9f1cfc437626c2f25e880d5be244a2cadd614d69774dd6af755cf1d6f"
+    },
+    {
+      "path": "app/Http/Controllers/SchoolChatController.php",
+      "git_blob": "9b3bb3183f7543bd45995d71c1bb05943e8e596c",
+      "sha256": "ea3f49aa1e16c1aa44c374acd532a3daa850aa5ccf0f7d6ae7041fa6b213f4df"
+    },
+    {
+      "path": "app/Http/Controllers/StaffNotificationController.php",
+      "git_blob": "4678564afa0897b4c485a2b143f57b3cf3c7c40c",
+      "sha256": "da5a1cd450a5f442ed0574c31176e3a0bbb93d2278efc06868c5e816928d5fdc"
+    },
+    {
+      "path": "app/Http/Controllers/StaffPortal/PortalController.php",
+      "git_blob": "38acbf1500ca9593a7a6a2c5453bd4faf22ccce1",
+      "sha256": "52df7ebd19a807234eb3bcaa7b59dceabd72830e7d2e8fb943fad8a5bacce6c0"
+    },
+    {
+      "path": "app/Http/Controllers/StudentLevelAnalysisController.php",
+      "git_blob": "ab00009ae364ee96bd7882318ca5e768ab26b93a",
+      "sha256": "c2e26edc6a3b38dde323c1f3fb5834b0ea5a01689132fa068c2023f19eba5c47"
+    },
+    {
+      "path": "app/Http/Controllers/StudentPortal/AcademicController.php",
+      "git_blob": "515bb7a517aa7f224a3e9704bbd30cf375b710ca",
+      "sha256": "d07af34567a51390d47a794cce9aec43c92b8c73800438e64537fd5a24480849"
+    },
+    {
+      "path": "app/Http/Controllers/StudentPortal/EducationController.php",
+      "git_blob": "e2eefd0eb253c0e5389e224c870c154c690be602",
+      "sha256": "d19e544daaa2e532db0d37832ce765b8b7e837274b83118c979c8608dfb76b0a"
+    },
+    {
+      "path": "app/Http/Controllers/StudentPortal/PortalController.php",
+      "git_blob": "e202d81216343f5948c389d5076f208afe658590",
+      "sha256": "d0443d4e908ef37aeb7351a9dc802d56e1e963b61eda22d3f191006cec331f75"
+    },
+    {
+      "path": "app/Http/Controllers/StudentPortal/TutorController.php",
+      "git_blob": "a626c0d430efa05b10580aa6df3bc48eff864f19",
+      "sha256": "86ee09983d734da9730e908464ede8271fc700177be7dcf5637f700e0c669d0a"
+    },
+    {
+      "path": "app/Http/Controllers/SupervisorPortal/AttendanceController.php",
+      "git_blob": "1bdfd51cd1f4ba8cddfec6f3fee4c79ff3998a7f",
+      "sha256": "d314279261418d1d33c8855dfe6081390d87ba96107302d671aa763a56c45968"
+    },
+    {
+      "path": "app/Http/Controllers/SupervisorPortal/Concerns/AuthorizesAssignedStudents.php",
+      "git_blob": "34b17d1080b8eebe0c0815e66486ec3f7047a0d1",
+      "sha256": "bcb7778f325392a7719e6ac5b7ff6e37c60694139d10aefbc4fedc2ca112349f"
+    },
+    {
+      "path": "app/Http/Controllers/SupervisorPortal/DashboardController.php",
+      "git_blob": "012c100d4b9a0258f56cb512c4353290811a91a7",
+      "sha256": "83744d7694d401bbac41d3ebb361978113f1529dd0131d53baf2f3e186743dcf"
+    },
+    {
+      "path": "app/Http/Controllers/SupervisorPortal/GuardianCallController.php",
+      "git_blob": "a92f1d8334bfac07646e34c85d9d4e7457dd42f8",
+      "sha256": "f2dba39fad322b16bf1c73c17a85d9ecfd0d601f77a998e7c3734da6be7df234"
+    },
+    {
+      "path": "app/Http/Controllers/SupervisorPortal/StudentController.php",
+      "git_blob": "92e279ef7c3302d97ead794ea8357973e4402538",
+      "sha256": "4a45e7a0bcbc2cfdc17b38b9e8b397de2a9092802906b9e70cc15aa058454281"
+    },
+    {
+      "path": "app/Http/Controllers/SupervisorPortal/StudentNoteController.php",
+      "git_blob": "c3c6a8027c0be6e52db35e7bd5f38cc3ac6a8f0c",
+      "sha256": "4a79a3e108982f6307bebec5d6028591867073829f9e9e0819371424341b9153"
+    },
+    {
+      "path": "app/Http/Controllers/TeacherPortal/AssignmentController.php",
+      "git_blob": "d5110842144aa2173d906d7dbd10262c951edb27",
+      "sha256": "048c511cb601372da23d1592dde6979ff9ee234a0e1c27b23c58d187a7e77a1a"
+    },
+    {
+      "path": "app/Http/Controllers/TeacherPortal/AssignmentSubmissionController.php",
+      "git_blob": "ca6338d3234433895806c8990372eda68939ba29",
+      "sha256": "3eddc1162691439b04df53eaf4cefe93e24b693b982f37187bf8b7fca152969c"
+    },
+    {
+      "path": "app/Http/Controllers/TeacherPortal/ClassroomController.php",
+      "git_blob": "cc7cc94ed32b5080650be692d40fa9aafe0b93c4",
+      "sha256": "8d232b731584d3a0d7e9730665bb63fc0bb01eba6cfc299f2208487c5ae72967"
+    },
+    {
+      "path": "app/Http/Controllers/TeacherPortal/Concerns/InteractsWithTeacherScope.php",
+      "git_blob": "bf3c5b2168db0ebbe95022fad4f4081f453f6dd0",
+      "sha256": "1eac3a7ac647d24e5dfb43736f5c3b3d349576626c2fb1a18faac2eda3d6a7bb"
+    },
+    {
+      "path": "app/Http/Controllers/TeacherPortal/DashboardController.php",
+      "git_blob": "86ecb9281ce677962e9e3cc900f0331442970dde",
+      "sha256": "d647395138759b27cd14a98f7a70f1efac585e5c50cb54ae7829a29fc30457e4"
+    },
+    {
+      "path": "app/Http/Controllers/TeacherPortal/ExamController.php",
+      "git_blob": "639829f32bfbbb3412e9eb69b87514a266048ff0",
+      "sha256": "106f4dcf209e7dbdb753d7718b865c53b66c4585afec26d53dbe622bbe2e27d2"
+    },
+    {
+      "path": "app/Http/Controllers/TeacherPortal/ExamReviewController.php",
+      "git_blob": "b5073ee1455ca9a284aba1dcfbf342aeb5b1dfad",
+      "sha256": "db122a4a73ca49b45a78362bd56a7c9876c6596b9ee0f14a53edaf74f8238dc3"
+    },
+    {
+      "path": "app/Http/Controllers/TeacherPortal/GradeController.php",
+      "git_blob": "8dedd0d3b95aeaa0ee645db52bb3a1f981636de3",
+      "sha256": "d483852321634799555782d94b2bfd4099b1ce80589880628566014b4c5c7923"
+    },
+    {
+      "path": "app/Http/Controllers/TeacherPortal/LessonController.php",
+      "git_blob": "ae3a01aaa885949120afaa4f8e5af8e7ed3572bf",
+      "sha256": "8203bba3fe57da6c6bb0305fb133bd41658c3f35b2c00f3bfd7db0a6fbd4445a"
+    },
+    {
+      "path": "app/Http/Controllers/TeacherPortal/ProfileController.php",
+      "git_blob": "4aa31a1534d3b7f1773e21d86aa6258ac725ade3",
+      "sha256": "d16e21630e10df5dbdf472522b1b0675d7cc7dd6bc0a63ae611a688e7b62e0bf"
+    },
+    {
+      "path": "app/Http/Controllers/TeacherPortal/StudentController.php",
+      "git_blob": "6e865c93b3ec19198a87930b153ac2471e4468ec",
+      "sha256": "3ca3ad6f04c4efa6c58aefa25854814d571c0995319d18f70180e4a61307bb4c"
+    },
+    {
+      "path": "app/Http/Controllers/TeacherPortal/TutorController.php",
+      "git_blob": "d2d7b18385462aaa2b533ab2ed9398f47344bda1",
+      "sha256": "aa9beaadda6d4e7b6ea0fa3e37569f64e4d3e98d8c99047793de432db524ae98"
+    },
+    {
+      "path": "app/Http/Middleware/EnsureUserHasPermission.php",
+      "git_blob": "a31d55d672749ae9e04abcdccbee35803be5f59d",
+      "sha256": "9e38cfcf5ee757349911e8d28a830847e0d597dc6232c034742ca52a8f6a8fbf"
+    },
+    {
+      "path": "app/Http/Middleware/EnsureUserIsAdmin.php",
+      "git_blob": "86f9d7b13fb09d7203f35514382518954a44ecb9",
+      "sha256": "13a3168935f5f945c2c09fb0ad226cd558edb20eaba799807cce14db59d78e47"
+    },
+    {
+      "path": "app/Http/Middleware/EnsureUserIsParent.php",
+      "git_blob": "95603242fed48e04fca429d730f5cd76c6a38284",
+      "sha256": "a8c0b8bbae5eff81438555b1a16103f90fcda145b7047b6b7e64f2340ba89dd1"
+    },
+    {
+      "path": "app/Http/Middleware/EnsureUserIsStaff.php",
+      "git_blob": "59ce57c4a6971cf35bbef8acf10fef4ab35c1968",
+      "sha256": "c5daab8ab40feadf894cadfeabd0dba862cd76bfd26078646aa1abcacc4f6076"
+    },
+    {
+      "path": "app/Http/Middleware/EnsureUserIsStudent.php",
+      "git_blob": "774345154911e258f9e5c2c496836543b80bcae1",
+      "sha256": "b3ddd0838c12faeff832bd2e9f8066b85862ab00f5c8a0ed777b49822d9b4da3"
+    },
+    {
+      "path": "app/Http/Middleware/EnsureUserIsSupervisor.php",
+      "git_blob": "87f93a46a2e4943deb64be8492199bee51baaf58",
+      "sha256": "e33e7760cc3960f15479515fdfc1e6c3e61ab6f941bd3ad751ca9f7cb91c3026"
+    },
+    {
+      "path": "app/Http/Middleware/EnsureUserIsTeacher.php",
+      "git_blob": "468462b40169c7230ba375c4027967b940910438",
+      "sha256": "545c3037366779cd717b220e80de0591151f75d2841cea490a5bf34dee7da307"
+    },
+    {
+      "path": "app/Http/Middleware/NoStoreForSensitivePages.php",
+      "git_blob": "28c09e5cca606d9bc884f07763d09505ed25fbf1",
+      "sha256": "9de172e6eb3b393f3ca9a826bd885dfdc7af05f8e03b1cc22a27bf9794b7bed3"
+    },
+    {
+      "path": "app/Http/Requests/AnnouncementRequest.php",
+      "git_blob": "d09cfb8c2e5f22e3a124720bd6ba2952bec63b97",
+      "sha256": "dfd235f5f2354e6fd68b2bdd1b6148cd2328519d9df22b6957490eef33c1ed9d"
+    },
+    {
+      "path": "app/Http/Requests/AssignmentSubmissionRequest.php",
+      "git_blob": "7b9c8ec9af9345ac4d0b00b2a5ed8f26a41c718f",
+      "sha256": "2d5b5c53f33bf0d4ce5ccd501273765020b75f0b0829166adb9614ef37e9f904"
+    },
+    {
+      "path": "app/Http/Requests/ClassroomRequest.php",
+      "git_blob": "247671777cf3954dad6e48deb90610c3d88fbe92",
+      "sha256": "8b9d019718c92d404ddd109b783ff7c89e36b3006462a88ce53ab0410d48f37f"
+    },
+    {
+      "path": "app/Http/Requests/ExamRequest.php",
+      "git_blob": "32fb5e7fc41ec86cf460dd6dd2b1954ac9aafb0f",
+      "sha256": "bb38f61fdceb27cb883f6d96d72537c4a489bb867c5dafe7ed2722ac43acba42"
+    },
+    {
+      "path": "app/Http/Requests/GuardianRequest.php",
+      "git_blob": "b8ddb6ffa4c82e8ee0e48eeb44b91cd558837f0b",
+      "sha256": "949f21f49d9148b5d9e3d37904da8d685957a071f800f986a02e0eeb3aa12916"
+    },
+    {
+      "path": "app/Http/Requests/LibraryResourceRequest.php",
+      "git_blob": "43cd369b23617139bec27a9b55af2ab33330dc4a",
+      "sha256": "5758fdbf819275d2444831b84ca3ad829cb486dd1af1eb5292722ae3df8b78ad"
+    },
+    {
+      "path": "app/Http/Requests/SaveExamAnswerRequest.php",
+      "git_blob": "9392d27fecfcd7bd67f11bb6b0f8e89527d634ca",
+      "sha256": "a65ee4783d515f6fac98782a497904dcd3ac41962e7ca99816dd25ae471aaa4e"
+    },
+    {
+      "path": "app/Http/Requests/ScheduleRequest.php",
+      "git_blob": "b08b070fab6690b28b2da23454b007963410c6d4",
+      "sha256": "9c56e93c2eda27bef3469d2d8da55bb9387073674da4a2217b07588144248df4"
+    },
+    {
+      "path": "app/Http/Requests/StudentRequest.php",
+      "git_blob": "d4b091374e01594d08ad8d42a59a981cac7f8075",
+      "sha256": "2d2e670b5d1f67a43404acf788cd9e07e1d4fc4f7caae4868af446453a4f430a"
+    },
+    {
+      "path": "app/Http/Requests/SubjectRequest.php",
+      "git_blob": "ef46be741a26bbe798aaf09d61c500d25ba37523",
+      "sha256": "056cc643fef3c0d28929cb7493df037c2fb98136223c511f9dc17ad83ba48240"
+    },
+    {
+      "path": "app/Http/Requests/Supervisor/StoreDailyAttendanceRequest.php",
+      "git_blob": "277ebbb009afb0a200ae27db31704cb2786ed1b6",
+      "sha256": "81970ac7f7a9d2f136b716bf6b7243ee143edc57601d2df8064b703754c863e9"
+    },
+    {
+      "path": "app/Http/Requests/SupervisorRequest.php",
+      "git_blob": "56925d6658d69514914400fc3f30fc499e69c312",
+      "sha256": "3f56f60a06814ce8699bc044961ab048d9ea430cafee28d0860eb09ac550b337"
+    },
+    {
+      "path": "app/Http/Requests/TeacherLessonRequest.php",
+      "git_blob": "260abc59c1a660ce8524ac49fb0b85ee1132fabf",
+      "sha256": "87319bd5284e589a9cb0165ad56ff2d35f0a86fb56db8416718232b36a81dd03"
+    },
+    {
+      "path": "app/Http/Requests/TeacherPortal/AssignmentRequest.php",
+      "git_blob": "5b33f9692b8f34db587afebda37f90faebfbd532",
+      "sha256": "4fd75752a50dff9fbe50ae7bfc4da215796cb9b4b18ed87584dc9b085812ad6c"
+    },
+    {
+      "path": "app/Http/Requests/TeacherPortal/ExamRequest.php",
+      "git_blob": "a20e57f8655bdd07e33e65ba1deb513545a403d3",
+      "sha256": "872c7a4e2d3f106d575dc4c05bffbb017b06bbda2b2a2faf01e683244ae64e9c"
+    },
+    {
+      "path": "app/Http/Requests/TeacherRequest.php",
+      "git_blob": "73888f5fe1c32801443f5ea63db291e526a4ee0f",
+      "sha256": "aeb8c6bc9f1eb1c7607291d7cd3bd4306d143d74c5c0898f634dbbf2b18c365b"
+    },
+    {
+      "path": "app/Http/Requests/TeacherTutorMessageRequest.php",
+      "git_blob": "3d75a7e835242cf490422ed20611e9b90f38c6e5",
+      "sha256": "466168ae9ffdb799c203d35aff8a5fa79aa069e492261412405100023e0fb1fb"
+    },
+    {
+      "path": "app/Http/Requests/TutorMessageRequest.php",
+      "git_blob": "1b2c99e12ca651da9dae6e73bd57bd4dab113f7f",
+      "sha256": "4ff6931598e2fe6e4d508973ae0424baeed4cbf143490d2af4a8ab8252d7d0e2"
+    },
+    {
+      "path": "app/Jobs/SendFcmNotification.php",
+      "git_blob": "b35eeafa8b357769431e12a84d3b40110adc7172",
+      "sha256": "9066e8e4c6d5d4d9c644fee5afbcc2de052b496e19683f17969a668bf3a74cc8"
+    },
+    {
+      "path": "app/Models/AcademicYear.php",
+      "git_blob": "f157e6fc441689b9242fc0aba7d68ef3f4f1923e",
+      "sha256": "24ae108d7692ad5a49f94bcdf361922f477c968c6d70920262cafd776c4de072"
+    },
+    {
+      "path": "app/Models/Announcement.php",
+      "git_blob": "d2cafa35c0d06f1ab1ffc5e6396d9776af9a852e",
+      "sha256": "6c74d5fee6e8153d606422a32d863df4f53efd8c1edd557814fd6397f65f21c1"
+    },
+    {
+      "path": "app/Models/Assignment.php",
+      "git_blob": "8b31fda54c6321e8b556cd12c1a94e1448d0876c",
+      "sha256": "8ae34119bc4542ed376ae426624f518908df891bef21ed3b2fe8056579133f78"
+    },
+    {
+      "path": "app/Models/AssignmentAttachment.php",
+      "git_blob": "719fc7c07eb65c5ce52d16467b0b644cd074732e",
+      "sha256": "2a774171ae81b649f41b45871282368822351e9bb3eb3f003b4cc48385c3ea06"
+    },
+    {
+      "path": "app/Models/AssignmentSubmission.php",
+      "git_blob": "c0a3240600d7e413192635ad98a5653897417e9f",
+      "sha256": "fe2622e04a4dea4b5ecc6baad62e70bb69c76f22ae8a80784767cde522f88d3a"
+    },
+    {
+      "path": "app/Models/AssignmentSubmissionAttachment.php",
+      "git_blob": "d5ac821d7ea5c10139e9eb912062519a50692aa7",
+      "sha256": "60fa488baf804635a1c22270349e50773672e977bccc9ca08dcd84db267a2236"
+    },
+    {
+      "path": "app/Models/Attendance.php",
+      "git_blob": "aa6b43cdca6afdf377fb68459072fb8564bbf0d8",
+      "sha256": "32009f4cb5417eb855be97ff85f688af48d7740652d69f8eb407c72a33670742"
+    },
+    {
+      "path": "app/Models/AuditLog.php",
+      "git_blob": "aef0bd26366f37b2f147e15eac243af44a71cae5",
+      "sha256": "a24db936716694fc29f9b89e98140463d33c99ad2758939950c6d258f8f164be"
+    },
+    {
+      "path": "app/Models/Classroom.php",
+      "git_blob": "0445df373e8812f0f3b0bbf4c7d14db50455eb68",
+      "sha256": "f3cf4daa411d845cb3aaae7ba762003aa4065cd640dc91d939e3b34df7842306"
+    },
+    {
+      "path": "app/Models/Conversation.php",
+      "git_blob": "5f2bcfba1a7b1a20f0ffdaf481c1b8efcab48515",
+      "sha256": "6ccbf6d92dbd34645fb7dda6994c5b0f23d63fc8a30544b841ac6dd58832d229"
+    },
+    {
+      "path": "app/Models/Exam.php",
+      "git_blob": "e290666d5a15c5d0a724234686ea86bba0b72e87",
+      "sha256": "cc4691bb6f0772649b0282ccd63cb0880ca218be2beefb37c00c5598288ee691"
+    },
+    {
+      "path": "app/Models/ExamAnswer.php",
+      "git_blob": "65e5939278a53bb2594bea6a2c0bac07d3664306",
+      "sha256": "9e2c602a176b2d36e26f589b6f75b72c67ce5536987af9782a4a0f62aa92d56f"
+    },
+    {
+      "path": "app/Models/ExamAttempt.php",
+      "git_blob": "54c2e9c9107011aa788269868ee67c1bb621350f",
+      "sha256": "0844ed9035f7ee603bbbc713730d37da83c577ad00e5f1e09a306efa0349c057"
+    },
+    {
+      "path": "app/Models/ExamQuestion.php",
+      "git_blob": "a426b15b06ba7cfc94e9f3a3756c4926b16e5c66",
+      "sha256": "09e94ab36b5866f028172b8de307bef33a66a4c4a5b5b77394e1ba33cb9e57af"
+    },
+    {
+      "path": "app/Models/FcmDevice.php",
+      "git_blob": "01cbf247ff3d79b1c34039aaef0b46ac6ddcb796",
+      "sha256": "027e97c0bac118739317acf152bd334f5f0695267caa57988a888097bf5074b5"
+    },
+    {
+      "path": "app/Models/Guardian.php",
+      "git_blob": "f778777032a3b8337b64dc58a2e4d56022124996",
+      "sha256": "4f40a390ada5132352ce9bb0dcfca39c866254e30bcf5f39707c8a1645284ef8"
+    },
+    {
+      "path": "app/Models/GuardianCall.php",
+      "git_blob": "947b497e243ac06113486e4cfb0fb8d090e379a6",
+      "sha256": "64f87cc4b0dee82ca24736821cd7bd47b29910ca1eccf9c3dd5c3840b51b7c22"
+    },
+    {
+      "path": "app/Models/Lesson.php",
+      "git_blob": "ca346b253a28236b5ecc943033ee5de6e96cc5a7",
+      "sha256": "4b35223b41cb34f3e83f1d8d93bb09d00b2e8c7b48e8732f0cd19a69bb008853"
+    },
+    {
+      "path": "app/Models/LessonAttachment.php",
+      "git_blob": "99976d3ecaad71bcddf52f6e74c316e6c8a766ee",
+      "sha256": "19ca1f51a5495d7727ba41df147711aae27ef18e3260a372eaa7fa720e5f2718"
+    },
+    {
+      "path": "app/Models/LibraryResource.php",
+      "git_blob": "a2b14262531a92f1aa7b32c2c7c5a51364562beb",
+      "sha256": "e35dd4f401b5e7025e7afaaae873585c84f69a121f87aba668cab1e6326b4fc6"
+    },
+    {
+      "path": "app/Models/Message.php",
+      "git_blob": "af6eaa62421e5edffe8dae15983e43bed302cddc",
+      "sha256": "2030ab3d4d288302290142c6bc3e97e4b70888e84592e5d2b390238cd5f08d54"
+    },
+    {
+      "path": "app/Models/PushSubscription.php",
+      "git_blob": "5a90af43f9151534328db9edb7b90c5319704d6e",
+      "sha256": "544e5cf7b92d6496fefffea43451005e904785614f72f1412f3901caea2f2447"
+    },
+    {
+      "path": "app/Models/SchoolActivity.php",
+      "git_blob": "a9cd84a3796854d701cab4bb59df9c2978faf4c4",
+      "sha256": "33d31737a3774fd364ba8bf4dc6f8dc897046ba7fc1bb9cabc0ff6f4818aaad7"
+    },
+    {
+      "path": "app/Models/StaffRole.php",
+      "git_blob": "523e53694ab58f7b6c0f1f5e78929d1e8b484815",
+      "sha256": "8dce269b8b5112479071dcd0095bb887d526d61d86829690fae7f51e79613cd6"
+    },
+    {
+      "path": "app/Models/StaffRoleAssignment.php",
+      "git_blob": "eb322b8f98f831391ee5fb19fab6ea21489caeac",
+      "sha256": "49cda2603af722d584524b9dbd7b3f81ea2600cc4bc46a1e4dc833e47ee9f050"
+    },
+    {
+      "path": "app/Models/StaffRolePermission.php",
+      "git_blob": "2bebeed746c8d1b6605869c68c4f62ed58bc86f8",
+      "sha256": "e82f479ad5c3ba7d3bfb6be9000664cd032757481c5a01965d4da9ae7aa93288"
+    },
+    {
+      "path": "app/Models/Stage.php",
+      "git_blob": "99ff455b1f87b76fa5c2ba2495a0a6224eb4d82f",
+      "sha256": "e1c61d6c3d8a996b8cf95cabcbc193f3a352ed20966f4596bc01588936f9e515"
+    },
+    {
+      "path": "app/Models/Student.php",
+      "git_blob": "ca479467450f058820dbd4ccd9768e7dbb75eac0",
+      "sha256": "eb38978468777eb9217645a3179c932e4c361a1055aa002015c67454e7c5370d"
+    },
+    {
+      "path": "app/Models/StudentNote.php",
+      "git_blob": "8400321a465d8ec99008b0f2f264d9e43d886760",
+      "sha256": "3d14ee52a1be0a0f3375fd64c2cfb1c317ded3424a3bbc0d5129500f860bfeeb"
+    },
+    {
+      "path": "app/Models/Subject.php",
+      "git_blob": "c6d29a3be2bb02b06f7b75e2d3fcb8ef426f583f",
+      "sha256": "a302671204b468ec9fe634353cc9fa375a3e9118afd6c10ca47a462791901311"
+    },
+    {
+      "path": "app/Models/Teacher.php",
+      "git_blob": "75a3c8fedbd75715ce17bfa5ed5d3ea9eb5020fd",
+      "sha256": "a89b7c33ff9520053c648668dd147f07613fb257affa82b7f99d3b8eec46a75b"
+    },
+    {
+      "path": "app/Models/TeacherStudentNote.php",
+      "git_blob": "d95ecb4421fad3a121d02b3c7f57b42e6bb4990b",
+      "sha256": "6810e3c48cf0c6b02f905a66da8ca35ac7a1e4afe2e08902cee812dae5a71913"
+    },
+    {
+      "path": "app/Models/TutorConversation.php",
+      "git_blob": "e2dfcd3a661784f6e0db46beadd1b03e059e1d1b",
+      "sha256": "db8787ed00a941f416a7bf9ab264b88296425dd52a47269e044e8a817eb91646"
+    },
+    {
+      "path": "app/Models/TutorMessage.php",
+      "git_blob": "fc4da6709309bfd42bf542b1cea65f55321d9156",
+      "sha256": "656fb5e18bb1756b27b00e339ca2992858a8dc2d68be21f8911f900f5e314a59"
+    },
+    {
+      "path": "app/Models/Unit.php",
+      "git_blob": "a9a42407d27803495f579c764134e28f3cb55887",
+      "sha256": "431df56a17381caea57cbbf2dc1c88d065e07371de236f8c45ea8741464d2e0a"
+    },
+    {
+      "path": "app/Models/User.php",
+      "git_blob": "f47e1b833153bfadd0d6968527d51c54c61b3352",
+      "sha256": "c9312ebfcfdd565cc260e262a4594426db7fe57c634e713a99ef793c307dca8b"
+    },
+    {
+      "path": "app/Notifications/ParentAnnouncementNotification.php",
+      "git_blob": "b6ef87d978be0b4d252f8e6581582b1160c93be5",
+      "sha256": "d696e0bd91fd9821d949d55b677624ec4fbf5266d54678e6b4199d16bf1c4d43"
+    },
+    {
+      "path": "app/Notifications/ParentFollowupNotification.php",
+      "git_blob": "2b1d6e3a3070e580a177fe8aace383ad1c8bb094",
+      "sha256": "ba5f30351cc53cc0b154ca2c3e949543048d3b4e787dc677b3a5993d56756916"
+    },
+    {
+      "path": "app/Notifications/ParentPortalNotification.php",
+      "git_blob": "cbb63c8373043a1a432c218d14dba4ab6755f8bd",
+      "sha256": "72e98237d5dea99da7032775eb39fc371883420893726e4d686dbc49b07cee6f"
+    },
+    {
+      "path": "app/Notifications/StudentAnnouncementNotification.php",
+      "git_blob": "21e32525e7afc869925ea993f92a55377eef2d6b",
+      "sha256": "1b37430e2b23713b9177af4700ebc0f2852e01b0ce97fa54374624a54c754302"
+    },
+    {
+      "path": "app/Providers/AppServiceProvider.php",
+      "git_blob": "42bced46b8defcc6fc8c571b7bcde9186da5c0c9",
+      "sha256": "201486bacd6119a52e29814a74e5aecebb093aaf8d7ca581772b7c429ed4aca2"
+    },
+    {
+      "path": "app/Rules/SchoolEmail.php",
+      "git_blob": "4d87e369a791ae8cb1f1fe5a7a6b49cab2599f5f",
+      "sha256": "76afbf31a09c644e10af955827675eec641e1d44a62d6f090aadcd2075c23771"
+    },
+    {
+      "path": "app/Services/AccountPasswordService.php",
+      "git_blob": "3fd8492d597a38ed277e2752c864a42cb2e7fcd0",
+      "sha256": "5c47a7c0484829911ab1464fb513832a73100ecfd3269c516f4807145bfb9d12"
+    },
+    {
+      "path": "app/Services/AdminRecordLifecycle.php",
+      "git_blob": "fcb1c23c74975ed5189483356e3646ce3279e1af",
+      "sha256": "aceda1db1e1494a20ff74570713bbc7258aa4283d5e32692df7163a784fbc016"
+    },
+    {
+      "path": "app/Services/AssignmentContentRenderer.php",
+      "git_blob": "bf3ac12aa4dd323b2520e2fcff6be7d90b52922d",
+      "sha256": "925e0babdc764c0eeb5afecce8569982bf36d44036d10e6782cecc827cdb3a70"
+    },
+    {
+      "path": "app/Services/AssignmentSubmissionService.php",
+      "git_blob": "ee9b107055f5615b0ef31f3d8d94db54359d38a5",
+      "sha256": "dc86d00c632b8a5e98ef0194d771a801ba8a8df0e216d495ef7b7ac2197e2a09"
+    },
+    {
+      "path": "app/Services/AuditService.php",
+      "git_blob": "e81dbebf6a04e15d42feea2e029bd21c798fc26d",
+      "sha256": "a62e7cc0b4986d9dbe0772caca193fd63612a1ea7b2f697bd9730edb5fcd78f6"
+    },
+    {
+      "path": "app/Services/ClassroomOrdering.php",
+      "git_blob": "b3222609305fa7f7f3b1f40a86976f576f6a76e1",
+      "sha256": "7f3fa258a0afe2db1cf7dfddd93ca865bee1fd580b3a581e5b013ee09c30ee68"
+    },
+    {
+      "path": "app/Services/DailyAttendanceService.php",
+      "git_blob": "4707b1db29ccf792205c841bc1daf293e3f50cce",
+      "sha256": "3326cb34a35bd6671004a1b8b2d83272d4668542958a3c44a096a65d795a38a2"
+    },
+    {
+      "path": "app/Services/ExamAttemptPolicy.php",
+      "git_blob": "a30ec97bea4eece596ae4d118e9168ef6f0999ec",
+      "sha256": "cc5cc939fbdee2976a726827993667c7eb441cb3345ae24004151764c3ed74c6"
+    },
+    {
+      "path": "app/Services/ExamAttemptService.php",
+      "git_blob": "cfe9bf16fbe233fc17f27dff8d6fe55784a2f4d7",
+      "sha256": "616373a72051de6eecb5772c188e14a587f7975299b474a4a1def18985106bc8"
+    },
+    {
+      "path": "app/Services/ExcelImportService.php",
+      "git_blob": "1bd7f4b010ceadc116cd4dedfe03f178e0465089",
+      "sha256": "eba74d1ed733f64420ed69cb7978a3688132535781e2d31bdc0e6451dfbcf3f1"
+    },
+    {
+      "path": "app/Services/FcmDestination.php",
+      "git_blob": "236f30b33ed31d5746b11467fac2b12fb575f0bd",
+      "sha256": "2fbdfcd4607e12122a53a4091f378c47b97efe9a41587307ca3f68d0478978cd"
+    },
+    {
+      "path": "app/Services/FcmNotificationService.php",
+      "git_blob": "93871a9086657796734fece2de6380ae56aebb51",
+      "sha256": "301bbac8da670048c57516477e18f764d683bcc3e23cae22be816eaa80977694"
+    },
+    {
+      "path": "app/Services/FcmService.php",
+      "git_blob": "32418d021a6f8e3df1ec984995d9ac6958dacaf6",
+      "sha256": "a4cfd4aaeb17702796236d6c63480c25cc04de2fdaee1f2da9ca143170a85552"
+    },
+    {
+      "path": "app/Services/FinancialPdfService.php",
+      "git_blob": "7deb6046fe77e506551ee69561adc7613de2b033",
+      "sha256": "b28c420f7802fc8f7b8c1eafc6e5257787703293bf4e5ed09626888c3f6cccff"
+    },
+    {
+      "path": "app/Services/GeminiSmartTutorGateway.php",
+      "git_blob": "e620e3ad1b813e575984b9dad2994345bdae7009",
+      "sha256": "5fefb9bda5eb5abd4b2419c56fbfb8deeaa6755dd49e62bd01d946200274f880"
+    },
+    {
+      "path": "app/Services/GoogleFcmAccessTokenProvider.php",
+      "git_blob": "f49c7e1afe6771287c3891ee7377f0de6b16a690",
+      "sha256": "ccef1c0791350c5b26e425101d707421ce58561a0b4a8957ab8073a12f510fae"
+    },
+    {
+      "path": "app/Services/LibraryBookNaming.php",
+      "git_blob": "087ca1dc5ded3aea3a43842e46c81d04a3d59f35",
+      "sha256": "90eebc3cef8bfd6fdff3fd56972ea451b8d7d675282e7f6e9f1532c06ccde9ad"
+    },
+    {
+      "path": "app/Services/LibraryCatalogService.php",
+      "git_blob": "530032fd967d43307eca12c44a82c8e6af88c4de",
+      "sha256": "a0cdf4d54e324272c597850cc5806b2802d739a0da78b0386ae9f73ecac55b13"
+    },
+    {
+      "path": "app/Services/LibraryUploadService.php",
+      "git_blob": "672f0ddd3d3ea9c49f0724ba1a5891eca56f2320",
+      "sha256": "977e1c481577991ae56b1aeb6074214cf89e8da75f4c1a4f85763e01cec3e9a9"
+    },
+    {
+      "path": "app/Services/Money.php",
+      "git_blob": "fcd1f8fba0f8812234b11d92441d07411272b826",
+      "sha256": "3ae5c64ddee72302de6b96974436569dc08c486ffe4d9d8bb7e100ea45be1562"
+    },
+    {
+      "path": "app/Services/ParentAnnouncementNotificationService.php",
+      "git_blob": "8ae960adfc112f59f41952b22a597d0423c6b31c",
+      "sha256": "8dd8c3688396c06a30d2a0c43ea3791255905aaf608397ce8852d06fb0b443fd"
+    },
+    {
+      "path": "app/Services/ParentFollowupNotificationService.php",
+      "git_blob": "7d93fe1e3fe83952d2421177c586ab2cfade132a",
+      "sha256": "32e97a494e71bcbcfa0eaff7af01c00bb7d6f36a2bf93690cf06c4b10a868c2d"
+    },
+    {
+      "path": "app/Services/ParentIdentityService.php",
+      "git_blob": "c35829ac89b254c59ffc728cea45efe315f611ef",
+      "sha256": "9630c756090d2d89771cba80a908fe5056bfe72c50a2c13896df465a68bc5e1a"
+    },
+    {
+      "path": "app/Services/ParentNotificationService.php",
+      "git_blob": "8f5e8c9b253276dee11fe56696fe4227cefdeacf",
+      "sha256": "fec72da5ef9e0dbd401d7a99136a15c93280872cdc7bc26dcd38ea9de3a28677"
+    },
+    {
+      "path": "app/Services/ParentPortalContext.php",
+      "git_blob": "4ebf4049d21170c3cdcf1ca06f87bd5e6688f758",
+      "sha256": "1e1dbc20ee377e77beeffc268acc76ff22c0f1b4d20cead726e1dad3b1f50964"
+    },
+    {
+      "path": "app/Services/PortalAnnouncementFeed.php",
+      "git_blob": "2c4467a7f1513b94ec057c2f2c89ef84fadfc511",
+      "sha256": "aa171204e2eac9a5de2a93473ac4f5c6519069dc0ff122d7ca56af3d5bf2d6e4"
+    },
+    {
+      "path": "app/Services/PortalEventService.php",
+      "git_blob": "dfabaa14e741b625204342f8ab38dc1aa44ffaa8",
+      "sha256": "7e57a3376e0dc152766cf7ac5117891d68912dc9431cd7a3b17ab3f241355105"
+    },
+    {
+      "path": "app/Services/ResultPublicationService.php",
+      "git_blob": "c7132f0d1e7fc92251a4fef56ed7598ee3e0caeb",
+      "sha256": "bf534359caabe679eb651ab59f46b33e4844fe3d3973aca963e9d7d9f7d207cb"
+    },
+    {
+      "path": "app/Services/SchoolAccountService.php",
+      "git_blob": "e4fcdb31c92a1c01a3653a824615af3fed1f08af",
+      "sha256": "cf2e1e9ccba7c127392fa28f0e34bc3a0eafa44fc5d7addbe1bb581cce7eb419"
+    },
+    {
+      "path": "app/Services/SchoolChatService.php",
+      "git_blob": "f0bbac677e6323baea194603cbf39918bcb48a1e",
+      "sha256": "cc229f72eb6bd9ab17ef7dec9b12bf4d7586e0ed8ae92b9b2337e3655fb905c6"
+    },
+    {
+      "path": "app/Services/SmartTutorConversationService.php",
+      "git_blob": "924daf09cd6b93f58d4cb91564581eb764720eb2",
+      "sha256": "d494f874ef5f21f5db93eca39b5c64e997f43939ee7d0aa94f6d5b3fead9cb36"
+    },
+    {
+      "path": "app/Services/StaffAccess.php",
+      "git_blob": "e0b743cc46f0da5f35225b5182b0dfe53c270184",
+      "sha256": "0b5c233421a632d40211d6cd5bec58a65fd6695a48a636c11d3f0ba7be85a61a"
+    },
+    {
+      "path": "app/Services/StudentCardPdfService.php",
+      "git_blob": "4cd202eb2847c8197ee523e3e36666bd67644676",
+      "sha256": "cc4809892fc1376b124f24cc4d4224e3f47a59b895f08085949949f86ceab4a0"
+    },
+    {
+      "path": "app/Services/StudentFinanceService.php",
+      "git_blob": "897ad963efa37f6fbac0552d09aad3e4c6ce5771",
+      "sha256": "a94326be12add5d5f4bc6163c2aecffe4b995236400504865b58bd97bd2a236d"
+    },
+    {
+      "path": "app/Services/StudentLevelAnalysisService.php",
+      "git_blob": "edf7cf49606445f78d070ca978597823d5437acc",
+      "sha256": "99c82c45f97fb113ebff807fe508a3924b5e7bc19b2b4e0e5e3037050d61d7cf"
+    },
+    {
+      "path": "app/Services/StudentNotificationService.php",
+      "git_blob": "4135cd7a5389e21a6abed030e886c10b7c4eb6e1",
+      "sha256": "cc1d4976176fe2a7332ccc9a456e48fcd4cc7a2455d622ab27fe1e3a1cb62919"
+    },
+    {
+      "path": "app/Services/SubjectDisplayName.php",
+      "git_blob": "fa3da815bb496bd8598a4fa5b5960b3de3ea97e8",
+      "sha256": "cbc341dda60ddf24d0fad7306a1dc5dbbec6a69da85cb0fd3dbf61a3605160cd"
+    },
+    {
+      "path": "app/Services/TeacherAssignmentGroups.php",
+      "git_blob": "d6d7733c78f5be79dea23b2672ba1d733adcd86f",
+      "sha256": "aac91140dc85fa3e322237556dd12daa92b53c4a55cd04ada9ab694fda932df8"
+    },
+    {
+      "path": "app/Services/TeacherCreationIntent.php",
+      "git_blob": "eb9a752ee93f7734c5aa035c145bd0cc187d7470",
+      "sha256": "ac48732fd3e3992750942eecad2d0bc851cb0db43b167416faef64e65a8f4a7a"
+    },
+    {
+      "path": "app/Services/UnavailableSmartTutorGateway.php",
+      "git_blob": "78ad7bdeef1b6a97e8949944ebf6a1a2ec7bb27d",
+      "sha256": "3c28c9410fe68d07c271f712ff2c940895a5010a7e47dfa9bd84a293165913a6"
+    },
+    {
+      "path": "app/Services/WebPushService.php",
+      "git_blob": "50c850acc50c012ee4b6637711ac113e30491ac4",
+      "sha256": "8c9ffd8990c2d52b819fdc0d0a7524a5bbe44e85afcc85d52cc40c7b5185d907"
+    },
+    {
+      "path": "app/Support/AcademicClassroomOrder.php",
+      "git_blob": "1fceb7a9d1ff3f812f196365fafdab1f08c21d7c",
+      "sha256": "d57ba18749b0edfbd9c8b99098718152753fcac15ce7c10435a18f9602c9cae7"
+    },
+    {
+      "path": "app/Support/DisplayTimezone.php",
+      "git_blob": "12db438ccb1d8f94224779dc0c549e96a9854a5c",
+      "sha256": "a7057584573da6eb07b51f3bb0d06f16fb93d6223eb456f2a041d93a81eccb55"
+    },
+    {
+      "path": "app/Support/NotificationContext.php",
+      "git_blob": "ff94f5453c06189c53638c75e736b3e80d902b5b",
+      "sha256": "27281756dca1e59b14918c13dbb94d8e7cd9f3a1240a5d0bf837acd107f2be5a"
+    },
+    {
+      "path": "app/Support/NotificationData.php",
+      "git_blob": "f91c30fe8441ab69fd123f5282aed7e603786a10",
+      "sha256": "041a49cd5d7fb3147ad366a7da8a6b09735f3bc12a78a3dddeb50358e5ad5bf3"
+    },
+    {
+      "path": "app/Support/SchoolBranding.php",
+      "git_blob": "790fdcba64bf41af74064f06bc805c69efc80f1b",
+      "sha256": "cf98a23470f4209f0c8391ff3d1accbbf38cfc2d41d4a19ebc9a1693b9181f34"
+    },
+    {
+      "path": "app/Support/TutorMessageRenderer.php",
+      "git_blob": "4eed8535551358c66bddc69aa4586e433173d161",
+      "sha256": "6f08f9392081d2be02f2b7270575519c9673649938b82c3f231a7248ffd6970a"
+    },
+    {
+      "path": "bootstrap/app.php",
+      "git_blob": "e114ac7bbcc87e5799d7b5b5eaa107968a0429a2",
+      "sha256": "24b5c47a265afdeab44a7f0195e5790e25eba217e810bc1e0c2182eb2501ba59"
+    },
+    {
+      "path": "bootstrap/cache/.gitignore",
+      "git_blob": "d6b7ef32c8478a48c3994dcadc86837f4371184d",
+      "sha256": "240a3e0d37d2e86b614063f5347eb02d4f99ca6c254de6b82871ff8d95532a7d"
+    },
+    {
+      "path": "bootstrap/providers.php",
+      "git_blob": "fc94ae6011d6ce1d1175d0f642412c2a27913f6c",
+      "sha256": "f720e185207a343d4c19fc99dbb317a4187efbcd7d38a303a695bbdd77ffb943"
+    },
+    {
+      "path": "composer.json",
+      "git_blob": "66b2873526dde6b8800399acddcaffccd5c33efe",
+      "sha256": "263602488e6f70e5bf91fed19634a152460724c5e4e42817f757d59ba57d3294"
+    },
+    {
+      "path": "composer.lock",
+      "git_blob": "46fbe6ea3f8681ba863eb95c6b3f4f4b98c5830e",
+      "sha256": "3cc417fa5b788656d9b46aced6e790ee3b930ffa90bce1659cb2ad16655496ea"
+    },
+    {
+      "path": "config/app.php",
+      "git_blob": "2def49df1900a176374b35809023ff2608e775ec",
+      "sha256": "d80d30fbf7fe86e52dc5dde07f8f27fe6ed9d495a9616cd94d635865d5b9f019"
+    },
+    {
+      "path": "config/auth.php",
+      "git_blob": "d7568ff194267ec424aa84e2e9c0d2cbea42b8f8",
+      "sha256": "c7e204e9785c9f596d66fb884b493f658f2327f157646bdb4088efd6b3a7773f"
+    },
+    {
+      "path": "config/cache.php",
+      "git_blob": "d7eec61a39914c7b4794339e723da8503eea3d41",
+      "sha256": "ee4ad2bba1edfcff52e9599f37371f2370d0b167cc226ce72d46cdf6edf2dc55"
+    },
+    {
+      "path": "config/database.php",
+      "git_blob": "b21f9f4790f476d27c52b6965a71bbaa04a2575b",
+      "sha256": "006b38db9386a1824f97639ed3e3a77023a3ad91673b89e71ebb6c87a7df7d80"
+    },
+    {
+      "path": "config/filesystems.php",
+      "git_blob": "37d8fca4f6f85da3a176a3668c537bc5e7fd29a7",
+      "sha256": "ba7060d7a23e490c3ce830656f6d24ad3ccf5b868e3293f2a12e411959dc5635"
+    },
+    {
+      "path": "config/library.php",
+      "git_blob": "bd9b6289b56dee27251ac0546868c1f850acf546",
+      "sha256": "e4a4758c0aa64fd48377eaaf7e5a7baa56e148ee789cf7b943e3cea5db25ba68"
+    },
+    {
+      "path": "config/logging.php",
+      "git_blob": "97bdc0390b3cb6e55231fa12bdf50d649d37b400",
+      "sha256": "beb1ffd0db910f6f0b4f75214c3d5aa385d692733ece8a450f4c169d2c99ce38"
+    },
+    {
+      "path": "config/mail.php",
+      "git_blob": "e32e88da2cc82d4139c032c28b03005afc6008c6",
+      "sha256": "c43ff49a31c5f32ce21eb7159f2a4b3cd2f4074eaed5838d265646dbfedd3474"
+    },
+    {
+      "path": "config/permissions.php",
+      "git_blob": "93aef7527d4f6c8c7abfb62983c63fcf07dffeab",
+      "sha256": "6a188e2036ebf10f3d763c6c7b99ab561bd889713cc0f1861aa7714338a25571"
+    },
+    {
+      "path": "config/queue.php",
+      "git_blob": "79c2c0a23cd06bcb6d22ea0a2b218e22a6d51198",
+      "sha256": "6101774da7c8b79af46d0028f2b8b31a484c3f7eda10b76e5b27b6093ad364a4"
+    },
+    {
+      "path": "config/school_accounts.php",
+      "git_blob": "fbb9be8308a0f4c286f6bf5fe64b3979383c2765",
+      "sha256": "9e2719af1f9d0071780b5e11bfb267e999d04b27f5f0a6beb4c65c0732480879"
+    },
+    {
+      "path": "config/services.php",
+      "git_blob": "6d55c18aa7122bec88adc2fbd6885a081cfe5e23",
+      "sha256": "2bd76e39d3d94df7b4ca34a12a25754606a9c50067af499766ff415611941095"
+    },
+    {
+      "path": "config/session.php",
+      "git_blob": "f5744827f901d05402fe81e2314290ff539c0fd9",
+      "sha256": "64272cfbef6f47c65bf857f1c5b1e853700c0d0278de46b86663fd83ef4aeed8"
+    },
+    {
+      "path": "config/smart_tutor.php",
+      "git_blob": "f05cafcf50615da85578706cd916f200b81c0f80",
+      "sha256": "32e28b0116833936a426801307e1d5057c011240565eefd1699e6213d892c401"
+    },
+    {
+      "path": "config/student_academic.php",
+      "git_blob": "c2ee0271c19817ae201be1d1cf143fed4da0c033",
+      "sha256": "fbff6ee19165e283b62f9124e8a933d2f8028e4e32c1a02bb40456f66703bcab"
+    },
+    {
+      "path": "database/.gitignore",
+      "git_blob": "9b19b93c9f13d72749cc3bac760a28325116f3f1",
+      "sha256": "e758642d95e83e907e010b6e46b07b3f953c7cef11fe5ebefc2a77b9d7b4d5f7"
+    },
+    {
+      "path": "database/factories/UserFactory.php",
+      "git_blob": "c4ceb0745b7dde10ee0fd29e7fd98af1303e360b",
+      "sha256": "50bdc543f1b09d1a57260be55ad0e1a68aee4b34f63e1109dc94d9bcd3080526"
+    },
+    {
+      "path": "database/migrations/0001_01_01_000000_create_users_table.php",
+      "git_blob": "05fb5d9ea95d1b527ba0e7074936553944b8d302",
+      "sha256": "10d79883bc08ce46510f9ad8b1830b4d06d586dc56ae2c8bac3b3e491f69a90f"
+    },
+    {
+      "path": "database/migrations/0001_01_01_000001_create_cache_table.php",
+      "git_blob": "06dc7a5ee782ac3a0f3f1c471b03120d87f2e655",
+      "sha256": "fbb4665e5a977e71df4e74ec75b3c06ca4f17ad0de7138fe9786639189978e77"
+    },
+    {
+      "path": "database/migrations/0001_01_01_000002_create_jobs_table.php",
+      "git_blob": "edac6fee599f55c34fd7ade713079c7f007b2fe4",
+      "sha256": "df4910687180313a14a3f96a8bddd808ae145ed1b107cd772caf865c0dc2b746"
+    },
+    {
+      "path": "database/migrations/2026_08_22_000001_create_school_admin_schema.php",
+      "git_blob": "0922fedf60d0f803320761e28b0ef32dd5113fc5",
+      "sha256": "2009569dd17dd018f959a27c383f8b1a3000e28af9a92d0aede8d9551babae47"
+    },
+    {
+      "path": "database/migrations/2026_08_23_000002_create_notifications_table.php",
+      "git_blob": "52e3b00595fe8d3f1569cea0b0499b42ade2e628",
+      "sha256": "8ed086ee6290efc9ca90b3d1297bc05bab7eee6242710e6f7787d8e993f4e1e4"
+    },
+    {
+      "path": "database/migrations/2026_08_23_000003_create_learning_content_tables.php",
+      "git_blob": "ba847a404162534f02299debd90ea6a918f76e56",
+      "sha256": "e78228fb53b71e3052616b15d9f921bcfeea61e30a334a9d8654b4a5d400e5e9"
+    },
+    {
+      "path": "database/migrations/2026_08_23_000003_create_student_academic_tables.php",
+      "git_blob": "2720102fe32e37d594fe4370b9f9f4b95b1c8819",
+      "sha256": "919a95f990325bc475fe8afb4d00b200b64e82bb4679832f2584a6f52a0a96bc"
+    },
+    {
+      "path": "database/migrations/2026_08_23_000004_add_disk_to_library_resources.php",
+      "git_blob": "807cdb9a7d46fbbb9b4f2c072a27810a0feb8236",
+      "sha256": "6746e5d16175337f576a996cdf4d526112ad16afd08536ce772a1d67af3fe6a4"
+    },
+    {
+      "path": "database/migrations/2026_08_23_000005_create_tutor_conversations_and_messages.php",
+      "git_blob": "b64e1091a4c3822ee0fd2d56b1ae10494e4e45f8",
+      "sha256": "4638a4341da9e54fe8ba3ab84408bf32baab83dfbd9a61125b0ccabf0dd8eb34"
+    },
+    {
+      "path": "database/migrations/2026_08_23_000006_add_delivery_metadata_to_tutor_messages.php",
+      "git_blob": "eb23a4a1e03ba87e67f554c51ffb6f5f91135d85",
+      "sha256": "bd9faa2e05dbf8c4222217948f3a14b807b14d76fbf9bad1577b5da133f2d8d2"
+    },
+    {
+      "path": "database/migrations/2026_08_24_000001_create_teacher_academic_schema.php",
+      "git_blob": "90ec03aa5a3cd31a3c69ff3c07d6d329608bedf4",
+      "sha256": "20f2cfd7c95f2a660b49713411252ccc50d3e8add43b290690cb09e20bd3536b"
+    },
+    {
+      "path": "database/migrations/2026_08_24_000002_create_grade_sheets_table.php",
+      "git_blob": "b915dc0b8f789fd74de78d63671b920578623a5a",
+      "sha256": "2b156c7705585fdf3b1870dadaf23bb2d053e6fb157698aceed44766205c1b9e"
+    },
+    {
+      "path": "database/migrations/2026_08_24_000003_create_parent_academic_and_communication_schema.php",
+      "git_blob": "e6d82ea0c85d2d55369d9817fe8c13262d86493e",
+      "sha256": "c1821e4df99f0af51fb726526e122409c0661729c7d65ef833188ae499194dbb"
+    },
+    {
+      "path": "database/migrations/2026_08_25_000001_add_scores_to_grade_sheets.php",
+      "git_blob": "6bb9177cace54d2f1c407b229aa69101030cda5d",
+      "sha256": "8b6e008d40e6a63de02be0e4a1c79d329004c993df496e7eb220109e48f178a3"
+    },
+    {
+      "path": "database/migrations/2026_08_27_000001_add_assignment_compatibility_columns.php",
+      "git_blob": "26e537ba35e656ac699a6fa350506bac0db67ca3",
+      "sha256": "cc4cc4fb14637bd0877fc77108b1ed9dc37508d930fc18d1dd8e2b7fa3d2c977"
+    },
+    {
+      "path": "database/migrations/2026_08_27_000002_add_assignment_published_at.php",
+      "git_blob": "48d30a25ddd4e08375b0bc18a86e0329c89264da",
+      "sha256": "cc9feeeea096a0186724980362955f75ba889dde74ef3debd737c64ce7e84c7d"
+    },
+    {
+      "path": "database/migrations/2026_08_27_000003_make_assignment_due_date_nullable.php",
+      "git_blob": "4ef834ef72e9a5db7559057af9603a107a02a1ab",
+      "sha256": "da3e8693acf652ac874d1c7e6b9b6c440598a7ae8415a4742d8bc9c3e52c4067"
+    },
+    {
+      "path": "database/migrations/2026_08_27_000004_add_assignment_submission_compatibility_columns.php",
+      "git_blob": "7add2464a023d33c4273e8f91641e0e7686f9797",
+      "sha256": "86cdbc98df396090c7146612577d1abddabf33b6e4953b5fac470a5ebf8893c6"
+    },
+    {
+      "path": "database/migrations/2026_08_27_000005_make_submission_file_metadata_nullable.php",
+      "git_blob": "7696d6bdd9c3b47fb4684c8f06fa68865b380298",
+      "sha256": "b4e5057f73e77756bddced8e68273f774c7fb76741cc04242ca1d3b33b73f236"
+    },
+    {
+      "path": "database/migrations/2026_08_28_000001_add_column_scores_to_grade_sheets.php",
+      "git_blob": "d3c88eb078b34e4b5a19c84c90b2909f32d53b7e",
+      "sha256": "b51d85059f643d0e7d9e4c09237d9b3564dd5183c839c38e5eabd5bc70550aff"
+    },
+    {
+      "path": "database/migrations/2026_08_28_000001_add_student_file_metadata_to_assignment_attachments.php",
+      "git_blob": "8f06c0536c3ae83d4a726c26ac54969602466bae",
+      "sha256": "c784c76f7c448b0717273a689e007729d091b1a72327b4392b95bec60917273e"
+    },
+    {
+      "path": "database/migrations/2026_08_28_000002_align_integration_nullable_columns.php",
+      "git_blob": "b89f14475b11e07102768107abd1c2436ab34c87",
+      "sha256": "02f74048a5951b0f8b98d41f13f5573a36679ad8f1bedcef191af2c7705de5ff"
+    },
+    {
+      "path": "database/migrations/2026_08_28_000003_add_teacher_scope_to_lessons.php",
+      "git_blob": "94f13595dcfc585967fea34fc76e74257dfbd81a",
+      "sha256": "086f59440420f894f895fbd812e9cd87994ab7c6804556cf375da128edc0e790"
+    },
+    {
+      "path": "database/migrations/2026_08_28_000004_create_teacher_student_notes_table.php",
+      "git_blob": "b5c04aa416aefb345046adda8c2bea045a26845b",
+      "sha256": "d059b74d9243a2279b1c1db45327a0676ea70ea04f4dc86583ab6c3c8a4429ab"
+    },
+    {
+      "path": "database/migrations/2026_08_30_000001_rebuild_daily_attendance_and_create_supervisor_schema.php",
+      "git_blob": "33ca22c2e6818fb5f0b5c7b3a545282f2c7c6fe9",
+      "sha256": "ae44215a9b2001d8deef3bacd70dfdc74f679243dca5bb9e84241886bf0f1a3e"
+    },
+    {
+      "path": "database/migrations/2026_08_30_000002_create_school_period_times.php",
+      "git_blob": "dcf2179854e8aa1d1a5504ae84f76d4a349ec6dd",
+      "sha256": "fdb34f97bf720490bb1de61d04c3b414806f03624445a60709ba23507f3db70b"
+    },
+    {
+      "path": "database/migrations/2026_08_30_000003_add_default_school_break_settings.php",
+      "git_blob": "3fea21836c50d1c7a2642d3f8c0818c28e951002",
+      "sha256": "ea3c1e0305d8284673984fb3ae1fa57b4d9f6f9b06d17127184314b318d10b93"
+    },
+    {
+      "path": "database/migrations/2026_09_06_000001_add_default_account_password_setting.php",
+      "git_blob": "ab703b56a5f5c1650767e734966b74515985ac46",
+      "sha256": "40d5f36593830db243e8b46099764391bf7d47821e619d016ef154da2e978d62"
+    },
+    {
+      "path": "database/migrations/2026_09_06_000002_create_account_numbering_schema.php",
+      "git_blob": "fc9293497dad8898e203d8adf643a1d9b8ff415f",
+      "sha256": "439c399626790cb0bd5f8c10e0cf948e9ce65914d12f933e3ba558b1c213920c"
+    },
+    {
+      "path": "database/migrations/2026_09_06_000003_create_student_financial_schema.php",
+      "git_blob": "9ca8ab35fa252b975140dd519ab704beac31a5d6",
+      "sha256": "9b50e07b377b547a902fea59b7c6f967990dc1eaedacf36e6196a8b325e02cfc"
+    },
+    {
+      "path": "database/migrations/2026_09_06_000004_create_result_publication_schema.php",
+      "git_blob": "d4d1c3781656248e582592cc0969d4a96da22eca",
+      "sha256": "9e2dd2e69977331687c7885bc9a012ef6064655476329db55ce7a425cc1750cc"
+    },
+    {
+      "path": "database/migrations/2026_09_26_000001_create_stages_table.php",
+      "git_blob": "18aa385c1e3b0d1fc29ff30094b5e227d2100daf",
+      "sha256": "ce4d2eea69a388da8cc70c472aa6774475f07d334c8fd364dcf55315604624a7"
+    },
+    {
+      "path": "database/migrations/2026_09_30_000001_add_catalog_metadata_to_library_resources.php",
+      "git_blob": "553a6bcf5df23333d7a61daa9fe0093d57ccb795",
+      "sha256": "6ee286c51741147c6b1107141c53748b8d2807b0efbdf35545f43419d9ec698e"
+    },
+    {
+      "path": "database/migrations/2026_10_05_000001_complete_primary_classroom_branches.php",
+      "git_blob": "47ebfdbb1fa5626b755090d388d7baa96ed76482",
+      "sha256": "78b9fbd6e047510cd125f01c3abf708a8649927dd13f38be5b12688bc0ea0a25"
+    },
+    {
+      "path": "database/migrations/2026_10_05_000001_create_configurable_staff_roles.php",
+      "git_blob": "3962492e3fd432feaf2bff2f2d10f89ee95fdcad",
+      "sha256": "27aad3283b7f368798c84a5bd8050544a70b4ef94edf7aa4d764eccbacf69377"
+    },
+    {
+      "path": "database/migrations/2026_10_07_000001_create_teacher_creation_intents_table.php",
+      "git_blob": "9529badd3a9ca372ec9f00086294ff13fea26652",
+      "sha256": "f63cab1eddab7b37980b85b75052b1c60fda4817475c3f361fdbc154a8fcb4d7"
+    },
+    {
+      "path": "database/migrations/2026_10_08_000001_add_additional_guardian_details.php",
+      "git_blob": "c676e66de8c14ee98c4010892aa4812d7c80d276",
+      "sha256": "c33d23af27fcb8e61c85162477b1d4f7c45b3fad4c4c89548e7113db1b2bdaa4"
+    },
+    {
+      "path": "database/migrations/2026_10_09_000001_create_school_activities_table.php",
+      "git_blob": "35cba8d308457a848b3725a023d3ce3dddcbdd86",
+      "sha256": "88930233614e0390d03ebe0b6569ba1b5b13080b2ba231f0478b3f53171b9659"
+    },
+    {
+      "path": "database/migrations/2026_10_11_000001_repoint_grade_sheets_to_teachers.php",
+      "git_blob": "bcef76323465dc2ddffc44f79380665c71f6749e",
+      "sha256": "06f3c92c38ea78db1cacfa162d786d5f1b91c121516ac851dacfe8cfa51b1e93"
+    },
+    {
+      "path": "database/migrations/2026_10_11_000002_add_submission_key_to_lessons.php",
+      "git_blob": "658816bf505b46aedc66a2b98a4405c18fb18775",
+      "sha256": "29e714d206224fbe281aee0f66fce9a4f770cfac924246e3768fd920b06faa49"
+    },
+    {
+      "path": "database/migrations/2026_10_11_000003_add_soft_deletes_to_classrooms.php",
+      "git_blob": "80e91b421ac6ea56a3e0cabea64dbb2089a8b5ba",
+      "sha256": "5b126cea788df751f0be84bd90ae08aa98ab3f5b29cfd4a4563211a67b2628f6"
+    },
+    {
+      "path": "database/migrations/2026_11_01_000001_create_fcm_devices_table.php",
+      "git_blob": "8b7b135c68d521047e1e4bd951ab1247bfa47f92",
+      "sha256": "80dd521939415c820426cb46dbe9c48957bbcba5b32b9657176b74bd8fd76499"
+    },
+    {
+      "path": "database/migrations/2026_11_08_000001_add_fcm_outbox_payload.php",
+      "git_blob": "e64ffd40c5ffce70b7723f3e96698cc522e38044",
+      "sha256": "cb238b50ec73fb93a416ee838fbba44d7965c7a966ac732540f99d9f8f44f650"
+    },
+    {
+      "path": "database/migrations/2026_11_08_000002_add_teacher_owner_to_tutor_conversations.php",
+      "git_blob": "2fa71455e9b678d240893dcc41890cd8c923c279",
+      "sha256": "958b0059ccadab2c9a8933f37f8ef21d53d5873565ec9d6f42cca2f5b4a14b8d"
+    },
+    {
+      "path": "database/migrations/2026_11_11_000001_add_fcm_event_cancellation.php",
+      "git_blob": "4c73edcdc36674c81e76a9bee74286bd36313863",
+      "sha256": "fce52fb92074df1954e0b9bf152b929dc96cfaff0098de84f231816589073933"
+    },
+    {
+      "path": "database/migrations/2026_11_11_000002_create_lesson_save_requests.php",
+      "git_blob": "824b1dd4603b48924a6c1ec8f65e774f943f4126",
+      "sha256": "e36621a2bde7071a5c505ff6a1e1d769a7f4cf6608a6a8b46dcc97f1c17fca3b"
+    },
+    {
+      "path": "database/seeders/DatabaseSeeder.php",
+      "git_blob": "b39e8d0b226379ee9c92c9186fefd20fd198675f",
+      "sha256": "3ea6212d610789446a768a5560d8f961e4fff13b77ffc5b22f083eaefb42358d"
+    },
+    {
+      "path": "database/seeders/DesignReviewSeeder.php",
+      "git_blob": "42d4c0ed9ce0daf5fedd33a9b1cfeef09ddaaf8b",
+      "sha256": "d3478718f84d9108f3c38559ae9d42cd2942597703e0c083801a20d1c57a33cf"
+    },
+    {
+      "path": "database/seeders/LocalDemoSeeder.php",
+      "git_blob": "2e1e5b432020dce935fb2452829748324777a690",
+      "sha256": "5054d2babc657089b4eaeb583f47d9e35f504250fe66747e1908ca8ebcb6d417"
+    },
+    {
+      "path": "package-lock.json",
+      "git_blob": "eded1fe4433d35b453739b7abc9c4d63eee3f292",
+      "sha256": "30497e7fa491717506d69b5c0b38aaaba62476dfe89e18db96d741fa2d74b6b1"
+    },
+    {
+      "path": "package.json",
+      "git_blob": "3daf1427b5dfc39638ef3878310dcfca6ff3056d",
+      "sha256": "7d9261a40ffaa5a5e339369a0dd5bd86eca0ff296dacdd2d78777c0303848f56"
+    },
+    {
+      "path": "phpunit.xml",
+      "git_blob": "4f5b21c42f41f0b83f1b1f0844dce0c68cba9581",
+      "sha256": "aab1c2be116bb40c818e8e0d3c8983674eb143b0f093ae0da0766998b7459eac"
+    },
+    {
+      "path": "public/.htaccess",
+      "git_blob": "b574a597daf309b383dc2dc2bd1e5362630e2531",
+      "sha256": "b7e379c77639fd56144947dbae84c84eb466d9c686ea81f2f013ae85421da923"
+    },
+    {
+      "path": "public/.user.ini",
+      "git_blob": "26b06310baa39abf1de2b99183b8ce81feb7a85f",
+      "sha256": "747035d6b17d038239dcdfe025ec8d0ce64fed053b9fa39dfe9d5e043c735e1a"
+    },
+    {
+      "path": "public/app-sw.js",
+      "git_blob": "4b7ef36f1ad21df39c4ad78f03f82443f83dda5f",
+      "sha256": "c8434e0834eb78aa9cf6a7a11ea6ef917367c523a950c871cc18f280b9daa186"
+    },
+    {
+      "path": "public/css/admin.css",
+      "git_blob": "503b5292382d514cc68722f00f9b82bb5471cf17",
+      "sha256": "bf24fb11c4d67296b46c9348932df52cf46dda0f970d55721b393524e4504966"
+    },
+    {
+      "path": "public/css/finance.css",
+      "git_blob": "c6d70134e6a61f63617f6492b9cc61af76850379",
+      "sha256": "9468c15c52563d73b44b60c11da9b25de430726220c218dbf47683645d4753cc"
+    },
+    {
+      "path": "public/css/library.css",
+      "git_blob": "b0a70fc29328cac71c5926b4a3bec09859a769e3",
+      "sha256": "9bbe7475ed71dc7aa7cebca3655268e922feba4819e93428e3a20b2806a9745f"
+    },
+    {
+      "path": "public/css/mobile-tables.css",
+      "git_blob": "bab2ba78193ac2a1c51f9f843f68e8771e748edb",
+      "sha256": "d3df80fbb69615b9107747b8a7d454a896eb206e99de7333ddad7ec6c300a00c"
+    },
+    {
+      "path": "public/css/parent-academics.css",
+      "git_blob": "37b0bf6500d2aed7cdcf7f6c25a6835868bfba40",
+      "sha256": "b6183e6073c5d375326436584cb4b60d4e1f14c6183e1f862062443d9111e141"
+    },
+    {
+      "path": "public/css/parent-followup.css",
+      "git_blob": "44eb6801b67f9078b03f33059f0afa97b608b52a",
+      "sha256": "cac60f17cf954376a8abfa2291279d7856500bac63969b64e330a9191b848333"
+    },
+    {
+      "path": "public/css/parent-notifications.css",
+      "git_blob": "e5690c05a95189bdeb0318da01e6fb7763b7eb57",
+      "sha256": "6e3c952ddc78deee99970d69e033953667afd9269afd320eab098950565aefd8"
+    },
+    {
+      "path": "public/css/parent.css",
+      "git_blob": "079282195da9ba159af2c9d3a6f8e43970a3b012",
+      "sha256": "1486bfe34dc841a0600007596fbbcecb2f7694c815e19664b52fad25e229d944"
+    },
+    {
+      "path": "public/css/portal-system.css",
+      "git_blob": "d3306bb18b4c1c0456fd77e873807b32a70b7f62",
+      "sha256": "e41a6c74e9a41b0d0df19f71313ab7a2e3965791fc65d6ce259da05f69d1f7b8"
+    },
+    {
+      "path": "public/css/pwa.css",
+      "git_blob": "de0413ace30f89b8e440d173e2dbc9f2809d616d",
+      "sha256": "c966a2713c9b0cb1a5130fbe4eabc1c063e6fe97eb4ebca41a6a811c2f51823c"
+    },
+    {
+      "path": "public/css/school-branding.css",
+      "git_blob": "ae39d011206d92ca8fd78749a5db605f1240f821",
+      "sha256": "27f7d0e1c095fedf7e81ea86b70d5e8be47150d6ae02bf92cbe718ac260536c6"
+    },
+    {
+      "path": "public/css/school-chat.css",
+      "git_blob": "9e85a01c2c1cfc4c1fc988d523c27fdf3f1e9bbf",
+      "sha256": "b577074dd3a3cf7ff1df7d0e37fd0edce73c1c3ec90f54887631263971a9519a"
+    },
+    {
+      "path": "public/css/staff.css",
+      "git_blob": "6e12abb1795c975a9a6793100563fcd7558b8d76",
+      "sha256": "f718140273095b70a4bc94998ea88a07542032e464091d2fb53e89971c19e1a6"
+    },
+    {
+      "path": "public/css/student-install.css",
+      "git_blob": "1cc531cfbf55f45471770ab3c0f6c5c4454e25b8",
+      "sha256": "eb1a51d278dfa6658ad2226d1c1e71847dd196fd5b385655315112122133cbd8"
+    },
+    {
+      "path": "public/css/student-notifications.css",
+      "git_blob": "b794cd3c5b73910c6126525aaafdc14b701a7c1f",
+      "sha256": "624e8cfda3f5d306f55d14ff8c306420fb78b727356a98ef1faded80c33c0ce5"
+    },
+    {
+      "path": "public/css/student.css",
+      "git_blob": "4b4db520facc2954db5971478aa2d47ceed115c0",
+      "sha256": "523741ba70c74397430fd3ccec110d4fd6d5babba6285a47ec3ae3019bc45580"
+    },
+    {
+      "path": "public/css/supervisor-attendance-bulk.css",
+      "git_blob": "22d5a468e595e7449cf3462e6bcc298019d8ec06",
+      "sha256": "e3495246ce91c830fcddc82929fbc4fc36d4274e5fd01a54dd3efa949c7d5de7"
+    },
+    {
+      "path": "public/css/supervisor-attendance.css",
+      "git_blob": "b192f1d4e3d84747a33d15566149d8ff8a9bb381",
+      "sha256": "ed0bd690c830e79a02aa0d9aa031676cd7534a9f3b67eb52e11ee47be469e2ae"
+    },
+    {
+      "path": "public/css/supervisor-calls.css",
+      "git_blob": "82928c625669101978ec33eb52c6f41f3c5d5d8a",
+      "sha256": "d15bce933a6961a625a3047d0ec86077f97891d58e61e41ddfdaf0354350f462"
+    },
+    {
+      "path": "public/css/supervisor-reports.css",
+      "git_blob": "2446326e8521529a817d59584d7bd78a25419f60",
+      "sha256": "2d3866a696c526d3f43b9d5d6999d794917a36bff9ec6a6a4a43ce0d5d04ebc9"
+    },
+    {
+      "path": "public/css/teacher-overrides.css",
+      "git_blob": "3696e6872a3320e3022b5647e6fc0633b20cdf15",
+      "sha256": "c9538a5c1e498628c878a59b82426302f9f1e61ac50cb5e61906f0642799c929"
+    },
+    {
+      "path": "public/css/teacher-tutor.css",
+      "git_blob": "10389c423295c1d0eb79997ac5f80732e66ee3bc",
+      "sha256": "1e42d08f52947a0970399cbd2a46ae424702a4078eba788a014a7a4f0c7daf19"
+    },
+    {
+      "path": "public/firebase-messaging-sw.js",
+      "git_blob": "5e8794f4c57aa5b39063683f552e37e948916a75",
+      "sha256": "cf6825613c7d5ef38b0f88d4e039ea0773508e75b1c6df892be5dd659a0df021"
+    },
+    {
+      "path": "public/icons/hexa-tech-logo.png",
+      "git_blob": "b8e38841d2bd2aa78c58c7a1e6305c8bfd4799fa",
+      "sha256": "780366928e8b973d333e054365460c77e2e40eaac99025db550446ae09de3646"
+    },
+    {
+      "path": "public/icons/nasbia-logo.jpg",
+      "git_blob": "da059699e88eb58523214501dd45c0ee71de4278",
+      "sha256": "839e9769e9bb51a661c6b2660c5d1b6b3a5e94cadf3554d143d566f719bb0e15"
+    },
+    {
+      "path": "public/icons/nasr-daem-logo.jpg",
+      "git_blob": "fbae5dc72eee5305482a57a38caa41c011c98187",
+      "sha256": "261a0f1f1df5726b3d40f623ce3ac507110be708f555b32ef7a820b543ceace7"
+    },
+    {
+      "path": "public/icons/nasr-logo.jpg",
+      "git_blob": "ef9e74c56271072ee86d75c8ea41799a5b31350c",
+      "sha256": "ed9425a92ef2a66eafe13b5b87b0f031de55f32e01c936f55b5eb127aa673749"
+    },
+    {
+      "path": "public/index.php",
+      "git_blob": "ee8f07e993802c29e166435e55e302ebfff1c12b",
+      "sha256": "eba77cba39695b6bd091fe5211d481f7ebb2ce2d8d26230b5a609465d0a4aff9"
+    },
+    {
+      "path": "public/js/admin-card-selection.js",
+      "git_blob": "290041096582b7eb56f84d32ba057d2d72d825f6",
+      "sha256": "afdefae9788a1e4c1f087cddb96aca5db9e7aca763f1bab5be46a2a766a814f8"
+    },
+    {
+      "path": "public/js/admin-student-photo.js",
+      "git_blob": "2560c98980baa0fd5959c4d7747441a11827bc7e",
+      "sha256": "44f5460f9edfb0331a9db6662526fd9e3aba1a2a35c5210369ad9d9a679646bb"
+    },
+    {
+      "path": "public/js/admin-teacher-form.js",
+      "git_blob": "d59ae5b8b87fd686d46a62dd9d21b7ceb46db695",
+      "sha256": "099fd2faf4f368515580cda1e132df772874801a7e269d70d442acb8d6082109"
+    },
+    {
+      "path": "public/js/enhanced-selects.js",
+      "git_blob": "a9e250fb9edd977b3961c695651f91d07c277683",
+      "sha256": "618e21b9cb9a1fb8ee5bd4a15e278a9a694817d2dbe1ff54b7dbfcd46da34976"
+    },
+    {
+      "path": "public/js/library-reader.js",
+      "git_blob": "1acbce4ae9df8ec9e2fa42f714b81e609c07f140",
+      "sha256": "f3117be89b15350ac186da4b48bbb51debd7c88142c4d79bd5e20cdbf21a9d8a"
+    },
+    {
+      "path": "public/js/library-upload.js",
+      "git_blob": "94a061a96f29f2f86d253ed6fd852188eeb3ad49",
+      "sha256": "5674287b8141c4598d1e3f5cb3575f985c9ffcd0be3c74ad18c4d085728908e4"
+    },
+    {
+      "path": "public/js/mobile-tables.js",
+      "git_blob": "1ccb160573cb76ca9a0e9b86789405115edb2b15",
+      "sha256": "22a3d4ae712a9ca454ae83fec15f1496487ee9a1473c6236cc949b03a077b4e1"
+    },
+    {
+      "path": "public/js/nasbia-identity.js",
+      "git_blob": "c19e1eabb361a91480bffbe97f0d7fc37f07a402",
+      "sha256": "56d898c90a4063c60591af0ca50e8970f80083f20672fb29ea47b2f01b6c9d04"
+    },
+    {
+      "path": "public/js/parent-notifications.js",
+      "git_blob": "4f471468bee1bd04cb4a1ced8960fc4d05b97dd5",
+      "sha256": "958343af7afabfadedd8e74bcdcc41ed30febff2ae04bef2b94a277df70ea3f4"
+    },
+    {
+      "path": "public/js/portal-system.js",
+      "git_blob": "368d68655d64e183a689ae3834a04805026de8b8",
+      "sha256": "58abfcc04f1e8dcf3b00dee39af9eaaec312afeb91129d8d86df8622df437aeb"
+    },
+    {
+      "path": "public/js/pwa-install.js",
+      "git_blob": "5892d1f3e867f89cc67608bfcfca5511a63c1cb8",
+      "sha256": "0e5ee501f445d30d50086c68b77dbd4436f9adadd7a42ff011cf42e82df4bc6a"
+    },
+    {
+      "path": "public/js/school-chat.js",
+      "git_blob": "dceee86d0a473457293a9b73fbccec97cf017520",
+      "sha256": "8e767db369a700a6df892e24d0a2b047cb2ed9189c4d5fb420e4651781cc844c"
+    },
+    {
+      "path": "public/js/school-push-privacy.js",
+      "git_blob": "48966482548b532c6fde94a6691ffed389d1cf03",
+      "sha256": "e1289e901c5633812a6a89e9e51fde851ceeae7fe67edfb56891bd015e1cd13e"
+    },
+    {
+      "path": "public/js/school-push-session.js",
+      "git_blob": "c8c8a2c7e229fb11ac1f557114a66291baaeeffc",
+      "sha256": "5aecf4686bddf2e85fee68143ffbe9f01c3876bd66b410b731971caaa8921676"
+    },
+    {
+      "path": "public/js/searchable-multiselects.js",
+      "git_blob": "87ac81c7b75fa251e5448a629bc05133f38647b2",
+      "sha256": "55797eba6f4462c39f6bcddaaba9dbc5499af6bf4902e50928efe6d00e52606c"
+    },
+    {
+      "path": "public/js/staff-form.js",
+      "git_blob": "60b195aa1dd8d149a159f356d31c287ff4807c40",
+      "sha256": "91f3de4054281ba98d772624138315a8eb61aa77e8c4081b865a753efa600d54"
+    },
+    {
+      "path": "public/js/student-install.js",
+      "git_blob": "3f183167765d552fb1372fd23784b011b2da210a",
+      "sha256": "1d917b20895a562cdc7b2291463f611b0b5eb54e42dc9f109864d0f67d3fb577"
+    },
+    {
+      "path": "public/js/student-notifications.js",
+      "git_blob": "ace96f9a46927fcc4d06308e5cace9d589577f8a",
+      "sha256": "d938b36b17d94e60e556b832f8cca7ae408cab85f566a0cc40dd6a7ce57dfd32"
+    },
+    {
+      "path": "public/js/student-tutor.js",
+      "git_blob": "dca842e46fa945f1ccedc073094b012d88aa30cf",
+      "sha256": "3a00fb2d141b01966f1ddeb026861bcc33e674e4c950e16675732a5094bfb201"
+    },
+    {
+      "path": "public/js/supervisor-attendance-bulk.js",
+      "git_blob": "5594d05c23730db248c698b8898394a8ef0ef196",
+      "sha256": "2fdec30acac48007d856fd191c680d3b0a8b095a394313a9d477f7baf039e2b8"
+    },
+    {
+      "path": "public/js/supervisor-attendance.js",
+      "git_blob": "9ee94f53d5ad07b96f6203d953ff4e0cefe4124f",
+      "sha256": "004985610215c665106c6a36121b891780a84353cc8b5beac433fa087f039816"
+    },
+    {
+      "path": "public/js/supervisor-report.js",
+      "git_blob": "570f66960c05c88bc1ff34e09de1dfeed599351c",
+      "sha256": "cc5fb0bd30b24f075dfb59646520986da9c4a739f22cb0e11a9946ad37748629"
+    },
+    {
+      "path": "public/js/teacher-lesson-save.js",
+      "git_blob": "3b3f0c64361006b82a55860df866fd2ebd4d6dbb",
+      "sha256": "dafe7241b98ee402806208983fce808a63851ea70bcaad89c4db2891b55daeb8"
+    },
+    {
+      "path": "public/js/vendor/jsQR-1.4.0.LICENSE.txt",
+      "git_blob": "8dada3edaf50dbc082c9a125058f25def75e625a",
+      "sha256": "b40930bbcf80744c86c46a12bc9da056641d722716c378f5659b9e555ef833e1"
+    },
+    {
+      "path": "public/js/vendor/jsQR-1.4.0.js",
+      "git_blob": "429896a9d087eb3977cf67521f738d01af17c808",
+      "sha256": "bc40c8a15196236b2314db0856f72ca0b49980cd5413b8c852a7349f5fee0859"
+    },
+    {
+      "path": "public/manifest.webmanifest",
+      "git_blob": "6d4e1d13046b4f722367eee146abef2a7360ef17",
+      "sha256": "5fa0d0fa0359ed7bd1e1a599cf57ad7491b89d5bbdd4ad87f2b0efe523e66d3f"
+    },
+    {
+      "path": "public/offline.html",
+      "git_blob": "32593af110a644f76e94c2d6a2b7c0f473ae285d",
+      "sha256": "191f699183653c8dc6362145c70d24ea9195d0716d9478396d9cf36c4a4b0e67"
+    },
+    {
+      "path": "public/parent-manifest.webmanifest",
+      "git_blob": "4d0b0d34a6bbc5cc1713db647a755f3f9a45cbae",
+      "sha256": "db723c4c948f090d3cf0ab7094c2475c1b784eb75b23cb650efc054e5799afbf"
+    },
+    {
+      "path": "public/parent-sw.js",
+      "git_blob": "7a5017f52b734ab8f233aa0e19e0dd086ca1143b",
+      "sha256": "8673537abbd85e150368d6bed73ab9aae31c66792809849f138f659ce1dc4b40"
+    },
+    {
+      "path": "public/robots.txt",
+      "git_blob": "eb0536286f3081c6c0646817037faf5446e3547d",
+      "sha256": "e5c4b84484ee4216e9373be99380320c25dd94805f99f0a805846f087636553f"
+    },
+    {
+      "path": "public/student-manifest.webmanifest",
+      "git_blob": "a594becbb615d398cefecc0f5fbc26a37ab8918f",
+      "sha256": "992fd31aab66cec2a11d0dee4273ca8fbf8e207a4336bea734f0174bdd47328b"
+    },
+    {
+      "path": "public/student-sw.js",
+      "git_blob": "e3ea21824d938396226d6faecfebc9e71045d533",
+      "sha256": "e9f99f73963c03636eaef1347b6ae22762ace74398b4aacc41df51206536a088"
+    },
+    {
+      "path": "public/upload-too-large.html",
+      "git_blob": "e21acb29699610c3549703038b2d5c783132732b",
+      "sha256": "460722b7d72d1535fcdaaedc2668899738103cb8257f7ca59ba736ea7f96e566"
+    },
+    {
+      "path": "public/vendor/pdfjs/LICENSE",
+      "git_blob": "f433b1a53f5b830a205fd2df78e2b34974656c7b",
+      "sha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594"
+    },
+    {
+      "path": "public/vendor/pdfjs/VERSION.txt",
+      "git_blob": "f061b5008b2b7639e600ae930507de85e2663c69",
+      "sha256": "230de1b678dab97958d0b7f27f7ab5085d86d432bb0f9e4908e825405bca1e04"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/78-EUC-H.bcmap",
+      "git_blob": "2655fc70ae706c7ba52a5d647cbfdfad6072c697",
+      "sha256": "d92a261336dc18b8c03a46eb4d462382d33f4338fa195d303256b2031434c874"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/78-EUC-V.bcmap",
+      "git_blob": "f1ed8538287499647d923d7d8f517a00cdac4e3a",
+      "sha256": "61670bebc4e4827b67230c054fd0d820d6e30c3584d02e386804e62bbedc032a"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/78-H.bcmap",
+      "git_blob": "39e89d3339c74cbe06e7e4f76d60bf3556b0d4b6",
+      "sha256": "ece6415b853d61e1b2560165151407d35cf16e6556932b85a13ea75276b77402"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/78-RKSJ-H.bcmap",
+      "git_blob": "e4167cb51f66c60ef7d9500b450303b5da175574",
+      "sha256": "696b1f973c97623496703809eaaa5f9b40696c77540057413f4b826a08edfa7b"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/78-RKSJ-V.bcmap",
+      "git_blob": "50b1646e94bba61b3242a680fe3023337e191123",
+      "sha256": "53cb6d560ab377da48cf65d6dcacb0bdb31f13fab7066c580de38c12a73a7ff9"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/78-V.bcmap",
+      "git_blob": "d7af99b5e2ae9a21d534f1965c35a2b572143322",
+      "sha256": "289000f02fd34872b6975503217f33abae6bee676e7d28f640473a67c8db1712"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/78ms-RKSJ-H.bcmap",
+      "git_blob": "37077d01e26f9ee2427592f6deebb145d628e731",
+      "sha256": "a2442595218f5f8bd8e1b42188e368587d876cfe0cc4cd87196f077c878f72e2"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/78ms-RKSJ-V.bcmap",
+      "git_blob": "acf23231aea22e1a95761f7eafd35f1d42ea6b84",
+      "sha256": "f8ddceba96bfd9d3740bd1789ee30d1f47c78371520a8084f71f7df58f19be0b"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/83pv-RKSJ-H.bcmap",
+      "git_blob": "2359bc529d160857cce4c1d1bfca1322290205c1",
+      "sha256": "44040051ec818fe09b9703472bea72efd2759d5eeb5ff0d77c718d6bb5e6d1df"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/90ms-RKSJ-H.bcmap",
+      "git_blob": "af8293829c90ce63cc4c5eda0318003785ffcba1",
+      "sha256": "c13e043e85ff715b75bb03801e8fd0fb8f3a75e4a48496faa6baaf92b5b48ba1"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/90ms-RKSJ-V.bcmap",
+      "git_blob": "780549de19de05b6cbea4ccd4737351bc9ff6104",
+      "sha256": "499bb916ce1adbe4289b6e5811f4dc20eb238cdc2ffad20cf26ae56716885bab"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/90msp-RKSJ-H.bcmap",
+      "git_blob": "bfd3119c62d9976dde9b1e59c572c678cf5811a0",
+      "sha256": "7b8b3b8bbf821702e9a4df9f3596ce292380c8c1b0925dedadbb4e4b2d80498b"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/90msp-RKSJ-V.bcmap",
+      "git_blob": "25ef14ab4af42f4b70ccac76cddac8f3b22d8813",
+      "sha256": "6296c2b5c07dca8128e96d5296d621a3268803d4fa0e5812a21e52fe2802aacb"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/90pv-RKSJ-H.bcmap",
+      "git_blob": "02f713bb838a8cd46f5b262c934d0edc8c6e8fe9",
+      "sha256": "fb5103f03d3a34547e18d316e52b6d9b26e485c662999222f84d2ba54c2e4fa8"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/90pv-RKSJ-V.bcmap",
+      "git_blob": "d08e0cc5d98b2d933ab848c69dd6c504fbf1787d",
+      "sha256": "7bcb5ad2ba55b9662ce379e16c2d9cc2b82d621a579807353741172e4af615c2"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/Add-H.bcmap",
+      "git_blob": "59442acafb613b0c090314379f9f4c2fa134a1a1",
+      "sha256": "a2ffab28b990998181bcca9b0e914bb2207820f100ae31d5c469444892e5ad8e"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/Add-RKSJ-H.bcmap",
+      "git_blob": "a3065e441a0e1f1a65e9109ec9bc4f826fccac24",
+      "sha256": "b29f4b52e2465d0485856d5e69f1ba69927deb2848d8fd328c8035583b35bb7e"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/Add-RKSJ-V.bcmap",
+      "git_blob": "040014cfc0880371c20a89212942727c5dc30a78",
+      "sha256": "2aa2232c283a3f5d0997c2834a36cead0b79ce2657944cfeed08140c293460ff"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/Add-V.bcmap",
+      "git_blob": "2f816d320f08b8671498299c4d00e4564d2ece6c",
+      "sha256": "25125d3b1be64e86b2df5b3344170b45a42bcaa0b46e43a34314ef73c166e542"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/Adobe-CNS1-0.bcmap",
+      "git_blob": "88ec04af49d1e8ab6038e3b36dd28daf4dcf0119",
+      "sha256": "8c65be9d51a9f269a547dc12460707aaf4031ab67ebe8a2900f4b4cc6b3e450e"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/Adobe-CNS1-1.bcmap",
+      "git_blob": "03a501477c91d8156723f0c274a37d397ed65bad",
+      "sha256": "73152bc1a59cc594b414ac6068be48e5512b96ae85920c40e32a99269fdb0c04"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/Adobe-CNS1-2.bcmap",
+      "git_blob": "2aa95141f9f5802818e34b0aa626e34e7cfee805",
+      "sha256": "a1b8d353bdef9584c820464e8f1c9e2013d64ebf433cba0aa831dddf515818c2"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/Adobe-CNS1-3.bcmap",
+      "git_blob": "86d8b8c79cfa3907281aa3f25a46f178b87aedfa",
+      "sha256": "2ffc0c75c79fafde506163d3c08c390d183251009f3fbf6ae50d1167d14b9570"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/Adobe-CNS1-4.bcmap",
+      "git_blob": "f50fc6c14e67a228c4ba9a61b1357c16410e8228",
+      "sha256": "98a1f470c878c6b9691a4d7aef776af8ac9b55f5587c9fafa00547f3bf655716"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/Adobe-CNS1-5.bcmap",
+      "git_blob": "6caf4a83146a60a2db652647b9cfed5fb71bd97c",
+      "sha256": "ddd6e29955eb8cb545f2ebd09c628c3bbda5023256eda1b728f743c75fb77829"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/Adobe-CNS1-6.bcmap",
+      "git_blob": "b77fb0705c28d647d0bf7b25246af566a791b2ec",
+      "sha256": "317bb2db71e0e5b7b0c47b75de1da915c2e22f65f0c0861507f9ca7ba238f8a2"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/Adobe-CNS1-UCS2.bcmap",
+      "git_blob": "69d79a2c2c2b00207ab27b68ebf4404aa17c6f2c",
+      "sha256": "e665837f2197c6bd08cd8955ad4d6932cee2398e2e328b25b00e6bfb3bd72af9"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/Adobe-GB1-0.bcmap",
+      "git_blob": "36101083fa8fd22399728ccf533c48e830781de0",
+      "sha256": "8b81cce8a11d510e505704953cfa4e4ab080c1a0cab991145a3512ee433946b9"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/Adobe-GB1-1.bcmap",
+      "git_blob": "707bb1065c76d69551c287141cb258519132ef8e",
+      "sha256": "0426983081788ec7202703e71f1efa4b860f75b936994236010b39d89251a81e"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/Adobe-GB1-2.bcmap",
+      "git_blob": "f7648cc3ff02c44e9594ccbd71deec742e253c2f",
+      "sha256": "e67b37a83b160ab3831306a71a605893b24454ee81ac9b6123bf2d3984d268d5"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/Adobe-GB1-3.bcmap",
+      "git_blob": "852145890ede3dc04339de284993da270d62311d",
+      "sha256": "aa299afc3e12a28726147305f191be28c7498078c8b182ece7886ac79cd99078"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/Adobe-GB1-4.bcmap",
+      "git_blob": "e40c63ab1e5c240841f3b465ade920d60be6328f",
+      "sha256": "8fbd7d74c2ddb1350c1cecce54a73fde3f5453093d4bed445283ec0033d2097f"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/Adobe-GB1-5.bcmap",
+      "git_blob": "d7623b500232b6e62f29c2c232e6c2469a527314",
+      "sha256": "c22cb2fcff24112fa31dab2111bdc51957006576d31aad5a25e67793ac01428c"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/Adobe-GB1-UCS2.bcmap",
+      "git_blob": "7586525936cc5398b86d3752a4eb45b15825b25c",
+      "sha256": "20507620260c0c935c35afc1e70e5888aa7125d5ec7ffc03cef1959feb2c1641"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/Adobe-Japan1-0.bcmap",
+      "git_blob": "f0e94ec196757e8660b567d8ece7f99869927913",
+      "sha256": "464f08905236f5703b1f5cf8358767c8b18e6bcc808840d081f1de2c7ab38134"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/Adobe-Japan1-1.bcmap",
+      "git_blob": "dad42c5ad7dad57954fc9a051ee7e222e83bee45",
+      "sha256": "4c823848722187d1ffe75ae3f5f9126ccd2d7895a05fad14c919fb119e037008"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/Adobe-Japan1-2.bcmap",
+      "git_blob": "090819a064533f20aa68f562275556397683ae81",
+      "sha256": "7810fb808e367e70429e90a9478fe6a3fdc3e214f25c7582ce9c2da6a242315c"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/Adobe-Japan1-3.bcmap",
+      "git_blob": "087dfc155860e65d2dc828dd432ffe88239fde23",
+      "sha256": "84deb1828711ad3d390c9899c38abce1bf619d65ff7bf1a326ec95acc45f08f8"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/Adobe-Japan1-4.bcmap",
+      "git_blob": "46aa9bffe576e9a8b714646aed7f9e1a4e99dfe2",
+      "sha256": "3f8a4f974919c2b8bae5d10175ffa2673be140481e00840542c85d48ef184067"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/Adobe-Japan1-5.bcmap",
+      "git_blob": "5b4b65cc6292a5ba7d89e976565bf08814bb88b6",
+      "sha256": "1d3ce4ff28d977f8cf37a912ae4ec811f4175c3167b1ec0b2567feec3e79e1db"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/Adobe-Japan1-6.bcmap",
+      "git_blob": "e77d699ab6a1bfd1e3eab6db428222e108342aec",
+      "sha256": "5609797b9401b30be72ef9645da62a87829f058c3be4b5c623383119f584b1d9"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/Adobe-Japan1-UCS2.bcmap",
+      "git_blob": "128a14107750da2939d920c3e0802798c36f2e18",
+      "sha256": "66c5d0dc4964f4093e77b194023f3a0f689324028ec8330e1e1d0570bcba7c2f"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/Adobe-Korea1-0.bcmap",
+      "git_blob": "cef1a9985191f53c4a8a35811d1caeecdd1a1820",
+      "sha256": "dfb8c3874f0e5a8c3acf597d2c12d2b63e90bc5e4f0fce990ec4c56077d80b32"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/Adobe-Korea1-1.bcmap",
+      "git_blob": "11ffa36df8404ab970df2a24b2d80b1dc6348436",
+      "sha256": "62f277b7b1c441c007797ae707d5c37258d029ce4661a2b911e2e1ee35e6adc1"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/Adobe-Korea1-2.bcmap",
+      "git_blob": "3172308c79d57147cdbe05930228043faa48ca54",
+      "sha256": "1d77068af462f96d7ad28ad7e7d43eef6423c685b479d7dc25ff5df38db0380d"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/Adobe-Korea1-UCS2.bcmap",
+      "git_blob": "f3371c0cbd14c89a7d2b5a72e4e4f9cdc6d6017e",
+      "sha256": "857b723088be97255053562bfa41bd1075a7f7910d3bab59a0645c8bbc7060ff"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/B5-H.bcmap",
+      "git_blob": "beb4d228104cd985130e6eed7ccabdb63e94ce27",
+      "sha256": "718ad0ffbef4c34f8f3f31292c462e519cd567a5511fc8b346c60010d64f4ef9"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/B5-V.bcmap",
+      "git_blob": "2d4f87d5035f03485616d4986b6373fa0820d0af",
+      "sha256": "b5c37383517477620ced927b6b4ffd4f4cc6230d8051b5b46a21d6768e07f7d8"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/B5pc-H.bcmap",
+      "git_blob": "ce0013167f852a873b639e301088c094d468a750",
+      "sha256": "bab6028aead1d6149400e904ab10cfd319082d826473ed4c582c8eeed920f17e"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/B5pc-V.bcmap",
+      "git_blob": "73b99ff2fbca40e7ca5501f61e3f2f29c1fc1af6",
+      "sha256": "41543142b9767f3b76133899fc8453282b01ad3c653acaeea42d78c5a7d08c63"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/CNS-EUC-H.bcmap",
+      "git_blob": "61d1d0cb001dd484630e52eb7e47eaabbdee62cd",
+      "sha256": "e8f89cd61e6486b948205da46499d659ed0aed949b7095fd3c8e95ffe2b0e7a9"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/CNS-EUC-V.bcmap",
+      "git_blob": "1a393a51e079d1b5e7898423463fac5e87170da2",
+      "sha256": "cae422bec2ac6dbe86bf921cec942bacd2d0b733ffcca5f91b3ba14e917025a0"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/CNS1-H.bcmap",
+      "git_blob": "f738e218ae2b4e9c33a1833a49fe20027e869aa1",
+      "sha256": "e8487971ab20cd16f3de3e8ac56ec994b72b658ad113f2818239dfd5108f501a"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/CNS1-V.bcmap",
+      "git_blob": "9c3169f0d9a083b462427bf4e46a25296ebbd862",
+      "sha256": "42df8076aaa7574505e7304af83a3323ec032c4177d64b1309db8c043d594a8a"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/CNS2-H.bcmap",
+      "git_blob": "c89b3527fe57ad3b32061f36b73c756ead3fb071",
+      "sha256": "bc6024d274d440f0625c69e25f37036ef6cb6689432ceaa160d3432a2a716ca7"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/CNS2-V.bcmap",
+      "git_blob": "7588cec83e271feb04e3c7f3a6ee3a4c153f2052",
+      "sha256": "2e4f70a8afd23a121030fc2e5b5f3816e903b11e7ba8b8c09654b31c80399c38"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/ETHK-B5-H.bcmap",
+      "git_blob": "cb29415de4f5a669c1b47e34ab889b5fdee6e428",
+      "sha256": "d2f10fa519336bc4efcc7b6deb9604b75429946b40d82e311cb3a97a1994c89a"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/ETHK-B5-V.bcmap",
+      "git_blob": "f09aec6318dbec88491e3e488526882eaa930f37",
+      "sha256": "1fea3fd0d9f0f679f80505800851ef2e4131d81127e18c006938ffa2f4c8b247"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/ETen-B5-H.bcmap",
+      "git_blob": "c2d77462d298cdb261f5e2eed5218fcba35cbe4e",
+      "sha256": "87ee6b3f5bfda5fe26fa35431264c7d73070d10dbbf398a75185d63ae322c18d"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/ETen-B5-V.bcmap",
+      "git_blob": "89bff159ec62cc86b7c4a3258ee0455cab10b76a",
+      "sha256": "47dc0d2c21e3bde317947aec1675ceabc1d5460a60bf9c24334b8c407a17172c"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/ETenms-B5-H.bcmap",
+      "git_blob": "a7d69db5e32646c3fecf51bd03dc1a61c8189fae",
+      "sha256": "d5f5a73da4173b7da9a3a20e16f26f9cd5d12deb1553409919e0cec6fd37fdee"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/ETenms-B5-V.bcmap",
+      "git_blob": "adc5d618d6912cb3a67e4745b63764120f93d17f",
+      "sha256": "18252fca90f472f479af1bddd60d6ab51c8e1b55dcf6845951426504934543e0"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/EUC-H.bcmap",
+      "git_blob": "e92ea5b3b99b1f20d31c9760481de0472e72685b",
+      "sha256": "f9939cd57fccdc65c5d9f4c205fd497ebdbd283643308da5663801a8c1d9c595"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/EUC-V.bcmap",
+      "git_blob": "7a7c183228dfdc5c236b7914ca68298520ac60a1",
+      "sha256": "1283a50a706507c4436da83ede9ad7a4440be25378f2e96f6c81a430081426a3"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/Ext-H.bcmap",
+      "git_blob": "3b5cde44dbaf7f78c716c3705590ae28e9bed265",
+      "sha256": "4000ed4e61a1c668ef453bbd0603cfa383defa793abd46a57ed870d7f527350b"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/Ext-RKSJ-H.bcmap",
+      "git_blob": "ea4d2d97b8bc1df2abebce0d4f8c58789f723eb1",
+      "sha256": "e0d2f0df337660e73813238dd4a725f11f0621b90f3273857db253d0e7694caa"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/Ext-RKSJ-V.bcmap",
+      "git_blob": "3457c2770913963731993654c838df133deabbb3",
+      "sha256": "f617a22b6d67febb187990952006c91a9f5a4db21155d268c656252d0c21985d"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/Ext-V.bcmap",
+      "git_blob": "4999ca40412b66e87c56870c80cff32212483ee8",
+      "sha256": "c2087fb845a9e3acea0c2922cd40e6af67e11957bec74dcd597f1285edd490ce"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/GB-EUC-H.bcmap",
+      "git_blob": "e39908b9844939a3c6d6baccced5771b8c1b1b2d",
+      "sha256": "928bad06fd84a48f5ba7150d7716609119fb660f2aaa73eccad81ddab9b9d203"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/GB-EUC-V.bcmap",
+      "git_blob": "d5be5446aa40898742183202ce0624b8acee5234",
+      "sha256": "a9ad88ac2479da529b16dc48abc5952332e27bc355335f91df5729a587533324"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/GB-H.bcmap",
+      "git_blob": "39189c54e363ebe2ea542addd6b629bdacd0e8e9",
+      "sha256": "1018c777a8910b5bb46d7d54a4aee9d51ca5cff8addb2b41c969d9101cb3fd1c"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/GB-V.bcmap",
+      "git_blob": "310834512ffe49cbb7ca903abc2dc1aaa934e6f4",
+      "sha256": "0b96789143c0bbf9f1641ae7165b3456dccd14dabffcbb0bd654d5bf6f94f863"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/GBK-EUC-H.bcmap",
+      "git_blob": "05fff7e8254c995031783fb3b4892d58a6b176ac",
+      "sha256": "2103fed28650ede096a2281104a1a8a4304dae0db414342c636867522307123b"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/GBK-EUC-V.bcmap",
+      "git_blob": "0cdf6bed6d450473f92e691e9015e4028113607e",
+      "sha256": "a7fd35dd14d9dbdb955f34e6c0630618b6620dfd09d4283b2f65a65ce77fcaea"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/GBK2K-H.bcmap",
+      "git_blob": "46f6ba5967cdfb381f001eb1193f17b43d943962",
+      "sha256": "3d919ae72af16c5cc6846ec87a4326a9f125e493c59d3628429d35c2c95fe8c4"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/GBK2K-V.bcmap",
+      "git_blob": "d9a9479843eda25fb0a8fd69fb302740813d925f",
+      "sha256": "b927fdfd595c07ce9158bf2ec13f4641b2e83b01c70989dadfabd6ed7c6ac2dc"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/GBKp-EUC-H.bcmap",
+      "git_blob": "5cb0af687ee20a10ecc367892ae49d7b1e74acd1",
+      "sha256": "d15ebd8e81fb4fe8a244f1b1e877922e03500ac69eddf5001093e502430451d2"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/GBKp-EUC-V.bcmap",
+      "git_blob": "bca93b8efbb18a13e15025ad41d23db8267d2577",
+      "sha256": "fdc736d46e642625dccc8ad8c59f2c69fc7db7a13f2e799c6c6b779e707bb97a"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/GBT-EUC-H.bcmap",
+      "git_blob": "4b4e2d32294538b5093ed3870bb9de37abf21599",
+      "sha256": "dc5f44e48a39f3367ae28665027d8ab1d8cedb5a9dcc5068a900acd6709f60f9"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/GBT-EUC-V.bcmap",
+      "git_blob": "38f706699f395dcdad5c6ad93d1a9b6fe9f66c78",
+      "sha256": "a1ad24e63653b8aa388c18fa5e498f007564e43dde699a9f91ccb4645c999be8"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/GBT-H.bcmap",
+      "git_blob": "8437ac33771536813228e3f9c1cb6c35af3acc72",
+      "sha256": "8afda745a505763f3ff54c8126eeb48ef376ea9ed07d9f42ff9a22c5c547ec57"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/GBT-V.bcmap",
+      "git_blob": "697ab4a8e756204de9d089c8c136579973c9c0c6",
+      "sha256": "cdc2ec5c3c7c7033290c9a8894878202f08674eb9b1ae7d36218430326768771"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/GBTpc-EUC-H.bcmap",
+      "git_blob": "f6e50e89363483070b25106b94f729ae38587d28",
+      "sha256": "7b23e2f7bfdb6c918f567b7324bf858f398bd8cd5f268d74ece19a3c91bf4f32"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/GBTpc-EUC-V.bcmap",
+      "git_blob": "6c0d71a2d04473870c60dc59342400fe1b4ccc48",
+      "sha256": "d7a1b13ead9ab511cf2cd01de6ce8b02aa8e8767e84895337d7a3b67f039f93b"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/GBpc-EUC-H.bcmap",
+      "git_blob": "c9edf67cf6d640607080ad2775c14760df77dd96",
+      "sha256": "3c4a4eb82f05abe51f6650985c630e180438bfdd491318f5d20d2ec29236e1c3"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/GBpc-EUC-V.bcmap",
+      "git_blob": "31450c97f640ff40bd79677cd3e97f4485453d9b",
+      "sha256": "215bdfa2842705624b4cf4cd29b8e3c720f1e192365e0305c11030a424c84d7c"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/H.bcmap",
+      "git_blob": "7b24ea4629d0d4cc9f0cd5852edde324156ef0b1",
+      "sha256": "a0233e21047ec00b852125b243cbcf30abee511155b6d8159c24f944384bc9ee"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/HKdla-B5-H.bcmap",
+      "git_blob": "7d30c0500520d563d0e5891c8f4781c61ddcca5e",
+      "sha256": "5242bce18fb13ab4cc59b146a03eba36e4ce42667eeff09e10981a9d2aa4996b"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/HKdla-B5-V.bcmap",
+      "git_blob": "78946940d68cdd2ea1bec1230b1eb0b19b8d5deb",
+      "sha256": "2e0537f786c0791d41a925f72bad2d4e7268aa6cbf15a1400a722672cec38e2c"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/HKdlb-B5-H.bcmap",
+      "git_blob": "d829a231015161e107123e211d4a78110daab6bf",
+      "sha256": "fdc8159984bf5dbe475c0d5dfcb621ecee4dea07c38c668bd77f4c679e23b9b3"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/HKdlb-B5-V.bcmap",
+      "git_blob": "2b572b50a47f09a51c777efabcaf6a9e3faa26c2",
+      "sha256": "b249eb9dcb915ab45057c5d4d7aa55ef88d0efbb092af6bae0b2d4705d139abf"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/HKgccs-B5-H.bcmap",
+      "git_blob": "971a4f23f791f75d4e604ad717735ee55529eda5",
+      "sha256": "ab64c7fc5e9b2e97750cc4f269b0da14fd8649e49151b7598c8df86599bac591"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/HKgccs-B5-V.bcmap",
+      "git_blob": "d353ca256b54236a4acefafdbc08e5b719892014",
+      "sha256": "02ebdf7cdffb5395fb21091cd58a013a18ae5388922822f9dc6292ef16b98956"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/HKm314-B5-H.bcmap",
+      "git_blob": "576dc01112bd7f28c30804661f546ece203c53d8",
+      "sha256": "bfd8bbde6b36a9da4c1c902c74121a30d9807a7079a00eeea218be6adc223cef"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/HKm314-B5-V.bcmap",
+      "git_blob": "0e96d0e228e0608f77f035655140c6a235d4ea56",
+      "sha256": "2a64a815cfb6fdd480674a868762e3d161fda17543b20c9209978559f0667164"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/HKm471-B5-H.bcmap",
+      "git_blob": "11d170c75ed8696f0705f9fb9f5afcf3b0aff4c9",
+      "sha256": "49d7c037758826b5b6c0fa329c35bbf25d3943197754e72ecd30c6fb04d745e6"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/HKm471-B5-V.bcmap",
+      "git_blob": "54959bf9e776c990460f2582adee80d317062d20",
+      "sha256": "be24c109e78aa4fe3c1f27d30aab3ed0741e783fa1b6b6c2719741072b54b132"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/HKscs-B5-H.bcmap",
+      "git_blob": "6ef7857ad17cefc4ab714d209716002317c23baa",
+      "sha256": "08599378f41d96b40537adef6e6edcc4a787bc63f5accf47c026df4905a13914"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/HKscs-B5-V.bcmap",
+      "git_blob": "1fb2fa2a2ecdf5abd6b7cbf2cb5f2ee4f0b11fe2",
+      "sha256": "d073542b7dad1c4cbf01c1af5f0cd13218d1281a491956e310c55702fc8705c4"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/Hankaku.bcmap",
+      "git_blob": "4b8ec7fcef466bc4090dc13c8edb354cb94d0b67",
+      "sha256": "b454701f7aecd7856769016dfd04ca64280a060f2c67a2466d50b4395d24974e"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/Hiragana.bcmap",
+      "git_blob": "17e983e77264c62ee149d1c8ec576a23e8f90eda",
+      "sha256": "2ed669394756dd9458651cd9995ab29ab691ecb7686659003306cdf22767a414"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/KSC-EUC-H.bcmap",
+      "git_blob": "a45c65f008e7d6ff34edaf53af15ea471d4f6d90",
+      "sha256": "6784e16dbc5861c036c23d3e55f0d4ba0975a3e464da0ee8e49bcfff0be070c4"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/KSC-EUC-V.bcmap",
+      "git_blob": "0e7b21f0a612b1acc41c1b23ad0060da539eaf2b",
+      "sha256": "fdb36bad85e9924823d49db374067988e024cf80fc894711f2c9178951cbbe95"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/KSC-H.bcmap",
+      "git_blob": "b9b22b67879d4043c75b617a24f96b0bd47cf4ca",
+      "sha256": "c1f6d61f1d3304fd539a65ae72624fa567ecc3853bf52e283958a7a2515b3eee"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/KSC-Johab-H.bcmap",
+      "git_blob": "2531ffcf41acc01338f781c845c7f50f62fcc84a",
+      "sha256": "939993d213f68db763bf156217c217ae23af082b91a0eacecf3d11eb4ff8ef8c"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/KSC-Johab-V.bcmap",
+      "git_blob": "367ceb226ab1e33624b30512716a3b65feb5a100",
+      "sha256": "5d61967aac0e666def721e8b8d0fed8f95a879a14f2e76ce516c3d11c621e519"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/KSC-V.bcmap",
+      "git_blob": "6ae2f0b6b7238adc67bd9231668d9853ea3c8e1e",
+      "sha256": "d7da5afd9f1fe74816d79c9325f0139a4efb6438664ebfdf9a7aa92f3034360f"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/KSCms-UHC-H.bcmap",
+      "git_blob": "a8d4240e6adb3ac1db859085b769a0715be03c72",
+      "sha256": "5b70d8f6a4fa9e2283dc649f0ff95d906d56efbee50a20e8d2faec3a8fed078e"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/KSCms-UHC-HW-H.bcmap",
+      "git_blob": "8b4ae18fd3efdbe020e4e1407d2f65125085a71a",
+      "sha256": "a5e6ba22aceb02fdedee11bfb9ed138463d89e85b87810b9f075b469d936f8ec"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/KSCms-UHC-HW-V.bcmap",
+      "git_blob": "b655dbcfb123ed06c7eeb87dfc96ecf6759363dd",
+      "sha256": "890332a6a26880d463a12f2a6ff048bf9cf7e45077cfb1ca8815b89baa7bf411"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/KSCms-UHC-V.bcmap",
+      "git_blob": "21f97f65b4a61adfa13f55d5a096ceab45eb485b",
+      "sha256": "1631b531c9a40c8cbe24c2317dba107362e49fa6e18af620414d627c111d570c"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/KSCpc-EUC-H.bcmap",
+      "git_blob": "e06f361eb6d429290806b9f9cd7a0aebce22be4d",
+      "sha256": "709480682c55cedbb0124b9960d78e28febeee0df2e34607d61aac6601647ec7"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/KSCpc-EUC-V.bcmap",
+      "git_blob": "f3c9113fcf0b02e1deea8246bfd27408becc8401",
+      "sha256": "031707887d6fc2378a36cdb6775334fd7a236c3f95048d8436abf43fe26fc49d"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/Katakana.bcmap",
+      "git_blob": "524303c4f0c20e6cd19aa1d35805e98c2c05cb7c",
+      "sha256": "3b6ca6642fbf8822da00d5e58a8aa275216d5c32dbf2bd73e934197fc9fc5c53"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/LICENSE",
+      "git_blob": "b1ad168ad0dd09b578cafec31d2666049b4d8718",
+      "sha256": "aa92ab5a472974865a96fd4a4e9c13bb41bf6fe1b309cb6b8da48bc9e19839a2"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/NWP-H.bcmap",
+      "git_blob": "afc5e4b05ee6f4be4f17eb616742b59aee4c5ac1",
+      "sha256": "286c6c9e335da330928a01edc3c97a3a623f1f7f3c42762b0a7dc2f651b1a78f"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/NWP-V.bcmap",
+      "git_blob": "bb5785e3278ab7a24b3080cf22ea0f609aab4595",
+      "sha256": "3a75fb7b59adfb172710758c425d8ac6c93fd5360a64dd4afd5dd04e60ab4b4d"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/RKSJ-H.bcmap",
+      "git_blob": "fb8d298e9bb8e090139bbc5e958f11a237672825",
+      "sha256": "a70de61a22a898f693f02cc011c3e3cff2e10aaa7cddb4661e456a21ae859f78"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/RKSJ-V.bcmap",
+      "git_blob": "a2555a6c048de98d68f534fbba18baf4b4311e50",
+      "sha256": "68c1a64506471a524ea5cfc3b3a9f8f70031989a6bd95427b1351f33ccf50b06"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/Roman.bcmap",
+      "git_blob": "f896dcf1c7fb118fc491094edd6244e16856d586",
+      "sha256": "1c6b3ef9d9e5cb1aa329142ce9414b90f9b6d7f9182a2a9e927378dab8f0d43f"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/UniCNS-UCS2-H.bcmap",
+      "git_blob": "d5db27c5cf1f5b0e66e16f6314d042a4ef707222",
+      "sha256": "779428116752f34e2490a1941d24e4634c71e3c22d053b811d2090ae2fb3c704"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/UniCNS-UCS2-V.bcmap",
+      "git_blob": "1dc9b7a21bc59b6540d55b3d8933e5a6ba9f8947",
+      "sha256": "1e5cc184b850ea44abc2df8ae5674279df668e8edf5e2a1a2ea2bd77adbd280f"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/UniCNS-UTF16-H.bcmap",
+      "git_blob": "961afefb66cb70ea2f10784029572e5f68ae4740",
+      "sha256": "32ff139b3c7b91d6ad25f994701f3ce7b242906022c418fd73e6493fc228bfe5"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/UniCNS-UTF16-V.bcmap",
+      "git_blob": "df0cffe86b5e9f154c5ef6207120d6bd43706631",
+      "sha256": "278eb1e68d1a236c60ef59472cf0176ee0d45f364285e76ca12419a08d46fb9a"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/UniCNS-UTF32-H.bcmap",
+      "git_blob": "1ab18a14367cf31113eddf5ae15d9fb3549f39ab",
+      "sha256": "bf26eb67fe19ee5ba915799e80ca72408400aa8342fdf6a244a4f44de8f97336"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/UniCNS-UTF32-V.bcmap",
+      "git_blob": "ad14662e25e7a4e3bd7f543c126ac24417bc3665",
+      "sha256": "f7da3caf83ceb1cb37936fa10700d9ba6e9c3f72c5bc9724e3ac79bff0c0179e"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/UniCNS-UTF8-H.bcmap",
+      "git_blob": "83c6bd7c4ff0abf4634765312b8a3026942d2b35",
+      "sha256": "2f2a742bcd1a84a148a4a518b9eed51a8f9c6ca5ed3bc5e2e41fff97de5dc2d8"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/UniCNS-UTF8-V.bcmap",
+      "git_blob": "22a27e4ddbe26664c57f778a864b6872f6c2ba03",
+      "sha256": "b7c3f10780a8c62dd1c8ff6c30dc1e4e23b6cdc87c3a96fcd514cc98ffd3af9d"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/UniGB-UCS2-H.bcmap",
+      "git_blob": "5bd6228ce62ec10f00316b136663ed6b60ebf9e5",
+      "sha256": "9201569b402e81ad8860650bd86350c4fa28e5dd5971f05fcacaf40f51de18ed"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/UniGB-UCS2-V.bcmap",
+      "git_blob": "53c534b7fecfd84e465c8943fe3adf500a4444f4",
+      "sha256": "f10282335e4d64203bc2a653a3a47d745ec76c8ae04549f4d50180c1899be216"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/UniGB-UTF16-H.bcmap",
+      "git_blob": "b95045b400a77419292cab245f9f66f6298dbb5d",
+      "sha256": "386fd39581245c034da016a92d23f3df1117d169f996100050b264fc09a84e35"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/UniGB-UTF16-V.bcmap",
+      "git_blob": "51f023e0d609798e72d46bf41309e092d72ccb07",
+      "sha256": "0473cfbba612b92dd9918f0ff8aee9112897c48e0ffdc0eb82da3144ed8ea84a"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/UniGB-UTF32-H.bcmap",
+      "git_blob": "f0dbd14f3795a40b23cbe5b826f776f4ea7cba4c",
+      "sha256": "f48a145dc4e3ed1dca1dde7111716a72306a2a4191ab05c6bae3a5c3a961cd2f"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/UniGB-UTF32-V.bcmap",
+      "git_blob": "ce9c30a98541e23244876fef9dc67c2639fdd746",
+      "sha256": "106acc49b7118bdef944e32107b4f348238f3929a0a15d3b7aab7b9101535993"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/UniGB-UTF8-H.bcmap",
+      "git_blob": "982ca462b1b047c945d3b7b0123eb42dfd8d48cd",
+      "sha256": "f217b439c80ee5fa1bc2cf6d1defcc319f8d84483d166a00ee199e05a68588df"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/UniGB-UTF8-V.bcmap",
+      "git_blob": "f78020dd4028d56497c44b7afa94985f0d18f8ce",
+      "sha256": "a64df947632878eacc532fa193c735c92a383b7d66e6f8374ac193af7c64fc63"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/UniJIS-UCS2-H.bcmap",
+      "git_blob": "7daf56afabf65a4707d7bb06d829f56b247c9e80",
+      "sha256": "ad2352f40870880fbf7f8ee5abadff743fbd025fbf9830b8ada472d1c5e4da0b"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/UniJIS-UCS2-HW-H.bcmap",
+      "git_blob": "ac9975c585ede6958758980ade161f687d40d58b",
+      "sha256": "16e87edca954177c0881c874859d6783220925d821b5cdfb8755b61ebd93f9ce"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/UniJIS-UCS2-HW-V.bcmap",
+      "git_blob": "3da0a1c62f19f720590b54fc1de7b027af100945",
+      "sha256": "1973457e2c0192819947e56068625b34fb9a72ecc8a476ce6d7eaae5f73e2e5c"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/UniJIS-UCS2-V.bcmap",
+      "git_blob": "c50b9ddfde9da7ebb2f67eba68d58fa2cdee902a",
+      "sha256": "42a133d8e2ce9dd6d2288018e01592d2bf2435b326d39b94ea0b6e6a44ac33d3"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/UniJIS-UTF16-H.bcmap",
+      "git_blob": "6761344639bcde069cf7133d52e127536dcdd037",
+      "sha256": "f6a89c5688978548c83fcee990e205bc63c74274d5c69b49032a3bd4c49a05ee"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/UniJIS-UTF16-V.bcmap",
+      "git_blob": "70bf90c0efb66da2a7aa19a820d766cfe3ef3183",
+      "sha256": "c67126fc7c73850855186bb0d6482ac0a365057e0b58778c4ab9f234683fef53"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/UniJIS-UTF32-H.bcmap",
+      "git_blob": "7a83d53ae70ca3d81cda827cc224ec8c5efa4f17",
+      "sha256": "96195950ce0fe24443d8eb426fa6b88534ec421d7bef9046f0b2362809cfba73"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/UniJIS-UTF32-V.bcmap",
+      "git_blob": "7a8713539491f51c52ba3a1525d181efd32c1f0f",
+      "sha256": "ed4dafda402bdd19c4d5d8bf2ab41473c0f86f384552b4c7b963d6627daedeb1"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/UniJIS-UTF8-H.bcmap",
+      "git_blob": "9f0334cac7f3852b4d06dc9e5cf0f9646ba21a5e",
+      "sha256": "798fb0bf06ab0788d1f6a91c2db7de581612eef03c628f10e8f7ecd8f70ab448"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/UniJIS-UTF8-V.bcmap",
+      "git_blob": "808a94f0fd9c3b3cb0267e5cfe4dced2e65ecb1c",
+      "sha256": "1021611424f913b2df0bfdbe94bd327c04e224ec89d8e821c6501ea3d21f4265"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/UniJIS2004-UTF16-H.bcmap",
+      "git_blob": "d768bf811ffeb0d794b732a82940fa1442af499f",
+      "sha256": "710a32d7cb43fd6bd9dbf30da5971f8c941590f74441e208d852c2be0e74cc97"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/UniJIS2004-UTF16-V.bcmap",
+      "git_blob": "3d5bf6fb4ef94b452ed1ef0df926fc2bee55e973",
+      "sha256": "3b149aff5c5707b57fb3215d1775852c8b1f413ec0f679ea628f25cf87fe098d"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/UniJIS2004-UTF32-H.bcmap",
+      "git_blob": "09eee10d4fb4b9fe1e70a1ee56825a207ae8034a",
+      "sha256": "8d2658e18741af7937d586a57c89729a6fec0d86121197c1f8518aa58b29cdfb"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/UniJIS2004-UTF32-V.bcmap",
+      "git_blob": "6c546001331cf4f2f68563229f994b55730dfdb1",
+      "sha256": "6dd475782f2897648a683c48b2fa015a15b8f06856760bddc8a17a63f418bacb"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/UniJIS2004-UTF8-H.bcmap",
+      "git_blob": "1b1a64f50d204b03ef0c5575233687830a1b053a",
+      "sha256": "691c614ce432b3e62486efb54e5c84c6da5afe9b51b21253bde4758feb484183"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/UniJIS2004-UTF8-V.bcmap",
+      "git_blob": "994aa9ef9f50495a3ac558630b0234680be23c2f",
+      "sha256": "40a8c7ea2d46711c5f78fc9a878a7db68b1543ba5cd60ecf14f519a2deb829b7"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/UniJISPro-UCS2-HW-V.bcmap",
+      "git_blob": "643f921b65819c9e8c80a97c51fc68a89053bd51",
+      "sha256": "6826f94d789d7bf1960668c1c5819c34c9585c1b23152fbc19ee81c7df08524b"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/UniJISPro-UCS2-V.bcmap",
+      "git_blob": "c148f67f5e9fe4a108519eeaace89e708a51f8f5",
+      "sha256": "493de9fd1a08f7946065d8ab58f0c3c9fe489f5a0f109f2d05a3169b4bd5789f"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/UniJISPro-UTF8-V.bcmap",
+      "git_blob": "1849d809a679e56414f4e18dce8ca3c41109e84e",
+      "sha256": "6181d382cf736c5e09492e8be9f26f31fa25b7462253f23ab16646af432cad81"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/UniJISX0213-UTF32-H.bcmap",
+      "git_blob": "a83a677c56df6f1ac395d2ba71e60a08b0985e97",
+      "sha256": "692044e1fb33445668632bc9fe7386805c624864be1ddeb29d65bb0c99fc630c"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/UniJISX0213-UTF32-V.bcmap",
+      "git_blob": "f527248ad547015ad8af1181e646da3b235de08f",
+      "sha256": "dd54e16ca7bffb3a886242549b2bf7d78a277087f7c60d2636f118c21a5b0646"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/UniJISX02132004-UTF32-H.bcmap",
+      "git_blob": "e1a988dc9e80be9a0803e22d021b1e81fdcc5b94",
+      "sha256": "f80ea5a989be30ccda5a8804baef6d3b4b044d2b339bf8b31c671b2466171cf6"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/UniJISX02132004-UTF32-V.bcmap",
+      "git_blob": "47e054a961adb3d97caaa31c854d9b8ef4555bf9",
+      "sha256": "94c22bd99e771c5fbe0dd8dc39850570d4db0075074aca13e272813edd7cc57f"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/UniKS-UCS2-H.bcmap",
+      "git_blob": "b5b94852a57b19bcb357a6cae2cae2e7910e05a1",
+      "sha256": "a1081396ab4adb6f4a5b6c15f896963c244c1c9bcb65ce5616d06096a1b9811c"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/UniKS-UCS2-V.bcmap",
+      "git_blob": "026adcaad4c56cb1989bd31cbcf3ad21f3965a17",
+      "sha256": "6cab547431958fbdc1d401d06ebd4dd61a73f5509a10f974df32bcbca11a2e43"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/UniKS-UTF16-H.bcmap",
+      "git_blob": "fd4e66e81f3507b190fb2986a26a45c1c380e302",
+      "sha256": "42d35b396286499dfae1737a07adb3a64500df37b426580bfb1d3ea872938519"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/UniKS-UTF16-V.bcmap",
+      "git_blob": "075efb7054901b1022af68e723647769cbe1d556",
+      "sha256": "5bdb7390c80dcc136cb47d41dc7460082560969c17322ee739fe3020fb642410"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/UniKS-UTF32-H.bcmap",
+      "git_blob": "769d2142c03b10680800b3b6ae883e27fe04c5a2",
+      "sha256": "3a01ec51ed1b828101351e337ffb8250abe11880032e5210f881170fed2588de"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/UniKS-UTF32-V.bcmap",
+      "git_blob": "bdab208b69d287128195eccbd084c8cf4ca658c3",
+      "sha256": "dfda895eceaed081af030dbbb962b49629eea817fc3c02bae15db93d0c68acd7"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/UniKS-UTF8-H.bcmap",
+      "git_blob": "6ff8674af772af896d7d33c7addc37c57822f8a2",
+      "sha256": "3fac9c65145f72d7d42157a3b9c5ed6904632184e6a0888f2b828699afd2002f"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/UniKS-UTF8-V.bcmap",
+      "git_blob": "8dfa76a58eb720dd1992c2cc9abf1dd4b39c5a66",
+      "sha256": "9ecc6cf30dd354b9778ddba163b6cc7302b087ce9f39d1ba73472d2b75ed13ca"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/V.bcmap",
+      "git_blob": "fdec9906621904180f42bd5c91f377397fd6cf95",
+      "sha256": "b9ad1c0c09ff14bca52f9a28a9767eb857ad0e8946e64ba14c7387a7eb69866a"
+    },
+    {
+      "path": "public/vendor/pdfjs/cmaps/WP-Symbol.bcmap",
+      "git_blob": "46729bbf30f3b2f176492d907fb8ca3f6a1e3026",
+      "sha256": "543923bead225732aba30976690ee89095a19628277b5863efecc2c728d5d7bf"
+    },
+    {
+      "path": "public/vendor/pdfjs/iccs/CGATS001Compat-v2-micro.icc",
+      "git_blob": "b5a73495bfc7509837b300800d8197d94e83fab7",
+      "sha256": "73e1ba37d2bad5bab2a964f40a9eed96209666efc067c3322626214bbef234a0"
+    },
+    {
+      "path": "public/vendor/pdfjs/iccs/LICENSE",
+      "git_blob": "4ee29e090cbd37377041c696bed983e66641d7cc",
+      "sha256": "286e4fd7b447330b2c88e23890e3cd0a9d38cb398d4a59cb247f578ccbda3213"
+    },
+    {
+      "path": "public/vendor/pdfjs/legacy/LICENSE_CORE_JS",
+      "git_blob": "22bbc01bba570f0d6336db9a04f6c685afe98654",
+      "sha256": "b87653fff2d44426ab5cd4723cee3b1364dc8d35a0acdf098c54689543123bf8"
+    },
+    {
+      "path": "public/vendor/pdfjs/legacy/compat.js",
+      "git_blob": "90447279f6446be7675fec4f26fe5e6a8fcc159c",
+      "sha256": "36643fdcd14c7589604e2521c5f6e2c661121b731943cf70fcacb2079084998f"
+    },
+    {
+      "path": "public/vendor/pdfjs/legacy/pdf.mjs",
+      "git_blob": "c80a83c1c055c08e76a657578e54e4396ac6143f",
+      "sha256": "f401927e692efc7735e0cd528c490d0dd31b7f0972c122b7040df805be45cce4"
+    },
+    {
+      "path": "public/vendor/pdfjs/legacy/pdf.worker.mjs",
+      "git_blob": "15d798847bdedfed3256bba03e70aeeebd0d2913",
+      "sha256": "a33cfe728c584fdba4fcc1fd54bcdc2f9f2f13889ddbb5b2bd1d0f8cbe49b84e"
+    },
+    {
+      "path": "public/vendor/pdfjs/legacy/student.mjs",
+      "git_blob": "d729bed5a6f9795bd3641e9b559811a9994bec7e",
+      "sha256": "30efaa7767a77d7a4ffd472912fbf9f3926dfffe807525e3c776a7a2c44e5172"
+    },
+    {
+      "path": "public/vendor/pdfjs/legacy/student.worker.mjs",
+      "git_blob": "87d75e8dc2b7b718ce7cc61ef3642d3dc938aec4",
+      "sha256": "09c6c3539fb6a6cabbe9023f24516abcaa63c63574c3821b120dc0ab0afe8f7d"
+    },
+    {
+      "path": "public/vendor/pdfjs/pdf.mjs",
+      "git_blob": "baa7e4c44216b248d4fca6b8647037bd949a9a02",
+      "sha256": "f80490490320511e5df18c580b9edd6b5db8058dceebaf6f161992e0a964b9e2"
+    },
+    {
+      "path": "public/vendor/pdfjs/pdf.worker.mjs",
+      "git_blob": "8a69d7e502f6b5602299f27f0371d5ccaee2c10e",
+      "sha256": "8ab0e5e30031b4a06ecfddd5ae9562f0227f830ee7ec9ed1a968b134243d2386"
+    },
+    {
+      "path": "public/vendor/pdfjs/standard_fonts/FoxitDingbats.pfb",
+      "git_blob": "30d52963e281dcd7e6dd70555340fc987d3568ef",
+      "sha256": "845c752392b6c914fb989c75a08b7792b88f542d2499042ef2889f8c814a16ed"
+    },
+    {
+      "path": "public/vendor/pdfjs/standard_fonts/FoxitFixed.pfb",
+      "git_blob": "f12dcbce52babb40fb61765aa46ddf47e3846511",
+      "sha256": "b6c8fe53f134b8b6d4578cd2d544df4cee9624c4efa8d51a560fb40ea296101b"
+    },
+    {
+      "path": "public/vendor/pdfjs/standard_fonts/FoxitFixedBold.pfb",
+      "git_blob": "cf8e24aee5962ebcf7e4d58d932cc3321f3cdd38",
+      "sha256": "f1b7159702973f54fc86254ea38bcf3712b2a736eb3a0995751e9f4bb45ad603"
+    },
+    {
+      "path": "public/vendor/pdfjs/standard_fonts/FoxitFixedBoldItalic.pfb",
+      "git_blob": "d2880017c25716417f837a1c26044a0342fa3f9a",
+      "sha256": "8a000945843bd31add06aee63bf9fd41b7578b4f3242a4b7cd46349ad9d24d4d"
+    },
+    {
+      "path": "public/vendor/pdfjs/standard_fonts/FoxitFixedItalic.pfb",
+      "git_blob": "d71697d4b638737a5545dd0cb28cba8f613e4eec",
+      "sha256": "5007faf8320fa1fcc08b8894b356ad976f60b992ba29ee5272578bbdebaf3876"
+    },
+    {
+      "path": "public/vendor/pdfjs/standard_fonts/FoxitSerif.pfb",
+      "git_blob": "3fa682efbb4b1d1941194a5dd8b78f39b33b72b0",
+      "sha256": "4f57d2b9d884af8f907bf22df6019b52d86cbf6214fdbd02b1ae05472a543f35"
+    },
+    {
+      "path": "public/vendor/pdfjs/standard_fonts/FoxitSerifBold.pfb",
+      "git_blob": "ff7c6ddecf6b689d93823c4c2a8c41e6e058de46",
+      "sha256": "0bdf4b04e964139818d51eda03d566ba999fc3ba2421b1c6c51f9dc969022e80"
+    },
+    {
+      "path": "public/vendor/pdfjs/standard_fonts/FoxitSerifBoldItalic.pfb",
+      "git_blob": "460231fb88a0083e577ed534760307d7779fd82f",
+      "sha256": "a406cac82583bf98175cb62c87ed5e95c45fbb34eece63a10b0a13e793cb2e10"
+    },
+    {
+      "path": "public/vendor/pdfjs/standard_fonts/FoxitSerifItalic.pfb",
+      "git_blob": "d03a7c781e1a2b91481103dc3227a6bdca4a461c",
+      "sha256": "610ae0687198045c4db5d1a6650fd5e92536631706382eb8b72e38df578d0ae9"
+    },
+    {
+      "path": "public/vendor/pdfjs/standard_fonts/FoxitSymbol.pfb",
+      "git_blob": "c8f9bca78c2f89ce40dff0afe6cdd7068061b3e6",
+      "sha256": "47967d055530e7357088a08403115425643ec2cdfd6201ba8af0fbd7116c1539"
+    },
+    {
+      "path": "public/vendor/pdfjs/standard_fonts/LICENSE_FOXIT",
+      "git_blob": "8b4ed6dddf22b2fcc9f7f520cd23613b49307fa0",
+      "sha256": "b578cdd2345840ada550bd12519533812320d5f1d21cf4c1c7e1b1b0a31c98b7"
+    },
+    {
+      "path": "public/vendor/pdfjs/standard_fonts/LICENSE_LIBERATION",
+      "git_blob": "213c182658826562cdcc02472a4e0869e225f64d",
+      "sha256": "d2c4d5b3e115a519cb58eb691aa64538397e2611f9ebe801392cf9667997e7dc"
+    },
+    {
+      "path": "public/vendor/pdfjs/standard_fonts/LiberationSans-Bold.ttf",
+      "git_blob": "ee2371540417ffbc652745b059effa260430179f",
+      "sha256": "361c61b82d575c5c35fd9157fda8b0194bcfcd0d88ea8521a4fb5dd53d33dddc"
+    },
+    {
+      "path": "public/vendor/pdfjs/standard_fonts/LiberationSans-BoldItalic.ttf",
+      "git_blob": "42b5717ddb92dc6e85edc72fb5c3a798b380902e",
+      "sha256": "a224075ac17495ad0a3af3bc0a419ac0704a8b3fd1095456201fb9b095fc281d"
+    },
+    {
+      "path": "public/vendor/pdfjs/standard_fonts/LiberationSans-Italic.ttf",
+      "git_blob": "0cf61263494608cbf1fccecce606bc01a247d1e4",
+      "sha256": "832b4406dbef23628800d3aaad21048534ac84d7e3ad955be83b8172ed8ef512"
+    },
+    {
+      "path": "public/vendor/pdfjs/standard_fonts/LiberationSans-Regular.ttf",
+      "git_blob": "366d1489cdde3523e488ed1ee85583618fb0c120",
+      "sha256": "f8ace1f892b2bd9dc1792ba7f097fa7588f84fed48321480e04de5390828221f"
+    },
+    {
+      "path": "public/vendor/pdfjs/wasm/LICENSE_JBIG2",
+      "git_blob": "37a329c636c65ab5fde4e471dc0bdf9b61d313cd",
+      "sha256": "9e66b7f1b934a28b37f3bc4dac97915de1674271e79a0a88182a18ed9731b4d1"
+    },
+    {
+      "path": "public/vendor/pdfjs/wasm/LICENSE_OPENJPEG",
+      "git_blob": "e8fa41040dfbe8be524cac5b1bb19d60c6eb0320",
+      "sha256": "a6af136f3e15038a666b61f376612a07d9a4e48cb7c01adbf3e33b3f14ab49b6"
+    },
+    {
+      "path": "public/vendor/pdfjs/wasm/LICENSE_PDFJS_JBIG2",
+      "git_blob": "f1845baf6613d744626e975ec933de7cdde1f915",
+      "sha256": "aad3cce09842e00e9e11ad5e8fef8cc02fbc3a3768fe2f007443b9cee37aaee5"
+    },
+    {
+      "path": "public/vendor/pdfjs/wasm/LICENSE_PDFJS_OPENJPEG",
+      "git_blob": "623929b849547b81e8d1f025f66ac0e347e27b88",
+      "sha256": "717fc62da03292dbb4dd0c8280bd4ce7bb8550dcf31d772bc93455fb50313425"
+    },
+    {
+      "path": "public/vendor/pdfjs/wasm/LICENSE_PDFJS_QCMS",
+      "git_blob": "9cf106272ac3b56b0c4c80218e8fc10a664ca5f4",
+      "sha256": "508a77d2e7b51d98adeed32648ad124b7b30241a8e70b2e72c99f92d8e5874d1"
+    },
+    {
+      "path": "public/vendor/pdfjs/wasm/LICENSE_QCMS",
+      "git_blob": "eec8246dfa81e83f19dae23f6c1fbf51720908c0",
+      "sha256": "36d847ae882f6574ebc72f56a4f354e4f104fde4a584373496482e97d52d31bc"
+    },
+    {
+      "path": "public/vendor/pdfjs/wasm/jbig2.wasm",
+      "git_blob": "254e1e48c86f51e103ee5a7f1fe0ee09e17af80c",
+      "sha256": "e6bee67724a7b5436fe8162638e3708cfc8d52b6342db69a49715e30ff27cfdc"
+    },
+    {
+      "path": "public/vendor/pdfjs/wasm/jbig2_nowasm_fallback.js",
+      "git_blob": "c86528f05912cef7320491b555d487715ecf394e",
+      "sha256": "04c795a6657a4553a64b781ea3e85256203d913c3b71b72b85fa3ce00622f458"
+    },
+    {
+      "path": "public/vendor/pdfjs/wasm/openjpeg.wasm",
+      "git_blob": "5acce73fd95c1baa3aa68cfe9d29aa3f97b7ce18",
+      "sha256": "004a0e62db930ba9ff2a22212f4554d0bb57a0635a8287caf70f98117cee14ba"
+    },
+    {
+      "path": "public/vendor/pdfjs/wasm/openjpeg_nowasm_fallback.js",
+      "git_blob": "0df96aed34f98a6c88a2a11656673b547f41e4c1",
+      "sha256": "0f998419819da4491d8302222aa9e2ff2494685641aa2a6c21c3760c29f3e319"
+    },
+    {
+      "path": "public/vendor/pdfjs/wasm/qcms_bg.wasm",
+      "git_blob": "ea1d07bc4439d034d5a188bb78ef317c33f56787",
+      "sha256": "663d86126d5f5fcb1c61490f94353e2a8375660b8c5498ab3ebab5a34b08800e"
+    },
+    {
+      "path": "public/vendor/pdfjs/wasm/quickjs-eval.js",
+      "git_blob": "f087fb29602352e8be9a6e7f7d766ccdb0dda038",
+      "sha256": "fe7930418e869791ce892567dbd0bc4698152b7e550b5cefa553992c56ddc325"
+    },
+    {
+      "path": "public/vendor/pdfjs/wasm/quickjs-eval.wasm",
+      "git_blob": "42980e94aa4d7359e4113c968c67800b45462764",
+      "sha256": "7bcacc9f22cacf7e9b23866d2a6d1639693d40c7f144e41b7c69ed37ba9cbe8f"
+    },
+    {
+      "path": "resources/css/app.css",
+      "git_blob": "54b247e2ae27b7ee170feeedfb5bcd7450ed622e",
+      "sha256": "02db84e827e06d8349293e9797eb8d81465e109e91976775964c4bf873b6fab5"
+    },
+    {
+      "path": "resources/js/app.js",
+      "git_blob": "8337712ea57f00733b5709b27efb3de797e95575",
+      "sha256": "101ead936a2281d53dcc064b7e2a2ab0d53b92ef3ef7b34b668673007895c860"
+    },
+    {
+      "path": "resources/js/firebase-messaging-sw.js",
+      "git_blob": "76ed5d81165927b3793a31406d2a8e7bd69e117b",
+      "sha256": "55490aef95c60f7e932026f936664a7c89839117285d74b37ffcd373c0fa988d"
+    },
+    {
+      "path": "resources/js/firebase-messaging.js",
+      "git_blob": "695b66faa395acf53426d646a6d243f633db8f25",
+      "sha256": "cb1b1a65bae4d9115615ff842d4af492f45279f8fd42c73c1b5534c6b234a3f7"
+    },
+    {
+      "path": "resources/views/admin/accounts/card-fragment.blade.php",
+      "git_blob": "d2f849ff03794a703609ae5a06ee816ce264d909",
+      "sha256": "724db7ef3973777049b89aa76cd77dc2a87361f47e62617a0ec4d9fdbc4d53b4"
+    },
+    {
+      "path": "resources/views/admin/accounts/card-pdf.blade.php",
+      "git_blob": "15be13b44fc785aa6eb6146bd03bb1b95cd12565",
+      "sha256": "8aa09fabb5a1ef75d8b535f3c276c4a9bd16536dedd947d810d2301bed5bd359"
+    },
+    {
+      "path": "resources/views/admin/accounts/card.blade.php",
+      "git_blob": "fe2f1ae143b53541db0c85a8354105bc250c7e8f",
+      "sha256": "f5ba7369fb43265c47ca9771fb4446212f4024688c1ea0c2a83b4be688ba06a9"
+    },
+    {
+      "path": "resources/views/admin/accounts/cards-print.blade.php",
+      "git_blob": "56bed31c8b3a14bda456036fece60f2b356b59cc",
+      "sha256": "35f5dcf85d5248a9927a35a4c31d2b423f7e4ee4625b845f6ced70407b8a6e50"
+    },
+    {
+      "path": "resources/views/admin/accounts/cards.blade.php",
+      "git_blob": "9550ed839ec455dd8b2c348fcb845f01b2c3d728",
+      "sha256": "674e6fba2da79798aaa086202f1bd0d7bd95f270f350c19b2cd8f622819a974a"
+    },
+    {
+      "path": "resources/views/admin/accounts/preview.blade.php",
+      "git_blob": "72dc3f540c7a2a2aed1c7cc5d0e0b597d1cd4304",
+      "sha256": "311db9b1505925f9940ca48aab86e8d060436de5c420bf15de24c1e81e2ef26b"
+    },
+    {
+      "path": "resources/views/admin/accounts/settings.blade.php",
+      "git_blob": "10843fec40d80d5fa59b7e6d645f38d266b0516b",
+      "sha256": "e8a53381d51c8e73cceba5d7a1ba1713c570b55b414df6c72fccf8a68a44ea81"
+    },
+    {
+      "path": "resources/views/admin/accounts/verify.blade.php",
+      "git_blob": "97eacfde266fdab712e58662991d593ad2a72261",
+      "sha256": "273dd6516db677df20a5c7c088a6fba4e519a430bef1d738354f6da5e5e3afcd"
+    },
+    {
+      "path": "resources/views/admin/announcements/form.blade.php",
+      "git_blob": "0d9cfe6b15cc9057a163026b9587e55e1f2049b4",
+      "sha256": "1afc83ecc7023b839f00361c0156035cd58c1181252969f5d3de539760c0a619"
+    },
+    {
+      "path": "resources/views/admin/announcements/index.blade.php",
+      "git_blob": "2915164c46dbbf38c68da6e067ba628884adaeb5",
+      "sha256": "fd580deb0e0e3cdcf5d46b909d58d3d1a944f3fa477289b3ea782d5567496158"
+    },
+    {
+      "path": "resources/views/admin/announcements/show.blade.php",
+      "git_blob": "febb4bbd307d51f158a8da25a7b218c07b0710be",
+      "sha256": "db5b0c4e6d8c8c8e41320ed8f3f4529ba1dde358eaa2976064b4f6410d44ef35"
+    },
+    {
+      "path": "resources/views/admin/classes/form.blade.php",
+      "git_blob": "589384053dd7f70222795bab82fc8581155912fa",
+      "sha256": "71929619e62c5d8d0f5b105947927e9f5de8e067e720651bf495530da5134c4f"
+    },
+    {
+      "path": "resources/views/admin/classes/index.blade.php",
+      "git_blob": "63d5db93c1ebbcad438d393df657994a4ff1ba41",
+      "sha256": "5e47df352465b5b4fdb288754a687bbc4dcddbd7cc36907ca7538f39a29e8f9f"
+    },
+    {
+      "path": "resources/views/admin/classes/sections.blade.php",
+      "git_blob": "30965f16be422b8decbd833df06fe451f43bc623",
+      "sha256": "d762d98d2edf41602defa633e5068f27e02bfcbc7815341380a5d883940b05b1"
+    },
+    {
+      "path": "resources/views/admin/classes/show.blade.php",
+      "git_blob": "582e0ffc7e36f137b297022393961441c652f962",
+      "sha256": "c8f64f68a34b14706d2230c8baba3cfb607bbf8d29c413d2de7e58d29ba605de"
+    },
+    {
+      "path": "resources/views/admin/dashboard.blade.php",
+      "git_blob": "a3e2e5cdbafa9ea90879732c73ce405a9365a756",
+      "sha256": "b1c052b17c8eddb57b8e3061774485ca2dc5cd39659707d0f80335c46e954a4d"
+    },
+    {
+      "path": "resources/views/admin/imports/create.blade.php",
+      "git_blob": "b4b55922b284cb06f4cbdeca9bf5e84aa4bcf65d",
+      "sha256": "5e39b3d47d4ba0f6c091f288974325d7ce4676b71a0f947f65e60c33a380382d"
+    },
+    {
+      "path": "resources/views/admin/layout.blade.php",
+      "git_blob": "f556ac7d0b80b28ca1b89561ad628df9938ed8f1",
+      "sha256": "e4f63c5e3a460e2cee45f14f7a75d2f95db542077e81dd44dbd8b4fd2b4b1d78"
+    },
+    {
+      "path": "resources/views/admin/modules/index.blade.php",
+      "git_blob": "b255487ad98f062bae5630e7ec481391f15fc103",
+      "sha256": "6505e1c6bb6846419665ec7cb1bed9abe54a86b65aaea11a5c8d5a3426c97d95"
+    },
+    {
+      "path": "resources/views/admin/operations/academic-filters.blade.php",
+      "git_blob": "a93e421412a94634735fac41cab99112e3dde31e",
+      "sha256": "49581c0fc02b32d920cf994d173ad7a47c6cc610870b1b5c413eb70810071dde"
+    },
+    {
+      "path": "resources/views/admin/operations/attendance.blade.php",
+      "git_blob": "fb42c3cd2b184f1af88b2cc0ed69284b5aa0ab88",
+      "sha256": "44d4c24f4f5a7aa4e2791926da0308aef523dd002a27eacd71a6785fce61a31d"
+    },
+    {
+      "path": "resources/views/admin/operations/audit.blade.php",
+      "git_blob": "d89e0e86953d3b1d1b58b78fbafd6f6fbe1f528b",
+      "sha256": "8783adbf5643e327754129ded09846e5512b2211fd4158a384a21b4ec415178f"
+    },
+    {
+      "path": "resources/views/admin/operations/exam-form.blade.php",
+      "git_blob": "d5cde5ee3639ef29155b8030980de12ab81574ee",
+      "sha256": "0d292305e3637140dfa67ba7fd99e5743e069c63d9bebd5f3468ef3c1f9afcd9"
+    },
+    {
+      "path": "resources/views/admin/operations/exams.blade.php",
+      "git_blob": "7d70e1090c99bbca3784e635c5757e51645ff463",
+      "sha256": "3397d752a5a988db1f0285a0d6550f591cbe14297ef35e01e26dcc5f4b76a1c0"
+    },
+    {
+      "path": "resources/views/admin/operations/grades.blade.php",
+      "git_blob": "d8a96bea64c6ec328ecb4a9f9334e96c39ef1321",
+      "sha256": "f473bf633a7faafc54dbf7776b2adc785ad55acbcdc7c48d6c9c102c25887d40"
+    },
+    {
+      "path": "resources/views/admin/operations/library.blade.php",
+      "git_blob": "af4fd136f3987f203dcb2fd3a38c9d173a55c253",
+      "sha256": "bf6f781a39452b01bb36855928095e15ba6517a2bb703f7f3274560dd737d25c"
+    },
+    {
+      "path": "resources/views/admin/operations/notifications.blade.php",
+      "git_blob": "4988fb6efb8cf7961f8dd253c9a33b3834eb7e25",
+      "sha256": "38d714efd3803ef1168275e739e92c0f114617180ae9033354755f652f8bc45a"
+    },
+    {
+      "path": "resources/views/admin/operations/reports-pdf.blade.php",
+      "git_blob": "8476ab4e56768ce0a7e51117f20f4fef04d25287",
+      "sha256": "991796011b67c1eb2809e3e814a0c0d05d9b79db35ce1e4e6fc3ce08824d5f33"
+    },
+    {
+      "path": "resources/views/admin/operations/reports.blade.php",
+      "git_blob": "d30e69cc06c365b979f87110e7cb136a07ee2b43",
+      "sha256": "4bf8b55d46fe1f1a045131064cc4d96825f79a1f84e8b580bc8930b10089e6a1"
+    },
+    {
+      "path": "resources/views/admin/operations/role-permissions.blade.php",
+      "git_blob": "50db6f4b27f28f0969478503e2d7987e7d2edce7",
+      "sha256": "5afd444702713a133599660ee32adeedfaa433010078ac20bbfac1b9fa43b4d5"
+    },
+    {
+      "path": "resources/views/admin/operations/roles.blade.php",
+      "git_blob": "f41706b73325a2449902b8d0e6788f3cb3004ca2",
+      "sha256": "a8dbe4141f3c8200fb041990e0f3319084f02fecc85292a3a6c7a943dca283d9"
+    },
+    {
+      "path": "resources/views/admin/operations/schedule-form.blade.php",
+      "git_blob": "96f62bb53a173fff076a56df46645d01dc41c594",
+      "sha256": "b954ed2df05f9500f88052cb1750a3c02093e6b6319f873c73b4a0528b3540fc"
+    },
+    {
+      "path": "resources/views/admin/operations/schedules.blade.php",
+      "git_blob": "08930a2f2a658e3aad3efa38cd5225cfb4a937b6",
+      "sha256": "a8aeddfe5dbfad887fcee9a9eeed12400f83fadc46716cc1d349c4f10edaa340"
+    },
+    {
+      "path": "resources/views/admin/operations/settings.blade.php",
+      "git_blob": "d90b7b43695daa4fe576575621ab71b8cff624fb",
+      "sha256": "761c3a333591baa82a322829d076444fc219ef4777eca3f8dcd34dc8f585a15b"
+    },
+    {
+      "path": "resources/views/admin/operations/staff-create-modal.blade.php",
+      "git_blob": "9db2140d8c3ab0c832059db27558280b0b870811",
+      "sha256": "7b388a131a5c7b65d9fc7e2d775ed49ab2a97cfcf567b75dc5b31c7307e1af2c"
+    },
+    {
+      "path": "resources/views/admin/operations/users.blade.php",
+      "git_blob": "6f098f1cd88bb2e31fc475e3a40b9c305ac4e0c3",
+      "sha256": "a3eecc3b98b682cf51c1fefefc12bae942b4a5371eacb97da2af0634465f8019"
+    },
+    {
+      "path": "resources/views/admin/parents/form.blade.php",
+      "git_blob": "9c9615bfea4a25c04189ee0bdc2da458b67c02cf",
+      "sha256": "ccd0c531914a89685c148ad47afb1e8b6acffda4e9031d0ed2a64d7d2a4ca32c"
+    },
+    {
+      "path": "resources/views/admin/parents/index.blade.php",
+      "git_blob": "47f1b295c70ab718106424b6612b846af14ac702",
+      "sha256": "d390c0bfef85e983452b009fcab05b324e895b0f740baa89596787566d50123a"
+    },
+    {
+      "path": "resources/views/admin/parents/show.blade.php",
+      "git_blob": "c8fedd1cce995294ce4a034e0397807618788293",
+      "sha256": "0447b3dd6fa22a9b42ee63ef3e596ad0a888de3fb8134ed3849d0732236c062a"
+    },
+    {
+      "path": "resources/views/admin/partials/account-filters.blade.php",
+      "git_blob": "fff0dfb9670708839c200b433ec97661e4452e57",
+      "sha256": "752253f82e1a9898f86ae5988bd8a910cde5baadf5bc512161f700093a05e0f6"
+    },
+    {
+      "path": "resources/views/admin/profile.blade.php",
+      "git_blob": "b9aa961f2bb8af44f20d0b7a2087d4a3f07d6589",
+      "sha256": "c931ba9dcd84c880da08046a53e6d1f40a4bc2e6cb5ef4ec0b93988434390d97"
+    },
+    {
+      "path": "resources/views/admin/results/index.blade.php",
+      "git_blob": "be2af7f453059204a09d794ca4d89ab73dbf8f9f",
+      "sha256": "b224de064d052c86c7c9388aaf7f2b700c449d63045894cd70f6592a02e925f5"
+    },
+    {
+      "path": "resources/views/admin/results/show.blade.php",
+      "git_blob": "4acef301a9e91745f08e4aeb63c73b3c3da03292",
+      "sha256": "8e8641863396c3ef23a7552a950b9c21f94b195fb1cebc98f23c7712703ca674"
+    },
+    {
+      "path": "resources/views/admin/students/form.blade.php",
+      "git_blob": "4da2d748e4f41bba510b8b8c73069761c13d96f8",
+      "sha256": "66b9a89f41dc5af25c726548a680bd9d9ec4f4d6839b9199c0d987fdf88a9361"
+    },
+    {
+      "path": "resources/views/admin/students/index.blade.php",
+      "git_blob": "fb5a7c013306c2cce555cf90ba665538f96bab4a",
+      "sha256": "6b485006e5519f8dd5ab35fbb750b4eadf6372a2412e1e24c56f45412064bbbb"
+    },
+    {
+      "path": "resources/views/admin/students/show.blade.php",
+      "git_blob": "edf5e1f15ff1395039404e8be1cbf0f32b6b1487",
+      "sha256": "2d6708b614f718f77b6a7a2df0c3f5eddfab259332d5514fa1e0a9dd81e5b3f6"
+    },
+    {
+      "path": "resources/views/admin/subjects/form.blade.php",
+      "git_blob": "ed4f494c82dbbcee33372521d722b4e9ccf6a783",
+      "sha256": "a92b7e956b395a0304af934e7c8f1a7aa37caa1f1b71cff330308217dba1b3b4"
+    },
+    {
+      "path": "resources/views/admin/subjects/index.blade.php",
+      "git_blob": "98053bd89b2ca9df45229f418ae6f9e1c5b9ee30",
+      "sha256": "bd16492bf4a2e72e3983f5a74de3c7f8b37b3a01dd90701fe30f7505a0fc19a3"
+    },
+    {
+      "path": "resources/views/admin/subjects/show.blade.php",
+      "git_blob": "59c018ad6f5c6c02b53199a78dbb6a799c3821bd",
+      "sha256": "9c75923286aad0fcf9571e74483391fa5705203f6864a37e64c0413e25f45153"
+    },
+    {
+      "path": "resources/views/admin/supervisors/form.blade.php",
+      "git_blob": "4dae762b77901bcadecf9f410989a1975bbe2bf5",
+      "sha256": "ad08dcb9bb02c8e00579b1c055282cf64280dcbc01799303036111e8be44e234"
+    },
+    {
+      "path": "resources/views/admin/supervisors/index.blade.php",
+      "git_blob": "6265c5ccd9f061b48578e8c8e3bf75af505d3e5a",
+      "sha256": "db059b465a3c8338cf29047f959a61a2aa2c0c7f411c52ef2f0bd75384da22d0"
+    },
+    {
+      "path": "resources/views/admin/teachers/form.blade.php",
+      "git_blob": "929165fbb1bfb5618fa6004c4eee39260e78aed0",
+      "sha256": "74a80330a2dc198466a862be5c80014e62f108e68e32d294ee1830a0e6c15ebf"
+    },
+    {
+      "path": "resources/views/admin/teachers/index.blade.php",
+      "git_blob": "3e0956a5aeb06ac60e05c035b433ba84e2bb9fe8",
+      "sha256": "3442a206a9016ef143748b3c1961f97f84fd0f7d72785c1aa4e5fb78a701e3a3"
+    },
+    {
+      "path": "resources/views/admin/teachers/show.blade.php",
+      "git_blob": "d6833d5759a0524b43a7f360e3cd35602cc2fbbc",
+      "sha256": "e2bd2b900cad37d5e3c60e36d2ba84f885530e219daea059027abd75cc9d88bb"
+    },
+    {
+      "path": "resources/views/auth/login.blade.php",
+      "git_blob": "ba11977f4ed4017cb1f97a8fc542e72fbe3aee34",
+      "sha256": "486410477effe7a11c7acf26f99cea3f99a83dd7cd33e4bdaed72814ffdf812d"
+    },
+    {
+      "path": "resources/views/components/assignment-content.blade.php",
+      "git_blob": "77c995f0fc34443da3044cd5d9ba490cbfc7a592",
+      "sha256": "37defefffbbc0953eb92c57cf0b5bf459a425cae81f17fee995c492a1d4e60c8"
+    },
+    {
+      "path": "resources/views/components/check-list.blade.php",
+      "git_blob": "64bf0ae1f227bf0c4222788ef8bf40c3d4304bf8",
+      "sha256": "682361697c53414c33732cc9d7ca96b590cfc077be6e913316c75f27c51cff5e"
+    },
+    {
+      "path": "resources/views/components/portal-icon.blade.php",
+      "git_blob": "60f89767590d1d83b820dc66719d2e9a34c70bf4",
+      "sha256": "25edce5c70b4ab59e3609826990c493283fb882dd1adeccbf25c0c30f74c28da"
+    },
+    {
+      "path": "resources/views/errors/403.blade.php",
+      "git_blob": "7070585a358b55d38d433c457f334fa4c6afffc3",
+      "sha256": "c56a9f4a6a711c95b3305bb5d712b7b03ac556de43166a1b2c5e42cc3b0919c6"
+    },
+    {
+      "path": "resources/views/errors/404.blade.php",
+      "git_blob": "cf442e8fdc68c5e4e01d703ad94cd318597032c9",
+      "sha256": "54a1a4c8aa091087d569b280d477bc60d781e44dbae8f264307745b2047c9280"
+    },
+    {
+      "path": "resources/views/errors/4xx.blade.php",
+      "git_blob": "e644c672d62b9d1b957b7e98489d67940284c490",
+      "sha256": "c52f812972601b1d6a68ccb1b46dbe656db7779205c8118739beaf8fca2ecb26"
+    },
+    {
+      "path": "resources/views/errors/5xx.blade.php",
+      "git_blob": "172ef5fe1cb6488603628e14971b82c74cecd508",
+      "sha256": "af80cfea1e30d74b380b68dcebdf25557b5e2b1651fc9ad4678caf7301394a9e"
+    },
+    {
+      "path": "resources/views/errors/school.blade.php",
+      "git_blob": "52b736ae511198bf45ded438a43d189e882ab435",
+      "sha256": "09c5c537ddaf043ac3db75dd3eb151d6bdbeb772c1d2e9631260492dffc522c7"
+    },
+    {
+      "path": "resources/views/finance/index.blade.php",
+      "git_blob": "ddea82f21d87f6e320878eedbd36bff702859d85",
+      "sha256": "c67f9977cd4cf046bbbd668d3b810ed0661f662c516b1592c88ecfc6dd3cc578"
+    },
+    {
+      "path": "resources/views/finance/no-children.blade.php",
+      "git_blob": "0141e96d5e07bc6198798a3fbd7bbf7e16d63a04",
+      "sha256": "1a1acb250ec9be86aecf2f8d7510bf554f0732773526dd79eed9fe8f0bc40a1c"
+    },
+    {
+      "path": "resources/views/finance/print-statement.blade.php",
+      "git_blob": "72b7160ecb217143e40bd7dc21ccec492ebce794",
+      "sha256": "9a4b633156092e4bcc2fcfb37423028321ff3ac7b47d8cf2076576f62f8be794"
+    },
+    {
+      "path": "resources/views/finance/receipt.blade.php",
+      "git_blob": "2ee55024ab5160b43bcf71f1bc2b27570bf83e20",
+      "sha256": "a3f402862f55188e2e800a0c0a1769d2e018efedc66167cd452fa66d0d881d5b"
+    },
+    {
+      "path": "resources/views/finance/statement-data.blade.php",
+      "git_blob": "45321db9635cb99b4181004ed1ac033c55a9f074",
+      "sha256": "a5ccd55909d9c7787854db6e0a1c45a6a985395aa119c110a621dfaf9fe1db8c"
+    },
+    {
+      "path": "resources/views/finance/statement.blade.php",
+      "git_blob": "c6cc0433f703f7a25623c347ccb04e4d09ac5680",
+      "sha256": "f02e173a5c7ad4b137e455810db20055a5d82d7c2c55d86ce96ecab234bfafae"
+    },
+    {
+      "path": "resources/views/finance/templates.blade.php",
+      "git_blob": "b6f3bb5441d7d226f2127cc657f6dbf5cf7f60b9",
+      "sha256": "9597a8b03a89604bc32156115416e2f002f08f1374fcf1b1d9add734ea260cde"
+    },
+    {
+      "path": "resources/views/library/card.blade.php",
+      "git_blob": "832642d69f5b2dda54afdcc9c2d96b2c40fa3880",
+      "sha256": "0a2f1e2da3b7a5603c197771ad483bec0fc35be86f612119f33b11979cb3bc94"
+    },
+    {
+      "path": "resources/views/library/catalog.blade.php",
+      "git_blob": "682cea8cd5fa5af7f87a3f4fd9d7752c42a9eeb1",
+      "sha256": "9fa9891599e49b4a3bbf08209d7933e3e79e2df2479940ef27a98a684ebffb29"
+    },
+    {
+      "path": "resources/views/library/reader.blade.php",
+      "git_blob": "4626312acdcc35924788f6fab38da7ece54d1f7c",
+      "sha256": "93f31008bb560a5751962d0ed4fb87a3c1d3e46111c566ca4b03f529315b440c"
+    },
+    {
+      "path": "resources/views/library/subject-icon.blade.php",
+      "git_blob": "81497892f3c71bd589ea6cc6838d1884dc5523e6",
+      "sha256": "8d050989d9c257118728f6a607839ad99c07f24cdcb65ec07062ef2a49f0e4b2"
+    },
+    {
+      "path": "resources/views/library/upload.blade.php",
+      "git_blob": "7a0c3324135e2102f21a92f9b94a3309652cfc63",
+      "sha256": "4ad83c97d398054ce572b8947d51771ca08d1d376027dbb6a94b92302e2a7870"
+    },
+    {
+      "path": "resources/views/notifications/composer.blade.php",
+      "git_blob": "c31d091cb98a5ff7e78040bf94022b20ac6f6f2c",
+      "sha256": "75499855ad3f2aa9cfb16b69e51a1d61bc2c27484da00d9666defd0410b129f4"
+    },
+    {
+      "path": "resources/views/parent/announcements/show.blade.php",
+      "git_blob": "4dac4dc69bb0f6eec41866f818adf94ea52097f8",
+      "sha256": "2a566d02e27bcddbb23c0e10d9705e265c97cfdca3389037fcccf118e04a7f99"
+    },
+    {
+      "path": "resources/views/parent/assignments.blade.php",
+      "git_blob": "e008e9a94efd0d19ba7c98c818516a8852b307cb",
+      "sha256": "7f0488bb206c6e945405e438566f554ea5ea486d8a2ea6295838f0e30f517a71"
+    },
+    {
+      "path": "resources/views/parent/attendance.blade.php",
+      "git_blob": "a4a2f7486c1c34424c1b3c45ad24cab80593b956",
+      "sha256": "932f8026c05090e291194a31bafbfa047d259b4cb2dd59e57f58133d2949e28c"
+    },
+    {
+      "path": "resources/views/parent/children/index.blade.php",
+      "git_blob": "fa3cded1040010ca97d481686c3d01616263406d",
+      "sha256": "616163b6fbb5bf9cf10ce8f3efa6750d967343e07bdb75f797c567c2074174a9"
+    },
+    {
+      "path": "resources/views/parent/children/show.blade.php",
+      "git_blob": "faab73ce875c8f7e4c6c2766fa65db499b40d270",
+      "sha256": "11c156b7c933c52db98dcd908af7d3fee1d05319bb45ed99d3699a791df3fede"
+    },
+    {
+      "path": "resources/views/parent/conversations/create.blade.php",
+      "git_blob": "7d0e887d5fd2a38bebbbf40d6e2c6bf3802fcde1",
+      "sha256": "7ec898a19520e3b728a40817220b6e61e207b7e73e7e27a80176004f4165e81b"
+    },
+    {
+      "path": "resources/views/parent/conversations/index.blade.php",
+      "git_blob": "ed624efb2066bf9292708cfc534dfe20bf943e23",
+      "sha256": "8a24eda21e3931ffe6bf3d8dc93064323626f25cc709286ac62c8fb1218b84cb"
+    },
+    {
+      "path": "resources/views/parent/conversations/show.blade.php",
+      "git_blob": "595c5b2e7bb317fded9a9744368ec8c3734017b3",
+      "sha256": "75603ed57f50462e6d5284382e6a7feaf85720b9d5e3e76d2b300283c5207137"
+    },
+    {
+      "path": "resources/views/parent/dashboard.blade.php",
+      "git_blob": "3ae48a1a6f71c311dcfeaec128cba9c4c933b15e",
+      "sha256": "f9ccf1c861be964433cde74a84a1d0164619e5543a762967e74e7d6d95e21d66"
+    },
+    {
+      "path": "resources/views/parent/exams.blade.php",
+      "git_blob": "f4115d6d864fbadd479bbe49b999d576fe339215",
+      "sha256": "f59dd4e01b5c5714a4635641ecffb7097ca0e4238e16aaac01c2eb3f25ab658d"
+    },
+    {
+      "path": "resources/views/parent/followup/call.blade.php",
+      "git_blob": "4bad393ed87fe263bebaf4712c75599ed2844c2e",
+      "sha256": "f205c76f85ca6dc8916694e5b9ac3f63bfd94c5693633922063a05dcb309fa91"
+    },
+    {
+      "path": "resources/views/parent/followup/note.blade.php",
+      "git_blob": "1984083665dd55fc60909e92843502b5f4ffbc63",
+      "sha256": "d6e0ee3147d45c1f8f9734aee419085ff4a6fa422bde96a07378a00177a2734a"
+    },
+    {
+      "path": "resources/views/parent/guardian-calls.blade.php",
+      "git_blob": "6c6c20db998634ddbca7bb5727503cacd98e4d3f",
+      "sha256": "e39f1592b2c8086f5826d911dcff10c6d930491aa24eb04636ad1291a0ceb046"
+    },
+    {
+      "path": "resources/views/parent/identity.blade.php",
+      "git_blob": "29332598743935ff6e5e1d49c2618ef99dee4af2",
+      "sha256": "43c849dbbdf1031ee1e97fd65795c85680dda8b7d2e45c85713d8a288669473e"
+    },
+    {
+      "path": "resources/views/parent/layout.blade.php",
+      "git_blob": "22669933c421fb2d84698f2c7ad441d699fa069d",
+      "sha256": "09ce87ffbd3793af1c01165e7cfda32715e1a343a8041b30e40d2b4450e33f16"
+    },
+    {
+      "path": "resources/views/parent/messages.blade.php",
+      "git_blob": "5eb761831eb60664ea341ca42e5d8f87e13b77b6",
+      "sha256": "ce3792a2e781274923006256e55474f7277a39b6e85ecde7cc2e23153f6f4c10"
+    },
+    {
+      "path": "resources/views/parent/more.blade.php",
+      "git_blob": "d439e3ae367c7cf959f081ac5c3db365f8478b78",
+      "sha256": "6f17a5adfe45d3adb6ea37c1499279026b3e5f5dd5511b8c48aafbbd92d6677c"
+    },
+    {
+      "path": "resources/views/parent/notifications.blade.php",
+      "git_blob": "57abdce518f05a17be7e664fe63e0bcb471c7cf5",
+      "sha256": "12491d109cbc26452f11cd1c7b0f79214194f26fe4b56b0dba9348e7342d3f54"
+    },
+    {
+      "path": "resources/views/parent/offline.blade.php",
+      "git_blob": "104e94d795c0be1235818e9da8635950bf017699",
+      "sha256": "6df61aca6c738101f96d34793cbfa1a52c10e09a6e766415e35120d2408ccb28"
+    },
+    {
+      "path": "resources/views/parent/partials/child-switcher.blade.php",
+      "git_blob": "57df2e713a9c0c1628f1ca7ce7fde44ab82caaeb",
+      "sha256": "62662045b76ae6a2884932c43e6109be93cd22b78ab0573b0c4f6320223a6071"
+    },
+    {
+      "path": "resources/views/parent/partials/notification-bell.blade.php",
+      "git_blob": "411fe8b3e8ba32bda68c8ab32e756cb8d8da99d6",
+      "sha256": "8bef5b9de22f27852628f2a88356a5313e6c9a7d358f0783764d4718ebd52a39"
+    },
+    {
+      "path": "resources/views/parent/partials/notification-icon.blade.php",
+      "git_blob": "2f92ffc8f9c1b486226ad6c60500eaf03216e442",
+      "sha256": "848ad66682a9f5ba14ea6f92eaf95af3a135f7f008ade31174acee2b1916243f"
+    },
+    {
+      "path": "resources/views/parent/partials/published-results.blade.php",
+      "git_blob": "fab05524e37195f8024d4a5d86ba1c120a2dd141",
+      "sha256": "8a2d67149284db4456ad258706121763c98ba84f75f5e39cfcc905b286f11b73"
+    },
+    {
+      "path": "resources/views/parent/partials/subject-filter.blade.php",
+      "git_blob": "4261f88374bbbc5f7cb1e2e2ece3d5e1a4630523",
+      "sha256": "8ca1868f7d8617c564b8296230f92fc2abbeb429514041bf4cc7a9050afe0bde"
+    },
+    {
+      "path": "resources/views/parent/profile.blade.php",
+      "git_blob": "91b0d55a1164026d630bbeb43a8f96b093238426",
+      "sha256": "431071844299364ae855c92f80f29f8e14a08d674901758456f777f711a2217a"
+    },
+    {
+      "path": "resources/views/parent/results.blade.php",
+      "git_blob": "17e46ce6d2c9105afd02bf561360a3c542baec34",
+      "sha256": "2d2b6ccb18df65d5f808160b51859fee51e26e4bf834c0f3b27d5e14322f3c87"
+    },
+    {
+      "path": "resources/views/parent/student-followup.blade.php",
+      "git_blob": "f2e769d588d6df6400fba3a9a1e7c40f666c45d1",
+      "sha256": "238b13561e6e77f00a9827551c979b4f263dd8e3b74083eb6e8183ff99db8b14"
+    },
+    {
+      "path": "resources/views/shared/ads/index.blade.php",
+      "git_blob": "7b0c16a050c5d6f2b432237349bf65f4d24d0901",
+      "sha256": "cf034f0a7a480d9b0b3940bb8752b7c35cb256db1f4e41127baa5b84a4540562"
+    },
+    {
+      "path": "resources/views/shared/brand-mark.blade.php",
+      "git_blob": "df36dae6441bb9822dbee420fb6126949cad3ec6",
+      "sha256": "d866f0b5b93bcd6c9bbc7871239784b661f0be220e0ea39896c8dfef1065db0f"
+    },
+    {
+      "path": "resources/views/shared/branding-style.blade.php",
+      "git_blob": "b4230bce92d1d3deca249cde30c657de6045196e",
+      "sha256": "e27dab91f471b2ae099687e4f17a7af32800c0d16fa1cea2853999285de4e816"
+    },
+    {
+      "path": "resources/views/shared/chat/assets.blade.php",
+      "git_blob": "983500c0252b3a536db37b7eeae38fa7db9b002e",
+      "sha256": "36ea86bc3b541536aae956992b7d3fc9f627779b01a3b405b63d7b433bdd4fce"
+    },
+    {
+      "path": "resources/views/shared/chat/contacts.blade.php",
+      "git_blob": "f74f13d249a40fcb57c421407f422b3a37c492dc",
+      "sha256": "8d89005e84575e8966d853006cee2aa22b7661ce3fef8fc5b23381e9f524e929"
+    },
+    {
+      "path": "resources/views/shared/chat/inbox.blade.php",
+      "git_blob": "c22a38f950e66ed598cb926b02a5aaf258d4d5ac",
+      "sha256": "52472f00fb493e19a81b0f3c18dc0e811ae069c36b9369f07daa208bf04c23ee"
+    },
+    {
+      "path": "resources/views/shared/chat/thread.blade.php",
+      "git_blob": "3e6d7d65409e0b75f4d1d0fec9f33870e63ffe9a",
+      "sha256": "0d329b12b976fe032e467f5c01e990115e90ae70495f966e580f22a827ab7ea2"
+    },
+    {
+      "path": "resources/views/shared/fcm-activation.blade.php",
+      "git_blob": "8732ace21db57713d4d98d1e272775a694e57eda",
+      "sha256": "15650995caf032e2027d83bf21b93bc216ac3cafc3e20a77575e11c3d8e4b79f"
+    },
+    {
+      "path": "resources/views/shared/fcm-assets.blade.php",
+      "git_blob": "6ee99dd6bf031c8ffdf1d086ce3f357ba1870572",
+      "sha256": "2432550eda6f66848c2c9c63232724bd13f7de234a982b08d8e4e5b177a70030"
+    },
+    {
+      "path": "resources/views/shared/portal-assets.blade.php",
+      "git_blob": "ba872fdf058e03dc488b0ddab7dc8b5341444f99",
+      "sha256": "e9c8a81fe2b193f57754458f7efef6fdfd746b62492de248c0b003fc2796aea3"
+    },
+    {
+      "path": "resources/views/shared/published-results.blade.php",
+      "git_blob": "17f1421674dc806eb55611dce37f01be712285f5",
+      "sha256": "47b23dede18c96215fa422d523b5dddca8a308dc94493180ef000b9a9c0ec759"
+    },
+    {
+      "path": "resources/views/shared/pwa-head.blade.php",
+      "git_blob": "549564554788b816ad4c8ecbf5423fc6b4fc00c4",
+      "sha256": "a5b7263d5e2a8fbc2f360cfc438154396ffe87afa44daa115c5fb9af289c2e3a"
+    },
+    {
+      "path": "resources/views/shared/pwa-install.blade.php",
+      "git_blob": "06d77fdcffa15dc987a6aec2ff1a6428476c1cfd",
+      "sha256": "fad358f0368b6b97af7b2038dc35613f85ea6f3136b4bde4d60a20d97f722eac"
+    },
+    {
+      "path": "resources/views/shared/student-analysis.blade.php",
+      "git_blob": "0e5c68ef850efa76290b3376e836469ecf3819c3",
+      "sha256": "bbee496273fa54ed65d1becfd5b69e0c90e24f66034531f34d64dc5b1cb4b6e0"
+    },
+    {
+      "path": "resources/views/staff/dashboard.blade.php",
+      "git_blob": "9da4f9f93a2a86f3da3b84e48d687b604f8ecbec",
+      "sha256": "88a6b0c82e666df0f3cd5af07a6025df3c85ef3fd483175078ce6b171817cf3a"
+    },
+    {
+      "path": "resources/views/staff/layout.blade.php",
+      "git_blob": "9368aabaa449956ad4f9faaa3c4ce59101f569ec",
+      "sha256": "a64ae37892be1430d7e5afec10ef706fff2d37ddabafddac77257a29a6febc6e"
+    },
+    {
+      "path": "resources/views/staff/modules/_table.blade.php",
+      "git_blob": "8689e26a35f29dc9b68c19af9f9b9bab37584dcd",
+      "sha256": "208f6fac09ef5e38fd2e05fbbb874a2f004ad87e87d8cd3de58db3443d545598"
+    },
+    {
+      "path": "resources/views/staff/modules/academic.blade.php",
+      "git_blob": "26bac21c7a02b9f947679884d496c91cb247d777",
+      "sha256": "d15ac04a4f7d7e0bf37ea81febad81a4c68637db9568e5061f08e9b0d8099a86"
+    },
+    {
+      "path": "resources/views/staff/modules/activities.blade.php",
+      "git_blob": "9d5ad2315324e50f975598ec79d3695dc37247df",
+      "sha256": "503a7e87b2cd39ca79a98744b2b2fb805f67581a87416c8e8bf26ebe4266b83d"
+    },
+    {
+      "path": "resources/views/staff/modules/announcements.blade.php",
+      "git_blob": "84a5dbd189ca01ac4b87464882e9fd78c4808581",
+      "sha256": "0ee3df45d148f1725f6187740f05a8d30b75ab4c464ac6988169335601047804"
+    },
+    {
+      "path": "resources/views/staff/modules/assignments.blade.php",
+      "git_blob": "a70c51c89b546863ecc1a69215963d2e7597f882",
+      "sha256": "8ef646f474f0f9b4989046334c7d2c5a61d426a6df107c84bb17055226b29d94"
+    },
+    {
+      "path": "resources/views/staff/modules/attendance.blade.php",
+      "git_blob": "a3d29d5fe134702166ccf6ad8c922e8e64f39008",
+      "sha256": "c9b04bf77f14728e1d62ba4038fe0f173f552cdb8897ed89f4184b6d3f7936d5"
+    },
+    {
+      "path": "resources/views/staff/modules/calls.blade.php",
+      "git_blob": "87e5dab987407a31e3b953c8851c0d217a5443cd",
+      "sha256": "66dfc4e7e0440403f2f3e41e699fae298a42bf51b4565077ec49e4daec44f722"
+    },
+    {
+      "path": "resources/views/staff/modules/rows/academic.blade.php",
+      "git_blob": "11a48801409f38547137f1d2292f21180263043d",
+      "sha256": "9e4c34c77d8e57814eb754eebf557c4f4412b8588ef6f8a131b4cd024c463da4"
+    },
+    {
+      "path": "resources/views/staff/modules/rows/activities.blade.php",
+      "git_blob": "16190b791b070210ce450547334a6ca9075aaf4c",
+      "sha256": "bb0d947cffcbb53aa9a06a8bd0826729479dfcd26a43c7e063d0da63e22d47e7"
+    },
+    {
+      "path": "resources/views/staff/modules/rows/announcements.blade.php",
+      "git_blob": "9cdb0cb246febfef57cd30648bb774c0e902e701",
+      "sha256": "01c85c8ad6d2c453ad2df9bbb84907ed817813d1c4f88eab2f222897034f2af6"
+    },
+    {
+      "path": "resources/views/staff/modules/rows/assignments.blade.php",
+      "git_blob": "ecc85f0fbd556b433d717ca21d2122e3bed779d0",
+      "sha256": "3288edf80a297a77e14a752fb1807c1a2008aab5fcdcef3511d83d7dbfc9ae18"
+    },
+    {
+      "path": "resources/views/staff/modules/rows/attendance.blade.php",
+      "git_blob": "24b3acd5d2861b90f65f9ccae1cbeeb8940c8d94",
+      "sha256": "8fb0f184fef92c144b0125a44cbd1cdd6badd82a60f893eb330f8921f151678a"
+    },
+    {
+      "path": "resources/views/staff/modules/rows/calls.blade.php",
+      "git_blob": "dace3fe4039a81d7eafd43fb299b474f5b2b0da4",
+      "sha256": "1b8e6637925a9ead352dff9068e0ec6642c90f12f0b4b6085aa1022492fd8798"
+    },
+    {
+      "path": "resources/views/staff/modules/rows/students.blade.php",
+      "git_blob": "964a9e29ccac0fe73ff565dc506e9c02094a8544",
+      "sha256": "f70e94810041baa9853315ee8a9ac04a3fa0ef9b173f57efdbe355223f795fd4"
+    },
+    {
+      "path": "resources/views/staff/modules/rows/teachers.blade.php",
+      "git_blob": "fd56d2a977860709a8054bfaa4ab9d1812f9ad71",
+      "sha256": "5cd134476f8797ff23113bcaba45152988134165c6d689ba3383b2a5af5f62c7"
+    },
+    {
+      "path": "resources/views/staff/modules/students.blade.php",
+      "git_blob": "3d45ad0547e6d9a300aade05c6fe4df7a1ed23cf",
+      "sha256": "ba1a2b395e4c45c44276edd11d91021b7fccf1f9b11878193c6e7d1214afaa70"
+    },
+    {
+      "path": "resources/views/staff/modules/teachers.blade.php",
+      "git_blob": "64fb814e30622544ba6c135136e78f2a045b6c20",
+      "sha256": "2429666e2516c5787ff612fd389bf1b1a92c7eeee561a3c57dfa5c267955657b"
+    },
+    {
+      "path": "resources/views/staff/notifications/create.blade.php",
+      "git_blob": "3284f120d4743b29dc77ca579ba607afc77c72ee",
+      "sha256": "6ba735f4dd96d5a6b7fb30008379d87abdaa17ecda33dd4d8728a9888ec7602b"
+    },
+    {
+      "path": "resources/views/staff/students/form.blade.php",
+      "git_blob": "47f221aa1be21b45ce0955ceaf3914de58d9d506",
+      "sha256": "239b2e5e794e72f54c1f97d7a3fa078fa7601f4dabc698d55d1bb17c58599244"
+    },
+    {
+      "path": "resources/views/staff/students/guardians.blade.php",
+      "git_blob": "f70b16432c634a4f4778a7f7cac3500f89c3de59",
+      "sha256": "92e060b49276e8b1327fcd439e2e715d317896ec541301b4195df778e29c5843"
+    },
+    {
+      "path": "resources/views/student/announcements/show.blade.php",
+      "git_blob": "6f7bd8d7fa1ba8f3946b17da7b1f539abe4b32c8",
+      "sha256": "8d7ddc514a7e1f6456710322db2292e468a81e17014ace635284697ac62a0345"
+    },
+    {
+      "path": "resources/views/student/assignments/index.blade.php",
+      "git_blob": "4bb1438e02539d3f3e67374840c9b3f248a919bd",
+      "sha256": "137aac9a7cbb9cf3a22f4f9cc3f9a5a932c75880ae3da5e4f81615247dd021e9"
+    },
+    {
+      "path": "resources/views/student/assignments/show.blade.php",
+      "git_blob": "de0e0f10690da6802c848be754056690708cd8c0",
+      "sha256": "7358394ccda057a887bb3fc4958acf0efab896baf80c4e6beedf7318df5e2253"
+    },
+    {
+      "path": "resources/views/student/attendance.blade.php",
+      "git_blob": "c5a9c29d71f8605004a87ceee5594783654b8282",
+      "sha256": "0c96e4d7c9089e9db01e0feec0230998a4dd9cef375ec693cca2e89ed8b47a7d"
+    },
+    {
+      "path": "resources/views/student/dashboard.blade.php",
+      "git_blob": "395d35d956cb594db19c8ee77e049d1c5afb2ecc",
+      "sha256": "92e5df184e098d21ba57820b9067d55a8dd1197f9cc2877c8f3b5ad5c1b1ffcf"
+    },
+    {
+      "path": "resources/views/student/exams/attempt.blade.php",
+      "git_blob": "1a020288bfe2a9c8cecff44ea5e2a633bdad8fcd",
+      "sha256": "66695a0f7086dbc887936ffb481c5a2cbc30826ec955a4a43b491fde62a81b1c"
+    },
+    {
+      "path": "resources/views/student/exams/index.blade.php",
+      "git_blob": "fb4d4363d2c9def5c6bca7c78ffe49f7add9d2a7",
+      "sha256": "4178a5946fb4efdec3f624b5234442e56f81acd0f78f0d27b78e2669a9a8433c"
+    },
+    {
+      "path": "resources/views/student/exams/partials/row.blade.php",
+      "git_blob": "72a593b70cfb092c2c3bef4cd9d6354d197606b8",
+      "sha256": "a3d782b88a31ea8120f1cfe53af6c030ec5b113e4607ee3a1536b5a669d52d41"
+    },
+    {
+      "path": "resources/views/student/exams/result.blade.php",
+      "git_blob": "94f01b1b5db741b40d3ae6ba1ad76f8e9eea425d",
+      "sha256": "d1552bbd515b72fbaa1c856c9fd3c6afb905f3d9cbc2c38f010133345b3244d9"
+    },
+    {
+      "path": "resources/views/student/layout.blade.php",
+      "git_blob": "8ef79e7695d8386bcb859e04e892db37adc515f0",
+      "sha256": "0477f2f3aecc8a03086a543ce1733f5512a03b06a2f1be3161cc1f3877994cf1"
+    },
+    {
+      "path": "resources/views/student/lessons/file-unavailable.blade.php",
+      "git_blob": "f45214fe2885050c0eb76124d847bf7c30e99290",
+      "sha256": "964cb3fac627e324f8fedb72066c9b154f3148cb738cd74a0c880390a7fb8824"
+    },
+    {
+      "path": "resources/views/student/lessons/index.blade.php",
+      "git_blob": "90c1887801631e1270090e54ea77921d7601296f",
+      "sha256": "3fa233f73e058ec412f64dfb089001a9cceeaeb1e145deb90996b9816c6733af"
+    },
+    {
+      "path": "resources/views/student/lessons/quick-nav.blade.php",
+      "git_blob": "903dbc72892abcb34484f6bce803cc374373cfcd",
+      "sha256": "8bb696641e1f819b1e0cdadfa6a72cc8296e37dec2ea2d6a7d23424c2db777a2"
+    },
+    {
+      "path": "resources/views/student/lessons/show.blade.php",
+      "git_blob": "67c353cc01851c9d62ef2528ec9cbd2556d99045",
+      "sha256": "fc92b750d7bf1c57a9fe74add8a3ed80c2e8d6eecc0d2b336e810ff43aa9ea52"
+    },
+    {
+      "path": "resources/views/student/library/file-unavailable.blade.php",
+      "git_blob": "61ea393ff71ca38803dc3c543106c6a825dd9940",
+      "sha256": "bb894255722aa7e642330e657b2b2311d209b62da226f6c14644504e9984ad8e"
+    },
+    {
+      "path": "resources/views/student/library/index.blade.php",
+      "git_blob": "ede853de513b8a518a55333ef6d64fdc91d99964",
+      "sha256": "c093ca0752a7e9aa5b41bcc23198e0230d8e1c5ea622f9f6713c1a9a5efea05d"
+    },
+    {
+      "path": "resources/views/student/messages.blade.php",
+      "git_blob": "adec4d027baea2cae38615633a87172fa7a78217",
+      "sha256": "e63c7194b275fb428b3f08eb62526572b753f2826ef7fdac718ff47a190513c5"
+    },
+    {
+      "path": "resources/views/student/notifications.blade.php",
+      "git_blob": "e37de80e930783607f745b95f8718d52abae7894",
+      "sha256": "d387210af8bc13722a3a13aa19c2bde117820adb359c625df472e201333412b0"
+    },
+    {
+      "path": "resources/views/student/offline.blade.php",
+      "git_blob": "b0752098fe1f3c032ae35f862a3c4051277904e5",
+      "sha256": "7e3c3af1c0a3fd2737bbd585f29050c71e0c48ecdb61cddb701e7cadfa6c175c"
+    },
+    {
+      "path": "resources/views/student/partials/notification-bell.blade.php",
+      "git_blob": "f7dfe8b1c0b3bb1081945a2224a5da67ced483b2",
+      "sha256": "ce40eeaa61c0ac91c84fff3889208aa3dfdd84cb1df25e3e54818e3661c9d044"
+    },
+    {
+      "path": "resources/views/student/partials/notification-icon.blade.php",
+      "git_blob": "2f92ffc8f9c1b486226ad6c60500eaf03216e442",
+      "sha256": "848ad66682a9f5ba14ea6f92eaf95af3a135f7f008ade31174acee2b1916243f"
+    },
+    {
+      "path": "resources/views/student/profile.blade.php",
+      "git_blob": "5d4a5fd52655cf98ecfd7384e2ee5ce2b4d4deb7",
+      "sha256": "e416c177b18c8c28d6c9c2d8b8f525197364db9087615b3db07ff791047e238d"
+    },
+    {
+      "path": "resources/views/student/results.blade.php",
+      "git_blob": "123d2e4e3e59272f199da9b5564128f2979b169d",
+      "sha256": "f5229083a632ed54361f3783ee46f57d53e31c766344073b0ecb6cc7bc8fff5b"
+    },
+    {
+      "path": "resources/views/student/schedule.blade.php",
+      "git_blob": "53b5f66b48313fbbe339969f50ccc6169ee3771e",
+      "sha256": "735468ffae59cece18ae06206efefec8e3f2fb48e1bf653e49367b330df12c2f"
+    },
+    {
+      "path": "resources/views/student/subjects/index.blade.php",
+      "git_blob": "523ba494c39b7ee943887771c3a6de420ec5400d",
+      "sha256": "39b503af2e87785c53c7125687d957db46e5ec1f23d12d489affca9aef4c469f"
+    },
+    {
+      "path": "resources/views/student/subjects/show.blade.php",
+      "git_blob": "1df6556a7a79c5301e78ec5e918e76e4c2773295",
+      "sha256": "1c5904edfabfb69a948fe0b47c8c5bcad1b104ca0cd665048b42511056b8a4f5"
+    },
+    {
+      "path": "resources/views/student/tutor/index.blade.php",
+      "git_blob": "448d24cb485916c303b925c9bbce3e74fa2c0bb0",
+      "sha256": "3bf37bbd9f23a96b7f24b77aa2f744718522416191fe622b0db2f16386cfebe0"
+    },
+    {
+      "path": "resources/views/student/tutor/show.blade.php",
+      "git_blob": "40451f6bfe5070387b3a71d190a3ab984e50a32b",
+      "sha256": "a9e3329cfe474a77dfe95e3e1f2bfbfc36ef005c653f4e14ebb41138fb8a67c4"
+    },
+    {
+      "path": "resources/views/supervisor/attendance/history.blade.php",
+      "git_blob": "a4ccfffb69090804e35f864e809cc33d3b756a67",
+      "sha256": "75a7c5c5261bdda68bef1f54b31d1e247891dfa7981be50e2c1909d280d604aa"
+    },
+    {
+      "path": "resources/views/supervisor/attendance/index.blade.php",
+      "git_blob": "f4bb8c739ec0b2a6c2ee62d68c94f4d433212d56",
+      "sha256": "656a8e55b7072766bc2f1986ed957b67cce4480914aca7bc846eefb5ee8c4b2f"
+    },
+    {
+      "path": "resources/views/supervisor/calls/index.blade.php",
+      "git_blob": "6369a3224d9e002711a5de3b4a3d7dc30d37d80b",
+      "sha256": "46f0f1276aaaa4fe70e860a45a63a0714403339a39e2779547d51c2ffff8cc9b"
+    },
+    {
+      "path": "resources/views/supervisor/dashboard.blade.php",
+      "git_blob": "71818fc7e02f79a49110a7dfb38ba819b3b7e9a1",
+      "sha256": "05257a9752de8be6e207d44c18927f74397ed9d5e1004290dfd8e0b58e6b50f9"
+    },
+    {
+      "path": "resources/views/supervisor/layout.blade.php",
+      "git_blob": "273fcadfdd52c996d4ef20639b6a42718798df02",
+      "sha256": "5e7dd7a02df516c79628f87273197e6cbf86f4920fe2775c5973b8467a9f972a"
+    },
+    {
+      "path": "resources/views/supervisor/notes/index.blade.php",
+      "git_blob": "1d8816fdb4177773968a6e8ef26eadeedd898ace",
+      "sha256": "8fc300aa0036416eed9d56de67af1bd7a5a7e46eeb63f3f8c1c804271cdd78d4"
+    },
+    {
+      "path": "resources/views/supervisor/students/index.blade.php",
+      "git_blob": "dd7921eddcede23c20b6e34cdf4f303d84e4d435",
+      "sha256": "cc22e43e0c9fe2ed1d48f9bd75dc2e7db9e4ec90555ef9a12f6bc497cab37a85"
+    },
+    {
+      "path": "resources/views/supervisor/students/show.blade.php",
+      "git_blob": "36f0df76ccb3d3d4e7dc358566d4e2bf9f7fa97d",
+      "sha256": "901e318ae5d1f22d8acea0e892210f8bcf1db7329f7698eb10fa4dae52b139af"
+    },
+    {
+      "path": "resources/views/teacher/assignments/form.blade.php",
+      "git_blob": "dfc66a613ce71d480790a3d41425147200652b1f",
+      "sha256": "251651b6a4b126d01797b11bc27694582b9d747e9ee9b3f444e5b75d226dba7f"
+    },
+    {
+      "path": "resources/views/teacher/assignments/index.blade.php",
+      "git_blob": "6aefeb002a84a5421f59218fac507bfa4ec9814a",
+      "sha256": "a487d4cfced694688717878a5eb7282dab48d7952f7df0179f208024b9df3e39"
+    },
+    {
+      "path": "resources/views/teacher/assignments/show.blade.php",
+      "git_blob": "7b2bbb32e99aba834b79681c2ccdd734628dadae",
+      "sha256": "79092e6f1cf7b9b51185d840fe3aa8d3046a99b586dbb1817c3ed0a5cdfe4190"
+    },
+    {
+      "path": "resources/views/teacher/assignments/submissions.blade.php",
+      "git_blob": "ffc9e355a5620566a6d2cb0dcad34c2b18a0f92b",
+      "sha256": "f1d1eb9c5de6533cdd7184b4f1852e731fb2d627a2a1f69ed1744ef7e1b0070d"
+    },
+    {
+      "path": "resources/views/teacher/assistant-reports.blade.php",
+      "git_blob": "c5300039444909a21e8a02338737ed28a0de4e74",
+      "sha256": "97f29b99b0cbd353a512b17a2681ad47959286acf030f2abcd7985240a36f509"
+    },
+    {
+      "path": "resources/views/teacher/classes/index.blade.php",
+      "git_blob": "63c38e51aa14764b4826c581a37344be0fde893b",
+      "sha256": "05616bb4654885a92745e3ec4efa485c23208c45e97f01b6d539ed55bef1e409"
+    },
+    {
+      "path": "resources/views/teacher/classes/show.blade.php",
+      "git_blob": "e5be1800f705c3a67bf1cb6653258b8ef26c22a3",
+      "sha256": "f0d285127a5e7cce2e41ecdc793c0d720bf8320701854842c75dcc87d25dc0c5"
+    },
+    {
+      "path": "resources/views/teacher/dashboard.blade.php",
+      "git_blob": "17c08712329a3a28535eacfcc61804bb782c199c",
+      "sha256": "616b348778cadc5343d1ad512e31f176c270eb3e44fc4ce8639913a9b3ba49d8"
+    },
+    {
+      "path": "resources/views/teacher/exams/attempts.blade.php",
+      "git_blob": "233f012f6cae90736a66ee46ee34dd191f2fac26",
+      "sha256": "b4c0822cad28a0cfcfe00d641e7773da1de5101e80e5f36c57519aa10318a3aa"
+    },
+    {
+      "path": "resources/views/teacher/exams/form.blade.php",
+      "git_blob": "1d9166fcd5960d0bba2cf57d60b7fcc36df4fe25",
+      "sha256": "2da3c18ed35cf51cf0e3009302cd9d19c3cfdbf0495befddb4e674ce14732271"
+    },
+    {
+      "path": "resources/views/teacher/exams/index.blade.php",
+      "git_blob": "d23a720ca926a6366a1a29aa8e96c554980a15b3",
+      "sha256": "72ec0be8d078b7bae069fa12353dd77f96dfcd401ae8c9d7bdab91e052af6aa1"
+    },
+    {
+      "path": "resources/views/teacher/grades/index.blade.php",
+      "git_blob": "aef7652fa53365bb0e828bfe0212327a72d5fc32",
+      "sha256": "d3b00930832bdde9ddfffb0ba696b4020760a9325dc23bd5defb52cfc162c973"
+    },
+    {
+      "path": "resources/views/teacher/layout.blade.php",
+      "git_blob": "25d469448d862bad50b1948e1d8505049ab996a7",
+      "sha256": "11efc18b49c2e006de013ff5da11d0cc5792d5125cc9b5ae213db32ae7e374d6"
+    },
+    {
+      "path": "resources/views/teacher/lessons/form.blade.php",
+      "git_blob": "e8bbc6154134bcc9a3888906a9edf8e9068844db",
+      "sha256": "47eba8f6de34e00fc72e464298123ecafddb53ab7fed174dc96583152c0d7709"
+    },
+    {
+      "path": "resources/views/teacher/lessons/index.blade.php",
+      "git_blob": "84ce199544c6aac905a6457f7c7e29420ace3817",
+      "sha256": "4a54d25d8dc149941a5726dad4fb797b0c0ae516b18a99f4806a109aaf7d3e97"
+    },
+    {
+      "path": "resources/views/teacher/library/index.blade.php",
+      "git_blob": "199313e0c9453bf7f7244d6c9b23c138e3a230a4",
+      "sha256": "8307551f3d7dc4b6139245ad19efab389d17152328bd5cbe69cf7bb65332259b"
+    },
+    {
+      "path": "resources/views/teacher/profile.blade.php",
+      "git_blob": "03d811bdf3837b0cf2625e0d9f5e75228d3ae206",
+      "sha256": "13f1db70d3c7bfa3bd2b4ef576b8adabd13070233a54cf2dec822960ee37020c"
+    },
+    {
+      "path": "resources/views/teacher/students/index.blade.php",
+      "git_blob": "4f394d0f3a14e861053ce61c629f8faf63bf3a7a",
+      "sha256": "89e5435e5e070318c03b96cae5cdcf91bfa5a11083a3948cfcee8b971ffaaafe"
+    },
+    {
+      "path": "resources/views/teacher/students/show.blade.php",
+      "git_blob": "2c76364948c9b592dc37749fe8f0c0ffef0f4fff",
+      "sha256": "2d9ae6c236e387353207f46c4ba76e6e95fae3fafe1b025125b7c7d588da0254"
+    },
+    {
+      "path": "resources/views/teacher/tutor/index.blade.php",
+      "git_blob": "7f5b882de7f3a7793a2f546f58fe2a8df348f018",
+      "sha256": "992cc198d27b0c34ea1eaa82cf5b4efa1cfc5c39e52657c76cf6ab0827665f82"
+    },
+    {
+      "path": "resources/views/teacher/tutor/show.blade.php",
+      "git_blob": "a2e1a5f58c05143b6360a228df7fe4d0f892f329",
+      "sha256": "5842e5a167b8f9e08347e451e34d1ec4cfc641c93db882f758706eaf24d1de62"
+    },
+    {
+      "path": "resources/views/vendor/pagination/nasbia-simple.blade.php",
+      "git_blob": "dcb6802aeb7b08defd38707b7e79ee86eaa48bd4",
+      "sha256": "3496f51b2a1a8fa7ddc479adc65d798495c3e20de4a5c15aa95656e09a3ba087"
+    },
+    {
+      "path": "resources/views/vendor/pagination/nasbia.blade.php",
+      "git_blob": "57a3860f63adba90015a1c200a534401f53133c5",
+      "sha256": "dc6badf6365fca66b1876431e4c5fa236d01a8f72ede13306fbcf9ae3fbb7924"
+    },
+    {
+      "path": "resources/views/welcome.blade.php",
+      "git_blob": "26e294ab7e94805169f7366856834958fbbd8927",
+      "sha256": "bdb9bb7d2eecceb3581e429545b6ec96014ccab6d0ae83d4c52930e9a15f7d65"
+    },
+    {
+      "path": "routes/admin.php",
+      "git_blob": "80d99d8a8203cb082249b58d761fe09ba3a77606",
+      "sha256": "f1619ccc52e7932da512bb69da551339102a7398d422afea6c54713d686210c3"
+    },
+    {
+      "path": "routes/console.php",
+      "git_blob": "8213372c6546743f35d0eec0e1c7c82de9bbd915",
+      "sha256": "e39f6492c2210d0f672095daa89cae65aea3248540804db637f7e3b0147d888b"
+    },
+    {
+      "path": "routes/finance.php",
+      "git_blob": "dd56648464bdcfbb0522bbe64f8d37c771722bdc",
+      "sha256": "fa62100298b218644af32a069acccb7b3132e6413ba80a47983da302a84b8519"
+    },
+    {
+      "path": "routes/library-uploads.php",
+      "git_blob": "2a8e1af239849acbb6f20f7fe9fd04ca783f6b73",
+      "sha256": "7cc0df3966994ca5a41b68f40c0ea59323519febcab547ea1d060eaeccf528c5"
+    },
+    {
+      "path": "routes/parent.php",
+      "git_blob": "c2459dd2ebf00541fcc3e5c7ff1ff24af7a1e79f",
+      "sha256": "614c88d195c8eb1db2cd4a57aa69aa9be18e39430552c86683eac3ec293a9ee8"
+    },
+    {
+      "path": "routes/staff.php",
+      "git_blob": "90a1d58e5f92b06c560395550822f38d69bfb413",
+      "sha256": "0f326ee16bff73a49970d264124f380134b74a3297b0afd992ba01f7966e36c7"
+    },
+    {
+      "path": "routes/student.php",
+      "git_blob": "9b627e3c683baea8578f4719b994b24fec891407",
+      "sha256": "449ff3292cb510dcbcb7b06da7edae29445e6fcd1ae4b50d2471f7f8a9d9bd18"
+    },
+    {
+      "path": "routes/supervisor.php",
+      "git_blob": "505d22c3aa51f5524b5ff28dab1fc5c8d7e262b5",
+      "sha256": "020a94b7a23d784baad352f40867e039346dc0f989fcd33a7dfad25ccfbef497"
+    },
+    {
+      "path": "routes/teacher.php",
+      "git_blob": "b94d354c5e4c66653279cb780ecdfee79976b253",
+      "sha256": "aed693a1417cf1de27c801e6dcea89266b79ec4fd7e06e2e11dab5e86805ccb1"
+    },
+    {
+      "path": "routes/web.php",
+      "git_blob": "22e21aa0f51db2bfaa45aabc5e0ba2e1c47886bb",
+      "sha256": "97ac37f694d792eec7b13a77a446dedf39d196e93db96595bbb665858c5fccc5"
+    },
+    {
+      "path": "scripts/qa/browser-academics.cjs",
+      "git_blob": "630c7a43bd5bc37ded0acc8cf54cfdf26c198a48",
+      "sha256": "912d731403260b22b2a7b4d307de490c6368fc7d361acc5fe18bc8621047f579"
+    },
+    {
+      "path": "scripts/qa/browser-bootstrap.php",
+      "git_blob": "84e62a14ff345d0d7bd97dc58378dfc543ca9c9b",
+      "sha256": "34109d13623c0b74a8ccfa6217d83bf3050e6c13779bc19bf08fd627e7a7d551"
+    },
+    {
+      "path": "scripts/qa/browser-class-snapshot.php",
+      "git_blob": "5c19e09cf8cd10086025af680fec998108929db8",
+      "sha256": "d73499d32a7676186a3695abaec6b782b628f02d473f1110f9754c5c310e5655"
+    },
+    {
+      "path": "scripts/qa/browser-learning.cjs",
+      "git_blob": "cb575531d08dace934572384ff831596950c82a3",
+      "sha256": "2b1ebd4723aada20c91fe75d5d8bece6a9c60d29ce1e5997fd290f8218c6ca03"
+    },
+    {
+      "path": "scripts/qa/browser-pwa-upgrade.cjs",
+      "git_blob": "5e79555e74fc48adca6ed614711aaf8b86f993c3",
+      "sha256": "fb7c3b42e97cfe1e96d398186e6e6ef269c17f123f922242b3e385e20ca00339"
+    },
+    {
+      "path": "scripts/qa/browser-pwa.cjs",
+      "git_blob": "c09e2f14c47a3927ef888472b4a39ab5b63145fa",
+      "sha256": "21b94c18e3cd3bf908a4094fec2f6ef343114dc7f70dae288dd1eb6c7707da63"
+    },
+    {
+      "path": "scripts/qa/browser-qa009-closeout.cjs",
+      "git_blob": "a1bff57025c20b83c4a2f808a69a029bd611d497",
+      "sha256": "4d4a79217297e57c46c47e1cba3f437ce4f960e14aa71f0ac70f11f47c5b95fe"
+    },
+    {
+      "path": "scripts/qa/browser-round-two-admin.cjs",
+      "git_blob": "ffe13393cd36dba55ee8a208591a199a238155c6",
+      "sha256": "887f453302c67c530bd1017604511421a418b1e41a96aef31b6f87560d55fd7e"
+    },
+    {
+      "path": "scripts/qa/browser-round-two.cjs",
+      "git_blob": "cbcf7821f334b7fa123da9be5f69663d544cb01e",
+      "sha256": "ced932e8ad4dff8efa0e940bd0b4243c7aaaf38e06b8d9fd77557c9e7fb139fb"
+    },
+    {
+      "path": "scripts/qa/browser-router.php",
+      "git_blob": "05401b604a16712ebb8f952aafd5fc2ca944f5a4",
+      "sha256": "4e4ffb5ca769179fe145583342fc490bec8ea68f74c033b7a3d4c880dbcd5dc7"
+    },
+    {
+      "path": "scripts/qa/browser-smoke.cjs",
+      "git_blob": "dbe889721bb683f2f83ffc96ad13ba608ae6229b",
+      "sha256": "64b6c48839a0d3aef4bd4f01fd7b1796cc5abf9df97c260e64c71239edf5d666"
+    },
+    {
+      "path": "scripts/qa/browser-tutor.cjs",
+      "git_blob": "9451159887ff9876b236095854688c172d4d4fbc",
+      "sha256": "90bff7bf3338d374c550b78cec209cebf5cdedd4ac5022aeff65f9f2151825b4"
+    },
+    {
+      "path": "scripts/qa/browser-upgrade-router.php",
+      "git_blob": "3d0a7fe10aef527b8f35a142deea17e74c84f7ac",
+      "sha256": "a08991ac445856d7b2d95b4bb601a6441928837103cafd84a45c12b9061599c2"
+    },
+    {
+      "path": "scripts/qa/create-browser-fixture.php",
+      "git_blob": "09f052868a4ba0d00aabd0a5e72594c7572d549e",
+      "sha256": "85ebb03ab4282b2caa5178f8eaba0e4033d6098cbec358da37039b2f51529847"
+    },
+    {
+      "path": "scripts/qa/fcm-postgres-concurrency.php",
+      "git_blob": "3e6ecce6e206b0f61d05a037d153525405c3319a",
+      "sha256": "e790303df0e68050b5450807e8302b21acf31878518a8e860ebedbcbbc90c272"
+    },
+    {
+      "path": "scripts/qa/fixtures/PWA_BASELINE.md",
+      "git_blob": "5042785cf8a551471364c69a433e7048f64fbe41",
+      "sha256": "2bd0d1644317d79b57f14997c013f2d515bb583b1dff2f6bd6c3df3a19b3251b"
+    },
+    {
+      "path": "scripts/qa/fixtures/parent-sw-baseline.js",
+      "git_blob": "3f65618f46b921628fd97b59ca492443df7f13c0",
+      "sha256": "cc4855de20101dc74a3c9bd3db3592805333f19bc8f6890023f71f904948b5e5"
+    },
+    {
+      "path": "scripts/qa/fixtures/student-sw-baseline.js",
+      "git_blob": "2f13133f7abce9dcae89ed4529bce8ea7d037b12",
+      "sha256": "63ced069970064ac6f6a7b37c0979c3dff413569aeb98e1699a070d0d8150473"
+    },
+    {
+      "path": "scripts/qa/package-review.ps1",
+      "git_blob": "e6527ec4bd3f027886c47845d3b812d470422ec8",
+      "sha256": "d5dd73710d0c9068563ad7238d7ab2fa0a0306c6635966f51b6b93aca6421e0c"
+    },
+    {
+      "path": "scripts/qa/postgres-common.ps1",
+      "git_blob": "e4ef697342ef9e23061813e6a2577332f6e42c71",
+      "sha256": "ea811f907ab4047ddf40e394be06c1adb13929738067471f399f33067d9e9c61"
+    },
+    {
+      "path": "scripts/qa/postgres-upgrade.php",
+      "git_blob": "b6eca25128f711075b05f5c16f6284be8de8ec74",
+      "sha256": "8eb657d6633cb443e8e36a3206d52edd1336e14e5f22c2304dcc9ab0a419f214"
+    },
+    {
+      "path": "scripts/qa/round-two-notify.php",
+      "git_blob": "a019e815e8cc6caa4e8446250730ce24e53ea5f0",
+      "sha256": "9b6c8cb8164947cc63c0a121ae0a577fc414f263de9a3139e5e7f5e67c908feb"
+    },
+    {
+      "path": "scripts/qa/round-two-postgres-upgrade.php",
+      "git_blob": "619934b10562732432a550ca94e718f59ad37347",
+      "sha256": "5185cbf1a4180e765641918cafd023bf2cae9bdc00fff8eba90ab1db282bdaa0"
+    },
+    {
+      "path": "scripts/qa/round-two-result-concurrency.php",
+      "git_blob": "afa2ecc8651e71866950189b5951c1c29caaa248",
+      "sha256": "dbada5066c48acabc1b7242feea1322d896ca9b5fa479f398e70da984b1daa82"
+    },
+    {
+      "path": "scripts/qa/run-fcm-concurrency.ps1",
+      "git_blob": "76439e73d20a8b1483203b0c6db6dbc48c3ad661",
+      "sha256": "dbd894ceef1723793e0691a516d0c30817c7700cd05138022b65751d236fe218"
+    },
+    {
+      "path": "scripts/qa/run-isolated.ps1",
+      "git_blob": "74212d372ba87d06a7df4122b904a623ed7447de",
+      "sha256": "99c75c0a8b45d8b145ecb79551bf5e65ad25a1d9ca00e96c49d9698b9b3cf5a7"
+    },
+    {
+      "path": "scripts/qa/run-postgres.ps1",
+      "git_blob": "412421f000d5e0b2d80d39c3736ab24cd5a73f4d",
+      "sha256": "69d11d9e3df676f08da275ced4ff9ba94cd5ab97ac9c7dec28b119aa6edfa370"
+    },
+    {
+      "path": "scripts/qa/runtime-check.php",
+      "git_blob": "20fcc7b879c0c9c2a5ac25f6700b7f0393c58749",
+      "sha256": "bc70236c68e8b726fea64aa46b39bd1a227277cb0623b428bcc10b1b51582d8f"
+    },
+    {
+      "path": "scripts/qa/start-postgres.ps1",
+      "git_blob": "724fb4e19d70840ae919da559f45c9d1e2fe3a48",
+      "sha256": "cc583047e2f5717a4ff15daac2a3ba79053e863b34fbd6ab1111fa22b35a018a"
+    },
+    {
+      "path": "scripts/qa/stop-postgres.ps1",
+      "git_blob": "262d0710d82ec8c2e8f7d9bfb143e884606c1ba4",
+      "sha256": "b45586c0ed57790ee6b3e5599f88a762090045eee11f5e1d4936026597601af7"
+    },
+    {
+      "path": "scripts/qa/upgrade-browser-tutor.php",
+      "git_blob": "bcbea64edbe48cb4daa68dcd33d0aef44584e1ca",
+      "sha256": "479a979ee5817f337f1d9bcb2014f594912203b42e1b415ac9e57cc010f41562"
+    },
+    {
+      "path": "scripts/qa/validate-postgres-upgrade.ps1",
+      "git_blob": "4874e2d08a196f68c3b0cc1950bfcba38f03fac2",
+      "sha256": "188b740f83fc1d1cdba6a5b6447daaa807ca875102aaa4a0b904e0311d7fb5ce"
+    },
+    {
+      "path": "scripts/qa/validate-round-two-postgres-upgrade.ps1",
+      "git_blob": "1271ea5013eeb718e9d02a77e93a444a1e5cafc8",
+      "sha256": "e6cc1a7731482de722cd7f10a41c6d30660059943b183702c88641bf1169112e"
+    },
+    {
+      "path": "scripts/release/package_full.py",
+      "git_blob": "203914800debe42166275d47e7d2c35d09ce3d0b",
+      "sha256": "924ae00a1d2ef9e86ee288b9a461ada2dd1f0f620e1f7ae7714593cc53accd8a"
+    },
+    {
+      "path": "tests/Concerns/CreatesStudentEducationFixtures.php",
+      "git_blob": "899a27ea886bef13392c0cf3b3a362997787a2f6",
+      "sha256": "5a2a09018575a3a6dc3d28e70c312614fbc2b6a88b080382427362d012c0336e"
+    },
+    {
+      "path": "tests/Feature/AdminOperationsTest.php",
+      "git_blob": "7a38e2bece3d086c23245d9aa48291a8c6828f00",
+      "sha256": "501859fa834bea01bbe171e5a3face4baa7cea8ce20ea34aab50659340c416e8"
+    },
+    {
+      "path": "tests/Feature/AdminPortalTest.php",
+      "git_blob": "8d5f4d33819bfce87b5b563d50e28eafce4ba31f",
+      "sha256": "61237240161d284557e17573d446e74c4797b28e3b45267043714f8f6dae8d85"
+    },
+    {
+      "path": "tests/Feature/AdminReportsTest.php",
+      "git_blob": "fee8e1d52f5e06fc6b526f230bc9a240d322ff49",
+      "sha256": "d34e93f4bee74341f99a46a04cfae72a140453265a131841644cc9f52d6fc1dd"
+    },
+    {
+      "path": "tests/Feature/AssignmentContentTest.php",
+      "git_blob": "b09386e4e63949b647a7c78bf614e11c260c385b",
+      "sha256": "66c32422556a75a97be938ba28467218e94fb4ba75648fa76cf27743b4a41383"
+    },
+    {
+      "path": "tests/Feature/ClassroomDeletionTest.php",
+      "git_blob": "d3c87ae32c9725dbf6b104357e0b29a63a1ecceb",
+      "sha256": "4da7bee75eb3ea04680f6341f8bd83d7afb6a7ce122bc364c6a0f07cdb5a3c6b"
+    },
+    {
+      "path": "tests/Feature/ClassroomDuplicateValidationTest.php",
+      "git_blob": "dfb821b2f13981229da4dd6279dff27b7b59a85e",
+      "sha256": "e4c9b802e52ec779f1fb4698279b8ae118190eabbdea0297bc5bb86b54a38f56"
+    },
+    {
+      "path": "tests/Feature/ClassroomSectionTest.php",
+      "git_blob": "3616ce7b934b724013756d24320e547cf2515f40",
+      "sha256": "f11dd92f291194c0ec40b04f8d02f7e005f2e96c1e6340580563a4e5d964c2f0"
+    },
+    {
+      "path": "tests/Feature/ClassroomSectionsTest.php",
+      "git_blob": "0ac28aa954383ceb2604401c7e1f043294f09615",
+      "sha256": "f132a45f452bbb45824f4bc8e0c9852fea6f18b1f9c7f252b481b66ddcb5876d"
+    },
+    {
+      "path": "tests/Feature/CloseoutDisplayTimezoneTest.php",
+      "git_blob": "8a46e0bb3770a7f27b03ffbdab9623aa17611d2e",
+      "sha256": "a83df210ac5db7f92eba94a4b83ddd6b3048c684ae8904272ce989b6fd8ffc4e"
+    },
+    {
+      "path": "tests/Feature/CloseoutFcmReliabilityTest.php",
+      "git_blob": "41b46fdc2921309dc6f1f0858ae610bd2bf8f21a",
+      "sha256": "38e8ffe2e44e84c566a866bbbcac8ac1f0d7ef9ab5b771a6160262d4b3322c66"
+    },
+    {
+      "path": "tests/Feature/CloseoutWebPushPrivacyTest.php",
+      "git_blob": "e6edb873d335babfb11be05b0618211f8ef27fe0",
+      "sha256": "f62e3d190635b4fe9b85e62f0e694a19da1099981ce7994b0b0f0b3be70d9938"
+    },
+    {
+      "path": "tests/Feature/DefaultAccountPasswordTest.php",
+      "git_blob": "fefc921eadc41f92fbd214879496d963581f7948",
+      "sha256": "4bf3b0ebfcbe436e0327b64d74659486508cd9235e062c659f49574b0053f823"
+    },
+    {
+      "path": "tests/Feature/DemoPortalSmokeTest.php",
+      "git_blob": "72c498dba0eb175e87ddda03c8a0e6c482a7e920",
+      "sha256": "936a1e160f631857a0c9e20c39a17526d1d716524eb83bbdc356e9620e1bd629"
+    },
+    {
+      "path": "tests/Feature/FcmIntegrationTest.php",
+      "git_blob": "a4ea8028c6bc7033e2194b9c768cd72d9de64de1",
+      "sha256": "41b25451197203935fc0de971c223ee8d0ddfc3af50a3a93f81a9a3000e96499"
+    },
+    {
+      "path": "tests/Feature/FcmOutboxRecoveryTest.php",
+      "git_blob": "117470ed0c75db7e97a7d6de7d612ef7736bde24",
+      "sha256": "f4e6cff7566b9570f267327df94003eaf473c1b4cf4bbc6aaa83a31c4d3b9603"
+    },
+    {
+      "path": "tests/Feature/GeminiSmartTutorGatewayTest.php",
+      "git_blob": "d576f8cc33d658769c02dbb94fead003374f9561",
+      "sha256": "c279c3e55964afc7f23d90f18381f3dc9fba02181fc43155aa58eadeddb8dae8"
+    },
+    {
+      "path": "tests/Feature/LibraryCatalogTest.php",
+      "git_blob": "afd210c988e408eff41542aa94cb6398c99948fe",
+      "sha256": "ffa112e733a952bd4cb40e94f403653dcf9def523f013cd724d636252df01876"
+    },
+    {
+      "path": "tests/Feature/LibraryFileRecoveryTest.php",
+      "git_blob": "1261e88ba70d29c2cf52523b9761c84b57fa4922",
+      "sha256": "84d3a84d4255aff6c89a4556b45565f850c9b2d51f34fa5527be7bca65671570"
+    },
+    {
+      "path": "tests/Feature/LibraryImportTest.php",
+      "git_blob": "31bb1afc23c89ca16f1f7f4bb14fdce506faa729",
+      "sha256": "1c032464b695ec87610963cf31af936ade4004bad8434a7f2a999a7ec08ed034"
+    },
+    {
+      "path": "tests/Feature/LibraryUploadTest.php",
+      "git_blob": "3536270dfd426ca588aef33a58f56d6340232f53",
+      "sha256": "5aaa405dc8aded0666a1007564fc48d8a6e6093d0043e06a684eee2d0ada8416"
+    },
+    {
+      "path": "tests/Feature/ParentAnnouncementNotificationTest.php",
+      "git_blob": "9c6bc54c81f7b1142b11c1081e4bfdff7efc289a",
+      "sha256": "0631506e1f15c2d9372d0d86c2a38e4ca8eef8489faf42cc24b7a4eb95e0db37"
+    },
+    {
+      "path": "tests/Feature/ParentFollowupNotificationTest.php",
+      "git_blob": "8ebc63ecec4e9ff064b8b44f59791fd5cb93c0f3",
+      "sha256": "b962596a0fd3b3d243b2a503a6bf033ff89ec1df74e2c4d31c4f5d9cbb033e9c"
+    },
+    {
+      "path": "tests/Feature/ParentIdentityTest.php",
+      "git_blob": "4719411fa79a15ed7659603c37235c34c647ff3f",
+      "sha256": "4df59ccd4af2aabad8a80e36e76b08883fd6634a2eaa59b06335213a1a75af39"
+    },
+    {
+      "path": "tests/Feature/ParentPortalTest.php",
+      "git_blob": "e554d323a65605c23ac80a38ef74cb2c96223c54",
+      "sha256": "6ff099deb4e1144e98ef2388ff3f09e4a87e7488ce53036f5c924b71a94c6f51"
+    },
+    {
+      "path": "tests/Feature/ParentPwaFallbackTest.php",
+      "git_blob": "f8fc19925dc4945a76d474523e6fac4174a4ba98",
+      "sha256": "fa63f21786e3f39427164ae34956e0e8503a6f690c21fe35eee6e8ed97415e95"
+    },
+    {
+      "path": "tests/Feature/ParentSubjectFilterTest.php",
+      "git_blob": "bd1883525d78681511149a83b307026a311736cd",
+      "sha256": "e28f877b3875e338063fb3fd5637b6411df3e61c97a0a64df7e76f998bce43fe"
+    },
+    {
+      "path": "tests/Feature/PortalAnnouncementFeedTest.php",
+      "git_blob": "db0a0fc904f06a3adfff2e6a8f1e2bff384502d1",
+      "sha256": "81d3e823922ab5d7a4f0e210aa2c53ae08703822394d66cf23f6be9cb02fae9b"
+    },
+    {
+      "path": "tests/Feature/PortalAssetAvailabilityTest.php",
+      "git_blob": "a0edb2c62c3dd6a31097a8158fb011a345c97a12",
+      "sha256": "37b4020a9d19311ca8050c2f61540c775816681581d5fa8a49973147d8e616f4"
+    },
+    {
+      "path": "tests/Feature/PrimaryClassBranchesMigrationTest.php",
+      "git_blob": "805bea389ed20acf5a27d38057095c28f3effd9d",
+      "sha256": "028828972e713bdbe99c9fa08f00fe714599e81ece733b5c42d3d96a6d39be35"
+    },
+    {
+      "path": "tests/Feature/PublicLoginTest.php",
+      "git_blob": "467d9fa4e78b16eddde84674f512d613cb3cf7e2",
+      "sha256": "e1f218cf502d8c958363aad7b79d051c09bb345a04edd580bc3159c133537cc0"
+    },
+    {
+      "path": "tests/Feature/QaAccessFinanceTest.php",
+      "git_blob": "668239d072348933763f5ed8d1d3c2f217b01694",
+      "sha256": "7415e716edd462e144232d8acdedcbd26f96accd949357e23fd2764d8c1670db"
+    },
+    {
+      "path": "tests/Feature/QaLearningAcceptanceTest.php",
+      "git_blob": "b4695f48b01d1366030466ee03163aaf6a2ef023",
+      "sha256": "53c997d30bbfcbedbb7cfb37b370b0039b5cbc71701d45975c80efb50c5a496e"
+    },
+    {
+      "path": "tests/Feature/QaRelationsInterfaceTest.php",
+      "git_blob": "aa28d165024884960d517d23ac9a063469e4b1d3",
+      "sha256": "2e739111813e234fa30b0344b47231db4655530013062fd02ada7184befe5028"
+    },
+    {
+      "path": "tests/Feature/QaRoundTwoAdministrationTest.php",
+      "git_blob": "950f8f6fb3991ff90adf10c0d84439585880a9c7",
+      "sha256": "48614f8f0a5c3f88e7d5f357c4710b8d28b6501b024d3f1d663a585e778768e3"
+    },
+    {
+      "path": "tests/Feature/QaTestIsolationTest.php",
+      "git_blob": "d7edc78389c6b3cd8b11cf65428cc3dc5d8c0d5e",
+      "sha256": "742efe398550342375b18120c42d43c2be77c62dcf954951669e0da70fee7a6d"
+    },
+    {
+      "path": "tests/Feature/ResultPublicationTest.php",
+      "git_blob": "228e0cbd0976d2667269b17c0c0a5ee68ff4e648",
+      "sha256": "1b7313219926cbbaaa2251b1ef500cfd31f51dd8ca3b80d229ffd5772bb65725"
+    },
+    {
+      "path": "tests/Feature/Round2LearningTest.php",
+      "git_blob": "040c6ba2436c06f4af7d89579bf4e60323ae559b",
+      "sha256": "c273cbaa183642603b48fe632a20ef3a13f9b5229906844dd2995ecfd560bca3"
+    },
+    {
+      "path": "tests/Feature/RoundTwoAnnouncementTest.php",
+      "git_blob": "7ec37102ecd928ad43d22c24094792c487d18ba3",
+      "sha256": "bc56df75078990341f0a4c9ccf4dd66ef944d7e59d49f0c2835ebf41177cdad8"
+    },
+    {
+      "path": "tests/Feature/RoundTwoLessonUploadTest.php",
+      "git_blob": "a164e152ed0176fded2c1c9801330c3f384beab9",
+      "sha256": "03a7da4f9576353d7f703d10fe32909ec0bbf23cccc00a845708041eeb094567"
+    },
+    {
+      "path": "tests/Feature/RoundTwoResultPushTest.php",
+      "git_blob": "4299a51862e1f36cf7115803333725e990cccc43",
+      "sha256": "c0b716f36fa5873e9da8d217ca336645b583984ffc659f2107d2d8364ec8c3d5"
+    },
+    {
+      "path": "tests/Feature/SchoolAccountNumberingTest.php",
+      "git_blob": "2750fa45354ecbeb0f49cdc5f72ec240988d78f5",
+      "sha256": "2fb54b964532c0b93732dc669caccef512f42626550f84a718497fa2886eda48"
+    },
+    {
+      "path": "tests/Feature/SchoolBrandingTest.php",
+      "git_blob": "a7023bb13d12656035f222352f3f3678214bcab1",
+      "sha256": "8e147828605f806294cd8dc9b89af4c03ca2a2ada5ab5ea385c9d3c7ab3c60ee"
+    },
+    {
+      "path": "tests/Feature/SchoolChatTest.php",
+      "git_blob": "51759134d4053ea04a28228acabb4ae2d1df5ce2",
+      "sha256": "44e520735551e3ebde64f89d0fa9629ed857348cf0ccfac7301b6386404037f1"
+    },
+    {
+      "path": "tests/Feature/StudentAcademicPortalTest.php",
+      "git_blob": "b6c70fb09e5d2fea4a1799fca2575fe77425690d",
+      "sha256": "7bd9caa8b3de013f61a23fbcb12cb7d7da1f47287fbca1ea47cbdcbabfd125f4"
+    },
+    {
+      "path": "tests/Feature/StudentAnnouncementNotificationTest.php",
+      "git_blob": "a0a83e4cbcf07807765b8784fa3887a26dee039a",
+      "sha256": "c031e147b0158d9b319dc3fa6c5f1ffe58e4b47ff9489c6f3dbc158647ab5608"
+    },
+    {
+      "path": "tests/Feature/StudentEducationTest.php",
+      "git_blob": "11d9419d2669b94f7f019c66ce58cd8b2c5fa396",
+      "sha256": "985fbe4e0b5719d00e2e5e168bc76405c333f09a4b2b9f39a674d3aa615b15d9"
+    },
+    {
+      "path": "tests/Feature/StudentFinanceTest.php",
+      "git_blob": "3623dadb1acad1947346e882cb1c6bbdafbec8cd",
+      "sha256": "0add161cd7a7efb7c6a3e043354685961a159734bb9a8d8f3475203203115e6d"
+    },
+    {
+      "path": "tests/Feature/StudentLevelAnalysisTest.php",
+      "git_blob": "036838645b48187f05fc0df14fb262aba719050e",
+      "sha256": "744a4de9f6281249977b244c02f1c98a90e86243584f429b55db7014fa229ebe"
+    },
+    {
+      "path": "tests/Feature/StudentLibraryReaderTest.php",
+      "git_blob": "bd50b0f171f2a2de34d4a9062c61e7ec5eaab5a5",
+      "sha256": "583369c571bb2e8149aab713dfe11f2f378fffccc9c59e44011fc571eb9ab584"
+    },
+    {
+      "path": "tests/Feature/StudentLibraryTest.php",
+      "git_blob": "2e909135fdfb02138e234bc9ffc84509d675d3d2",
+      "sha256": "b36cc4e8f0f7bf2778667292988e481c66b147f11c4dd76b8bbd79be10655c31"
+    },
+    {
+      "path": "tests/Feature/StudentPhotoTest.php",
+      "git_blob": "63e3042cb38ea0881c3d894f116564dc0ac5422c",
+      "sha256": "16e5c54896226d87163f4548aef3f4a92f03cab65443a95a9686daca3f58c8c2"
+    },
+    {
+      "path": "tests/Feature/StudentPwaTest.php",
+      "git_blob": "02b11861f6ac11f67c11ead6b0584591e7f259f6",
+      "sha256": "c0da08645a447b5fbe9c4dcadc1d4e9139a046e34bf0da345ddb0ba0275c65eb"
+    },
+    {
+      "path": "tests/Feature/StudentSmartTutorReliabilityTest.php",
+      "git_blob": "54b522317c23bec5a044b19fc714ba940a716d98",
+      "sha256": "5ec90689ff7653f8a06b29ccaf24127bd282274f995314604f9efdced32303db"
+    },
+    {
+      "path": "tests/Feature/StudentSmartTutorTest.php",
+      "git_blob": "6691433fe7d6d9784d226b7b95caf5deafb305b2",
+      "sha256": "92b9b5564f4310ab01c06f3db25f9a3650fb826c37885e60c5c2537c31fc068b"
+    },
+    {
+      "path": "tests/Feature/StudentTutorRenderingTest.php",
+      "git_blob": "2fd9e7c6585a47b5d34eac9b27722eb15d641e59",
+      "sha256": "73bf4b145f5a139edbe61152512a26cec9321b043a26e6704c719252dd7ecc5d"
+    },
+    {
+      "path": "tests/Feature/SupervisorAttendanceFlowTest.php",
+      "git_blob": "94fa0e6037c402fa9c831f48d4293078c370f4e2",
+      "sha256": "19fbbc1938f879e68a88c6aab04694474934fdc422aa6cea43355617e16a8ee5"
+    },
+    {
+      "path": "tests/Feature/SupervisorAttendanceTest.php",
+      "git_blob": "04052dd7490043eeed839effe95710db49f6cf39",
+      "sha256": "70be2c0c1dbb9eee2581ece6c42c1495130a9c3ea3c726c76832a08fd42e7b7b"
+    },
+    {
+      "path": "tests/Feature/SupervisorGuardianCallNotificationTest.php",
+      "git_blob": "785b80d092fc64d82f966132ed46c7593de47995",
+      "sha256": "115fc31abef9fd21ee391097cf55b5e0a0c89752746f8978a3aaa3c3984f5cf1"
+    },
+    {
+      "path": "tests/Feature/TeacherAssignmentFormTest.php",
+      "git_blob": "e4b628397e7b6c43a6e7c9c5be7681ea311a1b7e",
+      "sha256": "700d2533e47e449eb8d75951411c487d18304b0c3e78544ac20335e961e93ca9"
+    },
+    {
+      "path": "tests/Feature/TeacherGradeSheetPercentageTest.php",
+      "git_blob": "ba3e1c741145a18c8b38fa3ca88cdf4785369725",
+      "sha256": "2c2c5ca00320fec71f098d5fced1937aaaae17b98ab69bb3848863ae7f8a4e59"
+    },
+    {
+      "path": "tests/Feature/TeacherHighSeverityFixTest.php",
+      "git_blob": "e28fb185064c6a787c431f3a9d3a40b1b8ad4f06",
+      "sha256": "155a70567dd1a993f52686f3034cfcd4ac88001a2602252264e9cfdf32fd3bab"
+    },
+    {
+      "path": "tests/Feature/TeacherPortalWorkflowTest.php",
+      "git_blob": "5e1860c1853d7242a85355565f973daeddbe379c",
+      "sha256": "8543e068b8acacfb843b285fd924b730a9de9855def31b68aaf26084c21407db"
+    },
+    {
+      "path": "tests/Feature/TeacherSmartTutorTest.php",
+      "git_blob": "09971c7155f3d03e3552e7d41cdaf56e1a5f2432",
+      "sha256": "7b6cf37c1f01d98e4bc0f4dc352fb4de1cab02205624c97ff415b0931d0eea89"
+    },
+    {
+      "path": "tests/Feature/TeacherTutorMigrationTest.php",
+      "git_blob": "bae63ac9623c36103ea3f606b066fbcc6ebdfeb4",
+      "sha256": "7081b3aa8486d7cbeb1e4ddf3c8705e52d3f25408960b63ae56646d9c0a77ffe"
+    },
+    {
+      "path": "tests/Feature/TutorDeliveryMetadataMigrationTest.php",
+      "git_blob": "c4cc8c7b3ab5aa2fae02f8d19c7f6078c1690735",
+      "sha256": "381df7c659b429b7a4bec5489564037f7b2c2431bedb82894f96f4541b014c57"
+    },
+    {
+      "path": "tests/TestCase.php",
+      "git_blob": "b7ef45218fb0ae272e77651484437c48b7a58690",
+      "sha256": "987fd83f3b83dd3e56ec4c69ecc41d9653ed7c672707b5fee367f6267ccd6fac"
+    },
+    {
+      "path": "tests/Unit/ExampleTest.php",
+      "git_blob": "5773b0ceb771e176520d5a9c1efe5e918878318d",
+      "sha256": "ffacae5c1a2a44c809420af5b3b404910da1b12167d58764dac6d10b8ba8cfaf"
+    },
+    {
+      "path": "tests/js/fcm-client.test.mjs",
+      "git_blob": "f849aaee5ab03594e91a38adfd4847c48111982b",
+      "sha256": "33f008042735e345f75fa724ec6d4fa590f2c9f8d206bda44bc70220c2059163"
+    },
+    {
+      "path": "tests/js/fcm-worker.test.mjs",
+      "git_blob": "5f83b954ffc40d36b62c912e60d33259a835a73c",
+      "sha256": "38f7e40414cabb2e38309d0e10d85b9096ce260d48f9b6352cc8c7ed1b1207c2"
+    },
+    {
+      "path": "tests/js/push-privacy.test.mjs",
+      "git_blob": "c06a202edc90b90abb5f03ba3c2c53707c8b770c",
+      "sha256": "220b272b8c725a56815b3608fbf1b8d6f3d85e77c0da3b94e7e8773b8efc616d"
+    },
+    {
+      "path": "tests/js/student-pwa.test.mjs",
+      "git_blob": "fee64b3b942114ad56960f0993aef33e8ae0a70f",
+      "sha256": "e55577732a6f395341f4a2487a1e2b4d858400b4f7d86712b535b38fc6c20bdd"
+    },
+    {
+      "path": "tests/js/student-reader-compat.test.mjs",
+      "git_blob": "1756c380eb54ed89740c71b1ece2e28d9c859614",
+      "sha256": "369f316722d58f98d1aac90ee52f8fdff20444ce09f85a2962cd446099af3c5c"
+    },
+    {
+      "path": "vite.config.js",
+      "git_blob": "b4b3d26a89b5df368c199621bfa78336fe20ddc5",
+      "sha256": "5d9f8ce3c5f07d73904cfed81666a1b2aed51dcee87d801bc9b475b82d5b7d41"
+    }
+  ]
+}

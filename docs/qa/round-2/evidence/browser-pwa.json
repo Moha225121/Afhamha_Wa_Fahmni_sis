@@ -1,0 +1,155 @@
+{
+  "testedAt": "2026-11-12T10:34:07.732Z",
+  "browser": "157.0.4341.42",
+  "viewport": "390x900",
+  "environment": "Loopback synthetic QA server; clean unauthenticated contexts; service workers allowed; external requests blocked",
+  "limits": "Actual local worker installation/activation and offline navigation only. No physical-device PWA install/update, Push, external provider, or authenticated/private account data tested.",
+  "results": [
+    {
+      "name": "parent worker actual activation, offline fallback, public cache only",
+      "result": "PASS",
+      "activation": {
+        "scope": "http://127.0.0.1:8766/parent/",
+        "script": "http://127.0.0.1:8766/parent-sw.js",
+        "state": "activated"
+      },
+      "offlineNavigations": [
+        {
+          "path": "/parent/qa-offline-check",
+          "status": 200,
+          "fromServiceWorker": true
+        },
+        {
+          "path": "/parent/dashboard",
+          "status": 200,
+          "fromServiceWorker": true
+        },
+        {
+          "path": "/parent/grades",
+          "status": 200,
+          "fromServiceWorker": true
+        },
+        {
+          "path": "/parent/messages",
+          "status": 200,
+          "fromServiceWorker": true
+        }
+      ],
+      "cache": [
+        {
+          "name": "afhamha-parent-static-v9",
+          "entries": [
+            {
+              "url": "http://127.0.0.1:8766/parent-offline.html",
+              "method": "GET",
+              "status": 200,
+              "type": "text/html; charset=utf-8"
+            },
+            {
+              "url": "http://127.0.0.1:8766/favicon.ico",
+              "method": "GET",
+              "status": 200,
+              "type": "image/jpeg"
+            },
+            {
+              "url": "http://127.0.0.1:8766/icons/nasbia-logo.jpg",
+              "method": "GET",
+              "status": 200,
+              "type": "image/jpeg"
+            },
+            {
+              "url": "http://127.0.0.1:8766/school-branding/icon-192.png",
+              "method": "GET",
+              "status": 200,
+              "type": "image/png"
+            },
+            {
+              "url": "http://127.0.0.1:8766/school-branding/icon-512.png",
+              "method": "GET",
+              "status": 200,
+              "type": "image/png"
+            },
+            {
+              "url": "http://127.0.0.1:8766/school-app-icon",
+              "method": "GET",
+              "status": 200,
+              "type": "image/png"
+            }
+          ]
+        }
+      ],
+      "blockedExternal": [],
+      "unsuccessfulOnline": []
+    },
+    {
+      "name": "student worker actual activation, offline fallback, public cache only",
+      "result": "PASS",
+      "activation": {
+        "scope": "http://127.0.0.1:8766/student/",
+        "script": "http://127.0.0.1:8766/student-sw.js",
+        "state": "activated"
+      },
+      "offlineNavigations": [
+        {
+          "path": "/student/qa-offline-check",
+          "status": 200,
+          "fromServiceWorker": true
+        },
+        {
+          "path": "/student/dashboard",
+          "status": 200,
+          "fromServiceWorker": true
+        },
+        {
+          "path": "/student/grades",
+          "status": 200,
+          "fromServiceWorker": true
+        },
+        {
+          "path": "/student/messages",
+          "status": 200,
+          "fromServiceWorker": true
+        }
+      ],
+      "cache": [
+        {
+          "name": "afhamha-student-static-v2",
+          "entries": [
+            {
+              "url": "http://127.0.0.1:8766/student-offline.html",
+              "method": "GET",
+              "status": 200,
+              "type": "text/html; charset=utf-8"
+            },
+            {
+              "url": "http://127.0.0.1:8766/favicon.ico",
+              "method": "GET",
+              "status": 200,
+              "type": "image/jpeg"
+            },
+            {
+              "url": "http://127.0.0.1:8766/school-branding/icon-192.png?v=20261031-nasbia",
+              "method": "GET",
+              "status": 200,
+              "type": "image/png"
+            },
+            {
+              "url": "http://127.0.0.1:8766/school-branding/icon-512.png?v=20261031-nasbia",
+              "method": "GET",
+              "status": 200,
+              "type": "image/png"
+            },
+            {
+              "url": "http://127.0.0.1:8766/student-manifest.webmanifest",
+              "method": "GET",
+              "status": 200,
+              "type": "application/manifest+json"
+            }
+          ]
+        }
+      ],
+      "blockedExternal": [],
+      "unsuccessfulOnline": []
+    }
+  ]
+}
