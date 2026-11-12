@@ -69,7 +69,7 @@ class FcmNotificationService
 
     public function retryPending(int $limit = 100): int
     {
-        $ids = DB::table('fcm_notification_events')->whereNull('queued_at')->whereNull('sent_at')
+        $ids = DB::table('fcm_notification_events')->whereNull('queued_at')->whereNull('sent_at')->whereNull('cancelled_at')
             ->whereNotNull('payload')->orderBy('id')->limit($limit)->pluck('id');
         $queued = 0;
         foreach ($ids as $id) {
@@ -85,7 +85,7 @@ class FcmNotificationService
             return DB::transaction(function () use ($deliveryId): bool {
                 $event = DB::table('fcm_notification_events')->where('id', $deliveryId)->lockForUpdate()->first();
                 // Legacy rows have no durable payload. Never invent or replay their notification.
-                if (! $event || $event->sent_at || $event->queued_at || $event->payload === null) {
+                if (! $event || $event->sent_at || $event->cancelled_at || $event->queued_at || $event->payload === null) {
                     return false;
                 }
                 $payload = json_decode($event->payload, true, 512, JSON_THROW_ON_ERROR);

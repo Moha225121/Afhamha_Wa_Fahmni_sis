@@ -95,6 +95,7 @@ class AccountNumberingController extends Controller
 
     public function cards(Request $request, StudentCardPdfService $pdf)
     {
+        $request->validate(['classroom_id' => 'nullable|integer|exists:classrooms,id', 'status' => 'nullable|in:active,inactive']);
         $students = Student::with(['user', 'classroom', 'guardians.user'])
             ->when($request->integer('classroom_id'), fn ($q, $id) => $q->where('classroom_id', $id))
             ->when($request->input('status'), fn ($q, $status) => $q->where('status', $status))

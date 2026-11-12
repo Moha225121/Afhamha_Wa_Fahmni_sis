@@ -1,0 +1,376 @@
+{
+  "result": "PASS",
+  "baseline_ref": "1756cc4bf1019561c6caded736819cb3d62a81b7",
+  "baseline_migrations": 44,
+  "migrations": [
+    {
+      "path": "database/migrations/2026_11_11_000001_add_fcm_event_cancellation.php",
+      "sha256": "fce52fb92074df1954e0b9bf152b929dc96cfaff0098de84f231816589073933"
+    },
+    {
+      "path": "database/migrations/2026_11_11_000002_create_lesson_save_requests.php",
+      "sha256": "e36621a2bde7071a5c505ff6a1e1d769a7f4cf6608a6a8b46dcc97f1c17fca3b"
+    }
+  ],
+  "baseline_archive_sha256": "1da422483bee8bffd989e56ca93f02cd896ef2fa0fc3fb6052cb32657566d1a0",
+  "backup_sha256": "2be450ab9fe1d16d7eb836473607ea0af5180733c437cf3fb96722c59ca1a019",
+  "upgraded_backup_sha256": "ac24aa16724e63cc4d371cb6cfbd174d647a53e91b3981a9118d1a9d2d7bc63e",
+  "phases": [
+    {
+      "phase": "baseline",
+      "result": "PASS",
+      "engine": "PostgreSQL 17.11 on x86_64-windows, compiled by msvc-19.44.35229, 64-bit",
+      "database": "nasbia_qa_upgrade",
+      "checks": [
+        "baseline starts in an empty isolated database",
+        "exact baseline migration files applied",
+        "44 baseline migrations recorded",
+        "both Round 2 additions absent from baseline",
+        "saved answers grades uploads messages and partial payment seeded"
+      ],
+      "duration_seconds": 3.591
+    },
+    {
+      "phase": "upgrade",
+      "result": "PASS",
+      "engine": "PostgreSQL 17.11 on x86_64-windows, compiled by msvc-19.44.35229, 64-bit",
+      "database": "nasbia_qa_upgrade",
+      "checks": [
+        "all baseline table hashes unchanged after backup",
+        "exactly two additive migrations applied",
+        "every preexisting field and row retained after both migrations",
+        "no legacy event cancellation fabricated",
+        "no historical receipts or queue jobs backfilled",
+        "legacy events lacking durable payload not replayed",
+        "existing attachment bytes retained",
+        "lesson replay receipt UUID unique on PostgreSQL",
+        "receipt rejects unknown lesson foreign key",
+        "rollback refuses to discard cancellation history",
+        "refused rollback leaves all tables unchanged",
+        "repeat migration is a no-op"
+      ],
+      "duration_seconds": 1.62
+    },
+    {
+      "phase": "restore",
+      "result": "PASS",
+      "engine": "PostgreSQL 17.11 on x86_64-windows, compiled by msvc-19.44.35229, 64-bit",
+      "database": "nasbia_qa_restore",
+      "checks": [
+        "pg_restore retained all table row counts and SHA256 values",
+        "persistent uploaded file remains separate from database restore",
+        "new receipt and cancellation history restored",
+        "restored message sequence allocates an unused ID",
+        "rolled-back sequence probe leaves restored rows unchanged"
+      ],
+      "duration_seconds": 0.658
+    }
+  ],
+  "restored_rows": {
+    "academic_years": {
+      "count": 1,
+      "sha256": "ca24f38c669d45aee4a589c7268b6744b121df452f38c452c9824cd0292e079d"
+    },
+    "account_number_settings": {
+      "count": 1,
+      "sha256": "2efc6521f8e38d54b901cf255203a7dcba6e60c386c53379a1d81f6f8d696cf0"
+    },
+    "announcements": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "assignment_attachments": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "assignment_submission_attachments": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "assignment_submissions": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "assignments": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "attendance_records": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "audit_logs": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "cache": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "cache_locks": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "classroom_subject": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "classrooms": {
+      "count": 1,
+      "sha256": "96ba2326cfa0b1d4f0743e50ec24398eb64cca4b9595bb4bd2ae10a0a43818cb"
+    },
+    "conversation_participants": {
+      "count": 2,
+      "sha256": "13971d00358c7d4dd225210c131d9134cab9cdb3c862a3abd3aa36d873f87f2a"
+    },
+    "conversations": {
+      "count": 1,
+      "sha256": "08b3388701f376a13a5533d11929da2676cb0dcad6e0b08f006242a67d80260d"
+    },
+    "discounts": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "exam_answers": {
+      "count": 1,
+      "sha256": "443a4f47a05d23264e5b990a308425adef99a748f5146b76a022b5ac13848091"
+    },
+    "exam_attempts": {
+      "count": 1,
+      "sha256": "7c1b99783f71776693dbc9b1f5b14753e71d7b679f4e4fa9d46adf0c9bb40764"
+    },
+    "exam_choices": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "exam_periods": {
+      "count": 1,
+      "sha256": "fed07bb650523ce25729bc51803ede850d808becb44b2114ab0cddeb60ac18d7"
+    },
+    "exam_questions": {
+      "count": 1,
+      "sha256": "f57d29f61eeac7d9daff5b4d4a187f26044053fbbb64bc0f4302a24f4900f5b4"
+    },
+    "exams": {
+      "count": 1,
+      "sha256": "4b94bd15518d5c9b7ba52804e73d5a6033a44211cfa2051e2780ad6b8ee81994"
+    },
+    "failed_jobs": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "fcm_devices": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "fcm_notification_deliveries": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "fcm_notification_events": {
+      "count": 4,
+      "sha256": "dc47e91b14d1b79eff1713fb561936ab7e0c5f7d174f316d89ea0550403f5214"
+    },
+    "fcm_schedule_cursors": {
+      "count": 1,
+      "sha256": "bfd95acfa595e535b7deb5d26ec66eb658b5f4d76037f6fc1472f2a3b9ac244b"
+    },
+    "fee_templates": {
+      "count": 1,
+      "sha256": "4969392361cd3f3dbd81de9098dd4db5ce7fe2762a066f22de03a97f75f208e1"
+    },
+    "fee_types": {
+      "count": 7,
+      "sha256": "21a7aa2b8188734332e0ae01da77a666d32ced19b455ca1f2583ef34b5f791e6"
+    },
+    "financial_notifications": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "financial_transactions": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "grade_sheets": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "grades": {
+      "count": 1,
+      "sha256": "8b63b850d4fc26553a27472f5202fdc3d96d4a64d63211650c68cd72c44f2574"
+    },
+    "guardian_calls": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "guardian_student": {
+      "count": 1,
+      "sha256": "1947c7d81ea323d6a47b1557989a61d8d2d487748ab129557e794a9f138f6312"
+    },
+    "guardians": {
+      "count": 1,
+      "sha256": "fc6c7d9162c37d5b342e23cc3105e4d59a428c9276e710b14fc0bb7aee82dc7f"
+    },
+    "job_batches": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "jobs": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "lesson_attachments": {
+      "count": 1,
+      "sha256": "b61f900ae32abe890be333908c326e2f9e03c6c4118440c6b839959868453f08"
+    },
+    "lesson_save_requests": {
+      "count": 1,
+      "sha256": "b40c3eb7396ec9789e8879cae331a7a9a58c1244d6548e3f32eca8b800ba6b62"
+    },
+    "lessons": {
+      "count": 1,
+      "sha256": "9ce10fd322589da74c2f428b21bcabbc4b549f563f4e698552a9a26fed10deae"
+    },
+    "library_resources": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "messages": {
+      "count": 1,
+      "sha256": "76ff449496a4d8276416af745e4fd4d085b78f47f5dc53eb0e696e441f706bce"
+    },
+    "migrations": {
+      "count": 46,
+      "sha256": "fd22163661ecfe997e306674ff022633859f0ec2368ed619eaccfb2b6063530c"
+    },
+    "notifications": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "number_sequences": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "password_reset_tokens": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "payment_methods": {
+      "count": 4,
+      "sha256": "aa763c975d04131eb4ceeb05040c9f5a0137090076b20482545b48801ac40457"
+    },
+    "push_subscriptions": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "receipts": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "result_marks": {
+      "count": 1,
+      "sha256": "80ca955df3b86156161326dadf8cd6ba4026e6e4c09277a293b77fdbb01b7844"
+    },
+    "result_publications": {
+      "count": 1,
+      "sha256": "344116880920270bcd919158bbed503fca60d0dc8cf6d49a681ceb26e21e0f02"
+    },
+    "schedules": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "school_activities": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "school_period_times": {
+      "count": 60,
+      "sha256": "e4d6d2868380e2fa00cbebf77d46f917fbfe271a2e471d9758bcd6bbf1068290"
+    },
+    "sessions": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "settings": {
+      "count": 3,
+      "sha256": "30cbdfba7f2623e5eba0bf2246b0919309ea691fd03d56c34c838088114ab5ba"
+    },
+    "staff_role_assignments": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "staff_role_permissions": {
+      "count": 15,
+      "sha256": "ab481d83b9078e3c271c36fbe7bcc114ab7525eb448a8c7ca012a2013a7f1bb6"
+    },
+    "staff_roles": {
+      "count": 7,
+      "sha256": "0f3a41104521f82db2215a6aabf2276a355907721f6b6b3bc2da49b07530faa1"
+    },
+    "stages": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "student_fees": {
+      "count": 1,
+      "sha256": "a3bd6876956ef3de260988e5868984525a9655e206b74b140e53a1e9424a03c5"
+    },
+    "student_installments": {
+      "count": 1,
+      "sha256": "e0b9f0feb8c33280b217cac70ab3a1d7fe471b3147ddd0b57c3238f9ddd9ea8f"
+    },
+    "student_notes": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "student_payments": {
+      "count": 1,
+      "sha256": "55885af297f331e9574245e2b46b0311ba9cbbbaf59d1850df5c926eb76a4510"
+    },
+    "students": {
+      "count": 1,
+      "sha256": "11380dd95206ad6998fb81ef3507fddd23f86c9a21e421ae5e7edfe1d8bc614e"
+    },
+    "subjects": {
+      "count": 1,
+      "sha256": "dce195fa51d40a94197e3f30950efbaa62dfb9e324665ebf0c6762de73f28e4e"
+    },
+    "supervisor_class_assignments": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "teacher_assignments": {
+      "count": 1,
+      "sha256": "d0c1414295766563ee2d4396b47cc5b7963d94c2b88adbc3767fea57c1cf7f8d"
+    },
+    "teacher_creation_intents": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "teacher_student_notes": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "teachers": {
+      "count": 1,
+      "sha256": "2c7974f2297372077468086b409c1cff77a6a804574b5c41e82a9be081118c8f"
+    },
+    "tutor_conversations": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "tutor_messages": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "units": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "users": {
+      "count": 4,
+      "sha256": "1445588044bc710134b6bc47e826ad24995a021852b1c13d1ac846d4c6c21f90"
+    }
+  },
+  "limitations": "Synthetic PostgreSQL on Windows only; no production access, providers, or production-size lock timing."
+}

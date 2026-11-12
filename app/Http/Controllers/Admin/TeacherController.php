@@ -19,7 +19,12 @@ class TeacherController extends Controller
 {
     public function index(Request $r): View
     {
-        $teachers = Teacher::with(['user', 'subjects', 'classrooms'])->when($r->q, fn ($q, $v) => $q->whereHas('user', fn ($u) => $u->where('name', 'like', "%$v%")->orWhere('email', 'like', "%$v%")))->when($r->status, fn ($q, $v) => $q->where('status', $v))->latest()->paginate(15)->withQueryString();
+        $filters = $r->validate(['q' => 'nullable|string|max:150', 'status' => 'nullable|in:active,inactive']);
+        $term = trim($filters['q'] ?? '');
+        $teachers = Teacher::with(['user', 'subjects', 'classrooms'])
+            ->when($term !== '', fn ($q) => $q->whereHas('user', fn ($u) => $u->where(fn ($match) => $match
+                ->whereLike('name', "%{$term}%")->orWhereLike('email', "%{$term}%")->orWhereLike('phone', "%{$term}%"))))
+            ->when($filters['status'] ?? null, fn ($q, $v) => $q->where('status', $v))->latest()->orderByDesc('id')->paginate(15)->withQueryString();
 
         return view('admin.teachers.index', compact('teachers'));
     }

@@ -23,9 +23,9 @@ use Illuminate\Database\Eloquent\Model;
     public function scopeVisibleToStudent(Builder $query, Student $student): void
     {
         $query->currentlyPublished()->where(function (Builder $audience) use ($student): void {
-            $audience->whereIn('audience', ['all', 'students'])
+            $audience->where(fn (Builder $global) => $global->whereIn('audience', ['all', 'students'])->whereNull('classroom_id'))
                 ->when($student->classroom_id, fn (Builder $classrooms) => $classrooms->orWhere(
-                    fn (Builder $classroom) => $classroom->where('audience', 'classroom')->where('classroom_id', $student->classroom_id),
+                    fn (Builder $classroom) => $classroom->whereIn('audience', ['all', 'students', 'classroom'])->where('classroom_id', $student->classroom_id),
                 ));
         });
     }

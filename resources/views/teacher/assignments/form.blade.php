@@ -20,7 +20,7 @@
     <select name="subject_id" id="a-subject" required>
         <option value="">اختر المادة</option>
         @foreach($subjects as $s)
-        <option value="{{ $s->id }}" @selected(old('subject_id', $assignment->subject_id ?? '')==$s->id)>{{ $s->name }}</option>
+        <option value="{{ $s->id }}" @selected(old('subject_id', $assignment->subject_id ?? '')==$s->id)>{{ $s->name }}{{ $s->code ? ' — '.$s->code : '' }}</option>
         @endforeach
     </select>
 </label>

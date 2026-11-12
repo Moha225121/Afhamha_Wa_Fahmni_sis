@@ -135,4 +135,117 @@ class ResultPublicationTest extends TestCase
         $this->post(route('admin.results.import-sheet', $this->period), ['sheet_id' => $sheet, 'subject_id' => $unassigned->id])->assertUnprocessable();
         $this->actingAs($this->parent)->get('/parent/results')->assertDontSee('79.5');
     }
+
+    public function test_round_two_empty_draft_explains_steps_and_cannot_be_reviewed(): void
+    {
+        $this->get(route('admin.results.show', $this->period))->assertOk()
+            ->assertSeeText('الخطوة التالية: أدخل الدرجات أو استوردها')
+            ->assertSeeText('إنشاء الفترة لا ينشر النتائج');
+        $this->patch(route('admin.results.status', $this->period), ['status' => 'under_review'])->assertSessionHasErrors('status');
+        $this->assertDatabaseHas('exam_periods', ['id' => $this->period, 'status' => 'draft']);
+    }
+
+    public function test_round_two_repeated_marks_preserve_distinct_subjects_and_periods_and_draft_removal_is_audited(): void
+    {
+        $this->mark();
+        $this->mark();
+        $second = Subject::create(['name' => 'علوم', 'code' => 'R2-SCI', 'stage' => 'أساسي', 'status' => 'active']);
+        $this->post(route('admin.results.mark', $this->period), ['student_id' => $this->student->id, 'subject_id' => $second->id, 'score' => 9, 'maximum_score' => 10])->assertSessionHasNoErrors();
+        $other = DB::table('exam_periods')->insertGetId(['name' => 'اختبار شهري', 'academic_year_id' => $this->student->classroom->academic_year_id, 'term' => 'الأول', 'exam_type' => 'شهري', 'status' => 'draft', 'created_by' => $this->admin->id]);
+        $this->post(route('admin.results.mark', $other), ['student_id' => $this->student->id, 'subject_id' => $this->subject->id, 'score' => 7, 'maximum_score' => 10])->assertSessionHasNoErrors();
+        $this->assertDatabaseCount('result_marks', 3);
+        $mark = DB::table('result_marks')->where('exam_period_id', $this->period)->where('subject_id', $this->subject->id)->first();
+        $this->get(route('admin.results.show', $this->period))->assertOk()->assertSeeText('تعديل الدرجة')->assertSeeText('حذف درجة المسودة');
+        $this->actingAs($this->parent)->delete(route('admin.results.mark.destroy', [$this->period, $mark->id]))->assertForbidden();
+        $this->actingAs($this->admin)->delete(route('admin.results.mark.destroy', [$other, $mark->id]))->assertNotFound();
+        $this->delete(route('admin.results.mark.destroy', [$this->period, $mark->id]))->assertRedirect()->assertSessionHasNoErrors();
+        $this->delete(route('admin.results.mark.destroy', [$this->period, $mark->id]))->assertNotFound();
+        $this->assertDatabaseCount('result_marks', 2);
+        $this->assertDatabaseHas('audit_logs', ['action' => 'result_mark_removed']);
+        $this->transition('under_review');
+        $remaining = DB::table('result_marks')->where('exam_period_id', $this->period)->first();
+        $this->delete(route('admin.results.mark.destroy', [$this->period, $remaining->id]))->assertSessionHasErrors('period');
+        $this->assertDatabaseCount('result_marks', 2);
+    }
+
+    public function test_round_two_empty_exam_import_is_reported_and_does_not_claim_success_or_link_exam(): void
+    {
+        $teacher = Teacher::create(['user_id' => User::factory()->create(['role' => 'teacher'])->id, 'status' => 'active']);
+        $exam = Exam::create(['title' => 'لم يصحح', 'subject_id' => $this->subject->id, 'teacher_id' => $teacher->id, 'classroom_id' => $this->student->classroom_id, 'starts_at' => now()->subHour(), 'duration_minutes' => 30, 'total_score' => 100, 'status' => 'published']);
+        $this->post(route('admin.results.import', $this->period), ['exam_ids' => [$exam->id]])->assertSessionHasErrors('exam_ids');
+        $this->assertNull($exam->fresh()->exam_period_id);
+        $this->assertDatabaseCount('result_marks', 0);
+    }
+
+    public function test_round_two_repeated_exam_import_updates_one_mark_and_preserves_other_subjects(): void
+    {
+        $teacher = Teacher::create(['user_id' => User::factory()->create(['role' => 'teacher'])->id, 'status' => 'active']);
+        $exam = Exam::create(['title' => 'اختبار مصحح', 'subject_id' => $this->subject->id, 'teacher_id' => $teacher->id, 'classroom_id' => $this->student->classroom_id, 'starts_at' => now()->subHour(), 'duration_minutes' => 30, 'total_score' => 100, 'status' => 'published']);
+        DB::table('grades')->insert(['exam_id' => $exam->id, 'student_id' => $this->student->id, 'score' => 81]);
+        foreach (range(1, 2) as $_) $this->post(route('admin.results.import', $this->period), ['exam_ids' => [$exam->id]])->assertSessionHasNoErrors();
+        $this->assertDatabaseCount('result_marks', 1);
+        $this->assertDatabaseHas('result_marks', ['exam_period_id' => $this->period, 'student_id' => $this->student->id, 'subject_id' => $this->subject->id, 'score' => 81]);
+        DB::table('grades')->where('exam_id', $exam->id)->update(['score' => 84]);
+        $this->post(route('admin.results.import', $this->period), ['exam_ids' => [$exam->id]])->assertSessionHasNoErrors();
+        $this->assertDatabaseCount('result_marks', 1);
+        $this->assertDatabaseHas('result_marks', ['score' => 84]);
+    }
+
+    public function test_round_two_exam_cannot_be_imported_into_another_period_and_batch_is_atomic(): void
+    {
+        $teacher = Teacher::create(['user_id' => User::factory()->create(['role' => 'teacher'])->id, 'status' => 'active']);
+        $exams = collect(['مرتبط', 'جديد'])->map(fn ($title) => Exam::create(['title' => $title, 'subject_id' => $this->subject->id, 'teacher_id' => $teacher->id, 'classroom_id' => $this->student->classroom_id, 'starts_at' => now()->subHour(), 'duration_minutes' => 30, 'total_score' => 100, 'status' => 'published']));
+        foreach ($exams as $exam) DB::table('grades')->insert(['exam_id' => $exam->id, 'student_id' => $this->student->id, 'score' => 81]);
+        $linked = $exams->first();
+        $new = $exams->last();
+        $new->update(['subject_id' => Subject::create(['name' => 'علوم', 'code' => 'R2-ATOMIC', 'stage' => 'أساسي', 'status' => 'active'])->id]);
+        $this->post(route('admin.results.import', $this->period), ['exam_ids' => [$linked->id]])->assertSessionHasNoErrors();
+        $other = DB::table('exam_periods')->insertGetId(['name' => 'فترة مستقلة', 'academic_year_id' => $this->student->classroom->academic_year_id, 'term' => 'الأول', 'exam_type' => 'شهري', 'status' => 'draft', 'created_by' => $this->admin->id]);
+
+        $this->post(route('admin.results.import', $other), ['exam_ids' => [$new->id, $linked->id]])->assertSessionHasErrors('exams');
+
+        $this->assertSame($this->period, (int) $linked->fresh()->exam_period_id);
+        $this->assertNull($new->fresh()->exam_period_id);
+        $this->assertDatabaseCount('result_marks', 1);
+        $this->assertDatabaseMissing('result_marks', ['exam_period_id' => $other]);
+        $this->assertDatabaseHas('result_marks', ['exam_period_id' => $this->period, 'student_id' => $this->student->id, 'score' => 81]);
+        $this->assertDatabaseCount('grades', 2);
+    }
+
+    public function test_round_two_corrected_republication_does_not_restore_withdrawn_student_result(): void
+    {
+        $this->mark();
+        foreach (['under_review', 'approved', 'published', 'hidden', 'draft'] as $status) $this->transition($status);
+        $mark = DB::table('result_marks')->where('exam_period_id', $this->period)->first();
+        $this->delete(route('admin.results.mark.destroy', [$this->period, $mark->id]))->assertSessionHasNoErrors();
+        $otherUser = User::factory()->create(['role' => 'student', 'status' => 'active']);
+        $otherStudent = Student::create(['user_id' => $otherUser->id, 'student_number' => 'R2-OTHER', 'classroom_id' => $this->student->classroom_id, 'status' => 'active']);
+        $this->post(route('admin.results.mark', $this->period), ['student_id' => $otherStudent->id, 'subject_id' => $this->subject->id, 'score' => 9, 'maximum_score' => 10])->assertSessionHasNoErrors();
+        foreach (['under_review', 'approved', 'published'] as $status) $this->transition($status);
+        $this->assertDatabaseMissing('result_publications', ['exam_period_id' => $this->period, 'student_id' => $this->student->id]);
+        $this->assertDatabaseHas('audit_logs', ['action' => 'student_result_withdrawn']);
+        $this->actingAs($this->student->user)->get('/student/results')->assertOk()->assertDontSee('الفترة السرية');
+        $this->actingAs($this->parent)->get('/parent/results')->assertOk()->assertDontSee('الفترة السرية');
+        $this->actingAs($otherUser)->get('/student/results')->assertOk()->assertSee('الفترة السرية');
+    }
+
+    public function test_round_two_explicit_utc_schedule_stores_and_publishes_at_the_exact_boundary(): void
+    {
+        config(['app.display_timezone' => 'Africa/Tripoli']);
+        $this->get(route('admin.results.index'))->assertOk()->assertSeeText('موعد النشر (UTC، اختياري)');
+        $this->post(route('admin.results.store'), ['name' => 'R2 boundary', 'academic_year_id' => $this->student->classroom->academic_year_id, 'term' => 'الأول', 'exam_type' => 'شهري', 'classroom_id' => $this->student->classroom_id, 'scheduled_at' => '2027-01-01T00:30'])->assertSessionHasNoErrors();
+        $this->period = DB::table('exam_periods')->where('name', 'R2 boundary')->value('id');
+        $this->assertDatabaseHas('exam_periods', ['id' => $this->period, 'scheduled_at' => '2027-01-01 00:30:00']);
+        $this->mark();
+        $this->transition('under_review'); $this->transition('approved');
+        $this->travelTo(\Illuminate\Support\Carbon::parse('2027-01-01 00:29:59', 'UTC'));
+        $this->artisan('results:publish-due')->assertSuccessful();
+        $this->assertDatabaseHas('exam_periods', ['id' => $this->period, 'status' => 'approved']);
+        $this->travelTo(\Illuminate\Support\Carbon::parse('2027-01-01 00:30:00', 'UTC'));
+        $this->artisan('results:publish-due')->assertSuccessful();
+        $this->artisan('results:publish-due')->assertSuccessful();
+        $this->assertDatabaseHas('exam_periods', ['id' => $this->period, 'status' => 'published']);
+        $this->assertSame(1, $this->parent->notifications()->count());
+    }
+
 }

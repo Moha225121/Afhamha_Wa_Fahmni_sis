@@ -25,7 +25,7 @@ class StudentNotificationService
 
         Student::query()->where('status', 'active')
             ->whereHas('user', fn (Builder $users) => $users->where('role', 'student')->where('status', 'active'))
-            ->when($announcement->audience === 'classroom', fn (Builder $students) => $students->where('classroom_id', $announcement->classroom_id))
+            ->when($announcement->classroom_id, fn (Builder $students) => $students->where('classroom_id', $announcement->classroom_id))
             ->with('user')->chunkById(200, function ($students) use ($announcement): void {
                 foreach ($students as $student) {
                     $this->storeAnnouncement($student->user, $announcement, push: true);
@@ -62,7 +62,7 @@ class StudentNotificationService
             }
         }
 
-        return $student->user->notifications()->whereNotIn('id', $withdrawnIds)->where(function (Builder $query) use ($ids): void {
+        return $student->user->notifications()->whereNull(\App\Support\NotificationData::field('result_withdrawn_at'))->whereNotIn('id', $withdrawnIds)->where(function (Builder $query) use ($ids): void {
             $query->where('type', '!=', StudentAnnouncementNotification::class)
                 ->orWhereIn('id', $ids);
         });

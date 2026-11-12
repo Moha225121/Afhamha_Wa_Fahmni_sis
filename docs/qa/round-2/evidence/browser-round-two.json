@@ -1,0 +1,77 @@
+{
+  "testedAt": "2026-11-12T10:53:08.898Z",
+  "browser": "157.0.4341.42",
+  "os": "win32",
+  "viewports": [
+    "390x900",
+    "1440x900"
+  ],
+  "environment": "Loopback isolated PostgreSQL, synthetic identities, external requests blocked",
+  "results": [
+    {
+      "name": "I: interrupted create and lost committed response retain form, retry once without duplicate PNG/MP4",
+      "result": "PASS",
+      "detail": "Three real requests: pre-server disconnect, post-commit lost response, replay. Full-file retry. Downloaded original MP4 decoded/played in desktop Edge; no physical phone/camera test."
+    },
+    {
+      "name": "I: edit retry after lost committed response adds attachment only once",
+      "result": "PASS"
+    },
+    {
+      "name": "I: validation permits corrections; expired-session retry refreshes CSRF without losing selected files",
+      "result": "PASS",
+      "detail": "422/419 responses injected at browser transport; authenticated fresh-form CSRF retrieval and final save are real loopback requests."
+    },
+    {
+      "name": "E: immediate and school-time scheduled announcements, pending visibility, scheduler dedup and archive",
+      "result": "PASS",
+      "detail": {
+        "created": "2026-11-12T10:53:06.690Z",
+        "scheduledInput": "2026-11-12T12:53",
+        "visibleAfterUTC": "2026-11-12T10:53:00.000Z",
+        "beforeDue": {
+          "serverUTC": "2026-11-12T10:51:18+00:00",
+          "createdUTC": "2026-11-12T10:51:16+00:00",
+          "publishedUTC": "2026-11-12T10:53:00+00:00",
+          "status": "published",
+          "currentlyPublished": false,
+          "before": 0
+        },
+        "afterParentSummary": {
+          "serverUTC": "2026-11-12T10:53:01+00:00",
+          "createdUTC": "2026-11-12T10:51:16+00:00",
+          "publishedUTC": "2026-11-12T10:53:00+00:00",
+          "status": "published",
+          "currentlyPublished": true,
+          "before": 1
+        },
+        "notificationCounts": {
+          "serverUTC": "2026-11-12T10:53:02+00:00",
+          "createdUTC": "2026-11-12T10:51:16+00:00",
+          "publishedUTC": "2026-11-12T10:53:00+00:00",
+          "status": "published",
+          "currentlyPublished": true,
+          "before": 1,
+          "first": 2,
+          "repeated": 2
+        },
+        "archived": {
+          "serverUTC": "2026-11-12T10:53:06+00:00",
+          "createdUTC": "2026-11-12T10:51:16+00:00",
+          "publishedUTC": "2026-11-12T10:53:00+00:00",
+          "status": "archived",
+          "currentlyPublished": false,
+          "before": 2
+        }
+      }
+    },
+    {
+      "name": "E: eligible announcement draft deletion and explicit unavailable phone-push state",
+      "result": "PASS"
+    },
+    {
+      "name": "Browser runtime contains no uncaught errors or HTTP 5xx",
+      "result": "PASS"
+    }
+  ]
+}

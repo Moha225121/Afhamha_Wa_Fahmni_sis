@@ -1,0 +1,21 @@
+{
+  "scope": "round-2-learning",
+  "environment": "isolated SQLite in-memory on Windows",
+  "result": "passed",
+  "tests": 167,
+  "assertions": 1232,
+  "duration_ms": 27554,
+  "production_tested": false,
+  "scope_note": "Broad scoped run before final browser and import-lock refinements; overlapping counts must not be summed with full integration results.",
+  "final_focused_regression": {
+    "suites": ["ResultPublicationTest", "Round2LearningTest"],
+    "result": "passed",
+    "tests": 18,
+    "assertions": 261,
+    "duration_ms": 6259
+  },
+  "browser_results": {
+    "learning": {"result": "passed", "checks": 6, "evidence": "evidence/learning/browser-learning.json"},
+    "academics": {"result": "passed", "checks": 9, "evidence": "evidence/learning/browser-academics.json"}
+  }
+}

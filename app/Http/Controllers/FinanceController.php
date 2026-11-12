@@ -99,6 +99,7 @@ class FinanceController extends Controller
         abort_unless($request->user()->isAdmin(), 403);
         $templates = DB::table('fee_templates')->orderByDesc('id')->get()->map(function ($t) use ($finance) {
             $t->target_count = $finance->targets($t)->count();
+            $t->assigned_count = DB::table('student_fees')->where('fee_template_id', $t->id)->count();
 
             return $t;
         });
@@ -134,7 +135,23 @@ class FinanceController extends Controller
             app(SchoolAccountService::class)->audit('fee_status_changed', 'fee_templates', $template, ['active' => $old->active], $data);
         });
 
-        return back()->with('success', 'تم تحديث حالة الرسوم.');
+        return back()->with('success', 'تم تحديث حالة تعريف الرسوم. التعطيل يمنع الإسناد الجديد ويحفظ الالتزامات والمدفوعات المسجلة.');
+    }
+
+    public function templateDestroy(Request $request, int $template)
+    {
+        abort_unless($request->user()->isAdmin(), 403);
+        DB::transaction(function () use ($template): void {
+            $record = DB::table('fee_templates')->where('id', $template)->lockForUpdate()->first();
+            abort_unless($record, 404);
+            if (DB::table('student_fees')->where('fee_template_id', $template)->exists()) {
+                throw \Illuminate\Validation\ValidationException::withMessages(['fee' => 'لا يمكن حذف تعريف رسوم طُبق على الطلاب. عطّله لمنع الإسناد الجديد؛ الالتزامات والمدفوعات تبقى محفوظة.']);
+            }
+            DB::table('fee_templates')->where('id', $template)->delete();
+            app(SchoolAccountService::class)->audit('fee_deleted', 'fee_templates', $template, (array) $record, []);
+        });
+
+        return back()->with('success', 'تم حذف تعريف الرسوم غير المستخدم.');
     }
 
     public function pay(Request $request, Student $student, StudentFinanceService $finance)

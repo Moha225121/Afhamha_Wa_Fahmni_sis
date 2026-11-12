@@ -54,7 +54,7 @@
 @else
 <span class="muted-inline">—</span>
 @endif
-@if($r->status !== 'cancelled' && $isPassed)<form method="post" action="{{ route('teacher.exams.cancel', $r->id) }}">@csrf @method('patch')<button type="submit" class="teacher-delete-action" title="إلغاء الاختبار" aria-label="إلغاء الاختبار" data-confirm="هل أنت متأكد من إلغاء هذا الاختبار؟">إلغاء</button></form>@endif
+@if($r->status !== 'cancelled')<form method="post" action="{{ route('teacher.exams.cancel', $r->id) }}">@csrf @method('patch')<button type="submit" class="teacher-delete-action" title="إلغاء الاختبار" aria-label="إلغاء الاختبار" data-confirm="إلغاء الاختبار يوقف المحاولات الجديدة ويحفظ المحاولات والدرجات السابقة. هل تريد المتابعة؟">إلغاء</button></form>@endif
 <form method="post" action="{{ route('teacher.exams.destroy', $r->id) }}">
     @csrf
     @method('delete')

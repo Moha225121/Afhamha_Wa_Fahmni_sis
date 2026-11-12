@@ -1,6 +1,8 @@
 # Afhamha Wa Fahmni SIS
 
-> تسليم 2026-11-09: الهدف **مدرسة النسبية، جذر هذا المستودع**. لا تنتقل إلى `nasr-al-daem-school`؛ هو تطبيق آخر وليس اعتمادًا لهذا الجذر. المرجع التنفيذي الوحيد للنشر والبناء والاعتمادات والبيئة والترقية والرجوع هو [DIGITALOCEAN_HANDOFF_AR.md](docs/deployment/DIGITALOCEAN_HANDOFF_AR.md). حالة التسليم مستقلة عن موافقة الإنتاج في [RELEASE_READINESS.md](docs/qa/RELEASE_READINESS.md).
+> **الجولة الثانية:** الهدف **Nasbia، جذر هذا المستودع**؛ `nasr-al-daem-school` تطبيق مدرسة أخرى. المرجع الحالي للنشر اليدوي والترحيلات والأصول والعمال والرجوع هو [ROUND_2_HANDOFF_AR.md](docs/deployment/ROUND_2_HANDOFF_AR.md)، والنتائج والنسخة وPR في [تقرير القبول العربي](docs/qa/ROUND_2_ACCEPTANCE_AR.md)، وتفاصيل المصادر والأدلة داخل [docs/qa/round-2](docs/qa/round-2/). حالة الدمج في main منفصلة عن النشر اليدوي وقبول الإنتاج؛ لم يحدّث Codex الموقع الحي.
+>
+> تسليم 2026-11-09 في [DIGITALOCEAN_HANDOFF_AR.md](docs/deployment/DIGITALOCEAN_HANDOFF_AR.md) و[RELEASE_READINESS.md](docs/qa/RELEASE_READINESS.md) سجل تاريخي؛ فرعه وأرقامه ونص «غير ملتزم بها» لا تمثل الجولة الحالية. اتبع مرجع الجولة الثانية عند اختلاف خطوات الترقية.
 >
 > الأقسام أدناه خلفية تشغيل وتطوير، وليست إجراءات نشر معتمدة. لا تستخدم `composer setup` أو `composer create-project` أو سكربتات التثبيت التاريخية لترقية موقع قائم؛ تتضمن هذه المسارات توليد مفتاح أو migrations. تعتمد حزمة التسليم على ملفات القفل، وتثبت الاعتمادات دون scripts/plugins ثم تنفذ الخطوات المراجعة صراحة. مشغلات QA المعزولة في `scripts/qa` لا تقرأ `.env` الحقيقي. لا تستخدم المشغلات المحلية القديمة مع بيانات المدرسة للاختبار.
 

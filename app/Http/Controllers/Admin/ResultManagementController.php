@@ -74,6 +74,13 @@ class ResultManagementController extends Controller
         return back()->with('success', 'تم استيراد الدرجات كمسودة. راجعها ثم اعتمد الفترة.');
     }
 
+    public function destroyMark(int $period, int $mark, ResultPublicationService $results)
+    {
+        $results->removeMark($period, $mark);
+
+        return back()->with('success', 'تم حذف درجة المسودة مع حفظ أثر العملية. لم تُحذف محاولة الطالب أو درجة الاختبار الأصلية.');
+    }
+
     public function status(Request $request, int $period, ResultPublicationService $results)
     {
         $data = $request->validate(['status' => ['required', Rule::in(array_keys(ResultPublicationService::STATUSES))]]);

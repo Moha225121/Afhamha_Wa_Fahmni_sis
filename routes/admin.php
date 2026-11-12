@@ -22,13 +22,15 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
     Route::get('/conversations', [\App\Http\Controllers\SchoolChatController::class, 'index'])->name('conversations.index');
     Route::get('/conversations/{conversation}', [\App\Http\Controllers\SchoolChatController::class, 'show'])->name('conversations.show');
+    Route::patch('/conversations/{conversation}/status', [\App\Http\Controllers\SchoolChatController::class, 'status'])->name('conversations.status');
+    Route::delete('/conversations/{conversation}', [\App\Http\Controllers\SchoolChatController::class, 'destroy'])->name('conversations.destroy');
     Route::get('/conversations/{conversation}/messages', [\App\Http\Controllers\SchoolChatController::class, 'messages'])->middleware('throttle:120,1')->name('conversations.messages');
     Route::post('/conversations/{conversation}/messages', [\App\Http\Controllers\SchoolChatController::class, 'storeMessage'])->middleware('throttle:60,1')->name('conversations.messages.store');
     Route::get('/dashboard/index', fn () => redirect()->route('admin.dashboard'))->name('dashboard.index');
     Route::get('students/cards', [\App\Http\Controllers\Admin\AccountNumberingController::class, 'cards'])->name('students.cards');
     Route::resource('students', StudentController::class);
     Route::resource('teachers', TeacherController::class);
-    Route::resource('supervisors', SupervisorController::class)->only(['index','create','store','edit','update']);
+    Route::resource('supervisors', SupervisorController::class)->only(['index','create','store','edit','update','destroy']);
     Route::resource('parents', GuardianController::class);
     Route::get('classes/sections', [ClassroomController::class, 'sections'])->name('classes.sections');
     Route::post('classes/sections', [ClassroomController::class, 'storeSections'])->name('classes.sections.store');
@@ -39,7 +41,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::get('imports/{type}/template', [\App\Http\Controllers\Admin\ExcelImportController::class, 'template'])->name('imports.template');
     Route::get('imports/{type}', [\App\Http\Controllers\Admin\ExcelImportController::class, 'create'])->name('imports.create');
     Route::post('imports/{type}', [\App\Http\Controllers\Admin\ExcelImportController::class, 'store'])->name('imports.store');
-    Route::resource('announcements', AnnouncementController::class)->except('destroy');
+    Route::patch('announcements/{announcement}/archive', [AnnouncementController::class, 'archive'])->name('announcements.archive');
+    Route::resource('announcements', AnnouncementController::class);
     Route::get('schedules', [OperationsController::class, 'schedules'])->name('schedules.index');
     Route::get('schedules/create', [OperationsController::class, 'scheduleCreate'])->name('schedules.create');
     Route::post('schedules', [OperationsController::class, 'scheduleStore'])->name('schedules.store');
@@ -54,6 +57,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::post('results', [ResultManagementController::class, 'store'])->name('results.store');
     Route::get('results/{period}', [ResultManagementController::class, 'show'])->whereNumber('period')->name('results.show');
     Route::post('results/{period}/marks', [ResultManagementController::class, 'mark'])->whereNumber('period')->name('results.mark');
+    Route::delete('results/{period}/marks/{mark}', [ResultManagementController::class, 'destroyMark'])->whereNumber(['period', 'mark'])->name('results.mark.destroy');
     Route::post('results/{period}/import', [ResultManagementController::class, 'import'])->whereNumber('period')->name('results.import');
     Route::post('results/{period}/import-sheet', [ResultManagementController::class, 'importSheet'])->whereNumber('period')->name('results.import-sheet');
     Route::patch('results/{period}/status', [ResultManagementController::class, 'status'])->whereNumber('period')->name('results.status');

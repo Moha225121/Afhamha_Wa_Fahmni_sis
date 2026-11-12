@@ -21,7 +21,8 @@ class ExamAttemptService
             // A student row lock serializes two start requests from that student
             // without blocking every student starting the same exam.
             $lockedStudent = Student::query()->lockForUpdate()->findOrFail($student->id);
-            $lockedExam = Exam::query()->findOrFail($exam->id);
+            // Shared locks allow simultaneous starts but serialize against deletion/cancellation.
+            $lockedExam = Exam::query()->sharedLock()->findOrFail($exam->id);
             $scheduledEnd = $lockedExam->starts_at->copy()->addMinutes($lockedExam->duration_minutes);
             if (! in_array($lockedExam->status, ['published', 'scheduled'], true) || $lockedExam->classroom_id !== $lockedStudent->classroom_id) {
                 throw ValidationException::withMessages(['exam' => 'الاختبار غير متاح لهذا الطالب.']);

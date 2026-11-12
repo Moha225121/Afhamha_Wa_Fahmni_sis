@@ -44,6 +44,38 @@ class SchoolChatController extends Controller
             'hasOlderMessages' => $messages->isNotEmpty() && $conversation->messages()->where('id', '<', $messages->first()->id)->exists()]);
     }
 
+    public function status(Request $request, Conversation $conversation): RedirectResponse
+    {
+        abort_unless($request->user()->isAdmin(), 403);
+        $this->chat->authorize($request->user(), $conversation);
+        $data = $request->validate(['status' => 'required|in:open,closed']);
+        \Illuminate\Support\Facades\DB::transaction(function () use ($conversation, $data): void {
+            $conversation = Conversation::whereKey($conversation->id)->lockForUpdate()->firstOrFail();
+            $old = $conversation->getAttributes();
+            $conversation->update($data);
+            \App\Services\AuditService::record('status_changed', 'conversations', $conversation, $old);
+        });
+
+        return back()->with('success', $data['status'] === 'closed' ? 'أُرشفت المحادثة مع حفظ رسائلها ومشاركيها.' : 'أُعيد فتح المحادثة.');
+    }
+
+    public function destroy(Request $request, Conversation $conversation): RedirectResponse
+    {
+        abort_unless($request->user()->isAdmin(), 403);
+        $this->chat->authorize($request->user(), $conversation);
+        \Illuminate\Support\Facades\DB::transaction(function () use ($conversation): void {
+            $conversation = Conversation::whereKey($conversation->id)->lockForUpdate()->firstOrFail();
+            if ($conversation->messages()->exists()) {
+                throw \Illuminate\Validation\ValidationException::withMessages(['conversation' => 'تحتوي المحادثة على رسائل محفوظة. استخدم الأرشفة بدل الحذف.']);
+            }
+            $old = $conversation->getAttributes();
+            $conversation->delete();
+            \App\Services\AuditService::record('deleted_empty', 'conversations', $conversation, $old);
+        });
+
+        return redirect()->route('admin.conversations.index')->with('success', 'تم حذف المحادثة الفارغة.');
+    }
+
     public function storeMessage(Request $request, Conversation $conversation): RedirectResponse|JsonResponse
     {
         $this->chat->authorize($request->user(), $conversation);

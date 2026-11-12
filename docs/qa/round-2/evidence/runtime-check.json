@@ -1,0 +1,20 @@
+{
+    "configuration serialization": {
+        "exit": 0
+    },
+    "route:cache": {
+        "exit": 0,
+        "output": "INFO  Routes cached successfully."
+    },
+    "view:cache": {
+        "exit": 0,
+        "output": "INFO  Blade templates cached successfully."
+    },
+    "schedule:list": {
+        "exit": 0,
+        "output": "* * * * *  php artisan student-exams:finalize-expired ................................ Next Due: 17 seconds from now\r\n  0 0 * * *  php artisan library:prune-uploads ........................................... Next Due: 13 hours from now\r\n  0 8 * * *  php artisan finance:send-reminders .......................................... Next Due: 21 hours from now\r\n  * * * * *  php artisan results:publish-due ........................................... Next Due: 16 seconds from now\r\n  * * * * *  php artisan announcements:notify-due ...................................... Next Due: 16 seconds from now\r\n  * * * * *  php artisan fcm:retry-pending ............................................. Next Due: 16 seconds from now"
+    },
+    "route_count": 326,
+    "testedAt": "2026-11-12T10:42:43+00:00",
+    "environment": "Fresh isolated SQLite fixture, synthetic configuration cache, no production environment file"
+}

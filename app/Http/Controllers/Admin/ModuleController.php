@@ -22,15 +22,23 @@ class ModuleController extends Controller
         return view('admin.modules.index', compact('module', 'data'));
     }
 
-    public function toggle(string $module, int $id): RedirectResponse
+    public function toggle(Request $request, string $module, int $id): RedirectResponse
     {
         $map = ['students' => 'students', 'teachers' => 'teachers', 'parents' => 'guardians', 'subjects' => 'subjects', 'users' => 'users', 'library' => 'library_resources'];
         abort_unless(isset($map[$module]), 404);
-        $row = DB::table($map[$module])->find($id);
-        abort_unless($row, 404);
-        $status = $row->status === 'active' ? 'inactive' : 'active';
-        DB::table($map[$module])->where('id', $id)->update(['status' => $status, 'updated_at' => now()]);
-        AuditService::record('status_changed',$module);
+        $request->validate(['status' => 'sometimes|required|in:active,inactive']);
+        DB::transaction(function () use ($request, $map, $module, $id): void {
+            $row = DB::table($map[$module])->where('id', $id)->lockForUpdate()->first();
+            abort_unless($row && empty($row->deleted_at), 404);
+            $status = $request->input('status', $row->status === 'active' ? 'inactive' : 'active');
+            if (isset($row->user_id) || $module === 'users') {
+                $user = User::whereKey($module === 'users' ? $id : $row->user_id)->lockForUpdate()->firstOrFail();
+                app(\App\Services\AdminRecordLifecycle::class)->setUserStatus($user, $status);
+            }
+            DB::table($map[$module])->where('id', $id)->update(['status' => $status, 'updated_at' => now()]);
+            AuditLog::create(['user_id' => auth()->id(), 'action' => 'status_changed', 'module' => $module, 'record_id' => $id,
+                'old_values' => ['status' => $row->status], 'new_values' => ['status' => $status], 'ip_address' => request()->ip()]);
+        });
 
         return back()->with('success','تم تغيير الحالة.');
     }

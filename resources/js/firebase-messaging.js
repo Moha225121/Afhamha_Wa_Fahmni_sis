@@ -74,11 +74,21 @@ if (banner && config.apiKey && config.projectId && config.messagingSenderId && c
     };
 
     const start = async () => {
-        if (!('serviceWorker' in navigator) || !('Notification' in window) || !(await isSupported())) return;
+        if (!('serviceWorker' in navigator) || !('Notification' in window) || !(await isSupported())) {
+            message.textContent = 'هذا المتصفح لا يدعم إشعارات الهاتف في وضع الاستخدام الحالي. تبقى إشعاراتك متاحة داخل المنصة؛ قد يلزم تثبيت تطبيق الويب على الأجهزة الداعمة.';
+            enableButton.hidden = true;
+            setVisible(true);
+            return;
+        }
         const statusResponse = await request('/fcm-devices/status');
         if (!statusResponse.ok) throw new Error('Unable to check device registration.');
         const status = await statusResponse.json();
-        if (!status.configured) return;
+        if (!status.configured) {
+            message.textContent = 'التفعيل التلقائي لإشعارات هذا الجهاز غير مهيأ حاليًا. تابع إشعاراتك داخل المنصة، أو افتح صفحة الإشعارات لخيارات التفعيل المتاحة.';
+            enableButton.hidden = true;
+            setVisible(true);
+            return;
+        }
         if (status.project_id !== config.projectId) {
             message.textContent = 'إعدادات إشعارات المدرسة غير متطابقة. يرجى التواصل مع الإدارة.';
             setVisible(true);
@@ -87,7 +97,10 @@ if (banner && config.apiKey && config.projectId && config.messagingSenderId && c
         }
 
         if (Notification.permission === 'granted') {
-            try { await register(getMessaging(app)); } catch { setVisible(true); }
+            try { await register(getMessaging(app)); } catch {
+                message.textContent = 'إذن الإشعارات متاح، لكن تعذر تسجيل هذا الجهاز. تحقق من الاتصال ثم أعد المحاولة.';
+                setVisible(true);
+            }
             return;
         }
 
@@ -114,5 +127,13 @@ if (banner && config.apiKey && config.projectId && config.messagingSenderId && c
         }
     });
 
-    start().catch(() => { setVisible(true); });
+    start().catch(() => {
+        message.textContent = 'تعذر التحقق من إعداد إشعارات الهاتف. أعد تحميل الصفحة بعد التحقق من الاتصال؛ إشعارات المنصة متاحة.';
+        enableButton.hidden = true;
+        setVisible(true);
+    });
+} else if (banner) {
+    banner.querySelector('[data-fcm-message]').textContent = 'التفعيل التلقائي لإشعارات هذا الجهاز غير مهيأ حاليًا. تابع إشعاراتك داخل المنصة، أو افتح صفحة الإشعارات لخيارات التفعيل المتاحة.';
+    banner.querySelector('[data-fcm-enable]').hidden = true;
+    banner.hidden = false;
 }

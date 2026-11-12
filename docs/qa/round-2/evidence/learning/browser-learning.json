@@ -1,0 +1,31 @@
+{
+  "testedAt": "2026-11-12T10:45:14.802Z",
+  "browser": "157.0.4341.42",
+  "environment": "Synthetic loopback browser; no paid/external calls or physical device",
+  "results": [
+    {
+      "name": "Journey2 teacher attachment -> student upload -> draft hidden -> grade published to student and parent",
+      "result": "PASS"
+    },
+    {
+      "name": "Journey4 parent -> teacher and admin conversations; reply, order and Tripoli timestamps",
+      "result": "PASS"
+    },
+    {
+      "name": "Journey5 admin announcement published for second-child class; one-child parent excluded, drafts hidden",
+      "result": "PASS"
+    },
+    {
+      "name": "Journey6 supervisor visible note reaches linked guardian",
+      "result": "PASS"
+    },
+    {
+      "name": "QA007 existing student tutor new conversation remains private",
+      "result": "PASS"
+    },
+    {
+      "name": "No uncaught browser errors or HTTP 5xx during learning journeys",
+      "result": "PASS"
+    }
+  ]
+}

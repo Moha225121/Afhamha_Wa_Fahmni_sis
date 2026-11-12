@@ -50,7 +50,12 @@ class LibraryCatalogService
     {
         $visible = $this->visibleQuery($user);
         $bookTypes = config('library.book_types', self::BOOK_TYPES);
-        $grades = config('library.grades', self::GRADES);
+        $classrooms = $user->isTeacher() ? $user->teacher->classrooms()->get() : Classroom::all();
+        $gradeNumbers = $classrooms->map(fn ($room) => self::gradeForClassroom($room))
+            ->merge((clone $visible)->pluck('grade_levels')->flatten())->filter()->unique()->sort();
+        $gradeLabels = array_replace(self::GRADES, config('library.grades', []));
+        $grades = $gradeNumbers->filter(fn ($number) => isset($gradeLabels[(int) $number]))
+            ->mapWithKeys(fn ($number) => [(int) $number => $gradeLabels[(int) $number]])->all();
         $filters = array_replace(array_fill_keys(['q', 'subject', 'grade', 'book_type', 'audience', 'track', 'term', 'category', 'subject_id', 'stage'], ''), $request->validate([
             'q' => ['nullable', 'string', 'max:200'],
             'subject' => ['nullable', 'string', 'max:255'],
@@ -97,7 +102,12 @@ class LibraryCatalogService
             $query->where(fn (Builder $scope) => $scope->where('subject_name', $subject)
                 ->orWhere(fn (Builder $legacy) => $legacy->where(fn (Builder $empty) => $empty->whereNull('subject_name')->orWhere('subject_name', ''))
                     ->whereHas('subject', fn (Builder $subjects) => $subjects->where('name', $subject))));
-        })->when($filters['grade'], fn (Builder $query, $grade) => $query->whereJsonContains('grade_levels', (int) $grade));
+        })->when($filters['grade'], function (Builder $query, $grade) use ($classrooms): void {
+            $classroomIds = $classrooms->filter(fn ($room) => self::gradeForClassroom($room) === (int) $grade)->pluck('id');
+            $query->where(fn (Builder $grades) => $grades->whereJsonContains('grade_levels', (int) $grade)
+                ->orWhere(fn (Builder $legacy) => $legacy->whereIn('classroom_id', $classroomIds)
+                    ->where(fn (Builder $missing) => $missing->whereNull('grade_levels')->orWhereJsonLength('grade_levels', 0))));
+        });
         foreach (['book_type', 'audience', 'track', 'term', 'category', 'subject_id'] as $field) {
             $query->when($filters[$field], fn (Builder $query, $value) => $query->where($field, $value));
         }

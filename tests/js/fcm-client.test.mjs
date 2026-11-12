@@ -111,3 +111,27 @@ test('parent Web Push subscribes through the parent worker even if the root work
     assert.equal(subscriptions[0].applicationServerKey[0], 1);
     assert.match(status.textContent, /تم تفعيل/);
 });
+
+for (const scenario of ['unsupported', 'denied', 'unconfigured-server', 'unconfigured-build', 'status-error']) {
+    test(`FCM clearly explains ${scenario} without requesting permission or registering a token`, async () => {
+        let registrations = 0;
+        const enable = {hidden: false, addEventListener: () => {}};
+        const message = {textContent: ''};
+        const banner = {hidden: true, querySelector: selector => selector === '[data-fcm-enable]' ? enable : message};
+        const notification = {permission: scenario === 'denied' ? 'denied' : 'default', requestPermission: () => { throw new Error('No automatic permission prompts'); }};
+        const context = {
+            document: {querySelector: selector => selector === '[data-fcm-banner]' ? banner : {content: 'csrf'}},
+            window: {Notification: notification}, Notification: notification,
+            navigator: {serviceWorker: {register: async () => { registrations++; }}},
+            initializeApp: () => ({}), isSupported: async () => scenario !== 'unsupported',
+            fetch: async () => ({ok: scenario !== 'status-error', json: async () => ({configured: scenario !== 'unconfigured-server', project_id: 'school-project'})}),
+        };
+        const source = scenario === 'unconfigured-build' ? clientSource.replace("apiKey: 'api-key'", "apiKey: ''") : clientSource;
+        vm.runInNewContext(source, context);
+        await new Promise(setImmediate);
+        assert.equal(banner.hidden, false);
+        assert.equal(enable.hidden, true);
+        assert.equal(registrations, 0);
+        assert.match(message.textContent, scenario === 'unsupported' ? /لا يدعم/ : scenario === 'denied' ? /محظورة/ : scenario === 'status-error' ? /تعذر التحقق/ : /غير مهيأ/);
+    });
+}

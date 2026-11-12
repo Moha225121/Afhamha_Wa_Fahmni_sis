@@ -12,7 +12,7 @@
         @csrf
         @foreach($attempt->answers as $answer)
             <div class="field">
-                <strong>{{ $loop->iteration }}. {{ $answer->question_text_snapshot }}</strong>
+                <strong>السؤال {{ $loop->iteration }}</strong><x-assignment-content :content="$answer->question_text_snapshot" />
                 <p dir="auto">{{ $answer->answerOptions()[$answer->answer] ?? $answer->answer ?? 'لم يجب الطالب' }}</p>
                 @if(in_array($answer->question_type_snapshot, ['multiple_choice', 'true_false'], true))
                     <p>التصحيح الآلي: {{ $answer->awarded_score }} / {{ $answer->max_score }}</p>

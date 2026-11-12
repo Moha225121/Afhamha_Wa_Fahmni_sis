@@ -9,6 +9,12 @@
         <span class="chat-avatar" aria-hidden="true">{{ mb_substr($recipient?->name ?? 'المدرسة', 0, 1) }}</span>
         <div><h1>{{ $recipient?->name ?? 'المدرسة' }}</h1><p>{{ $conversation->student?->user?->name ?? 'محادثة عامة' }} · {{ match($recipient?->role) { 'admin' => 'إدارة المدرسة', 'teacher' => 'معلم الصف', default => 'ولي الأمر' } }}</p></div>
     </header>
+    @if(auth()->user()->isAdmin())
+    <div class="filters">
+        <form method="post" action="{{ route('admin.conversations.status', $conversation) }}">@csrf @method('patch')<input type="hidden" name="status" value="{{ $conversation->status === 'open' ? 'closed' : 'open' }}"><button class="btn secondary">{{ $conversation->status === 'open' ? 'أرشفة المحادثة' : 'إعادة فتح المحادثة' }}</button></form>
+        @if($messages->isEmpty())<form method="post" action="{{ route('admin.conversations.destroy', $conversation) }}">@csrf @method('delete')<button class="btn danger" data-confirm="حذف المحادثة الفارغة؟">حذف المحادثة الفارغة</button></form>@endif
+    </div>
+    @endif
     <button class="chat-older" type="button" data-chat-older @unless($hasOlderMessages) hidden @endunless>عرض رسائل أقدم</button>
     <div class="chat-history" role="log" aria-label="رسائل المحادثة" tabindex="0" data-chat-history>
         @php($lastDay = null)
