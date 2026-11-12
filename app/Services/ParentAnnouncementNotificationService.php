@@ -62,7 +62,7 @@ class ParentAnnouncementNotificationService
             }
         }
 
-        return $parent->notifications()->whereNotIn('id', $withdrawnIds)
+        return $parent->notifications()->whereNull(NotificationData::field('result_withdrawn_at'))->whereNotIn('id', $withdrawnIds)
             ->where(fn (Builder $personal) => $personal->whereNull(NotificationData::field('student_id'))->orWhereIn(NotificationData::field('student_id'), $notificationStudentIds))
             ->where(fn (Builder $followup) => $followup->whereNull(NotificationData::field('category'))
                 ->orWhereNotIn(NotificationData::field('category'), ['student_note', 'guardian_call'])->orWhereIn('id', $followupIds))

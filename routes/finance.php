@@ -16,5 +16,6 @@ Route::prefix('finance')->name('finance.')->middleware('auth')->group(function (
     Route::post('/fees', [FinanceController::class, 'templateStore'])->name('templates.store');
     Route::post('/fees/{template}/apply', [FinanceController::class, 'apply'])->name('templates.apply');
     Route::patch('/fees/{template}', [FinanceController::class, 'templateToggle'])->name('templates.toggle');
+    Route::delete('/fees/{template}', [FinanceController::class, 'templateDestroy'])->name('templates.destroy');
     Route::post('/officers', [FinanceController::class, 'officerStore'])->name('officers.store');
 });

@@ -58,22 +58,26 @@ class StudentController extends Controller
 
     public function update(StudentRequest $r, Student $student): RedirectResponse
     {
+        $oldPhoto = $student->user->avatar_path;
         DB::transaction(function () use ($r, $student) {
             app(\App\Services\SchoolAccountService::class)->settings(true);
             $oldUser = $student->user->getAttributes();
             $old = $student->getAttributes();
             $data = $r->safe()->only(['name', 'email', 'phone', 'status', 'first_name_en', 'last_name_en']);
-            $oldPhoto = $student->user->avatar_path;
             if ($r->hasFile('photo')) $data['avatar_path'] = $r->file('photo')->store('student-photos', 'public');
             if ($r->filled('password')) {
                 $data['password'] = $r->password;
             }$student->user->update($data);
             $student->update($r->safe()->only(['student_number', 'classroom_id', 'birth_date', 'gender', 'address', 'status']));
             $student->guardians()->sync($r->input('guardian_ids', []));
-            if ($r->hasFile('photo') && $oldPhoto) Storage::disk('public')->delete($oldPhoto);
             AuditService::record('updated', 'students', $student, $old);
             AuditService::record('updated', 'student_accounts', $student->user, $oldUser);
         });
+
+        if ($r->hasFile('photo') && $oldPhoto && str_starts_with($oldPhoto, 'student-photos/')
+            && ! User::where('avatar_path', $oldPhoto)->exists()) {
+            Storage::disk('public')->delete($oldPhoto);
+        }
 
         return redirect()->route('admin.students.show',$student)->with('success','تم تحديث بيانات الطالب.');
     }

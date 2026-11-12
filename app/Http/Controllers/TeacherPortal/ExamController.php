@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\TeacherPortal\Concerns\InteractsWithTeacherScope;
 use App\Http\Requests\TeacherPortal\ExamRequest;
 use App\Models\Classroom;
+use App\Models\Exam;
 use App\Models\ExamQuestion;
 use App\Models\Subject;
 use App\Services\AuditService;
@@ -311,29 +312,38 @@ class ExamController extends Controller
     public function cancel(Request $request, int $exam): RedirectResponse
     {
         $teacher = $this->teacher($request);
-        $examRow = DB::table('exams')->where('id', $exam)->first();
-        abort_unless($examRow && (int) $examRow->teacher_id === $teacher->id, 404);
-        abort_unless(\Illuminate\Support\Carbon::parse($examRow->starts_at)->isPast(), 422, 'لا يمكن إلغاء اختبار قبل موعده.');
-        DB::table('exams')->where('id', $exam)->update(['status' => 'cancelled', 'updated_at' => now()]);
-        AuditService::record('cancelled', 'exams');
+        DB::transaction(function () use ($teacher, $exam): void {
+            $examRow = Exam::whereKey($exam)->lockForUpdate()->first();
+            abort_unless($examRow && (int) $examRow->teacher_id === $teacher->id, 404);
+            if ($examRow->status === 'cancelled') return;
+            $old = $examRow->getAttributes();
+            $examRow->update(['status' => 'cancelled']);
+            AuditService::record('cancelled', 'exams', $examRow, $old);
+        });
 
-        return back()->with('success', 'تم إلغاء الاختبار وإيقاف مشاركته.');
+        return back()->with('success', 'تم إلغاء الاختبار وإيقاف المحاولات الجديدة، مع الاحتفاظ بالمحاولات والدرجات السابقة.');
     }
 
     public function destroy(Request $request, int $exam): RedirectResponse
     {
         $teacher = $this->teacher($request);
-        $examRow = DB::table('exams')->where('id', $exam)->first();
-        abort_unless($examRow && (int) $examRow->teacher_id === $teacher->id, 404);
-
-        DB::transaction(function () use ($exam) {
+        DB::transaction(function () use ($exam, $teacher) {
+            $examRow = Exam::whereKey($exam)->lockForUpdate()->first();
+            abort_unless($examRow && (int) $examRow->teacher_id === $teacher->id, 404);
+            if (DB::table('exam_attempts')->where('exam_id', $exam)->exists()
+                || DB::table('grades')->where('exam_id', $exam)->exists() || $examRow->exam_period_id) {
+                throw ValidationException::withMessages(['exam' => 'لا يمكن حذف الاختبار لوجود محاولات طلاب أو درجات أو ارتباط بفترة نتائج. يمكنك إلغاء الاختبار لإيقاف المحاولات الجديدة مع حفظ السجل.']);
+            }
+            if (! in_array($examRow->status, ['draft', 'cancelled'], true)) {
+                throw ValidationException::withMessages(['exam' => 'ألغِ الاختبار المجدول أو المنشور أولًا. يمكن حذف المسودة أو الاختبار الملغى فقط إذا لم يرتبط بمحاولات أو نتائج.']);
+            }
             $questionIds = DB::table('exam_questions')->where('exam_id', $exam)->pluck('id');
             DB::table('exam_choices')->whereIn('exam_question_id', $questionIds)->delete();
             DB::table('exam_questions')->where('exam_id', $exam)->delete();
-            DB::table('exams')->where('id', $exam)->delete();
+            $old = $examRow->getAttributes();
+            $examRow->delete();
+            AuditService::record('deleted', 'exams', $examRow, $old);
         });
-
-        AuditService::record('deleted', 'exams');
 
         return redirect()->route('teacher.exams.index')->with('success', 'تم حذف الاختبار بنجاح.');
     }

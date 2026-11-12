@@ -75,7 +75,7 @@
             @forelse($resources as $resource)
                 @include('library.card')
             @empty
-                <div class="lib-empty">
+                <div class="lib-empty">@if($routePrefix === 'teacher.library')<p>تظهر الكتب المنشورة المطابقة لموادك وتكليفاتك. إذا توقعت كتابًا غير ظاهر، اطلب من إدارة المدرسة مراجعة نشره وربطه بالمادة والصف من إدارة المكتبة.</p>@elseif($routePrefix === 'admin.library')<p>أضف الكتب الفعلية من نموذج إدارة المكتبة، وحدد الصف والمادة والجمهور الصحيحين.</p>@endif
                     @include('library.subject-icon', ['subjectName' => ''])
                     <h3>{{ $activeFilters->isNotEmpty() ? 'لم نجد كتبًا بهذه المواصفات' : 'المكتبة جاهزة لكتبك' }}</h3>
                     <p>{{ $activeFilters->isNotEmpty() ? 'جرّب اسمًا أقصر، أو اختر مادة أو صفًا آخر.' : (auth()->user()->isAdmin() ? 'أضف أول ملف، وحدد مادته وصفه ليسهل الوصول إليه.' : 'ستظهر هنا الكتب والموارد المتاحة لك عند إضافتها.') }}</p>

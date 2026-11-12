@@ -18,7 +18,13 @@ class GuardianController extends Controller
 {
     public function index(Request $r): View
     {
-        $parents = Guardian::with('user')->withCount('students')->when($r->q, fn ($q, $v) => $q->whereHas('user', fn ($u) => $u->where('name', 'like', "%$v%")->orWhere('email', 'like', "%$v%")))->paginate(15)->withQueryString();
+        $filters = $r->validate(['q' => 'nullable|string|max:150', 'status' => 'nullable|in:active,inactive']);
+        $term = trim($filters['q'] ?? '');
+        $parents = Guardian::with('user')->withCount('students')
+            ->when($term !== '', fn ($q) => $q->whereHas('user', fn ($u) => $u->where(fn ($match) => $match
+                ->whereLike('name', "%{$term}%")->orWhereLike('email', "%{$term}%")->orWhereLike('phone', "%{$term}%"))))
+            ->when($filters['status'] ?? null, fn ($q, $v) => $q->where('status', $v))
+            ->orderByDesc('id')->paginate(15)->withQueryString();
 
         return view('admin.parents.index', compact('parents'));
     }
@@ -73,10 +79,10 @@ class GuardianController extends Controller
         DB::transaction(function () use ($parent): void {
             $parent = Guardian::whereKey($parent->id)->lockForUpdate()->firstOrFail();
             $user = $parent->user()->lockForUpdate()->firstOrFail();
-            if (DB::table('guardian_student')->where('guardian_id', $parent->id)->exists()
-                || $user->conversations()->exists() || $user->sentMessages()->exists()) {
-                throw \Illuminate\Validation\ValidationException::withMessages(['parent' => 'لا يمكن حذف ولي أمر مرتبط بأبناء أو سجل مراسلات. تُحفظ العلاقات والسجلات الحالية.']);
-            }
+            $reasons = [];
+            if (DB::table('guardian_student')->where('guardian_id', $parent->id)->exists()) $reasons[] = 'روابط أبناء محفوظة، بما فيها الملفات المؤرشفة';
+            if ($user->conversations()->exists() || $user->sentMessages()->exists()) $reasons[] = 'سجل مراسلات محفوظ';
+            if ($reasons) throw \Illuminate\Validation\ValidationException::withMessages(['parent' => 'لا يمكن حذف ولي الأمر لوجود: '.implode('، ', $reasons).'. استخدم إيقاف الحساب مع حفظ السجل.']);
             $old = $parent->getAttributes();
             $user->update(['status' => 'inactive']);
             $parent->update(['status' => 'inactive']);

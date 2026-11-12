@@ -56,5 +56,12 @@ class SupervisorController extends Controller
     }
 
     private function form(User $supervisor): View { return view('admin.supervisors.form',['supervisor'=>$supervisor,'classrooms'=>Classroom::with('academicYear')->orderBy('name')->get()]); }
+    public function destroy(User $supervisor): RedirectResponse
+    {
+        $this->assertSupervisor($supervisor);
+        app(\App\Services\AdminRecordLifecycle::class)->deleteUser($supervisor);
+
+        return redirect()->route('admin.supervisors.index')->with('success', 'تم حذف المشرف غير المرتبط.');
+    }
     private function assertSupervisor(User $supervisor): void { abort_unless($supervisor->role==='supervisor',404); }
 }

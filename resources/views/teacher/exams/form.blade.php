@@ -7,7 +7,7 @@
 
         return [
             'type' => $q->type,
-            'text' => $text,
+            'text' => app(\App\Services\AssignmentContentRenderer::class)->render($text)->toHtml(),
             'score' => (float) $q->score,
             'choices' => collect($q->choices ?? [])->map(fn ($c) => ['text' => $c->text, 'is_correct' => (bool) $c->is_correct])->values(),
         ];
@@ -30,7 +30,7 @@
   <select name="subject_id" id="subject-select" required>
     <option value="">اختر المادة</option>
     @foreach($subjects as $s)
-    <option value="{{ $s->id }}" @selected(old('subject_id', $exam->subject_id ?? '')==$s->id)>{{ $s->name }}</option>
+    <option value="{{ $s->id }}" @selected(old('subject_id', $exam->subject_id ?? '')==$s->id)>{{ $s->name }}{{ $s->code ? ' — '.$s->code : '' }}</option>
     @endforeach
   </select>
 </label>
@@ -298,7 +298,7 @@
 
   function choiceRow(qIdx, cIdx, text, checked){
     text = text || '';
-    const safeText = text.replace(/"/g, '&quot;');
+    const safeText = String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     return `<div class="choice-row">
       <input type="checkbox" class="correct-toggle" data-group="q${qIdx}" name="questions[${qIdx}][choices][${cIdx}][is_correct]" value="1" ${checked?'checked':''} title="إجابة صحيحة">
       <input type="text" name="questions[${qIdx}][choices][${cIdx}][text]" value="${safeText}" placeholder="نص الخيار">
@@ -326,7 +326,7 @@
       <div>
         ${buildRichToolbar('question-' + qIdx, false)}
         <div class="rich-editor" contenteditable="true" data-placeholder="اكتب نص السؤال هنا...">${data.text || ''}</div>
-        <textarea hidden name="questions[${qIdx}][text]">${(data.text || '').replace(/"/g, '&quot;')}</textarea>
+        <textarea hidden name="questions[${qIdx}][text]"></textarea>
       </div>
       <div class="choices-list"></div>
       <button type="button" class="btn secondary small add-choice">إضافة خيار</button>
@@ -379,10 +379,17 @@
       }
     });
 
-    if (data.type === 'true_false') {
-      applyType();
-    } else if (data.choices && data.choices.length) {
+    if (data.choices && data.choices.length) {
       data.choices.forEach(c => addChoice(c.text, c.is_correct));
+      if (data.type === 'true_false') {
+        // Loading a saved answer key must not reset False to the new-question default True.
+        choicesList.style.display = '';
+        addChoiceBtn.style.display = 'none';
+        choicesList.querySelectorAll('input[type=text]').forEach(i => i.readOnly = true);
+      } else {
+        applyType();
+      }
+    } else if (data.type === 'true_false') {
       applyType();
     } else {
       addChoice('', true);

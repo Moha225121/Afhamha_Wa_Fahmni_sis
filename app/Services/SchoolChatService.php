@@ -72,6 +72,8 @@ class SchoolChatService
         abort_unless($recipients->isNotEmpty(), 403);
 
         return DB::transaction(function () use ($sender, $conversation, $body, $recipients): Message {
+            $conversation = Conversation::whereKey($conversation->id)->lockForUpdate()->firstOrFail();
+            abort_unless($conversation->status === 'open', 403);
             $message = $conversation->messages()->create(['sender_id' => $sender->id, 'body' => $body]);
             $conversation->update(['last_message_at' => $message->created_at]);
             $recipients->each(function (User $recipient) use ($conversation, $body): void {

@@ -3,9 +3,11 @@
 namespace App\Services;
 
 use App\Models\Student;
+use App\Support\NotificationData;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use Ramsey\Uuid\Uuid;
 
 class ResultPublicationService
 {
@@ -37,6 +39,9 @@ class ResultPublicationService
             $period = $this->locked($periodId);
             $this->editable($period);
             $students = $this->students($period)->pluck('id');
+            // Lock source exams in a stable order across periods, while retaining
+            // the caller's import order for the existing subject replacement policy.
+            DB::table('exams')->whereIn('id', $examIds)->orderBy('id')->lockForUpdate()->get(['id']);
             foreach ($examIds as $examId) {
                 $exam = DB::table('exams')->join('classrooms', 'classrooms.id', '=', 'exams.classroom_id')->where('exams.id', $examId)->where('classrooms.academic_year_id', $period->academic_year_id)->when($period->classroom_id, fn ($q) => $q->where('classrooms.id', $period->classroom_id))->when($period->grade, fn ($q) => $q->where('classrooms.name', $period->grade))->select('exams.*')->first();
                 abort_unless($exam, 422, 'أحد الاختبارات خارج نطاق الفترة.');
@@ -45,6 +50,9 @@ class ResultPublicationService
                 }
                 $manual = DB::table('grades')->where('exam_id', $examId)->whereIn('student_id', $students)->get()->keyBy('student_id');
                 $automatic = DB::table('exam_attempts')->where('exam_id', $examId)->whereIn('student_id', $students)->where('status', 'submitted')->whereNotNull('percentage')->orderByDesc('id')->get()->unique('student_id')->keyBy('student_id');
+                if ($manual->isEmpty() && $automatic->isEmpty()) {
+                    throw ValidationException::withMessages(['exam_ids' => 'لا توجد درجات مصححة مطابقة في الاختبار: '.$exam->title.'. أكمل تصحيح المحاولات وتحقق من نطاق الفترة قبل الاستيراد.']);
+                }
                 foreach ($students as $studentId) {
                     $mark = $manual->get($studentId) ?? $automatic->get($studentId);
                     if (! $mark) {
@@ -57,6 +65,18 @@ class ResultPublicationService
             }
             app(SchoolAccountService::class)->audit('results_imported', 'results', $periodId, [], ['exam_ids' => $examIds]);
         }, 3);
+    }
+
+    public function removeMark(int $periodId, int $markId): void
+    {
+        DB::transaction(function () use ($periodId, $markId): void {
+            $period = $this->locked($periodId);
+            $this->editable($period);
+            $mark = DB::table('result_marks')->where('exam_period_id', $periodId)->where('id', $markId)->first();
+            abort_unless($mark, 404);
+            DB::table('result_marks')->where('id', $markId)->delete();
+            app(SchoolAccountService::class)->audit('result_mark_removed', 'results', $periodId, (array) $mark, []);
+        });
     }
 
     public function transition(int $periodId, string $status): void
@@ -79,6 +99,16 @@ class ResultPublicationService
                     throw ValidationException::withMessages(['status' => 'لم يحِن موعد النشر المحدد. ستُنشر الفترة المعتمدة عند حلول الموعد.']);
                 }
                 $marks = DB::table('result_marks as m')->join('subjects as s', 's.id', '=', 'm.subject_id')->where('m.exam_period_id', $periodId)->select('m.*', 's.name as subject')->get();
+                // A reviewed correction can remove every mark for one student. Remove only the
+                // current visibility projection, retaining the previous published payload in audit.
+                $withdrawn = DB::table('result_publications')->where('exam_period_id', $periodId)
+                    ->whereNotIn('student_id', $marks->pluck('student_id')->unique())->get();
+                foreach ($withdrawn as $publication) {
+                    app(SchoolAccountService::class)->audit('student_result_withdrawn', 'results', $periodId,
+                        ['student_id' => $publication->student_id, 'payload' => json_decode($publication->payload, true)], []);
+                    DB::table('result_publications')->where('id', $publication->id)->delete();
+                    $this->withdrawNotifications($period, (int) $publication->student_id);
+                }
                 foreach ($marks->groupBy('student_id') as $studentId => $rows) {
                     $total = round((float) $rows->sum('score'), 2);
                     $maximum = round((float) $rows->sum('maximum_score'), 2);
@@ -96,7 +126,7 @@ class ResultPublicationService
                     app(SchoolAccountService::class)->audit('student_result_published', 'results', $periodId, $old ? json_decode($old->payload, true) : [], $payload + ['student_id' => $studentId]);
                     $student = Student::find($studentId);
                     if ($student) {
-                        app(PortalEventService::class)->notify($student, 'results:'.$periodId.':'.($period->revision + 1), ['title' => 'إعلان النتائج', 'body' => 'تم إعلان نتيجة '.$period->name.' للطالب '.$student->user->name.'. يمكنك الاطلاع عليها من قسم النتائج.', 'url' => route('parent.results', ['student' => $studentId]), 'category' => 'grade'], true);
+                        app(PortalEventService::class)->notify($student, 'results:'.$periodId.':'.($period->revision + 1), ['title' => 'إعلان النتائج', 'body' => 'تم إعلان نتيجة '.$period->name.' للطالب '.$student->user->name.'. يمكنك الاطلاع عليها من قسم النتائج.', 'url' => route('parent.results', ['student' => $studentId]), 'category' => 'grade', 'result_period_id' => $periodId, 'result_revision' => $period->revision + 1], true);
                     }
                 }
                 $changes += ['published_at' => now(), 'revision' => $period->revision + 1];
@@ -174,6 +204,23 @@ class ResultPublicationService
         abort_unless($period, 404);
 
         return $period;
+    }
+
+    private function withdrawNotifications(object $period, int $studentId): void
+    {
+        $notifications = DB::table('notifications')
+            ->where(NotificationData::field('student_id'), NotificationData::id($studentId))
+            ->where(NotificationData::field('category'), 'grade')->get();
+        foreach ($notifications as $notification) {
+            for ($revision = 1; $revision <= $period->revision; $revision++) {
+                $id = Uuid::uuid5(Uuid::NAMESPACE_URL, 'awf:results:'.$period->id.':'.$revision.':'.$notification->notifiable_id)->toString();
+                if ($notification->id !== $id) continue;
+                $data = json_decode($notification->data, true);
+                $data['result_withdrawn_at'] = now()->toIso8601String();
+                DB::table('notifications')->where('id', $id)->update(['data' => json_encode($data, JSON_UNESCAPED_UNICODE), 'updated_at' => now()]);
+                break;
+            }
+        }
     }
 
     private function editable(object $period): void

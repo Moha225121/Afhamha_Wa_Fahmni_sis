@@ -11,11 +11,12 @@ use App\Models\Subject;
 use App\Models\Unit;
 use App\Services\AuditService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+use Throwable;
 
 class LessonController extends Controller
 {
@@ -73,7 +74,7 @@ class LessonController extends Controller
         return $this->form($request, new Lesson(['status' => 'draft']));
     }
 
-    public function store(TeacherLessonRequest $request): RedirectResponse
+    public function store(TeacherLessonRequest $request): RedirectResponse|JsonResponse
     {
         $teacher = $this->teacher($request);
         $data = $request->validated();
@@ -85,28 +86,39 @@ class LessonController extends Controller
             if ($existing) {
                 abort_unless((int) $existing->teacher_id === (int) $teacher->id, 404);
 
-                return redirect()->route('teacher.lessons.index')->with('success', 'تم حفظ الدرس بنجاح.');
+                return $this->saved($request);
             }
         }
 
+        $storedFiles = [];
+        $workCompleted = false;
         try {
-            DB::transaction(function () use ($data, $teacher, $request, $submissionKey): void {
+            DB::transaction(function () use ($data, $teacher, $request, $submissionKey, &$storedFiles, &$workCompleted): void {
                 $lessonData = $this->lessonData($data, $teacher->id);
                 if ($submissionKey) {
                     $lessonData['submission_key'] = $submissionKey;
                 }
                 $lesson = Lesson::create($lessonData);
-                $this->storeAttachment($request, $lesson);
+                $this->storeAttachment($request, $lesson, $storedFiles);
                 AuditService::record('created', 'lessons', $lesson);
+                $workCompleted = true;
             });
-        } catch (QueryException $exception) {
-            $existing = $submissionKey ? Lesson::where('submission_key', $submissionKey)->first() : null;
+        } catch (Throwable $exception) {
+            // Once work completed, COMMIT may have been issued without an
+            // acknowledgement. Retain files even if a new connection sees no row yet.
+            if (! $workCompleted) $this->cleanupUnreferencedAttachments($storedFiles);
+            $existing = null;
+            try {
+                $existing = $submissionKey ? Lesson::where('submission_key', $submissionKey)->first() : null;
+            } catch (Throwable) {
+                // Unknown commit outcome: retain files and report the original failure.
+            }
             if (! $existing || (int) $existing->teacher_id !== (int) $teacher->id) {
                 throw $exception;
             }
         }
 
-        return redirect()->route('teacher.lessons.index')->with('success', 'تم حفظ الدرس بنجاح.');
+        return $this->saved($request);
     }
 
     public function edit(Request $request, Lesson $lesson): View
@@ -117,24 +129,69 @@ class LessonController extends Controller
         return $this->form($request, $lesson->load('attachments'));
     }
 
-    public function update(TeacherLessonRequest $request, Lesson $lesson): RedirectResponse
+    public function update(TeacherLessonRequest $request, Lesson $lesson): RedirectResponse|JsonResponse
     {
         $teacher = $this->teacher($request);
         abort_unless((int) $lesson->teacher_id === (int) $teacher->id, 404);
         $data = $request->validated();
-        abort_if(
-            $data['status'] === 'draft'
-            && $lesson->status === 'published'
-            && $lesson->published_at?->isPast(),
-            422,
-            'لا يمكن حفظ الدرس المنشور كمسودة بعد موعد نشره.'
-        );
         $this->assertPair($teacher, $data);
-        $lesson->update($this->lessonData($data, $teacher->id));
-        $this->storeAttachment($request, $lesson);
-        AuditService::record('updated', 'lessons', $lesson);
+        $storedFiles = [];
+        $workCompleted = false;
+        try {
+            DB::transaction(function () use ($request, $lesson, $teacher, $data, &$storedFiles, &$workCompleted): void {
+                $current = Lesson::whereKey($lesson->id)->lockForUpdate()->firstOrFail();
+                if ($key = $data['submission_key'] ?? null) {
+                    $receipt = DB::table('lesson_save_requests')->where('request_key', $key)->first();
+                    if ($receipt) {
+                        abort_unless((int) $receipt->teacher_id === (int) $teacher->id && (int) $receipt->lesson_id === (int) $lesson->id, 409);
+                        return;
+                    }
+                    DB::table('lesson_save_requests')->insert(['request_key' => $key,
+                        'teacher_id' => $teacher->id, 'lesson_id' => $lesson->id, 'created_at' => now()]);
+                }
+                abort_if($data['status'] === 'draft' && $current->status === 'published' && $current->published_at?->isPast(),
+                    422, 'لا يمكن حفظ الدرس المنشور كمسودة بعد موعد نشره.');
+                $current->update($this->lessonData($data, $teacher->id));
+                $this->storeAttachment($request, $current, $storedFiles);
+                AuditService::record('updated', 'lessons', $current);
+                $workCompleted = true;
+            });
+        } catch (Throwable $exception) {
+            if (! $workCompleted) $this->cleanupUnreferencedAttachments($storedFiles);
+            $saved = false;
+            try {
+                $saved = ! empty($data['submission_key']) && DB::table('lesson_save_requests')
+                    ->where('request_key', $data['submission_key'])->where('teacher_id', $teacher->id)->where('lesson_id', $lesson->id)->exists();
+            } catch (Throwable) {
+                // Preserve a possibly committed upload when the database is unavailable.
+            }
+            if (! $saved) throw $exception;
+        }
 
-        return redirect()->route('teacher.lessons.index')->with('success', 'تم تحديث الدرس بنجاح.');
+        return $this->saved($request);
+    }
+
+    private function saved(Request $request): RedirectResponse|JsonResponse
+    {
+        $request->session()->flash('success', 'تم حفظ الدرس بنجاح.');
+
+        return $request->expectsJson()
+            ? response()->json(['redirect' => route('teacher.lessons.index')])
+            : redirect()->route('teacher.lessons.index');
+    }
+
+    private function cleanupUnreferencedAttachments(array $paths): void
+    {
+        if ($paths === []) return;
+        try {
+            // transaction() can throw from an after-commit callback. Never remove
+            // a file still referenced by a committed row; an uncertain database
+            // outcome leaves the file for reconciliation instead of risking loss.
+            $referenced = LessonAttachment::where('disk', 'local')->whereIn('file_path', $paths)->pluck('file_path')->all();
+            Storage::disk('local')->delete(array_values(array_diff($paths, $referenced)));
+        } catch (Throwable) {
+            \Illuminate\Support\Facades\Log::warning('Lesson upload cleanup deferred; persistence or storage state is unavailable.', ['file_count' => count($paths)]);
+        }
     }
 
     public function publish(Request $request, Lesson $lesson): RedirectResponse
@@ -241,7 +298,7 @@ class LessonController extends Controller
         ];
     }
 
-    private function storeAttachment(TeacherLessonRequest $request, Lesson $lesson): void
+    private function storeAttachment(TeacherLessonRequest $request, Lesson $lesson, array &$storedFiles): void
     {
         if (! $request->hasFile('attachments')) {
             return;
@@ -249,6 +306,10 @@ class LessonController extends Controller
 
         foreach ($request->file('attachments', []) as $file) {
             $path = $file->store("lesson-attachments/{$lesson->id}", 'local');
+            if (! $path) {
+                throw new \RuntimeException('Unable to store lesson attachment.');
+            }
+            $storedFiles[] = $path;
             $lesson->attachments()->create([
                 'title' => $file->getClientOriginalName(),
                 'disk' => 'local',

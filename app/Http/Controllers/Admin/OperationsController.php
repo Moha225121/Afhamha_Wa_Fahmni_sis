@@ -32,10 +32,16 @@ class OperationsController extends Controller
 {
     public function schedules(Request $r): View
     {
-        $rows = DB::table('schedules')->join('classrooms', 'schedules.classroom_id', '=', 'classrooms.id')->join('teachers', 'schedules.teacher_id', '=', 'teachers.id')->join('users', 'teachers.user_id', '=', 'users.id')->join('subjects', 'schedules.subject_id', '=', 'subjects.id')->select('schedules.*', 'classrooms.name as classroom', 'users.name as teacher', 'subjects.name as subject')->when($r->classroom_id, fn ($q, $v) => $q->where('schedules.classroom_id', $v))->orderBy('day_of_week')->orderBy('starts_at')->paginate(20)->withQueryString();
+        $filters = $r->validate(['classroom_id' => 'nullable|integer|exists:classrooms,id', 'section' => 'nullable|string|max:100', 'day_of_week' => 'nullable|integer|between:0,6']);
+        $rows = DB::table('schedules')->join('classrooms', 'schedules.classroom_id', '=', 'classrooms.id')->join('teachers', 'schedules.teacher_id', '=', 'teachers.id')->join('users', 'teachers.user_id', '=', 'users.id')->join('subjects', 'schedules.subject_id', '=', 'subjects.id')
+            ->select('schedules.*', 'classrooms.name as classroom', 'classrooms.section', 'users.name as teacher', 'subjects.name as subject')
+            ->when($filters['classroom_id'] ?? null, fn ($q, $v) => $q->where('schedules.classroom_id', $v))
+            ->when($filters['section'] ?? null, fn ($q, $v) => $q->where('classrooms.section', $v))
+            ->when(isset($filters['day_of_week']), fn ($q) => $q->where('schedules.day_of_week', $filters['day_of_week']))
+            ->orderBy('day_of_week')->orderBy('starts_at')->orderBy('schedules.id')->paginate(20)->withQueryString();
 
         $breakSettings = DB::table('settings')->whereIn('key',['break_after_period','break_duration_minutes'])->pluck('value','key');
-        return view('admin.operations.schedules', compact('rows') + ['classrooms' => Classroom::all(), 'breakAfterPeriod'=>(int)($breakSettings['break_after_period']??3), 'breakDuration'=>(int)($breakSettings['break_duration_minutes']??30)]);
+        return view('admin.operations.schedules', compact('rows') + ['classrooms' => Classroom::with('academicYear')->orderBy('name')->orderBy('section')->get(), 'sections' => Classroom::whereNotNull('section')->where('section', '!=', '')->distinct()->orderBy('section')->pluck('section'), 'breakAfterPeriod'=>(int)($breakSettings['break_after_period']??3), 'breakDuration'=>(int)($breakSettings['break_duration_minutes']??30)]);
     }
 
     public function scheduleCreate(): View
@@ -353,8 +359,8 @@ class OperationsController extends Controller
         $users = User::when($filters['q'] ?? null, fn ($q, $v) => $q->where(fn ($match) => $match->where('name', 'like', "%$v%")->orWhere('email', 'like', "%$v%")))->when($filters['role'] ?? null, fn ($q, $v) => $q->where('role', $v))->when($filters['status'] ?? null, fn ($q, $v) => $q->where('status', $v))->latest()->orderByDesc('id')->paginate(20)->withQueryString();
 
         $classrooms = Classroom::orderBy('name')->get();
-        $users->getCollection()->load('supervisedClassrooms');
-        return view('admin.operations.users', compact('users', 'classrooms') + ['staffRoles' => \App\Models\StaffRole::where('active', true)->with('permissions')->get()]);
+        $supervisors = User::where('role', 'supervisor')->with('supervisedClassrooms')->orderBy('name')->get();
+        return view('admin.operations.users', compact('users', 'classrooms', 'supervisors') + ['staffRoles' => \App\Models\StaffRole::where('active', true)->with('permissions')->get()]);
     }
 
     public function userUpdate(Request $r, User $user): RedirectResponse
@@ -362,13 +368,22 @@ class OperationsController extends Controller
         $d = $r->validate(['role' => ['required', Rule::in(['admin', 'supervisor', 'teacher', 'student', 'parent', 'staff', 'financial_officer'])], 'status' => ['required', Rule::in(['active', 'inactive'])], 'classroom_ids'=>['nullable','array'],'classroom_ids.*'=>['integer','exists:classrooms,id'], 'financial_permissions_present' => 'sometimes|boolean', 'financial_permissions' => ['sometimes', 'array', Rule::prohibitedIf($r->input('role') !== 'supervisor')], 'financial_permissions.*' => [Rule::in(['finance.view', 'finance.pay', 'finance.reports'])]]);
         abort_if($user->is($r->user()) && ($d['status'] === 'inactive' || $d['role'] !== $user->role), 422, 'لا يمكنك تعديل امتيازات حسابك.');
         DB::transaction(function () use ($user, $r, $d): void {
+            $user = User::whereKey($user->id)->lockForUpdate()->firstOrFail();
+            if ($d['role'] !== $user->role && (DB::table('students')->where('user_id', $user->id)->exists() || DB::table('teachers')->where('user_id', $user->id)->exists() || DB::table('guardians')->where('user_id', $user->id)->exists())) {
+                throw \Illuminate\Validation\ValidationException::withMessages(['role' => 'هذا الحساب مرتبط بملف طالب أو معلم أو ولي أمر. لا يمكن تغيير دوره من قائمة المستخدمين.']);
+            }
+            if ($d['role'] !== $user->role && in_array($d['role'], ['student', 'teacher', 'parent'], true)) {
+                throw \Illuminate\Validation\ValidationException::withMessages(['role' => 'أنشئ حساب الطالب أو المعلم أو ولي الأمر من قسمه المخصص لضمان وجود ملف مرتبط.']);
+            }
             $old = $user->getAttributes();
             $updates = collect($d)->only(['role', 'status'])->all();
+            if ($d['role'] !== 'admin') app(\App\Services\AdminRecordLifecycle::class)->guardLastAdministrator($user);
             if ($d['role'] !== 'supervisor') {
                 $updates['financial_permissions'] = [];
             } elseif ($r->boolean('financial_permissions_present') || $r->has('financial_permissions')) {
                 $updates['financial_permissions'] = array_values(array_unique($d['financial_permissions'] ?? []));
             }
+            app(\App\Services\AdminRecordLifecycle::class)->setUserStatus($user, $d['status']);
             $user->update($updates);
             if ($d['role'] === 'supervisor' && ($r->has('classroom_ids') || $r->boolean('classroom_assignments_present'))) {
                 $user->supervisedClassrooms()->sync($d['classroom_ids'] ?? []);
@@ -380,7 +395,11 @@ class OperationsController extends Controller
 
         return back()->with('success', 'تم تحديث المستخدم.');
     }
-    public function userDestroy(Request $r, User $user): RedirectResponse { abort_if($user->is($r->user()),422,'لا يمكنك حذف حسابك.'); $user->staffRoles()->detach(); $user->delete(); AuditService::record('deleted','users',$user); return back()->with('success','تم حذف المستخدم.'); }
+    public function userDestroy(Request $r, User $user): RedirectResponse
+    {
+        app(\App\Services\AdminRecordLifecycle::class)->deleteUser($user);
+        return back()->with('success', 'تم حذف المستخدم غير المرتبط.');
+    }
 
     public function reports(Request $request): View
     {
