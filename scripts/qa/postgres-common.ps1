@@ -22,6 +22,12 @@ function Set-QaPostgresEnvironment($Cluster, [string] $SourceRoot, [string] $Dat
     foreach ($qaRelative in @('framework/views','framework/sessions','framework/cache/data','logs','app/private','app/public')) {
         New-Item -ItemType Directory -Path (Join-Path $qaStorage $qaRelative) -Force | Out-Null
     }
+    # libpq treats an explicitly empty PGSERVICE as a requested service on some
+    # Windows runtimes. Remove it and use existing empty files so no user-level
+    # service/password configuration can be consulted.
+    foreach ($qaFile in @('no-service.conf', 'no-password.conf')) {
+        New-Item -ItemType File -Path (Join-Path $qaOutput $qaFile) | Out-Null
+    }
     $qaVariables = @{
         APP_ENV='testing'; APP_KEY='base64:MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI='; APP_URL='http://127.0.0.1'; APP_DEBUG='false'
         APP_CONFIG_CACHE=('tmp/qa-pg-runs/' + (Split-Path $qaOutput -Leaf) + '/unused-config.php'); APP_ROUTES_CACHE=('tmp/qa-pg-runs/' + (Split-Path $qaOutput -Leaf) + '/unused-routes.php')
@@ -29,13 +35,14 @@ function Set-QaPostgresEnvironment($Cluster, [string] $SourceRoot, [string] $Dat
         DB_CONNECTION='pgsql'; DB_HOST='127.0.0.1'; DB_PORT=[string]$Cluster.port; DB_DATABASE=$Database; DB_USERNAME='qa_release_owner'; DB_PASSWORD=''; DB_URL=''; DB_SSLMODE='disable'
         QA_ALLOW_LOCAL_POSTGRES='1'; MAIL_MAILER='array'; CACHE_STORE='array'; SESSION_DRIVER='array'; QUEUE_CONNECTION='sync'; DB_QUEUE_CONNECTION='pgsql'; FILESYSTEM_DISK='local'; LOG_CHANNEL='single'
         GEMINI_API_KEY=''; FIREBASE_PROJECT_ID=''; GOOGLE_APPLICATION_CREDENTIALS=''; VAPID_PUBLIC_KEY=''; VAPID_PRIVATE_KEY=''
-        PGHOST='127.0.0.1'; PGPORT=[string]$Cluster.port; PGUSER='qa_release_owner'; PGDATABASE=$Database; PGPASSWORD=''; PGSERVICE=''; PGSERVICEFILE=(Join-Path $qaOutput 'no-service.conf'); PGPASSFILE=(Join-Path $qaOutput 'no-password.conf'); PGSSLMODE='disable'
+        PGHOST='127.0.0.1'; PGPORT=[string]$Cluster.port; PGUSER='qa_release_owner'; PGDATABASE=$Database; PGPASSWORD=''; PGSERVICE=$null; PGSERVICEFILE=(Join-Path $qaOutput 'no-service.conf'); PGPASSFILE=(Join-Path $qaOutput 'no-password.conf'); PGSSLMODE='disable'
     }
     $qaPrevious = @{}
     foreach ($qaKey in $qaVariables.Keys) {
         $qaPrevious[$qaKey] = [Environment]::GetEnvironmentVariable($qaKey, 'Process')
         [Environment]::SetEnvironmentVariable($qaKey, $qaVariables[$qaKey], 'Process')
     }
+    Remove-Item Env:PGSERVICE -ErrorAction SilentlyContinue
     return @{ output=$qaOutput; previous=$qaPrevious }
 }
 

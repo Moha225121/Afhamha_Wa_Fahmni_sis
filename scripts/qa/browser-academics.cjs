@@ -4,7 +4,7 @@ const assert = require('node:assert/strict');
 const { chromium } = require(path.join(process.env.QA_NODE_MODULES, 'playwright'));
 const base = 'http://127.0.0.1:8765';
 const fixture = JSON.parse(fs.readFileSync(path.join(process.env.QA_BROWSER_RUN, 'fixture.json')));
-const output = path.resolve('docs/qa/evidence');
+const output = path.resolve(process.env.QA_EVIDENCE_DIR || 'docs/qa/evidence');
 const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aX1sAAAAASUVORK5CYII=', 'base64');
 const results = [], errors = [];
 let browser;
@@ -87,6 +87,17 @@ async function shot(page, name) {
             await teacher.locator('[name="questions[1][type]"]').selectOption('short_answer');
             await teacher.locator('[name="questions[1][score]"]').fill('10');
             await teacher.locator('.question-card').nth(1).locator('[contenteditable]').fill('اشرح إجابتك اصطناعيًا');
+            const richEditor = teacher.locator('.question-card').nth(1).locator('[contenteditable]');
+            await richEditor.press('End');
+            await richEditor.press('Shift+Enter');
+            await richEditor.pressSequentially('2 < 5 & 7 > 3');
+            await richEditor.press('Enter');
+            await richEditor.pressSequentially('سطر عربي جديد');
+            await teacher.getByRole('button', { name: 'إضافة سؤال جديد' }).click();
+            await teacher.locator('[name="questions[2][type]"]').selectOption('true_false');
+            await teacher.locator('[name="questions[2][score]"]').fill('10');
+            await teacher.locator('.question-card').nth(2).locator('[contenteditable]').fill('العبارة الاصطناعية خاطئة');
+            await teacher.locator('[name="questions[2][choices][1][is_correct]"]').check();
             await teacher.getByRole('button', { name: 'نشر الاختبار', exact: true }).click();
             const row = teacher.getByRole('row').filter({ hasText: examTitle });
             reviewUrl = await row.getByRole('link', { name: 'المحاولات والتصحيح' }).getAttribute('href');
@@ -102,28 +113,46 @@ async function shot(page, name) {
         });
         await step('Journey3 teacher advances schedule through edit UI and student completes both question types', async () => {
             await teacher.goto(base + '/teacher/exams/' + examId + '/edit');
+            assert.equal(await teacher.locator('[name="questions[2][choices][1][is_correct]"]').isChecked(), true, 'Reloading a saved False answer must not silently change its answer key to True');
+            assert.equal(await teacher.locator('[name="questions[2][choices][0][is_correct]"]').isChecked(), false);
+            await visible(teacher.locator('.rich-editor').nth(1), 'سطر عربي جديد');
+            assert((await teacher.locator('.rich-editor').nth(1).innerText()).includes('2 < 5 & 7 > 3'));
             await teacher.locator('[name=starts_at]').fill(new Date(Date.now() - 60000).toISOString().slice(0, 16));
             await teacher.getByRole('button', { name: 'تحديث الاختبار', exact: true }).click();
             await student.goto(base + '/student/exams');
             await student.locator('.list-row').filter({ hasText: examTitle }).getByRole('button', { name: 'ابدأ', exact: true }).click();
+            const questionContent = student.locator('.question-form').nth(1).locator('.assignment-content');
+            await visible(questionContent, 'سطر عربي جديد');
+            const renderedQuestion = await questionContent.innerText();
+            assert(renderedQuestion.includes('2 < 5 & 7 > 3'));
+            assert(!/(?:<\/?div|<br|&nbsp;|&lt;|&gt;)/i.test(renderedQuestion), renderedQuestion);
+            await shot(student, 'exam-question-formatted-student.png');
             const objective = student.locator('form.question-form').first();
             await objective.getByRole('radio', { name: '4', exact: true }).check();
             await objective.getByRole('button', { name: 'حفظ الإجابة' }).click();
             const manual = student.locator('form.question-form').nth(1);
             await manual.locator('[name=answer]').fill('إجابة تفسيرية اصطناعية من المتصفح');
             await manual.getByRole('button', { name: 'حفظ الإجابة' }).click();
+            const trueFalse = student.locator('form.question-form').nth(2);
+            await trueFalse.getByRole('radio', { name: 'خطأ', exact: true }).check();
+            await trueFalse.getByRole('button', { name: 'حفظ الإجابة' }).click();
             await student.getByRole('button', { name: 'إرسال الاختبار', exact: true }).click();
             await shot(student, 'exam-submitted-student.png');
         });
         await step('Journey3 teacher reviews manual answer and preserves automatic score', async () => {
             await teacher.goto(reviewUrl); await visible(teacher, 'إجابة تفسيرية اصطناعية من المتصفح');
+            const reviewContent = teacher.locator('.assignment-content').nth(1);
+            await visible(reviewContent, 'سطر عربي جديد');
+            const reviewedQuestion = await reviewContent.innerText();
+            assert(reviewedQuestion.includes('2 < 5 & 7 > 3'));
+            assert(!/(?:<\/?div|<br|&nbsp;|&lt;|&gt;)/i.test(reviewedQuestion), reviewedQuestion);
             await visible(teacher, 'التصحيح الآلي: 10');
             await teacher.locator('input[name^="scores["]').fill('7');
             await teacher.getByRole('button', { name: 'حفظ التصحيح' }).click();
-            await visible(teacher, '17.00 / 20.00');
+            await visible(teacher, '27.00 / 30.00');
             await shot(teacher, 'exam-reviewed-teacher.png');
         });
-        await step('Journey3 admin imports into draft, reviews, approves and publishes; student and parent see 85 percent', async () => {
+        await step('Journey3 admin imports into draft, reviews, approves and publishes; student and parent see 90 percent', async () => {
             await admin.goto(base + '/admin/results');
             const form = admin.locator('form').filter({ has: admin.locator('[name=name]') });
             await form.locator('[name=name]').fill(periodTitle);
@@ -140,8 +169,8 @@ async function shot(page, name) {
                 await admin.locator('[name=status]').selectOption(state);
                 await admin.getByRole('button', { name: 'اعتماد تغيير الحالة' }).click();
             }
-            await student.reload(); await visible(student, periodTitle); await visible(student, '85%');
-            await parent.reload(); await visible(parent, periodTitle); await visible(parent, '85%');
+            await student.reload(); await visible(student, periodTitle); await visible(student, '90%');
+            await parent.reload(); await visible(parent, periodTitle); await visible(parent, '90%');
             await shot(student, 'exam-result-published-student.png');
             await shot(parent, 'exam-result-published-parent.png');
         });

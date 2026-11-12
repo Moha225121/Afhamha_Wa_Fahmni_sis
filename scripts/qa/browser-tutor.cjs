@@ -3,7 +3,8 @@ const path = require('node:path');
 const assert = require('node:assert/strict');
 const { chromium } = require(path.join(process.env.QA_NODE_MODULES, 'playwright'));
 const base = 'http://127.0.0.1:8765';
-const output = path.resolve('docs/qa/evidence');
+const output = path.resolve(process.env.QA_EVIDENCE_DIR || 'docs/qa/evidence');
+fs.mkdirSync(output, { recursive: true });
 const results = [], errors = [], blockedExternal = [];
 let browser;
 async function actor(email) {
@@ -98,6 +99,16 @@ async function check(name, run) {
         studentId = student.url().match(/conversations\/(\d+)/)[1];
         await student.reload();
         await student.getByRole('heading', { name: 'ابدأ بالسؤال', exact: true }).waitFor();
+        const question = 'سؤال طالب اصطناعي محفوظ ' + Date.now();
+        const form = student.locator('.chat-composer');
+        await form.locator('[name=message]').fill(question);
+        await Promise.all([student.waitForURL(student.url()), form.getByRole('button', { name: 'إرسال السؤال', exact: true }).click()]);
+        await student.getByText('غير مهيأة', { exact: false }).waitFor();
+        await student.reload();
+        assert.equal(await student.locator('[data-tutor-message-content]').filter({ hasText: question }).count(), 1);
+        assert.equal(await student.locator('.chat-message.from-tutor').count(), 0);
+        await student.goto(base + '/student/tutor');
+        assert.equal(await student.locator(`.list-row[href$="/conversations/${studentId}"]`).count(), 1);
         assert.equal((await teacher.goto(base + '/teacher/tutor/conversations/' + studentId)).status(), 404);
         assert.equal((await student.goto(base + '/student/tutor/conversations/' + teacherId)).status(), 404);
         assert.equal((await student.goto(base + '/teacher/tutor/conversations/' + teacherId)).status(), 403);
@@ -110,7 +121,7 @@ async function check(name, run) {
     });
     fs.writeFileSync(path.join(output, 'browser-tutor.json'), JSON.stringify({
         testedAt: new Date().toISOString(), browser: browser.version(),
-        environment: 'Synthetic loopback SQLite; missing Gemini credentials; all external browser requests blocked; not a real device/provider test',
+        environment: `Synthetic loopback ${process.env.QA_BROWSER_DATABASE || 'SQLite'} on Windows; missing Gemini credentials; all external browser requests blocked; not a real device/provider test`,
         fixture: path.basename(process.env.QA_BROWSER_RUN || ''), results,
     }, null, 2));
     await browser.close();

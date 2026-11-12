@@ -26,5 +26,7 @@ foreach (['route:cache', 'view:cache', 'schedule:list'] as $command) {
 $results['route_count'] = count($app['router']->getRoutes());
 $results['testedAt'] = gmdate(DATE_ATOM);
 $results['environment'] = 'Fresh isolated SQLite fixture, synthetic configuration cache, no production environment file';
-file_put_contents($qaRoot.'/docs/qa/evidence/runtime-check.json', json_encode($results, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE).PHP_EOL);
+$qaEvidence = getenv('QA_EVIDENCE_DIR') ?: $qaRoot.'/docs/qa/evidence';
+if (! is_dir($qaEvidence)) mkdir($qaEvidence, 0700, true);
+file_put_contents($qaEvidence.'/runtime-check.json', json_encode($results, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE).PHP_EOL);
 echo json_encode(['result' => 'PASS', 'routes' => $results['route_count'], 'checks' => 4]).PHP_EOL;

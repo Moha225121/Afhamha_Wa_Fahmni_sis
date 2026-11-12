@@ -6,7 +6,7 @@ const { chromium } = require(path.join(process.env.QA_NODE_MODULES, 'playwright'
 const base = process.env.QA_BASE_URL || 'http://127.0.0.1:8765';
 assert(['http://127.0.0.1:8765', 'http://127.0.0.1:8766'].includes(base));
 assert(process.env.QA_PHP_BINARY, 'Resolve PHP_BINARY before running this isolated browser check.');
-const output = path.resolve('docs/qa/evidence');
+const output = path.resolve(process.env.QA_EVIDENCE_DIR || 'docs/qa/evidence');
 const results = [], errors = [];
 const startedAt = new Date().toISOString();
 let browser;

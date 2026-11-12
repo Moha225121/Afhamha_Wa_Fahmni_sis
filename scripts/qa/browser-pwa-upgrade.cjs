@@ -8,7 +8,7 @@ const base = process.env.QA_BASE_URL || 'http://127.0.0.1:8765';
 assert(['http://127.0.0.1:8765', 'http://127.0.0.1:8766'].includes(base));
 const run = fs.realpathSync(process.env.QA_BROWSER_RUN);
 assert(run.startsWith(fs.realpathSync('tmp/qa-browser') + path.sep));
-const output = path.resolve('docs/qa/evidence');
+const output = path.resolve(process.env.QA_EVIDENCE_DIR || 'docs/qa/evidence');
 const stateFile = path.join(run, 'pwa-upgrade-state.json');
 const results = [];
 let browser;
