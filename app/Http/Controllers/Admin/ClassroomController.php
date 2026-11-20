@@ -35,15 +35,15 @@ class ClassroomController extends Controller
             ->sortBy(fn (Classroom $classroom) => [
                 array_search($this->normalizedGradeName($classroom->name), array_keys(TeacherAssignmentGroups::PRIMARY_GRADE_LABELS), true),
                 $classroom->academicYear?->name ?? '',
-                $this->canonicalSection($classroom->section) ?? '',
+                TeacherAssignmentGroups::canonicalPrimarySection($classroom->section) ?? $classroom->section,
             ])
             ->values()
             ->each(function (Classroom $classroom): void {
                 $classroom->setAttribute('display_grade', TeacherAssignmentGroups::PRIMARY_GRADE_LABELS[$this->normalizedGradeName($classroom->name)]);
-                $classroom->setAttribute('display_section', $this->canonicalSection($classroom->section) ?? '—');
+                $classroom->setAttribute('display_section', TeacherAssignmentGroups::canonicalPrimarySection($classroom->section) ?? trim($classroom->section));
             });
 
-        return view('admin.classes.sections', compact('classrooms'));
+        return view('admin.classes.sections', ['classrooms' => $classrooms, 'sectionOptions' => TeacherAssignmentGroups::PRIMARY_SECTIONS]);
     }
 
     public function storeSections(Request $request): RedirectResponse
@@ -51,7 +51,7 @@ class ClassroomController extends Controller
         $data = $request->validate([
             'source_classroom_id' => ['required', 'integer', 'exists:classrooms,id'],
             'sections' => ['required', 'array', 'min:1'],
-            'sections.*' => ['required', 'string', Rule::in(['A', 'B', 'C'])],
+            'sections.*' => ['required', 'string', Rule::in(TeacherAssignmentGroups::PRIMARY_SECTIONS)],
         ]);
 
         $source = Classroom::with('subjects')->findOrFail($data['source_classroom_id']);
@@ -64,7 +64,7 @@ class ClassroomController extends Controller
                 ->where('academic_year_id', $source->academic_year_id)
                 ->get(['name', 'section'])
                 ->filter(fn (Classroom $classroom) => $this->normalizedGradeName($classroom->name) === $this->normalizedGradeName($source->name))
-                ->map(fn (Classroom $classroom) => $this->canonicalSection($classroom->section))
+                ->map(fn (Classroom $classroom) => TeacherAssignmentGroups::canonicalPrimarySection($classroom->section))
                 ->all();
 
             foreach (array_unique($data['sections']) as $section) {
@@ -207,15 +207,5 @@ class ClassroomController extends Controller
     private function normalizedGradeName(string $name): string
     {
         return TeacherAssignmentGroups::gradeKey($name);
-    }
-
-    private function canonicalSection(?string $section): ?string
-    {
-        return match (trim((string) $section)) {
-            '', 'أ', 'ا', 'A', 'a', 'علمي' => 'A',
-            'ب', 'B', 'b' => 'B',
-            'ج', 'C', 'c' => 'C',
-            default => null,
-        };
     }
 }

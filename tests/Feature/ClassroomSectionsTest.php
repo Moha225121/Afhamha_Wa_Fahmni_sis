@@ -43,21 +43,30 @@ class ClassroomSectionsTest extends TestCase
             'academic_year_id' => $year->id,
         ]);
 
-        $this->actingAs($admin)->post(route('admin.classes.sections.store'), [
+        $this->actingAs($admin)->get(route('admin.classes.sections'))
+            ->assertOk()->assertSee('name="sections[]" value="E"', false)->assertSee('name="sections[]" value="F"', false);
+        $this->post(route('admin.classes.sections.store'), [
             'source_classroom_id' => $grade->id,
-            'sections' => ['B', 'C'],
-        ])->assertRedirect(route('admin.classes.sections'));
+            'sections' => ['B', 'C', 'D', 'E', 'F'],
+        ])->assertSessionHasNoErrors()->assertRedirect(route('admin.classes.sections'));
 
-        $branchC = Classroom::where('name', $grade->name)->where('section', 'C')->firstOrFail();
         $this->assertSame(1, Classroom::where('academic_year_id', $year->id)->where('section', 'B')->count());
-        $this->assertSame([$subject->id], $branchC->subjects()->pluck('subjects.id')->all());
+        foreach (['C', 'D', 'E', 'F'] as $section) {
+            $branch = Classroom::where('name', $grade->name)->where('section', $section)->firstOrFail();
+            $this->assertSame([$subject->id], $branch->subjects()->pluck('subjects.id')->all());
+        }
 
-        $this->actingAs($admin)->post(route('admin.classes.sections.store'), [
+        Classroom::where('name', $grade->name)->where('section', 'E')->update(['section' => 'هـ']);
+        Classroom::where('name', $grade->name)->where('section', 'F')->update(['section' => 'f']);
+        $this->post(route('admin.classes.sections.store'), [
             'source_classroom_id' => $grade->id,
-            'sections' => ['A', 'B'],
-        ])->assertRedirect(route('admin.classes.sections'));
+            'sections' => ['A', 'B', 'E', 'F'],
+        ])->assertSessionHasNoErrors()->assertRedirect(route('admin.classes.sections'));
 
-        $this->assertSame(3, Classroom::where('academic_year_id', $year->id)->count());
+        $this->assertSame(6, Classroom::where('academic_year_id', $year->id)->count());
+        Classroom::create(['name' => $grade->name, 'stage' => $grade->stage, 'section' => 'الزهراء', 'academic_year_id' => $year->id]);
+        $this->get(route('admin.classes.sections'))->assertOk()
+            ->assertViewHas('classrooms', fn ($rooms) => $rooms->pluck('display_section')->all() === ['A', 'B', 'C', 'D', 'E', 'F', 'الزهراء']);
     }
 
     public function test_branch_tool_rejects_other_grades_and_literary_classrooms(): void

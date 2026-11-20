@@ -8,7 +8,7 @@
 
     const classrooms = data.classroomSubjects || {};
     const subjects = data.subjects || [];
-    const maxAssignments = Number(list.dataset.maxAssignments || 30);
+    const maxAssignments = Number(list.dataset.maxAssignments || 6);
 
     function refreshSubjects(row, keepSelection) {
         const classroomSelect = row.querySelector('.teacher-assignment-classroom');
@@ -18,7 +18,6 @@
         const classroomId = classroomSelect.value;
         const groupHint = row.querySelector('.teacher-assignment-group-hint');
         const groupMembers = (data.classroomGroups || {})[classroomId];
-        if (groupHint) groupHint.textContent = groupMembers ? `سيُطبّق هذا الإسناد على ${groupMembers.length} شعب عند الحفظ.` : '';
         const allowedIds = (classrooms[classroomId] || []).map(String);
         const previousValue = keepSelection ? subjectSelect.value || subjectSelect.dataset.selectedSubject || '' : '';
         const options = subjects.filter((subject) => allowedIds.includes(String(subject.id)));
@@ -33,7 +32,15 @@
 
         subjectSelect.disabled = !classroomId || options.length === 0;
         if (classroomId && options.length === 0) {
-            subjectSelect.options[0].textContent = 'لا توجد مواد مرتبطة بهذا الصف';
+            subjectSelect.options[0].textContent = groupMembers ? 'لا توجد مادة مشتركة بين جميع الشعب' : 'لا توجد مواد مرتبطة بهذه الشعبة';
+        }
+        if (groupHint) {
+            groupHint.textContent = groupMembers ? `سيُطبّق هذا الإسناد على ${groupMembers.length} شعب عند الحفظ.` : '';
+            if (classroomId && options.length === 0) {
+                groupHint.textContent = groupMembers
+                    ? 'اختر شعبة محددة، أو اربط المادة بكل شعبة من صفحة الصفوف.'
+                    : 'أضف المادة إلى هذه الشعبة من صفحة تعديل الصف.';
+            }
         }
         delete subjectSelect.dataset.selectedSubject;
         subjectSelect.dispatchEvent(new Event('change', { bubbles: true }));
@@ -75,6 +82,7 @@
     addButton.addEventListener('click', () => {
         if (list.querySelectorAll('.teacher-assignment-row').length >= maxAssignments) return;
         const fragment = template.content.cloneNode(true);
+        fragment.querySelectorAll('.teacher-assignment-row').forEach((row) => refreshSubjects(row, true));
         list.appendChild(fragment);
         renameRows();
         document.dispatchEvent(new Event('enhanced-selects:init'));

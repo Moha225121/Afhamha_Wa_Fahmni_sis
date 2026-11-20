@@ -7,6 +7,8 @@ use Illuminate\Support\Collection;
 
 class TeacherAssignmentGroups
 {
+    public const PRIMARY_SECTIONS = ['A', 'B', 'C', 'D', 'E', 'F'];
+
     public const PRIMARY_GRADE_LABELS = [
         'الصفالاول' => 'الصف الأول',
         'الصفالثاني' => 'الصف الثاني',
@@ -19,6 +21,24 @@ class TeacherAssignmentGroups
     public static function gradeKey(string $name): string
     {
         return preg_replace('/[\s\p{Z}_\-\x{064B}-\x{065F}\x{0670}\x{0640}]+/u', '', strtr(trim($name), ['أ' => 'ا', 'إ' => 'ا', 'آ' => 'ا', 'ى' => 'ي']));
+    }
+
+    public static function canonicalPrimarySection(?string $section): ?string
+    {
+        $section = strtoupper(trim((string) $section));
+        if (in_array($section, self::PRIMARY_SECTIONS, true)) {
+            return $section;
+        }
+
+        return match ($section) {
+            '', 'أ', 'ا', 'علمي' => 'A',
+            'ب' => 'B',
+            'ج' => 'C',
+            'د' => 'D',
+            'ه', 'هـ' => 'E',
+            'و' => 'F',
+            default => null,
+        };
     }
 
     public static function groups(Collection $classrooms): array

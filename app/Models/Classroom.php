@@ -13,6 +13,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 {
     use SoftDeletes;
 
+    public function nameWithSection(): string
+    {
+        return trim($this->name.' '.$this->section);
+    }
+
     public function academicYear(): BelongsTo
     {
         return $this->belongsTo(AcademicYear::class);

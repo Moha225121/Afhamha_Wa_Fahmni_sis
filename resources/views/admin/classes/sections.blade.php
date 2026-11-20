@@ -9,7 +9,7 @@
 @section('content')
     <section class="panel" dir="rtl">
         <h2>إضافة شُعب للصفوف من الأول إلى السادس</h2>
-        <p class="muted">اختر صفًا موجودًا، ثم أضف له الشُعب A أو B أو C. تُنسخ المرحلة والسنة الدراسية والمواد من الصف المختار، ولا يُنقل أي طالب تلقائيًا. الشُعب الموجودة مسبقًا لن تتكرر.</p>
+        <p class="muted">اختر صفًا موجودًا وحدد الشُعب المطلوب إضافتها. تُنسخ المرحلة والسنة الدراسية والمواد من الصف المختار، ولا يُنقل أي طالب تلقائيًا. الشُعب الموجودة مسبقًا لن تتكرر.</p>
 
         <form method="post" action="{{ route('admin.classes.sections.store') }}" class="form-card">
             @csrf
@@ -26,7 +26,7 @@
                 </label>
                 <fieldset class="wide" style="border:1px solid var(--border,#d8e2ea);border-radius:12px;padding:1rem">
                     <legend>الشُعب المطلوب إضافتها</legend>
-                    @foreach(['A', 'B', 'C'] as $section)
+                    @foreach($sectionOptions as $section)
                         <label style="display:inline-flex;align-items:center;gap:.5rem;margin:0 0 0 1.25rem">
                             <input type="checkbox" name="sections[]" value="{{ $section }}" @checked(in_array($section, old('sections', []), true))>
                             الشعبة {{ $section }}

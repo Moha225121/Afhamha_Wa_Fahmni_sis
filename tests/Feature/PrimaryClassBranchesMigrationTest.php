@@ -52,7 +52,7 @@ class PrimaryClassBranchesMigrationTest extends TestCase
 
         $admin = User::factory()->create(['role' => 'admin', 'status' => 'active']);
         $this->actingAs($admin)->get(route('admin.teachers.create'))->assertOk()
-            ->assertViewHas('classroomLabels', function ($labels) {
+            ->assertViewHas('classroomLabels', function ($labels) use ($seventh) {
                 foreach (TeacherAssignmentGroups::PRIMARY_GRADE_LABELS as $name) {
                     foreach (['A', 'B', 'C'] as $section) {
                         if (!in_array($name.' '.$section, $labels, true)) {
@@ -60,7 +60,7 @@ class PrimaryClassBranchesMigrationTest extends TestCase
                         }
                     }
                 }
-                return in_array('الصف السابع', $labels, true) && !in_array('الصف السابع A', $labels, true);
+                return $labels[$seventh->id] === 'الصف السابع — الشعبة أ';
             })
             ->assertViewHas('classroomGroups', fn ($groups) => count($groups) === 6);
     }

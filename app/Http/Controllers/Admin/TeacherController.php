@@ -10,6 +10,7 @@ use App\Models\Teacher;
 use App\Models\User;
 use App\Services\AuditService;
 use App\Services\AccountPasswordService;
+use App\Services\TeacherAssignmentGroups;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -53,11 +54,6 @@ class TeacherController extends Controller
             })
             ->orderBy('name')
             ->get();
-        $normalizeClassroomName = static fn (string $name): string => preg_replace(
-            '/[\s\p{Z}_-]+/u',
-            '',
-            strtr(trim($name), ['أ' => 'ا', 'إ' => 'ا', 'آ' => 'ا'])
-        );
         $gradeOrder = [
             'الصفالاول' => 1,
             'الصفالثاني' => 2,
@@ -78,35 +74,29 @@ class TeacherController extends Controller
         ])->get();
         $assignedClassroomIds = $assignments->pluck('classroom_id')->map(fn ($id) => (int) $id)->all();
         $classrooms = $classrooms->reject(fn (Classroom $classroom) =>
-            trim((string) $classroom->section) === 'أدبي'
+            TeacherAssignmentGroups::gradeKey((string) $classroom->section) === 'ادبي'
             && !in_array((int) $classroom->id, $assignedClassroomIds, true)
         )->values();
-        $classrooms = $classrooms->sortBy(function (Classroom $classroom) use ($gradeOrder, $normalizeClassroomName): array {
-            $normalizedName = $normalizeClassroomName($classroom->name);
-            $section = strtr(trim((string) $classroom->section), ['أ' => 'ا', 'إ' => 'ا', 'آ' => 'ا']);
-            $sectionOrder = ['علمي' => 0, 'ا' => 0, 'A' => 0, 'a' => 0, 'ادبي' => 1, 'ب' => 1, 'B' => 1, 'b' => 1, 'ج' => 2, 'C' => 2, 'c' => 2];
+        $classrooms = $classrooms->sortBy(function (Classroom $classroom) use ($gradeOrder): array {
+            $normalizedName = TeacherAssignmentGroups::gradeKey($classroom->name);
+            $section = TeacherAssignmentGroups::canonicalPrimarySection($classroom->section) ?? $classroom->section;
 
             return [
                 $gradeOrder[$normalizedName] ?? 99,
-                $sectionOrder[$section] ?? 50,
+                $normalizedName,
                 $section,
                 $classroom->academicYear?->name ?? '',
                 $classroom->id,
             ];
         })->values();
-        $duplicateClassroomNames = $classrooms
-            ->countBy(fn (Classroom $classroom) => $normalizeClassroomName($classroom->name))
-            ->filter(fn (int $count) => $count > 1);
+        $gradesInMultipleYears = $classrooms->groupBy(fn (Classroom $room) => TeacherAssignmentGroups::gradeKey($room->name))
+            ->filter(fn ($rooms) => $rooms->pluck('academic_year_id')->unique()->count() > 1);
         $classroomLabels = [];
+        $gradeLabels = [];
         foreach ($classrooms as $classroom) {
-            $normalizedName = $normalizeClassroomName($classroom->name);
-            $label = match ($normalizedName) {
-                'الصفالاول' => 'الصف الأول',
-                'الصفالثاني' => 'الصف الثاني',
-                'الصفالثالث' => 'الصف الثالث',
-                'الصفالرابع' => 'الصف الرابع',
-                'الصفالخامس' => 'الصف الخامس',
-                'الصفالسادس' => 'الصف السادس',
+            $normalizedName = TeacherAssignmentGroups::gradeKey($classroom->name);
+            $primaryGrade = TeacherAssignmentGroups::PRIMARY_GRADE_LABELS[$normalizedName] ?? null;
+            $gradeLabel = $primaryGrade ?? match ($normalizedName) {
                 'الصفالسابع' => 'الصف السابع',
                 'الصفالثامن' => 'الصف الثامن',
                 'الصفالتاسع' => 'الصف التاسع',
@@ -117,47 +107,21 @@ class TeacherController extends Controller
             };
 
             $section = trim((string) $classroom->section);
-            $latinSection = match ($section) {
-                '', 'أ', 'ا', 'A', 'a' => 'A',
-                'ب', 'B', 'b' => 'B',
-                'ج', 'C', 'c' => 'C',
-                default => null,
-            };
-
-            if (isset(\App\Services\TeacherAssignmentGroups::PRIMARY_GRADE_LABELS[$normalizedName]) && $latinSection !== null) {
+            $latinSection = $primaryGrade ? TeacherAssignmentGroups::canonicalPrimarySection($section) : null;
+            $label = $gradeLabel;
+            if ($latinSection !== null) {
                 $label .= ' '.$latinSection;
-            } elseif ($duplicateClassroomNames->has($normalizedName)) {
-                $label .= ' — '.($section ?: 'صف إضافي');
-
-                $sameSectionAndYear = $classrooms->filter(fn (Classroom $other) =>
-                    $other->id !== $classroom->id
-                    && $normalizeClassroomName($other->name) === $normalizedName
-                    && $other->section === $classroom->section
-                    && $other->academic_year_id === $classroom->academic_year_id
-                )->isNotEmpty();
-                if ($sameSectionAndYear) {
-                    $label .= ' · '.($classroom->academicYear?->name ?? 'سنة دراسية أخرى');
-                }
+            } elseif ($section !== '') {
+                $label .= ' — الشعبة '.$section;
             }
-
             $classroomLabels[$classroom->id] = $label;
+            $gradeLabels[$classroom->id] = $gradeLabel;
         }
         $classroomSubjects = $classrooms->mapWithKeys(fn (Classroom $classroom) => [
-            $classroom->id => $classroom->subjects->pluck('id')->all(),
+            $classroom->id => TeacherAssignmentGroups::gradeKey((string) $classroom->section) === 'ادبي'
+                ? []
+                : $classroom->subjects->pluck('id')->all(),
         ])->all();
-
-        $gradeSubjectIds = $classrooms->groupBy(fn (Classroom $classroom) => $classroom->academic_year_id.':'.$normalizeClassroomName($classroom->name))
-            ->map(fn ($rooms) => $rooms->flatMap(fn (Classroom $classroom) => $classroom->subjects->pluck('id')->all())->unique()->values()->all())
-            ->all();
-
-        foreach ($classrooms as $classroom) {
-            $gradeKey = $classroom->academic_year_id.':'.$normalizeClassroomName($classroom->name);
-            $classroomSubjects[$classroom->id] ??= [];
-            $classroomSubjects[$classroom->id] = array_values(array_unique(array_merge(
-                $classroomSubjects[$classroom->id],
-                $gradeSubjectIds[$gradeKey] ?? []
-            )));
-        }
 
         // Keep existing assignments visible when editing, including assignments
         // to subjects that are now inactive or are missing a classroom pivot.
@@ -167,9 +131,11 @@ class TeacherController extends Controller
             $classroomSubjects[$assignment->classroom_id] = array_values(array_unique($classroomSubjects[$assignment->classroom_id]));
         }
 
-        $classroomGroups = \App\Services\TeacherAssignmentGroups::groups($classrooms);
+        $classroomGroups = TeacherAssignmentGroups::groups($classrooms);
         $classroomOptions = [];
         foreach ($classrooms as $classroom) {
+            $yearSuffix = $gradesInMultipleYears->has(TeacherAssignmentGroups::gradeKey($classroom->name))
+                ? ' · '.$classroom->academicYear?->name : '';
             $groupKey = 'all:'.$classroom->id;
             if (isset($classroomGroups[$groupKey])) {
                 $memberIds = $classroomGroups[$groupKey];
@@ -178,10 +144,9 @@ class TeacherController extends Controller
                     $commonSubjects = array_intersect($commonSubjects, $classroomSubjects[$memberId] ?? []);
                 }
                 $classroomSubjects[$groupKey] = array_values($commonSubjects);
-                $gradeLabel = preg_replace('/ [ABC]$/', '', $classroomLabels[$classroom->id]);
-                $classroomOptions[] = ['id' => $groupKey, 'label' => $gradeLabel.' — جميع الشعب'];
+                $classroomOptions[] = ['id' => $groupKey, 'label' => $gradeLabels[$classroom->id].' — جميع الشعب'.$yearSuffix];
             }
-            $classroomOptions[] = ['id' => (string) $classroom->id, 'label' => $classroomLabels[$classroom->id]];
+            $classroomOptions[] = ['id' => (string) $classroom->id, 'label' => $classroomLabels[$classroom->id].$yearSuffix];
         }
 
         // Display a complete subject assignment across the grade as one row on edit.
